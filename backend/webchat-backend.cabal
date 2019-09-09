@@ -17,7 +17,7 @@ cabal-version:       >=1.10
 
 executable webchat-backend
   main-is:             Main.hs
-  -- other-modules:
+  other-modules:       State
   -- other-extensions:
   build-depends:       base >=4.11 && <5
                      , webchat-common
@@ -35,5 +35,7 @@ executable webchat-backend
                      , websockets
                      , wai-websockets
                      , servant-websockets
+                     , wai-app-static
   hs-source-dirs:      src
+  ghc-options:         -Wall -O2
   default-language:    Haskell2010

@@ -11,7 +11,7 @@ import Data.Text (Text)
 
 data Message = Message
   { sender :: User
-  , recepient :: Channel
+  , recipient :: Channel
   , contents :: Text
   } deriving (Show, Eq, Generic)
 
@@ -41,7 +41,6 @@ defaultChannel = Public "main"
 data ClientCommand
   = Login Text
   | SendMessage Message
-  | GetChannelList
   | CreatePublicChannel Text
   deriving (Show, Eq, Generic)
 
@@ -53,7 +52,7 @@ data ServerCommand
   = NewMessage Message
   | ChannelList [Channel]
   | NewChannel Channel
---  | RemoveChannel Channel
+  | RemoveChannel Channel
   deriving (Show, Eq, Generic)
 
 instance FromJSON ServerCommand

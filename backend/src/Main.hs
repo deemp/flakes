@@ -14,120 +14,129 @@ module Main where
 
 import Control.Monad
 import Control.Monad.IO.Class
-import Data.Maybe
+import Control.Exception (finally)
 import Data.Proxy (Proxy(..))
 import System.Environment
 
 import Servant.API
 import Servant.API.WebSocket
-
-import Servant.Server.StaticFiles (serveDirectoryWebApp)
+import Servant.Server.StaticFiles (serveDirectoryWith)
+import Network.Wai.Application.Static (defaultWebAppSettings, ssIndices)
+import WaiAppStatic.Types (unsafeToPiece)
 import Servant.Server (Server, serve)
-import Network.Wai
 import Network.Wai.Handler.Warp
 import Network.Wai.Logger       (withStdoutLogger)
+import qualified Network.WebSockets as WS
 
 import Control.Concurrent
 import Control.Concurrent.STM
 
 import qualified Data.Aeson as A
 import Data.Text (Text)
-import qualified Data.HashMap.Strict as HM
-import qualified Data.HashSet as HS
-
-
-import qualified Network.WebSockets as WS
 
 import WebChat.Common
+import qualified State
 
 type API = "endpoint" :> WebSocket :<|> Raw
 
-data AppState = AppState
-  { users :: HM.HashMap User (TQueue ServerCommand)
-  , channels :: HS.HashSet Channel
-  }
-
-newAppState :: AppState
-newAppState = AppState HM.empty (HS.singleton defaultChannel)
-
+main :: IO ()
 main = do
-  (d : _) <- getArgs
-  state <- newTMVarIO newAppState
+  (d : p : _) <- getArgs
+  state <- newTVarIO State.newAppState
   let app = serve (Proxy @API) $ server state d
+      port = read @Int p
   withStdoutLogger $ \aplogger -> do
-    let settings = setPort 8080 $ setLogger aplogger defaultSettings
+    putStrLn $ "Server is listening at port " ++ show port
+    let settings = setPort port $ setLogger aplogger defaultSettings
     runSettings settings app
 
-server :: TMVar AppState -> FilePath -> Server API
-server state static = (websocketServer state) :<|> serveDirectoryWebApp static
+server :: TVar State.AppState -> FilePath -> Server API
+server state static = (websocketServer state) :<|> serveDirectoryWith staticSettings
+  where
+    staticSettings = (defaultWebAppSettings static) {ssIndices = [unsafeToPiece "index.html"]}
 
-websocketServer :: MonadIO m => TMVar AppState -> WS.Connection -> m ()
-websocketServer state conn =  do
+websocketServer :: MonadIO m => TVar State.AppState -> WS.Connection -> m ()
+websocketServer state conn = do
     void . liftIO $ do
       WS.forkPingThread conn 10
       queue <- newTQueueIO
-      forkIO $ sendProcess queue conn
       recvProcess state queue conn
 
-recvProcess :: MonadIO m => TMVar AppState -> TQueue ServerCommand -> WS.Connection -> m ()
-recvProcess state queue conn = forever $ do
-  msgData <- liftIO $ WS.receiveData conn
-  let msg = A.decode @ClientCommand msgData
-  liftIO . print $ msg
-  case msg of
-    Just command ->
-      case command of
-        Login userName -> do
-          let user = User userName
-              channel = Private user
-          liftIO . atomically $ do
-            st <- readTMVar state
-            let newUsers = HM.insert user queue (users st)
-                newChannels = HS.insert channel (channels st)
-            swapTMVar state (AppState newUsers newChannels)
+recvProcess :: TVar State.AppState -> TQueue ServerCommand -> WS.Connection -> IO ()
+recvProcess state queue conn = do
+  let
+    loginLoop :: IO User
+    loginLoop = do
+      msg <- getMessage
+      case msg of
+        Just command ->
+          case command of
+            Login userName -> atomically $ do
+              let user = User userName
+                  channel = Private user
+              modifyTVar' state $ State.addUser user queue
+              sendChannelList state queue
+              queues <- State.getAllQueues <$> readTVar state
+              send queues (NewChannel channel)
+              return user
+            _ -> loginLoop
+        Nothing -> loginLoop
 
-          queues <- liftIO . atomically $ getAllChannels state
-          let command = NewChannel channel
-          liftIO . atomically $ forM_ queues $ \q -> writeTQueue q command
+  user <- loginLoop
+  recvThId <- myThreadId
+  sendThId <- forkIO $ sendProcess user state recvThId queue conn
 
-        SendMessage msg -> sendMsg state msg
-        GetChannelList -> sendChannelList state queue
-        CreatePublicChannel name -> createChannel state name
-    Nothing -> return ()
+  flip finally (disconnect state user sendThId) $
+    forever $ do
+      message <- getMessage
+      atomically $
+        case message of
+          Just command ->
+            case command of
+              SendMessage msg -> sendMessage state msg
+              CreatePublicChannel name -> createChannel state name
+              _ -> return ()
+          Nothing -> return ()
+  where
+    getMessage :: IO (Maybe ClientCommand)
+    getMessage = A.decode @ClientCommand <$> WS.receiveData conn
 
-sendProcess :: MonadIO m => TQueue ServerCommand -> WS.Connection -> m ()
-sendProcess queue conn = liftIO $ forever $ do
-  msg <- atomically $ readTQueue queue
-  liftIO . print $ A.encode msg
-  WS.sendTextData conn $ A.encode msg
+sendProcess :: User -> TVar State.AppState -> ThreadId -> TQueue ServerCommand -> WS.Connection -> IO ()
+sendProcess user state recvThId queue conn =
+  flip finally (disconnect state user recvThId) $
+    forever $ do
+      msg <- atomically $ readTQueue queue
+      void $ WS.sendTextData conn $ A.encode msg
 
-sendMsg :: MonadIO m => TMVar AppState -> Message -> m ()
-sendMsg state msg@Message{..} = do
-  queues <- liftIO . atomically $ getChannel state recepient
-  let command = NewMessage msg
-  liftIO . atomically $ forM_ queues $ \q -> writeTQueue q command
+send :: [TQueue ServerCommand] -> ServerCommand -> STM ()
+send queues command = forM_ queues $ flip writeTQueue command
 
-getChannel :: TMVar AppState -> Channel -> STM [TQueue ServerCommand]
-getChannel state (Public _) = getAllChannels state
-getChannel state (Private user) = maybeToList . HM.lookup user . users <$> readTMVar state
+sendMessage :: TVar State.AppState -> Message -> STM ()
+sendMessage state msg@Message{..} = do
+  state' <- readTVar state
+  let queues = foldMap (flip State.getQueuesForChannel state') (getChannelsForMessage msg)
+  send queues $ NewMessage msg
+  where
+    getChannelsForMessage :: Message -> [Channel]
+    getChannelsForMessage (Message _ ch@(Public _) _) = [ch]
+    getChannelsForMessage (Message sender' ch@(Private _) _) = [ch, Private sender']
 
-getAllChannels :: TMVar AppState -> STM [TQueue ServerCommand]
-getAllChannels state = HM.elems . users <$> readTMVar state
-
-sendChannelList :: MonadIO m => TMVar AppState -> TQueue ServerCommand -> m ()
-sendChannelList state queue = liftIO . atomically $ do
-  st <- readTMVar state
-  let command = ChannelList $ HS.toList . channels $ st
+sendChannelList :: TVar State.AppState -> TQueue ServerCommand -> STM ()
+sendChannelList state queue = do
+  command <- ChannelList . State.getChannelList <$> readTVar state
   writeTQueue queue command
 
-createChannel :: MonadIO m => TMVar AppState -> Text -> m ()
+createChannel :: TVar State.AppState -> Text -> STM ()
 createChannel state name = do
   let channel = Public name
-  queues <- liftIO . atomically $ do
-    st <- readTMVar state
-    let newSt = AppState (users st) (HS.insert channel $ channels st)
-    void $ swapTMVar state newSt
-    getAllChannels state
+  modifyTVar' state $ State.addChannel channel
+  queues <- State.getAllQueues <$> readTVar state
+  send queues $ NewChannel channel
 
-  let command = NewChannel channel
-  liftIO . atomically $ forM_ queues $ \q -> writeTQueue q command
+disconnect :: TVar State.AppState -> User -> ThreadId -> IO ()
+disconnect state user thId = do
+  atomically $ do
+    modifyTVar' state $ State.removeUser user
+    queues <- State.getAllQueues <$> readTVar state
+    send queues $ RemoveChannel $ Private user
+  killThread thId

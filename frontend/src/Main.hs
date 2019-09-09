@@ -4,15 +4,14 @@
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Main where
 
 import qualified Data.Aeson as Aeson
-import           Data.ByteString    as B
+import qualified Data.ByteString    as B
 import           Data.ByteString.Lazy (toStrict, fromStrict)
-import           Data.Functor.Sum
-import           Data.List.NonEmpty
-import           Data.Monoid        ((<>))
+import           Data.List.NonEmpty ()
 import qualified Data.Text          as T
 import           Data.Text (Text)
 import           Reflex
@@ -24,36 +23,52 @@ import qualified Data.Map.Strict as M
 
 import WebChat.Common
 
-endpointUri :: Text
-endpointUri = "ws://localhost:8080/endpoint"
-
 main :: IO ()
 main = mainWidget $ do
+  host <- getLocationHost
+  protocol <- getLocationProtocol
+  let
+    websocketProtocol :: Text
+    websocketProtocol = case protocol of
+      "http:" -> "ws:"
+      "https:" -> "wss:"
+      _ -> "ws:"
+    endpointUri :: Text
+    endpointUri = T.concat [websocketProtocol ,"//", host, "/endpoint"]
+
+  el "h3" $ text "Webchat"
+
   rec
     let
       msgSendEv = traceEvent "send" $ switch (current msgEvDyn)
       msgRecvEv = traceEvent "recv" $ wsRespEv
       userEv = traceEvent "user" $ fmapMaybe loginEv msgSendEv
 
-    wsRespEv <- websocketWidget msgSendEv
+    wsRespEv <- websocketWidget endpointUri msgSendEv
 
     channelsDyn <- foldDynMaybe channelFold [defaultChannel] msgRecvEv
-    chEv <- traceEvent "selected channel" <$> channelWidget channelsDyn
+    let filteredChannelsDyn = traceDyn "channels" $ filter . (/=) . Private <$> userDyn <*> channelsDyn
+    chEv <- traceEvent "selected channel" <$> channelWidget filteredChannelsDyn
     chDyn <- holdDyn defaultChannel chEv
 
     userDyn <- holdDyn (User "") userEv
     msgEvDyn <- widgetHold loginWidget (chatWidget userDyn chDyn <$ userEv)
 
   messages <- foldDynMaybe msgFold [] msgRecvEv
+
   let
-    filteredMessages = Prelude.filter . filterMsg <$> chDyn <*> messages
+    filteredMessages = filter <$> (filterMsg <$> userDyn <*> chDyn)  <*> messages
     shownMessages = fmap showMsg <$> filteredMessages
 
   void $ el "div" $ do
     el "ul" $ simpleList shownMessages (\m -> el "li" $ dynText m)
+
   where
-    filterMsg :: Channel -> Message -> Bool
-    filterMsg ch (Message _ recep _) = ch == recep
+    filterMsg :: User -> Channel -> Message -> Bool
+    filterMsg _ ch@(Public _) Message{..} = ch == recipient
+    filterMsg user ch@(Private s) Message{..}
+      = (s == sender && recipient == (Private user))
+      || (user == sender && recipient == ch)
 
     loginEv (Login name) = Just $ User name
     loginEv _ = Nothing
@@ -67,6 +82,8 @@ main = mainWidget $ do
 
     channelFold :: ServerCommand -> [Channel] -> Maybe [Channel]
     channelFold (NewChannel ch) chs = Just $ ch : chs
+    channelFold (RemoveChannel ch) chs = Just $ filter (/= ch) chs
+    channelFold (ChannelList chs) _ = Just chs
     channelFold _ _ = Nothing
 
 -- Websocket
@@ -78,12 +95,13 @@ websocketWidget ::
      , TriggerEvent t m
      , PostBuild t m
      )
-  => Event t ClientCommand
+  => Text
+  -> Event t ClientCommand
   -> m (Event t ServerCommand)
-websocketWidget msgSendEv = do
+websocketWidget endpointUri msgSendEv = do
   let sendEv = fmap ((:[]) . toStrict . Aeson.encode) msgSendEv
   ws <- webSocket endpointUri $ def & webSocketConfig_send .~ sendEv
-  return $ traceEvent "websocketRaw" $ fmapMaybe decodeOneMsg (_webSocket_recv ws)
+  return $ fmapMaybe decodeOneMsg (_webSocket_recv ws)
   where
     decodeOneMsg :: B.ByteString -> Maybe ServerCommand
     decodeOneMsg = Aeson.decode . fromStrict
@@ -117,7 +135,10 @@ messagingWidget
   m (Event t ClientCommand)
 messagingWidget userDyn channelDyn = el "div" $ do
   rec
-    t <- inputElement $ def & inputElementConfig_setValue .~ fmap (const "") commandEv
+    t <- inputElement $ def
+      & inputElementConfig_setValue .~ fmap (const "") commandEv
+      & inputElementConfig_elementConfig . elementConfig_initialAttributes .~
+        ("placeholder" =: "Enter your message")
     b <- button "Send"
     let
       keypressEv = leftmost [b, keypress Enter t]
@@ -134,18 +155,18 @@ channelWidget
      , PostBuild t m
      )
   => Dynamic t [Channel] -> m (Event t Channel)
-channelWidget channels = el "div" $ do
+channelWidget channelsDyn = el "div" $ do
   rec
-    let channelMapDyn = fmap channelsToMap channels
-    dd <- dropdown defaultChannel channelMapDyn $ def
+    let channelMapDyn = fmap channelsToMap channelsDyn
+    dd <- dropdown defaultChannel channelMapDyn def
   return $ dd & _dropdown_change
+  where
+    channelToText :: Channel -> Text
+    channelToText (Public name) = T.append "#" name
+    channelToText (Private (User name)) = name
 
-channelToText :: Channel -> Text
-channelToText (Public name) = T.append "#" name
-channelToText (Private (User name)) = name
-
-channelsToMap :: [Channel] -> M.Map Channel Text
-channelsToMap channels = M.fromList $ fmap (\ch -> (ch, channelToText ch)) channels
+    channelsToMap :: [Channel] -> M.Map Channel Text
+    channelsToMap channels = M.fromList $ fmap (\ch -> (ch, channelToText ch)) channels
 
 -- New channel creation
 newChannelWidget
@@ -156,7 +177,7 @@ newChannelWidget
 newChannelWidget = el "div" $ do
   rec
     tn <- inputElement $ def
-      -- & inputElementConfig_setValue .~ fmap (const "") eNewName
+      & inputElementConfig_setValue .~ fmap (const "") eNewName
       & inputElementConfig_elementConfig . elementConfig_initialAttributes .~
         ("placeholder" =: "Enter new channel name")
     bn <- button "Create"
@@ -175,6 +196,6 @@ chatWidget ::
   -> Dynamic t Channel
   -> m (Event t ClientCommand)
 chatWidget userDyn channelDyn = do
-  newChEv <- traceEvent "channelWidget" <$> newChannelWidget
-  msgEv <- traceEvent "messagingWidget" <$> messagingWidget userDyn channelDyn
+  newChEv <- newChannelWidget
+  msgEv <- messagingWidget userDyn channelDyn
   return $ leftmost [newChEv, msgEv]
