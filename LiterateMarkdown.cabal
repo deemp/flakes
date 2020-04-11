@@ -58,6 +58,10 @@ category:            Productivity
 -- README.
 extra-source-files:  CHANGELOG.md, README.md
 
+source-repository head 
+  type: git
+  location: https://github.com/faeblDevelopment/LiterateMarkdown.git
+  branch: main
 
 library converter
   exposed-modules:     Converter
