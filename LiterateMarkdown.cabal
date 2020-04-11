@@ -34,8 +34,8 @@ description: lhsc is a program to convert literate haskell files in the
              creating the files `file1.md` `file2.md` ... or `file1.lhs` `file2.lhs` ... in the same directory respectively.
 
 -- A URL where users can report bugs.
--- bug-reports:
-
+bug-reports: https://github.com/faeblDevelopment/LiterateMarkdown/issues
+ 
 -- The license under which the package is released.
 license:             MIT
 
@@ -56,21 +56,26 @@ category:            Productivity
 
 -- Extra files to be distributed with the package, such as examples or a
 -- README.
-extra-source-files:  CHANGELOG.md
+extra-source-files:  CHANGELOG.md, README.md
 
+
+library converter
+  exposed-modules:     Converter
+  build-depends:       base ^>=4.12.0.0
+  default-language:    Haskell2010
 
 executable lhsc
   -- .hs or .lhs file containing the Main module.
   main-is:             literate_converter.hs
 
   -- Modules included in this executable, other than Main.
-  -- other-modules:
-
+  other-modules:       Converter
+ 
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
 
   -- Other library packages from which modules are imported.
-  build-depends:       base ^>=4.12.0.0
+  build-depends:       base ^>=4.12.0.0, converter
 
   -- Directories containing source files.
   -- hs-source-dirs:
@@ -78,3 +83,9 @@ executable lhsc
   -- Base language which the package is written in.
   default-language:    Haskell2010
 
+Test-Suite test-foo
+  type:                exitcode-stdio-1.0
+  main-is:             test.hs
+  other-modules:       Converter
+  build-depends:       base ^>=4.12.0.0, converter
+  default-language:    Haskell2010
