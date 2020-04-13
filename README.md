@@ -13,6 +13,7 @@ converts the `'''haskell [...]'''` to `> [...]` as recognised by the GHC literat
 
 Usage
 ------
+
 `lhsc (toLhs|toMd) file1 [file2] [...]`
 The `toLhs` and `toMd` commands are not case sensitive. 
 The program will convert each file from the other format to the specified one, 
