@@ -1,16 +1,18 @@
 # lhcs - a prepocessor for literate haskell markdown
 
-synopsis: Converter to convert from .lhs to .md and vice versa
+A Converter to convert from .lhs to .md and vice versa
 
-lhsc is a program to convert literate haskell files in the 
+`lhsc` is a program to convert literate haskell files in the 
 birdtick format to correctly rendered (git flavoured, html containing) markdown files 
 and vice versa.
+
 It strips away the heading tags #, replacing them with the corresponding html tags,
 converts the `'''haskell [...]'''` to `> [...]` as recognised by the GHC literate prepocessor.
 `''' [...] '''` will be converted to `< [...]` and will be discarded by ghc but will still be displayed as code when rendered. 
 (In both cases `'''` is actually the three md backticks, but its a pain to write md about md.)
 
-Useage:
+Useage
+------
 `lhsc (toLhs|toMd) file1 [file2] [...]`
 The `toLhs` and `toMd` commands are not case sensitive. 
 The program will convert each file from the other format to the specified one, 
