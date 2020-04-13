@@ -11,7 +11,7 @@ converts the `'''haskell [...]'''` to `> [...]` as recognised by the GHC literat
 `''' [...] '''` will be converted to `< [...]` and will be discarded by ghc but will still be displayed as code when rendered. 
 (In both cases `'''` is actually the three md backticks, but its a pain to write md about md.)
 
-Usage
+Useage
 ------
 `lhsc (toLhs|toMd) file1 [file2] [...]`
 The `toLhs` and `toMd` commands are not case sensitive. 
