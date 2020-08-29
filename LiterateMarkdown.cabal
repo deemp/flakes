@@ -16,19 +16,21 @@ name:                LiterateMarkdown
 version:             0.1.0.0
 
 -- A short (one-line) description of the package.
-synopsis: Converter to convert from .lhs to .md and vice versa
+synopsis: Converter to convert from .lhs to .md and vice versa.
 
 -- A longer description of the package.
-description: lhsc is a program to convert literate haskell files in the 
+description: `lhsc` is a program to convert literate haskell files in the 
              birdtick format to correctly rendered (git flavoured, html containing) markdown files 
              and vice versa.
+             .
              It strips away the heading tags #, replacing them with the corresponding html tags,
              converts the `'''haskell [...]'''` to `> [...]` as recognised by the GHC literate prepocessor.
              `''' [...] '''` will be converted to `< [...]` and will be discarded by ghc but will still be displayed as code when rendered. 
              (In both cases `'''` is actually the three md backticks, but its a pain to write md about md.)
-             
-             Useage:
-             `lhsc (toLhs|toMd) file1 [file2] [...]`
+             .
+             Usage:
+             .
+             `lhsc (toLhs|toMd) file1 [file2] [...]`;
              The `toLhs` and `toMd` commands are not case sensitive. 
              The program will convert each file from the other format to the specified one, 
              creating the files `file1.md` `file2.md` ... or `file1.lhs` `file2.lhs` ... in the same directory respectively.
