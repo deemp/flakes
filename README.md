@@ -1,4 +1,4 @@
-# lhcs - a prepocessor for literate haskell markdown
+# lhsc - a prepocessor for literate haskell markdown
 
 synopsis: Converter to convert from .lhs to .md and vice versa
 
