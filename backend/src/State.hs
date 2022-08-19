@@ -29,7 +29,7 @@ import qualified Data.HashSet as HS
 
 import Control.Concurrent.STM (TQueue)
 
-import WebChat.Common
+import Common
 
 data AppState = AppState
   { users :: HM.HashMap User (TQueue ServerCommand)

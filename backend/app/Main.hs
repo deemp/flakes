@@ -34,7 +34,7 @@ import Control.Concurrent.STM
 import qualified Data.Aeson as A
 import Data.Text (Text)
 
-import WebChat.Common
+import Common
 import qualified State
 
 type API = "endpoint" :> WebSocket :<|> Raw

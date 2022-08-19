@@ -1,9 +1,13 @@
 resolver: lts-19.18
-# resolver: nightly-2022-08-19
-# resolver: lts-19.10
-
 
 packages:
   - backend
-  - webchat-common
+
 allow-newer: true
+
+nix:
+  enable: true
+  packages: [zlib]
+
+ghc-options:
+  "$everything": -haddock

@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
-module WebChat.Common where
+module Common where
 
 import GHC.Generics (Generic)
 
