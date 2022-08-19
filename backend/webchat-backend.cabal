@@ -15,7 +15,7 @@ build-type:          Simple
 -- extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
-executable webchat-backend
+executable webchat-backend  
   main-is:             Main.hs
   other-modules:       State
   -- other-extensions:

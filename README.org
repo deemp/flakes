@@ -1,5 +1,0 @@
-#+TITLE: Simple Haskell Webchat
-
-This repo contains a very simple Haskell app built with ReflexFRP, Servant and WebSockets.
-
-You can try it live at: [[https://haskell-webchat.herokuapp.com/]]

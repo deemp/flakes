@@ -22,3 +22,7 @@ cabal.project.local~
 .ghc.environment.*
 
 /result
+.direnv
+
+_default.nix
+_shell.nix
