@@ -25,6 +25,7 @@ where
 
 import Common
 import Control.Concurrent.STM (TQueue)
+import Data.Function ((&))
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import Data.Maybe (maybeToList)
@@ -58,11 +59,11 @@ removeChannel :: Channel -> AppState -> AppState
 removeChannel channel AppState {..} = AppState users (HS.delete channel channels)
 
 getChannelList :: AppState -> [Channel]
-getChannelList = HS.toList . channels
+getChannelList state = state & channels & HS.toList
 
 getQueuesForChannel :: Channel -> AppState -> [TQueue ServerCommand]
 getQueuesForChannel (Public _) state = getAllQueues state
-getQueuesForChannel (Private user) state = maybeToList . HM.lookup user . users $ state
+getQueuesForChannel (Private user) state = state & users & HM.lookup user & maybeToList
 
 getAllQueues :: AppState -> [TQueue ServerCommand]
-getAllQueues = HM.elems . users
+getAllQueues state = state & users & HM.elems

@@ -1,46 +1,74 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
-module Main where
+module Main (main) where
 
 import Common
+  ( Channel (..),
+    ClientCommand (..),
+    Message (..),
+    ServerCommand (..),
+    User (User),
+  )
 import Control.Concurrent
+  ( ThreadId,
+    forkIO,
+    killThread,
+    myThreadId,
+  )
 import Control.Concurrent.STM
+  ( STM,
+    TQueue,
+    TVar,
+    atomically,
+    modifyTVar',
+    newTQueueIO,
+    newTVarIO,
+    readTQueue,
+    readTVar,
+    writeTQueue,
+  )
 import Control.Exception (finally)
-import Control.Monad
-import Control.Monad.IO.Class
+import Control.Monad (forM_, forever, void)
+import Control.Monad.IO.Class (MonadIO (..))
 import qualified Data.Aeson as A
 import Data.Proxy (Proxy (..))
 import Data.Text (Text)
 import Network.Wai.Application.Static (defaultWebAppSettings, ssIndices)
 import Network.Wai.Handler.Warp
+  ( defaultSettings,
+    runSettings,
+    setLogger,
+    setPort,
+  )
 import Network.Wai.Logger (withStdoutLogger)
 import qualified Network.WebSockets as WS
-import Servant.API
-import Servant.API.WebSocket
+import Servant.API (Raw, type (:<|>) (..), type (:>))
+import Servant.API.WebSocket (WebSocket)
 import Servant.Server (Server, serve)
 import Servant.Server.StaticFiles (serveDirectoryWith)
 import qualified State
-import System.Environment
+import System.Environment (getArgs)
 import WaiAppStatic.Types (unsafeToPiece)
 
 type API = "endpoint" :> WebSocket :<|> Raw
 
 main :: IO ()
 main = do
-  (d : p : _) <- getArgs
+  -- takes filepath and port as arguments
+  -- filepath to an html
+  (path : port' : _) <- getArgs
   state <- newTVarIO State.newAppState
-  let app = serve (Proxy @API) $ server state d
-      port = read @Int p
+  let app = serve (Proxy @API) $ server state path
+      port = read @Int port'
   withStdoutLogger $ \aplogger -> do
     putStrLn $ "Server is listening at port " ++ show port
     let settings = setPort port $ setLogger aplogger defaultSettings
@@ -54,29 +82,30 @@ server state static = websocketServer state :<|> serveDirectoryWith staticSettin
 websocketServer :: MonadIO m => TVar State.AppState -> WS.Connection -> m ()
 websocketServer state conn = do
   void . liftIO $ do
-    -- WTF what should be the IO a here?
+    -- WTF should be the IO a here?
     WS.withPingThread conn 10 (return ()) (return ())
     queue <- newTQueueIO
     recvProcess state queue conn
+
+onJust :: Maybe a -> b -> (a -> b) -> b
+onJust m d f = maybe d f m
 
 recvProcess :: TVar State.AppState -> TQueue ServerCommand -> WS.Connection -> IO ()
 recvProcess state queue conn = do
   let loginLoop :: IO User
       loginLoop = do
         msg <- getMessage
-        case msg of
-          Just command ->
-            case command of
-              Login userName -> atomically $ do
-                let user = User userName
-                    channel = Private user
-                modifyTVar' state $ State.addUser user queue
-                sendChannelList state queue
-                queues <- State.getAllQueues <$> readTVar state
-                send queues (NewChannel channel)
-                return user
-              _ -> loginLoop
-          Nothing -> loginLoop
+        onJust msg loginLoop $
+          \case
+            Login userName -> atomically $ do
+              let user = User userName
+                  channel = Private user
+              modifyTVar' state $ State.addUser user queue
+              sendChannelList state queue
+              queues <- State.getAllQueues <$> readTVar state
+              send queues (NewChannel channel)
+              return user
+            _ -> loginLoop
 
   user <- loginLoop
   recvThId <- myThreadId
@@ -86,13 +115,11 @@ recvProcess state queue conn = do
     forever $ do
       message <- getMessage
       atomically $
-        case message of
-          Just command ->
-            case command of
-              SendMessage msg -> sendMessage state msg
-              CreatePublicChannel name -> createChannel state name
-              _ -> return ()
-          Nothing -> return ()
+        onJust message (return ()) $
+          \case
+            SendMessage msg -> sendMessage state msg
+            CreatePublicChannel name -> createChannel state name
+            _ -> return ()
   where
     getMessage :: IO (Maybe ClientCommand)
     getMessage = A.decode @ClientCommand <$> WS.receiveData conn
@@ -108,14 +135,14 @@ send :: [TQueue ServerCommand] -> ServerCommand -> STM ()
 send queues command = forM_ queues $ flip writeTQueue command
 
 sendMessage :: TVar State.AppState -> Message -> STM ()
-sendMessage state msg@Message {..} = do
+sendMessage state msg@Message {} = do
   state' <- readTVar state
   let queues = foldMap (`State.getQueuesForChannel` state') (getChannelsForMessage msg)
   send queues $ NewMessage msg
   where
     getChannelsForMessage :: Message -> [Channel]
-    getChannelsForMessage (Message _ ch@(Public _) _) = [ch]
-    getChannelsForMessage (Message sender' ch@(Private _) _) = [ch, Private sender']
+    getChannelsForMessage (Message {recipient = ch@(Public {})}) = [ch]
+    getChannelsForMessage (Message {sender, recipient=ch@(Private {})}) = [ch, Private sender]
 
 sendChannelList :: TVar State.AppState -> TQueue ServerCommand -> STM ()
 sendChannelList state queue = do
