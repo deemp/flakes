@@ -50,7 +50,7 @@ executables:
       - backend
 
 # tests:
-#   backend-test:
+#   backend-test: 
 #     main: Spec.hs
 #     source-dirs: test
 #     ghc-options:

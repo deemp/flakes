@@ -5,37 +5,33 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
 
 module Main where
 
-import Control.Monad
-import Control.Monad.IO.Class
-import Control.Exception (finally)
-import Data.Proxy (Proxy(..))
-import System.Environment
-
-import Servant.API
-import Servant.API.WebSocket
-import Servant.Server.StaticFiles (serveDirectoryWith)
-import Network.Wai.Application.Static (defaultWebAppSettings, ssIndices)
-import WaiAppStatic.Types (unsafeToPiece)
-import Servant.Server (Server, serve)
-import Network.Wai.Handler.Warp
-import Network.Wai.Logger       (withStdoutLogger)
-import qualified Network.WebSockets as WS
-
+import Common
 import Control.Concurrent
 import Control.Concurrent.STM
-
+import Control.Exception (finally)
+import Control.Monad
+import Control.Monad.IO.Class
 import qualified Data.Aeson as A
+import Data.Proxy (Proxy (..))
 import Data.Text (Text)
-
-import Common
+import Network.Wai.Application.Static (defaultWebAppSettings, ssIndices)
+import Network.Wai.Handler.Warp
+import Network.Wai.Logger (withStdoutLogger)
+import qualified Network.WebSockets as WS
+import Servant.API
+import Servant.API.WebSocket
+import Servant.Server (Server, serve)
+import Servant.Server.StaticFiles (serveDirectoryWith)
 import qualified State
+import System.Environment
+import WaiAppStatic.Types (unsafeToPiece)
 
 type API = "endpoint" :> WebSocket :<|> Raw
 
@@ -51,36 +47,36 @@ main = do
     runSettings settings app
 
 server :: TVar State.AppState -> FilePath -> Server API
-server state static = (websocketServer state) :<|> serveDirectoryWith staticSettings
+server state static = websocketServer state :<|> serveDirectoryWith staticSettings
   where
     staticSettings = (defaultWebAppSettings static) {ssIndices = [unsafeToPiece "index.html"]}
 
 websocketServer :: MonadIO m => TVar State.AppState -> WS.Connection -> m ()
 websocketServer state conn = do
-    void . liftIO $ do
-      WS.forkPingThread conn 10
-      queue <- newTQueueIO
-      recvProcess state queue conn
+  void . liftIO $ do
+    -- WTF what should be the IO a here?
+    WS.withPingThread conn 10 (return ()) (return ())
+    queue <- newTQueueIO
+    recvProcess state queue conn
 
 recvProcess :: TVar State.AppState -> TQueue ServerCommand -> WS.Connection -> IO ()
 recvProcess state queue conn = do
-  let
-    loginLoop :: IO User
-    loginLoop = do
-      msg <- getMessage
-      case msg of
-        Just command ->
-          case command of
-            Login userName -> atomically $ do
-              let user = User userName
-                  channel = Private user
-              modifyTVar' state $ State.addUser user queue
-              sendChannelList state queue
-              queues <- State.getAllQueues <$> readTVar state
-              send queues (NewChannel channel)
-              return user
-            _ -> loginLoop
-        Nothing -> loginLoop
+  let loginLoop :: IO User
+      loginLoop = do
+        msg <- getMessage
+        case msg of
+          Just command ->
+            case command of
+              Login userName -> atomically $ do
+                let user = User userName
+                    channel = Private user
+                modifyTVar' state $ State.addUser user queue
+                sendChannelList state queue
+                queues <- State.getAllQueues <$> readTVar state
+                send queues (NewChannel channel)
+                return user
+              _ -> loginLoop
+          Nothing -> loginLoop
 
   user <- loginLoop
   recvThId <- myThreadId
@@ -112,9 +108,9 @@ send :: [TQueue ServerCommand] -> ServerCommand -> STM ()
 send queues command = forM_ queues $ flip writeTQueue command
 
 sendMessage :: TVar State.AppState -> Message -> STM ()
-sendMessage state msg@Message{..} = do
+sendMessage state msg@Message {..} = do
   state' <- readTVar state
-  let queues = foldMap (flip State.getQueuesForChannel state') (getChannelsForMessage msg)
+  let queues = foldMap (`State.getQueuesForChannel` state') (getChannelsForMessage msg)
   send queues $ NewMessage msg
   where
     getChannelsForMessage :: Message -> [Channel]

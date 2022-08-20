@@ -1,42 +1,45 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
+
 module Common where
 
-import GHC.Generics (Generic)
-
-import Data.Aeson (ToJSON, FromJSON)
+import Data.Aeson (FromJSON, ToJSON)
 import Data.Hashable
 import Data.Text (Text)
-
+import GHC.Generics (Generic)
 
 data Message = Message
-  { sender :: User
-  , recipient :: Channel
-  , contents :: Text
-  } deriving (Show, Eq, Generic)
+  { sender :: User,
+    recipient :: Channel,
+    contents :: Text
+  }
+  deriving (Show, Eq, Generic)
 
 instance FromJSON Message
+
 instance ToJSON Message
 
-
-newtype User = User { userName :: Text } deriving (Show, Eq, Ord, Generic)
+newtype User = User {userName :: Text} deriving (Show, Eq, Ord, Generic)
 
 instance FromJSON User
+
 instance ToJSON User
+
 instance Hashable User
 
-
 data Channel
-  = Public Text | Private User
+  = Public Text
+  | Private User
   deriving (Show, Eq, Ord, Generic)
 
 instance FromJSON Channel
+
 instance ToJSON Channel
+
 instance Hashable Channel
 
 defaultChannel :: Channel
 defaultChannel = Public "main"
-
 
 data ClientCommand
   = Login Text
@@ -45,8 +48,8 @@ data ClientCommand
   deriving (Show, Eq, Generic)
 
 instance FromJSON ClientCommand
-instance ToJSON ClientCommand
 
+instance ToJSON ClientCommand
 
 data ServerCommand
   = NewMessage Message
@@ -56,4 +59,5 @@ data ServerCommand
   deriving (Show, Eq, Generic)
 
 instance FromJSON ServerCommand
+
 instance ToJSON ServerCommand

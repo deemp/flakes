@@ -38,6 +38,7 @@ main = mainWidget $ do
 
   el "h3" $ text "Webchat"
 
+  -- https://stackoverflow.com/a/5406008
   rec
     let
       msgSendEv = traceEvent "send" $ switch (current msgEvDyn)
