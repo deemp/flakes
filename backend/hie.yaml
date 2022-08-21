@@ -1,0 +1,10 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "backend:lib"
+
+    - path: "./app/Main.hs"
+      component: "backend:exe:backend-exe"
+
+    - path: "./app/Paths_backend.hs"
+      component: "backend:exe:backend-exe"

@@ -1,9 +1,9 @@
 resolver: lts-19.18
 
 packages:
-  - backend
+  - .
 
-allow-newer: true
+# allow-newer: true
 
 nix:
   enable: true

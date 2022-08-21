@@ -26,3 +26,4 @@ cabal.project.local~
 
 _default.nix
 _shell.nix
+result

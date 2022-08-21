@@ -10,5 +10,6 @@
         "[ ]",
         "[x]",
         "WTF",
-    ]
+    ],
+    "haskell.serverExecutablePath": "haskell-language-server"
 }
