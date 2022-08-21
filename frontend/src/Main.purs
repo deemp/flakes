@@ -12,7 +12,13 @@ main :: Effect Unit
 main = do
   log "🍝"
 
-type Person = { "Name" ∷ String, age ∷ Int, "is active" ∷ Boolean }
+tree :: String
+tree = "tree"
+
+type Person = { "Name" ∷ String, age ∷ Int, tree ∷ Boolean }
+
+p::Person
+p = {"Name" : "hey", age : 3, "tree" : true}
 
 codec ∷ CA.JsonCodec Person
 codec =
@@ -20,5 +26,5 @@ codec =
     (CAR.record
       { "Name": CA.string
       , age: CA.int
-      , "is active": CA.boolean
+      , "tree": CA.boolean
       })

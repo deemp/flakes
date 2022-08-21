@@ -11,5 +11,9 @@
         "[x]",
         "WTF",
     ],
-    "haskell.serverExecutablePath": "haskell-language-server"
+    "haskell.serverExecutablePath": "haskell-language-server",
+    
+    "files.watcherExclude": {
+        "**/.spago/**": true
+    }
 }
