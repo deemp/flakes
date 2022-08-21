@@ -2,12 +2,12 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE NamedFieldPuns #-}
 
 module Main (main) where
 
@@ -39,7 +39,7 @@ import Control.Concurrent.STM
 import Control.Exception (finally)
 import Control.Monad (forM_, forever, void)
 import Control.Monad.IO.Class (MonadIO (..))
-import qualified Data.Aeson as A
+-- import qualified Data.Aeson as A
 import Data.Proxy (Proxy (..))
 import Data.Text (Text)
 import Network.Wai.Application.Static (defaultWebAppSettings, ssIndices)
@@ -69,9 +69,9 @@ main = do
   state <- newTVarIO State.newAppState
   let app = serve (Proxy @API) $ server state path
       port = read @Int port'
-  withStdoutLogger $ \aplogger -> do
+  withStdoutLogger $ \logger -> do
     putStrLn $ "Server is listening at port " ++ show port
-    let settings = setPort port $ setLogger aplogger defaultSettings
+    let settings = setPort port $ setLogger logger defaultSettings
     runSettings settings app
 
 server :: TVar State.AppState -> FilePath -> Server API
@@ -83,9 +83,9 @@ websocketServer :: MonadIO m => TVar State.AppState -> WS.Connection -> m ()
 websocketServer state conn = do
   void . liftIO $ do
     -- WTF should be the IO a here?
-    WS.withPingThread conn 10 (return ()) (return ())
-    queue <- newTQueueIO
-    recvProcess state queue conn
+    WS.withPingThread conn 10 (return ()) $ do
+      queue <- newTQueueIO
+      recvProcess state queue conn
 
 onJust :: Maybe a -> b -> (a -> b) -> b
 onJust m d f = maybe d f m
@@ -121,15 +121,20 @@ recvProcess state queue conn = do
             CreatePublicChannel name -> createChannel state name
             _ -> return ()
   where
+    -- try to read a message from WS else block
+    -- decode a message as a ClientCommand
+    -- TODO change message format
     getMessage :: IO (Maybe ClientCommand)
-    getMessage = A.decode @ClientCommand <$> WS.receiveData conn
+    getMessage = return Nothing
+    -- getMessage = A.decode @ClientCommand <$> WS.receiveData conn
 
 sendProcess :: User -> TVar State.AppState -> ThreadId -> TQueue ServerCommand -> WS.Connection -> IO ()
 sendProcess user state recvThId queue conn =
   flip finally (disconnect state user recvThId) $
     forever $ do
       msg <- atomically $ readTQueue queue
-      void $ WS.sendTextData conn $ A.encode msg
+      -- WS.sendTextData conn $ A.encode msg
+      WS.sendTextData conn ("" :: Text)
 
 send :: [TQueue ServerCommand] -> ServerCommand -> STM ()
 send queues command = forM_ queues $ flip writeTQueue command
@@ -142,7 +147,7 @@ sendMessage state msg@Message {} = do
   where
     getChannelsForMessage :: Message -> [Channel]
     getChannelsForMessage (Message {recipient = ch@(Public {})}) = [ch]
-    getChannelsForMessage (Message {sender, recipient=ch@(Private {})}) = [ch, Private sender]
+    getChannelsForMessage (Message {sender, recipient = ch@(Private {})}) = [ch, Private sender]
 
 sendChannelList :: TVar State.AppState -> TQueue ServerCommand -> STM ()
 sendChannelList state queue = do
@@ -162,4 +167,8 @@ disconnect state user thId = do
     modifyTVar' state $ State.removeUser user
     queues <- State.getAllQueues <$> readTVar state
     send queues $ RemoveChannel $ Private user
+  -- TODO ensure client disconnected
+  -- maybe send it a message
+  -- and wait until it confirms disconnect
+  -- then kill its thread
   killThread thId
