@@ -1,17 +1,7 @@
 {
-    // for Haskell
     "todo-tree.regex.regex": "((--\\s*($TAGS))|\\{-\\s($TAGS).*(\\n.*)*-})",
-    "todo-tree.general.tags": [
-        "BUG",
-        "HACK",
-        "FIXME",
-        "TODO",
-        "XXX",
-        "[ ]",
-        "[x]",
-        "WTF",
-    ],
     "haskell.serverExecutablePath": "haskell-language-server",
+    
     
     "files.watcherExclude": {
         "**/.spago/**": true
