@@ -16,6 +16,7 @@ build-type:     Simple
 library
   exposed-modules:
       Common
+      Message
       State
   other-modules:
       Paths_backend

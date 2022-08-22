@@ -1,7 +1,9 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Common where
+module Message where
+
+-- Client -> Server
 
 import Data.Aeson (FromJSON, ToJSON)
 import Data.Hashable
