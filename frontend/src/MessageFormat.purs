@@ -1,24 +1,10 @@
 module MessageFormat where
 
--- import Control.Category ((>>>))
--- import Data.Argonaut.Core as J
--- import Data.Codec.Argonaut as CA
--- import Data.Codec.Argonaut.Record as CAR
-
-import Control.Alternative
-import Data.Argonaut.Core
-import Data.Argonaut.Decode
-import Data.Argonaut.Encode
-import Data.Bifunctor
-import Data.Either
-import Data.Maybe
-import Data.Newtype
-import Foreign.Object
+import Data.Argonaut.Core (Json, jsonEmptyObject, stringify)
+import Data.Argonaut.Encode (class EncodeJson, encodeJson, (:=), (~>))
+import Data.Newtype (class Newtype, unwrap)
 
 import Data.Generic.Rep (class Generic, Constructor(..), Product(..), Sum(..), from)
-import Data.Newtype (class Newtype)
-import Data.Profunctor (wrapIso)
-import Data.Show.Generic (genericShow)
 import Data.Symbol (class IsSymbol, reflectSymbol)
 import Data.Tuple (Tuple)
 import Prelude (($), class Show)
@@ -76,8 +62,6 @@ data CommandToServer
 newtype User = User {userName :: String}
 
 newtype Channel = Channel {channelName :: String} 
-
--- sp = unwrap (User {userName : ""})
 
 -- Server -> Client
 
@@ -179,97 +163,11 @@ instance Show CommandToServer where show = show'
 instance Show MessageFromClient where show = show'
 instance Show Recipient where show = show'
 
+bm :: BroadcastMessageFromClient
 bm = BroadcastMessageFromClient {contents: "str", recipients: [rec]}
 
+rec :: Recipient
 rec = Private usr
 
+usr :: User
 usr = User {userName : "ehy"}
-
--- instance Show MessageFromServer where show = show'
--- instance Show MessageToClient where show = show'
--- instance Show Sender where show = show'
-
--- for printing constructors
--- class Default a where def :: a
-
--- instance Default String where def = ""
-
--- instance Default (Array a) where def = []
-
--- instance Default BroadcastMessageFromClient where def = BroadcastMessageFromClient {recipients: def, contents: def}
--- instance Default Channel where def = Channel {channelName : def}
--- instance Default LoginData where def = LoginData {userName : def, password: def}
--- instance Default MessageFromClient where def = MessageFromClient {recipient: def, contents: def}
--- instance Default MessageToClient where def = MessageToClient {sender: def, contents: def}
--- instance Default ServerNotification where def = ServerNotification {contents: def}
--- instance Default User where def = User {userName: def}
--- instance Default Recipient where def = Private def
--- instance Default Sender where def = PrivateSender {user : def}
-
-
--- instance EncodeJson User where encodeJson = encodeJsonNewType
-
--- ps = stringify $ encodeJsonNewType $ User {userName : "hey"}
-
--- ps' = User {userName : "hey"}
-
-
--- instance EncodeJson Channel where
---   encodeJson t@(Channel {channelName}) =
---     addTag t
---     ~> "channelName" := channelName
---     ~> jsonEmptyObject
-
-
--- codecBroadcastMessageFromClient :: CA.JsonCodec BroadcastMessageFromClient
--- codecBroadcastMessageFromClient = 
---   CA.object (constrName BroadcastMessageFromClient) (
---     CAR.record {
---       recipient : CA.array codecRecipient,
---       contents : CA.string
---     }
---   )
-
--- codecRecipient :: CA.JsonCodec Recipient
--- codecRecipient = 
-
--- codecUser :: CA.JsonCodec User
--- codecUser = 
---   let 
---     c = constrName (def :: User)
---   in
---     wrapIso User $
---       CAR.object c ({
---         userName : CA.string
---       })
-
--- instance encodeJsonAppUser :: EncodeJson AppUser where
---   encodeJson (AppUser { name, age, team }) =
---     "name" := name       -- inserts "name": "Tom"
---       ~> "age" :=? age   -- inserts "age": "25" (if Nothing, does not insert anything)
---       ~>? "team" := team -- inserts "team": "Red Team"
---       ~> jsonEmptyObject
-
--- ser :: {userName :: String} -> String
--- ser = CA.encode codecUser >>> J.stringify
-
--- type Person = { name ∷ String, age ∷ Int, active ∷ Boolean }
-
--- codec ∷ CA.JsonCodec Person
--- codec =
---   CA.object "Person"
---     (CAR.record
---       { name: CA.string
---       , age: CA.int
---       , active: CA.boolean
---       })
-
--- serP :: Person -> String
--- serP = CA.encode codec >>> J.stringify
-
-
--- data P = P
--- derive instance Generic P _
--- instance Show P where show = genericShow
-
--- type Us = {userName :: String}
