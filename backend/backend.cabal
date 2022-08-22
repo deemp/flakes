@@ -17,6 +17,7 @@ library
   exposed-modules:
       Common
       Message
+      MessageTH
       State
   other-modules:
       Paths_backend

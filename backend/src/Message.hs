@@ -10,6 +10,7 @@ import Data.Aeson.TH
 import Data.Hashable
 import Data.Text (Text)
 import GHC.Generics (Generic)
+import MessageTH (options)
 
 -- Client -> Server
 
@@ -81,33 +82,32 @@ data MessageFromServer
 
 -- Instances
 
-$(deriveJSON defaultOptions {tagSingleConstructors = True} ''Channel)
+$(deriveJSON options ''Channel)
 
-$(deriveJSON defaultOptions {tagSingleConstructors = True} ''User)
+$(deriveJSON options ''User)
 
-$(deriveJSON defaultOptions {tagSingleConstructors = True} ''LoginData)
+$(deriveJSON options ''LoginData)
 
-$(deriveJSON defaultOptions {tagSingleConstructors = True} ''Recipient)
+$(deriveJSON options ''Recipient)
 
-$(deriveJSON defaultOptions {tagSingleConstructors = True} ''Sender)
+$(deriveJSON options ''Sender)
 
-$(deriveJSON defaultOptions {tagSingleConstructors = True} ''BroadcastMessageFromClient)
+$(deriveJSON options ''BroadcastMessageFromClient)
 
-$(deriveJSON defaultOptions {tagSingleConstructors = True} ''ServerNotification)
+$(deriveJSON options ''ServerNotification)
 
-$(deriveJSON defaultOptions {tagSingleConstructors = True} ''MessageToClient)
+$(deriveJSON options ''MessageToClient)
 
-$(deriveJSON defaultOptions {tagSingleConstructors = True} ''MessageFromClient)
+$(deriveJSON options ''MessageFromClient)
 
-$(deriveJSON defaultOptions {tagSingleConstructors = True} ''MessageFromServer)
+$(deriveJSON options ''MessageFromServer)
 
-$(deriveJSON defaultOptions {tagSingleConstructors = True} ''CommandToServer)
+$(deriveJSON options ''CommandToServer)
 
 -- Internal
 
 -- We'll need to store users
 instance Hashable User
-
 
 defaultChannel :: Recipient
 defaultChannel = Public $ Channel "main"
@@ -127,9 +127,32 @@ us = encode $ User "hey"
 
 un = decode "{\"tag\":\"User\",\"userName\":\"hey\"}" :: Maybe User
 
+bm :: BroadcastMessageFromClient
+bm = BroadcastMessageFromClient {contents = "str", recipients = [r]}
+
+bme' = encode bm
+
+r :: Recipient
+r = Private usr
+
+usr :: User
+usr = User {userName = "ehy"}
+
+bme = "{\"recipients\":[{\"(contents)\":{\"userName\":\"ehy\",\"(tag)\":\"User\"},\"(tag)\":\"Private\"}],\"contents\":\"str\",\"(tag)\":\"BroadcastMessageFromClient\"}"
+
+bd = decode bme :: Maybe BroadcastMessageFromClient
+
+
+
 {-
+>>>bme'
+"{\"(tag)\":\"BroadcastMessageFromClient\",\"recipients\":[{\"(tag)\":\"Private\",\"(contents)\":{\"(tag)\":\"User\",\"userName\":\"ehy\"}}],\"contents\":\"str\"}"
+
+>>>bd
+Just (BroadcastMessageFromClient {recipients = [Private (User {userName = "ehy"})], contents = "str"})
+
 >>>us
-"{\"tag\":\"User\",\"userName\":\"hey\"}"
+"{\"(tag)\":\"User\",\"userName\":\"hey\"}"
 >>>un
-Just (User {userName = "hey"})
+Nothing
 -}

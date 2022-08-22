@@ -1,14 +1,20 @@
 module MessageFormat where
 
-import Data.Argonaut.Core (Json, jsonEmptyObject, stringify)
-import Data.Argonaut.Encode (class EncodeJson, encodeJson, (:=), (~>))
-import Data.Newtype (class Newtype, unwrap)
+import Data.Argonaut.Decode.Generic
+import Data.Argonaut.Encode.Generic
+import Data.Argonaut.Types.Generic
 
+import Data.Argonaut.Core (Json, jsonEmptyObject, stringify)
+import Data.Argonaut.Decode (class DecodeJson, decodeJson)
+import Data.Argonaut.Encode (class EncodeJson, encodeJson, (:=), (~>))
 import Data.Generic.Rep (class Generic, Constructor(..), Product(..), Sum(..), from)
+import Data.Lens.Lens.Product (_1)
+import Data.Newtype (class Newtype, unwrap)
 import Data.Symbol (class IsSymbol, reflectSymbol)
 import Data.Tuple (Tuple)
 import Prelude (($), class Show)
 import Type.Proxy (Proxy(..))
+
 
 class ConstrName rep where
   constrName' :: rep -> String
@@ -21,7 +27,7 @@ instance (ConstrName a, ConstrName b) => ConstrName (Sum a b) where
   constrName' (Inr b) = constrName' b
 
 instance (ConstrName a, ConstrName b) => ConstrName (Product a b) where
-  constrName' (Product a _) = constrName' a
+  constrName' (Product a b) = constrName' b
 
 constrName :: forall a rep. Generic a rep => ConstrName rep => a -> String
 constrName a = constrName' $ from a
@@ -63,6 +69,9 @@ newtype User = User {userName :: String}
 
 newtype Channel = Channel {channelName :: String} 
 
+
+
+-- r = constrName A
 -- Server -> Client
 
 -- When a servers sends a message to its client
@@ -112,19 +121,29 @@ derive instance Generic Sender _
 derive instance Generic ServerNotification _
 derive instance Generic User _
 
+tag::String
+tag = "(tag)"
+
+contents::String
+contents = "(contents)"
+
 addTag :: forall a rep. Generic a rep => ConstrName rep => a -> Tuple String Json
 addTag t = tag := constrName t
-
-tag::String
-tag = "tag"
-contents::String
-contents = "contents"
 
 addContents ∷ ∀ (a ∷ Type). EncodeJson a ⇒ a → Json
 addContents t = contents := encodeJson t ~> jsonEmptyObject
 
 encodeJsonNewType ∷ ∀ (a ∷ Type) (b ∷ Type) (c ∷ Type). Generic c a ⇒ ConstrName a ⇒ EncodeJson b ⇒ Newtype c b ⇒ c → Json
 encodeJsonNewType t = addTag t ~> encodeJson (unwrap t)
+
+bm :: BroadcastMessageFromClient
+bm = BroadcastMessageFromClient {contents: "str", recipients: [recip]}
+
+recip :: Recipient
+recip = Private usr
+
+usr :: User
+usr = User {userName : "ehy"}
 
 show' ∷ ∀ (a ∷ Type). EncodeJson a ⇒ a → String
 show' t = stringify $ encodeJson t
@@ -140,10 +159,10 @@ instance EncodeJson CommandToServer where
   encodeJson p@(RemoveFromChannel t) = addTag p ~> addContents t
 
 instance EncodeJson MessageFromClient where
-  encodeJson p@(MessageFromClient t) = addTag p ~> addContents t
+  encodeJson p@(MessageFromClient t) = addTag p ~> encodeJson t
 
 instance EncodeJson BroadcastMessageFromClient where
-  encodeJson p@(BroadcastMessageFromClient t) = addTag p ~> addContents t
+  encodeJson p@(BroadcastMessageFromClient t) = addTag p ~> encodeJson t
 
 instance EncodeJson Recipient where
   encodeJson p@(Private t) = addTag p ~> addContents t
@@ -163,11 +182,24 @@ instance Show CommandToServer where show = show'
 instance Show MessageFromClient where show = show'
 instance Show Recipient where show = show'
 
-bm :: BroadcastMessageFromClient
-bm = BroadcastMessageFromClient {contents: "str", recipients: [rec]}
 
-rec :: Recipient
-rec = Private usr
 
-usr :: User
-usr = User {userName : "ehy"}
+
+
+
+-- Generics tutorial
+-- https://harry.garrood.me/blog/write-your-own-generics/
+-- we encode from generic repr into target
+-- we decode our initial type into generic
+
+-- Workflow with generics
+-- https://jordanmartinez.github.io/purescript-jordans-reference-site/content/31-Design-Patterns/22-Generics.html
+
+
+-- TODO
+-- Can we read JSON and convert it into Generic representation?
+
+-- When converting from Generic into JSON, we need to insert some specific expressions like `(tag)`
+-- When converting from JSON into Generic, we need to eliminate them
+
+-- we need then our own `to'` and `from'` functions to operate on 

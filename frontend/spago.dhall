@@ -12,7 +12,13 @@ to generate this file without the comments in this block.
 -}
 { name = "my-project"
 , dependencies =
-  [ "argonaut", "codec-argonaut", "console", "effect", "prelude" ]
+  [ "argonaut"
+  , "argonaut-generic"
+  , "codec-argonaut"
+  , "console"
+  , "effect"
+  , "prelude"
+  ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]
 }
