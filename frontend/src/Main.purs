@@ -1,24 +1,25 @@
-module Main where
+module Main
+  ( codec
+  , main
+  , p
+  )
+  where
 
 import Prelude
 
-import Effect (Effect)
-import Effect.Console (log)
 import Data.Codec.Argonaut as CA
 import Data.Codec.Argonaut.Record as CAR
-
+import Effect (Effect)
+import Effect.Console (log)
 
 main :: Effect Unit
 main = do
-  log "🍝"
+  log $ show p."45tree"
 
-tree :: String
-tree = "tree"
-
-type Person = { "Name" ∷ String, age ∷ Int, tree ∷ Boolean }
+type Person = { "Name" ∷ String, age ∷ Int, "45tree" ∷ Boolean }
 
 p::Person
-p = {"Name" : "hey", age : 3, "tree" : true}
+p = {"Name" : "hey", age : 3, "45tree" : true}
 
 codec ∷ CA.JsonCodec Person
 codec =
@@ -26,5 +27,5 @@ codec =
     (CAR.record
       { "Name": CA.string
       , age: CA.int
-      , "tree": CA.boolean
+      , "45tree": CA.boolean
       })

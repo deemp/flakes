@@ -3,7 +3,7 @@
 
 module Common where
 
-import Data.Aeson (FromJSON, ToJSON)
+import Data.Aeson (FromJSON, ToJSON, encode)
 import Data.Hashable
 import Data.Text (Text)
 import GHC.Generics (Generic)
@@ -20,6 +20,9 @@ instance FromJSON Message
 instance ToJSON Message
 
 newtype User = User {userName :: Text} deriving (Show, Eq, Ord, Generic)
+
+-- >>>encode $ User "name"
+-- "{\"userName\":\"name\"}"
 
 instance FromJSON User
 
