@@ -1,58 +1,78 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE TemplateHaskell #-}
 
-module Message () where
+module Message (inve) where
 
 import Data.Aeson (FromJSON, ToJSON, decode, encode)
-import Data.Aeson.TH
-import Data.Hashable
+import qualified Data.Aeson as Aeson
+import Data.Aeson.TH (deriveJSON)
+import Data.Data (Proxy (Proxy))
+import Data.Hashable ( Hashable )
 import Data.Text (Text)
-import GHC.Generics (Generic)
-import MessageTH (options)
+-- import Deriving.Aeson (CustomJSON, SumTaggedObject, TagSingleConstructors, UnwrapUnaryRecords)
+-- import qualified Deriving.Aeson as DA
+import GHC.Generics ( Generic )
+import MessageTH(options)
 
 -- Client -> Server
+
+-- type MyOpts a = CustomJSON '[TagSingleConstructors, UnwrapUnaryRecords, SumTaggedObject "(tag)" "(contents)"] a
+
+
 
 data MessageFromClient = MessageFromClient
   { recipient :: Recipient,
     contents :: Text
   }
-  deriving (Show, Eq, Generic)
+  deriving (Show, Eq, Ord, Generic)
+  -- deriving (FromJSON, ToJSON) via MyOpts MessageFromClient
 
 data BroadcastMessageFromClient = BroadcastMessageFromClient
   { recipients :: [Recipient],
     contents :: Text
   }
-  deriving (Show, Eq, Generic)
+  deriving (Show, Eq, Ord, Generic)
+  -- deriving (FromJSON, ToJSON) via MyOpts BroadcastMessageFromClient
 
 -- When a user sends a message server knows this user's name
 -- So this user only specifies the target recipient
 data Recipient
-  = Public Channel
-  | Private User
+  = Public {channel :: Channel}
+  | Private {user :: User}
   deriving (Show, Eq, Ord, Generic)
+  -- deriving (FromJSON, ToJSON) via MyOpts Recipient
 
 data LoginData = LoginData
   { userName :: Text,
     password :: Text
   }
   deriving (Show, Eq, Ord, Generic)
+  -- deriving (FromJSON, ToJSON) via MyOpts LoginData
 
 data CommandToServer
-  = Login LoginData
-  | SendMessage MessageFromClient
-  | BroadcastMessage BroadcastMessageFromClient
-  | CreateChannel Channel
-  | RemoveChannel Channel
-  | JoinChannel Channel
-  | InviteToChannel BroadcastMessageFromClient
-  | RemoveFromChannel User
-  deriving (Show, Eq, Generic)
+  = Login {loginData :: LoginData}
+  | SendMessage {messageFromClient :: MessageFromClient}
+  | BroadcastMessage {broadcastMessageFromClient :: BroadcastMessageFromClient}
+  | CreateChannel {channel :: Channel}
+  | RemoveChannel {channel :: Channel}
+  | JoinChannel {channel :: Channel}
+  | InviteToChannel {broadcastMessageFromClient :: BroadcastMessageFromClient}
+  | RemoveFromChannel {user :: User}
+  deriving (Show, Eq, Ord, Generic)
+  -- deriving (FromJSON, ToJSON) via MyOpts CommandToServer
 
-newtype User = User {userName :: Text} deriving (Show, Eq, Ord, Generic)
+newtype User = User {userName :: Text}
+  deriving (Show, Eq, Ord, Generic, Hashable)
+  -- deriving (FromJSON, ToJSON) via MyOpts User
 
-newtype Channel = Channel {channelName :: Text} deriving (Show, Eq, Ord, Generic)
+newtype Channel = Channel {channelName :: Text}
+  deriving (Show, Eq, Ord, Generic)
+  -- deriving (FromJSON, ToJSON) via MyOpts Channel
 
 -- Server -> Client
 
@@ -63,24 +83,27 @@ data Sender
   = PublicSender {channel :: Channel, user :: User}
   | PrivateSender {user :: User}
   deriving (Show, Eq, Ord, Generic)
+  -- deriving (FromJSON, ToJSON) via MyOpts Sender
 
 data MessageToClient = MessageToClient
   { sender :: Sender,
     contents :: Text
   }
-  deriving (Show, Eq, Generic)
+  deriving (Show, Eq, Ord, Generic)
+  -- deriving (FromJSON, ToJSON) via MyOpts MessageToClient
 
 newtype ServerNotification = ServerNotification
   { contents :: Text
   }
-  deriving (Show, Eq, Generic)
+  deriving (Show, Eq, Ord, Generic)
+  -- deriving (FromJSON, ToJSON) via MyOpts ServerNotification
 
 data MessageFromServer
-  = ServerSent ServerNotification
-  | ClientSent MessageToClient
-  deriving (Show, Eq, Generic)
+  = ServerSent {serverSent :: ServerNotification}
+  | ClientSent {clientSent :: MessageToClient}
+  deriving (Show, Eq, Ord, Generic)
+  -- deriving (FromJSON, ToJSON) via MyOpts MessageFromServer
 
--- Instances
 
 $(deriveJSON options ''Channel)
 
@@ -104,33 +127,6 @@ $(deriveJSON options ''MessageFromServer)
 
 $(deriveJSON options ''CommandToServer)
 
--- Internal
-
--- We'll need to store users
-instance Hashable User
-
-defaultChannel :: Recipient
-defaultChannel = Public $ Channel "main"
-
-pc = encode $ Public $ Channel "us"
-
-pu = encode $ Private $ User "us"
-
-{-
->>>pc
-"{\"tag\":\"Public\",\"contents\":{\"tag\":\"Channel\",\"channelName\":\"us\"}}"
->>>pu
-"{\"tag\":\"Private\",\"contents\":{\"tag\":\"User\",\"userName\":\"us\"}}"
--}
-
-us = encode $ User "hey"
-
-un = decode "{\"tag\":\"User\",\"userName\":\"hey\"}" :: Maybe User
-
-bm :: BroadcastMessageFromClient
-bm = BroadcastMessageFromClient {contents = "str", recipients = [r]}
-
-bme' = encode bm
 
 r :: Recipient
 r = Private usr
@@ -138,21 +134,33 @@ r = Private usr
 usr :: User
 usr = User {userName = "ehy"}
 
-bme = "{\"recipients\":[{\"(contents)\":{\"userName\":\"ehy\",\"(tag)\":\"User\"},\"(tag)\":\"Private\"}],\"contents\":\"str\",\"(tag)\":\"BroadcastMessageFromClient\"}"
+bm :: BroadcastMessageFromClient
+bm = BroadcastMessageFromClient {contents = "str", recipients = [r]}
 
-bd = decode bme :: Maybe BroadcastMessageFromClient
+inv :: CommandToServer
+inv = InviteToChannel bm
 
+bme' = encode bm
 
+encR = encode r
+
+encUsr = encode usr
+
+bmp = "{\"recipients\":[{\"user\":{\"userName\":\"ehy\",\"(tag)\":\"User\"},\"(tag)\":\"Private\"},{\"user\":{\"userName\":\"ehy\",\"(tag)\":\"User\"},\"(tag)\":\"Private\"}],\"contents\":\"str\",\"(tag)\":\"BroadcastMessageFromClient\"}"
+
+inve = "{\"(tag)\":\"InviteToChannel\",\"broadcastMessageFromClient\":{\"(tag)\":\"BroadcastMessageFromClient\",\"recipients\":[{\"(tag)\":\"Private\",\"user\":{\"(tag)\":\"User\",\"userName\":\"ehy\"}}],\"contents\":\"str\"}}"
+
+invd :: Maybe CommandToServer
+invd = decode inve
+
+bmpd :: Maybe BroadcastMessageFromClient
+bmpd = decode bmp
+
+-- inve = encode inv
 
 {-
->>>bme'
-"{\"(tag)\":\"BroadcastMessageFromClient\",\"recipients\":[{\"(tag)\":\"Private\",\"(contents)\":{\"(tag)\":\"User\",\"userName\":\"ehy\"}}],\"contents\":\"str\"}"
-
->>>bd
-Just (BroadcastMessageFromClient {recipients = [Private (User {userName = "ehy"})], contents = "str"})
-
->>>us
-"{\"(tag)\":\"User\",\"userName\":\"hey\"}"
->>>un
-Nothing
+>>>bmpd
+Just (BroadcastMessageFromClient {recipients = [Private {user = User {userName = "ehy"}},Private {user = User {userName = "ehy"}}], contents = "str"})
+>>>inve
+"{\"(tag)\":\"InviteToChannel\",\"broadcastMessageFromClient\":{\"(tag)\":\"BroadcastMessageFromClient\",\"recipients\":[{\"(tag)\":\"Private\",\"user\":{\"(tag)\":\"User\",\"userName\":\"ehy\"}}],\"contents\":\"str\"}}"
 -}

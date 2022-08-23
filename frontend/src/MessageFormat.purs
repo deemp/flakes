@@ -5,12 +5,14 @@ import Data.Argonaut.Encode.Generic (genericEncodeJsonWith)
 import Data.Argonaut.Types.Generic (Encoding)
 
 import Data.Argonaut.Core (stringify)
-import Data.Argonaut.Decode (class DecodeJson)
+import Data.Argonaut.Decode (class DecodeJson, parseJson)
 import Data.Argonaut.Encode (class EncodeJson, encodeJson)
 import Data.Generic.Rep (class Generic)
 import Data.Newtype (class Newtype)
 import Prelude (($), class Show)
-import Data.Maybe (Maybe (Nothing))
+import Data.Maybe (Maybe (..))
+import Data.Either (Either(..))
+import Data.Show (show)
 
 -- Client -> Server
 
@@ -153,6 +155,14 @@ instance Show Sender where show = show'
 instance Show ServerNotification where show = show'
 instance Show User where show = show'
 
+inve :: String
+inve = "{\"(tag)\":\"InviteToChannel\",\"broadcastMessageFromClient\":{\"(tag)\":\"BroadcastMessageFromClient\",\"recipients\":[{\"(tag)\":\"Private\",\"user\":{\"(tag)\":\"User\",\"userName\":\"ehy\"}}],\"contents\":\"str\"}}"
+
+invd :: String
+invd = 
+  case parseJson inve of
+    Right e -> stringify e
+    Left e -> show e
 
 -- Generics tutorial
 -- https://harry.garrood.me/blog/write-your-own-generics/

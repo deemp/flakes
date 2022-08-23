@@ -4,10 +4,10 @@
 module MessageTH (options) where
 
 import Data.Aeson.TH
-  ( Options (sumEncoding, tagSingleConstructors),
-    SumEncoding (TaggedObject, contentsFieldName, tagFieldName),
+  ( Options (..),
+    SumEncoding (..),
     defaultOptions,
   )
 
 options :: Options
-options = defaultOptions {tagSingleConstructors = True, sumEncoding = TaggedObject {tagFieldName = "(tag)", contentsFieldName = "(contents)"}}
+options = defaultOptions {tagSingleConstructors = True, unwrapUnaryRecords = True, sumEncoding = TaggedObject {tagFieldName = "(tag)", contentsFieldName = "(contents)"}}

@@ -32,6 +32,7 @@ dependencies:
   - servant-websockets
   - wai-app-static
   - hashable
+  - deriving-aeson
 
 library:
   source-dirs: src
