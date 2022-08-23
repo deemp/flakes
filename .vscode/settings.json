@@ -1,9 +1,10 @@
 {
     "todo-tree.regex.regex": "((--\\s*($TAGS))|\\{-\\s($TAGS).*(\\n.*)*-})",
     "haskell.serverExecutablePath": "haskell-language-server",
-    
-    
     "files.watcherExclude": {
         "**/.spago/**": true
-    }
+    },
+    "purescript.outputDirectory": "./frontend/output/",
+    "purescript.packagePath": "./frontend",
+    "purescript.sourcePath": "./frontend/src"
 }

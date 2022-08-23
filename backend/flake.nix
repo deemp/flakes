@@ -5,10 +5,9 @@
     flake-utils.url = "github:numtide/flake-utils";
 
     # https://discourse.nixos.org/t/recommendations-for-use-of-flakes-input-follows/17413
-    # 524ef152342f37ac524e4da1e419d164316c7c8f
-    # hls = {
-    #   url = "github:haskell/haskell-language-server?rev=907a6e645bf03247887c63690f125d02dbcf9ed8";
-    # };
+    hls = {
+      url = "github:haskell/haskell-language-server?rev=9a0684ec28022f644de4f8a0eb3610ea7a8dd2eb";
+    };
     gitignore = {
       url = "github:hercules-ci/gitignore.nix/a20de23b925fd8264fd7fad6454652e142fd7f73";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -19,12 +18,12 @@
     extra-substituters = [
       "https://cache.nixos.org/"
       "https://cachix.cachix.org"
-      # "https://haskell-language-server.cachix.org"
+      "https://haskell-language-server.cachix.org"
     ];
     extra-trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
       "cachix.cachix.org-1:eWNHQldwUO7G2VkjpnjDbWwy4KQ/HNxht7H4SSoMckM="
-      # "haskell-language-server.cachix.org-1:juFfHrwkOxqIOZShtC4YC1uT1bBcq2RSvC7OMKx0Nz8="
+      "haskell-language-server.cachix.org-1:juFfHrwkOxqIOZShtC4YC1uT1bBcq2RSvC7OMKx0Nz8="
     ];
   };
 
@@ -34,7 +33,7 @@
     , nixpkgs
     , flake-utils
     , gitignore
-      # , hls
+    , hls
     }:
     flake-utils.lib.eachDefaultSystem (system:
     let
@@ -53,6 +52,7 @@
       # from stack.yaml resolver
       ghcVersion = "902";
       hPkgs = pkgs.haskell.packages."ghc${ghcVersion}";
+      haskell-language-server = hls.packages.${system}."haskell-language-server-${ghcVersion}";
 
       myDevTools = builtins.attrValues {
         inherit (hPkgs)
@@ -63,10 +63,10 @@
           hlint# Haskell codestyle checker
           hoogle# Lookup Haskell documentation
           implicit-hie# auto generate LSP hie.yaml file from cabal
-          haskell-language-server
           retrie# Haskell refactoring tool
           ;
         inherit stack-wrapped;
+        inherit haskell-language-server;
       };
 
       # Wrap Stack to work with our Nix integration. 
