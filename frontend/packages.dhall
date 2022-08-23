@@ -103,3 +103,25 @@ let upstream =
         sha256:8b4467b4b5041914f9b765779c8936d6d4c230b1f60eb64f6269c71812fd7e98
 
 in  upstream
+  with purescript-argonaut-generic =
+    {
+, dependencies =
+  [ "argonaut-codecs"
+  , "argonaut-core"
+  , "arrays"
+  , "assert"
+  , "bifunctors"
+  , "console"
+  , "control"
+  , "effect"
+  , "either"
+  , "exceptions"
+  , "foreign-object"
+  , "partial"
+  , "prelude"
+  , "strings"
+  ]
+  , version = "59cbe61c24ead743176e4b90076e84081cb5ca2a"
+    , repo = "https://github.com/br4ch1st0chr0n3/purescript-argonaut-generic.git"
+}
+

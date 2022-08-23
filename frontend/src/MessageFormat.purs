@@ -1,36 +1,16 @@
 module MessageFormat where
 
-import Data.Argonaut.Decode.Generic
-import Data.Argonaut.Encode.Generic
-import Data.Argonaut.Types.Generic
+import Data.Argonaut.Decode.Generic (genericDecodeJsonWith)
+import Data.Argonaut.Encode.Generic (genericEncodeJsonWith)
+import Data.Argonaut.Types.Generic (Encoding)
 
-import Data.Argonaut.Core (Json, jsonEmptyObject, stringify)
-import Data.Argonaut.Decode (class DecodeJson, decodeJson)
-import Data.Argonaut.Encode (class EncodeJson, encodeJson, (:=), (~>))
-import Data.Generic.Rep (class Generic, Constructor(..), Product(..), Sum(..), from)
-import Data.Lens.Lens.Product (_1)
-import Data.Newtype (class Newtype, unwrap)
-import Data.Symbol (class IsSymbol, reflectSymbol)
-import Data.Tuple (Tuple)
+import Data.Argonaut.Core (stringify)
+import Data.Argonaut.Decode (class DecodeJson)
+import Data.Argonaut.Encode (class EncodeJson, encodeJson)
+import Data.Generic.Rep (class Generic)
+import Data.Newtype (class Newtype)
 import Prelude (($), class Show)
-import Type.Proxy (Proxy(..))
-
-
-class ConstrName rep where
-  constrName' :: rep -> String
-
-instance IsSymbol name => ConstrName (Constructor name a) where
-  constrName' (Constructor _) = reflectSymbol (Proxy :: Proxy name)
-
-instance (ConstrName a, ConstrName b) => ConstrName (Sum a b) where
-  constrName' (Inl a) = constrName' a
-  constrName' (Inr b) = constrName' b
-
-instance (ConstrName a, ConstrName b) => ConstrName (Product a b) where
-  constrName' (Product a b) = constrName' b
-
-constrName :: forall a rep. Generic a rep => ConstrName rep => a -> String
-constrName a = constrName' $ from a
+import Data.Maybe (Maybe (Nothing))
 
 -- Client -> Server
 
@@ -47,8 +27,8 @@ newtype BroadcastMessageFromClient = BroadcastMessageFromClient
 -- When a user sends a message server knows this user's name
 -- So this user only specifies the target recipient
 data Recipient
-  = Public Channel
-  | Private User
+  = Public {channel :: Channel}
+  | Private {user :: User}
 
 newtype LoginData = LoginData
   { userName :: String,
@@ -56,23 +36,18 @@ newtype LoginData = LoginData
   }
 
 data CommandToServer
-  = Login LoginData
-  | SendMessage MessageFromClient
-  | BroadcastMessage BroadcastMessageFromClient
-  | CreateChannel Channel
-  | RemoveChannel Channel
-  | JoinChannel Channel
-  | InviteToChannel BroadcastMessageFromClient
-  | RemoveFromChannel User
+  = Login {loginData :: LoginData}
+  | SendMessage {messageFromClient :: MessageFromClient}
+  | BroadcastMessage {broadcastMessageFromClient :: BroadcastMessageFromClient}
+  | CreateChannel {channel :: Channel}
+  | RemoveChannel {channel :: Channel}
+  | JoinChannel {channel :: Channel}
+  | InviteToChannel {broadcastMessageFromClient :: BroadcastMessageFromClient}
+  | RemoveFromChannel {user :: User}
 
 newtype User = User {userName :: String}
 
 newtype Channel = Channel {channelName :: String} 
-
-
-
--- r = constrName A
--- Server -> Client
 
 -- When a servers sends a message to its client
 -- this client should know who has sent this message
@@ -91,8 +66,8 @@ newtype ServerNotification = ServerNotification
   }
 
 data MessageFromServer
-  = ServerSent ServerNotification
-  | ClientSent MessageToClient
+  = ServerSent {serverSent :: ServerNotification}
+  | ClientSent {clientSent :: MessageToClient}
 
 
 -- Instances
@@ -127,64 +102,56 @@ tag = "(tag)"
 contents::String
 contents = "(contents)"
 
-addTag :: forall a rep. Generic a rep => ConstrName rep => a -> Tuple String Json
-addTag t = tag := constrName t
+enc :: Encoding
+enc = {tagKey: tag, unwrapSingleArguments: true, valuesKey: Nothing}
 
-addContents ∷ ∀ (a ∷ Type). EncodeJson a ⇒ a → Json
-addContents t = contents := encodeJson t ~> jsonEmptyObject
+instance EncodeJson BroadcastMessageFromClient where encodeJson a = genericEncodeJsonWith enc a
+instance EncodeJson Channel where encodeJson a = genericEncodeJsonWith enc a
+instance EncodeJson CommandToServer where encodeJson a = genericEncodeJsonWith enc a
+instance EncodeJson LoginData where encodeJson a = genericEncodeJsonWith enc a
+instance EncodeJson MessageFromClient where encodeJson a = genericEncodeJsonWith enc a
+instance EncodeJson MessageFromServer where encodeJson a = genericEncodeJsonWith enc a
+instance EncodeJson MessageToClient where encodeJson a = genericEncodeJsonWith enc a
+instance EncodeJson Recipient where encodeJson a = genericEncodeJsonWith enc a
+instance EncodeJson Sender where encodeJson a = genericEncodeJsonWith enc a
+instance EncodeJson ServerNotification where encodeJson a = genericEncodeJsonWith enc a
+instance EncodeJson User where encodeJson a = genericEncodeJsonWith enc a
 
-encodeJsonNewType ∷ ∀ (a ∷ Type) (b ∷ Type) (c ∷ Type). Generic c a ⇒ ConstrName a ⇒ EncodeJson b ⇒ Newtype c b ⇒ c → Json
-encodeJsonNewType t = addTag t ~> encodeJson (unwrap t)
+instance DecodeJson BroadcastMessageFromClient where decodeJson a = genericDecodeJsonWith enc a
+instance DecodeJson Channel where decodeJson a = genericDecodeJsonWith enc a
+instance DecodeJson CommandToServer where decodeJson a = genericDecodeJsonWith enc a
+instance DecodeJson LoginData where decodeJson a = genericDecodeJsonWith enc a
+instance DecodeJson MessageFromClient where decodeJson a = genericDecodeJsonWith enc a
+instance DecodeJson MessageFromServer where decodeJson a = genericDecodeJsonWith enc a
+instance DecodeJson MessageToClient where decodeJson a = genericDecodeJsonWith enc a
+instance DecodeJson Recipient where decodeJson a = genericDecodeJsonWith enc a
+instance DecodeJson Sender where decodeJson a = genericDecodeJsonWith enc a
+instance DecodeJson ServerNotification where decodeJson a = genericDecodeJsonWith enc a
+instance DecodeJson User where decodeJson a = genericDecodeJsonWith enc a
 
 bm :: BroadcastMessageFromClient
-bm = BroadcastMessageFromClient {contents: "str", recipients: [recip]}
+bm = BroadcastMessageFromClient {contents: "str", recipients: [recipient, recipient]}
 
-recip :: Recipient
-recip = Private usr
+recipient :: Recipient
+recipient = Private {user : usr}
 
 usr :: User
 usr = User {userName : "ehy"}
 
 show' ∷ ∀ (a ∷ Type). EncodeJson a ⇒ a → String
-show' t = stringify $ encodeJson t
+show' a = stringify $ encodeJson a
 
-instance EncodeJson CommandToServer where
-  encodeJson p@(Login t) = addTag p ~> addContents t
-  encodeJson p@(SendMessage t) = addTag p ~> addContents t
-  encodeJson p@(BroadcastMessage t) = addTag p ~> addContents t
-  encodeJson p@(CreateChannel t) = addTag p ~> addContents t
-  encodeJson p@(RemoveChannel t) = addTag p ~> addContents t
-  encodeJson p@(JoinChannel t) = addTag p ~> addContents t
-  encodeJson p@(InviteToChannel t) = addTag p ~> addContents t
-  encodeJson p@(RemoveFromChannel t) = addTag p ~> addContents t
-
-instance EncodeJson MessageFromClient where
-  encodeJson p@(MessageFromClient t) = addTag p ~> encodeJson t
-
-instance EncodeJson BroadcastMessageFromClient where
-  encodeJson p@(BroadcastMessageFromClient t) = addTag p ~> encodeJson t
-
-instance EncodeJson Recipient where
-  encodeJson p@(Private t) = addTag p ~> addContents t
-  encodeJson p@(Public t) = addTag p ~> addContents t
-
-instance EncodeJson Channel where encodeJson = encodeJsonNewType
-instance EncodeJson LoginData where encodeJson = encodeJsonNewType
-instance EncodeJson ServerNotification where encodeJson = encodeJsonNewType
-instance EncodeJson User where encodeJson = encodeJsonNewType
-
+instance Show BroadcastMessageFromClient where show = show'
 instance Show Channel where show = show'
+instance Show CommandToServer where show = show'
 instance Show LoginData where show = show'
+instance Show MessageFromClient where show = show'
+instance Show MessageFromServer where show = show'
+instance Show MessageToClient where show = show'
+instance Show Recipient where show = show'
+instance Show Sender where show = show'
 instance Show ServerNotification where show = show'
 instance Show User where show = show'
-instance Show BroadcastMessageFromClient where show = show'
-instance Show CommandToServer where show = show'
-instance Show MessageFromClient where show = show'
-instance Show Recipient where show = show'
-
-
-
-
 
 
 -- Generics tutorial
