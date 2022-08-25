@@ -7,17 +7,63 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE UndecidableInstances #-}
 
-module Message
+module TransportTypes
   ( User (..),
-    MessageFromClient (..),
-    Entity (..),
-    Credentials (..),
-    Request' (..),
-    Response' (..),
     Channel (..),
+    Group (..),
+    SText (..),
+    SAlias (..),
+    SInt (..),
+    Seconds (..),
+    UTC (..),
+    SName (..),
+    SId (..),
+    Entity (..),
+    Contents (..),
+    MessageFromClient (..),
+    Credentials (..),
+    AdminPermission (..),
+    UserPermission (..),
+    Permissions (..),
+    Medium (..),
+    GroupAction (..),
+    MediumAction (..),
+    UserAction (..),
+    Tuple2 (..),
+    Alt2 (..),
+    Alt3 (..),
+    BroadcastMessage (..),
+    MessagesAction (..),
+    Request' (..),
+    ClientRequest (..),
     Sender (..),
     MessageToClient (..),
+    Notification (..),
+    GroupActionResponse (..),
+    MediumActionResponse (..),
+    UserActionResponse (..),
+    Reason (..),
+    Message' (..),
+    Edited (..),
+    Response' (..),
+    ServerResponse (..),
+    Response_ (..),
+    Message_ (..),
+    Request_ (..),
+    User_ (..),
+    Group_ (..),
+    Channel_ (..),
+    Medium_ (..),
+    UUser_ (..),
+    Entity_ (..),
+    Text_ (..),
+    Invitation_ (..),
+    Bio_ (..),
+    Info_ (..),
   )
 where
 
@@ -29,8 +75,8 @@ import qualified Data.HashSet as HS
 import Data.Hashable (Hashable)
 import Data.Text (Text)
 import GHC.Generics (Generic)
-import TransportTypesTH (options)
 import Network.WebSockets (Request (Request))
+import TransportTypesTH (options)
 import Prelude hiding (Either)
 
 -- Common
@@ -222,6 +268,7 @@ data Request'
     Apply {args :: [Alt3 (Tuple2 Medium [MediumAction]) (Tuple2 Group [GroupAction]) (Tuple2 User [UserAction])]}
   | -- TODO combine with client-side search
     AskAutoComplete {name :: SName Entity_}
+  | AskKnownEntities
   deriving (Show, Eq, Ord, Generic)
 
 -- | a client will determine the relevance of each server response
@@ -275,7 +322,7 @@ data GroupActionResponse
 
 data MediumActionResponse
   = Created
-  | Left
+  | LeftMedium
   | Joined
   | Deleted
   | Info {info :: SText Info_}
@@ -319,7 +366,9 @@ data Response'
     Registered
   | LoggedIn
   | LoggedOut
-  | AskReceived {responseId :: SId Response_}
+  | -- TODO maybe not needed as soon as a websocket is open
+    -- but maybe a client's response processing queue is full
+    AskReceived {responseId :: SId Response_}
   | -- when broadcasting a message, it becomes many messages with different ids
     -- for each entity, they will have a different id
     SentMessagesTo {entities :: [Tuple2 Entity Message']}
@@ -338,6 +387,7 @@ data Response'
       }
   | RespondAutoComplete {name :: SName Entity_, names :: [Tuple2 Entity (SName Entity_)]}
   | InvalidRequest {reason :: Reason}
+  | RespondKnownEntities {knownEntities :: [Entity]}
   deriving (Show, Eq, Ord, Generic)
 
 -- | data coming from a server
@@ -351,6 +401,8 @@ data ServerResponse = ServerResponse
     response :: Response'
   }
   deriving (Show, Eq, Ord, Generic)
+
+
 
 -- TODO safe SId
 -- can be used like this
@@ -399,11 +451,22 @@ data Bio_ = Bio_ deriving (Description)
 
 data Info_ = Info_ deriving (Description)
 
+data D = DA | DB
+
+-- class MyShow a where 
+--   sh :: a -> String
+--   default sh :: a -> String
+--   sh s = "str"
+
+-- instance MyShow a => Show a where
+--   show = sh
+
+
 -- TODO admin hierarchy
 
 -- Each command should be recognizable
 
--- {- TODO uncomment
+{- TODO uncomment
 $(deriveJSON options ''SName)
 
 $(deriveJSON options ''SAlias)
@@ -499,33 +562,3 @@ $(deriveJSON options ''Edited)
 $(deriveJSON options ''Response')
 
 -- -}
-
--- t :: (Integer, Integer)
--- t :: Tuple2 Int Int
--- t = Tuple2 3 4
-
--- p = encode t
-
-{-
->>>p
-"{\"(tag)\":\"Tuple2\",\"a2\":3,\"b2\":4}"
--}
-
--- r :: Entity
--- r = User' usr
-
--- usr :: User
--- usr = User {alias = Alias "user"}
-
--- cs :: CommandToServer
--- cs = BroadcastMessage {recipients = [r, r], contents = CText "text"}
-
--- inve = encode cs
-
--- invd :: Maybe CommandToServer
--- invd = decode inve
-
-{-
->>>inve
-"{\"(tag)\":\"BroadcastMessage\",\"recipients\":[{\"(tag)\":\"User'\",\"user\":{\"(tag)\":\"User\",\"name\":{\"(tag)\":\"Name\",\"name\":\"user\"}}},{\"(tag)\":\"User'\",\"user\":{\"(tag)\":\"User\",\"name\":{\"(tag)\":\"Name\",\"name\":\"user\"}}}],\"contents\":{\"(tag)\":\"CText\",\"text\":\"text\"}}"
--}

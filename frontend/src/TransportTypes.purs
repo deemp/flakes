@@ -1,11 +1,13 @@
-module Message where
+module TransportTypes where
 
+import Data.Argonaut (Json, JsonDecodeError, stringify)
 import Data.Argonaut.Decode (class DecodeJson)
-import Data.Argonaut.Decode.Class (class DecodeJsonField)
-import Data.Argonaut.Decode.Generic (genericDecodeJsonWith)
-import Data.Argonaut.Encode.Class (class EncodeJson)
-import Data.Argonaut.Encode.Generic (genericEncodeJsonWith)
+import Data.Argonaut.Decode.Generic (class DecodeRep, genericDecodeJsonWith)
+import Data.Argonaut.Encode.Class (class EncodeJson, encodeJson)
+import Data.Argonaut.Encode.Generic (class EncodeRep, genericEncodeJsonWith)
 import Data.Argonaut.Types.Generic (Encoding)
+import Data.Either (Either(..))
+import Data.Function (($))
 import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
@@ -17,6 +19,32 @@ import Data.Newtype (class Newtype)
 -- TODO smart constructor for messages' Internal representation
 
 -- TODO use the same smart constructors on the client's side
+
+-- TODO what message data should be stored along its id on the client?
+-- sender alias
+-- time
+-- which message it is a response to
+-- how many messages respond this one
+
+-- TODO show when a message was received
+
+-- Generics tutorial
+-- https://harry.garrood.me/blog/write-your-own-generics/
+-- we encode from generic repr into target
+-- we decode our initial type into generic
+
+-- Workflow with generics
+-- https://jordanmartinez.github.io/purescript-jordans-reference-site/content/31-Design-Patterns/22-Generics.html
+
+
+-- TODO
+-- Can we read JSON and convert it into Generic representation?
+
+-- When converting from Generic into JSON, we need to insert some specific expressions like `(tag)`
+-- When converting from JSON into Generic, we need to eliminate them
+
+-- we need then our own `to'` and `from'` functions to operate on 
+
 
 newtype User = User {alias :: SAlias User_}
 
@@ -178,6 +206,9 @@ data Request'
     Apply {args :: Array (Alt3 (Tuple2 Medium (Array MediumAction)) (Tuple2 Group (Array GroupAction)) (Tuple2 User (Array UserAction)))}
   | -- TODO combine with client-side search
     AskAutoComplete {name :: SName Entity_}
+  | -- get a list of known entities
+    AskKnownEntities
+    
 
 -- | a client will determine the relevance of each server response
 -- by observing the request ID
@@ -207,6 +238,8 @@ newtype MessageToClient = MessageToClient
     contents :: Contents
   }
 
+-- f :: forall a. IsJSON a => a -> Int
+-- f s = 3
 -- e.g., when a group is removed
 
 data Notification
@@ -226,7 +259,7 @@ data GroupActionResponse
 
 data MediumActionResponse
   = Created
-  | Left
+  | LeftMedium
   | Joined
   | Deleted
   | Info {info :: SText Info_}
@@ -284,6 +317,7 @@ data Response'
       }
   | RespondAutoComplete {name :: SName Entity_, names :: Array (Tuple2 Entity (SName Entity_))}
   | InvalidRequest {reason :: Reason}
+  | RespondKnownEntities {knownEntities :: Array Entity}
 
 -- | data coming from a server
 -- not necessarily a response to a client
@@ -373,204 +407,98 @@ contents = "(contents)"
 enc :: Encoding
 enc = {tagKey: tag, unwrapSingleArguments: true, valuesKey: Nothing}
 
+-- {- 
 derive instance Generic User _
 derive instance Newtype User _
-instance EncodeJson User where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson User where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Channel _
 derive instance Newtype Channel _
-instance EncodeJson Channel where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Channel where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Group _
 derive instance Newtype Group _
-instance EncodeJson Group where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Group where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic (SText a) _
 derive instance Newtype (SText a) _
-instance EncodeJson (SText a) where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson (SText a) where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic (SAlias a) _
 derive instance Newtype (SAlias a) _
-instance EncodeJson (SAlias a) where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson (SAlias a) where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic SInt _
 derive instance Newtype SInt _
-instance EncodeJson SInt where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson SInt where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Seconds _
 derive instance Newtype Seconds _
-instance EncodeJson Seconds where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Seconds where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic UTC _
 derive instance Newtype UTC _
-instance EncodeJson UTC where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson UTC where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic (SName a) _
 derive instance Newtype (SName a) _
-instance EncodeJson (SName a) where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson (SName a) where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic (SId a) _
 derive instance Newtype (SId a) _
-instance EncodeJson (SId a) where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson (SId a) where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Entity _
-instance EncodeJson Entity where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Entity where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Contents _
-instance EncodeJson Contents where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Contents where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic MessageFromClient _
 derive instance Newtype MessageFromClient _
-instance EncodeJson MessageFromClient where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson MessageFromClient where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Credentials _
 derive instance Newtype Credentials _
-instance EncodeJson Credentials where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Credentials where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic AdminPermission _
-instance EncodeJson AdminPermission where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson AdminPermission where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic UserPermission _
-instance EncodeJson UserPermission where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson UserPermission where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Permissions _
 derive instance Newtype Permissions _
-instance EncodeJson Permissions where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Permissions where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Medium _
-instance EncodeJson Medium where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Medium where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic GroupAction _
-instance EncodeJson GroupAction where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson GroupAction where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic MediumAction _
-instance EncodeJson MediumAction where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson MediumAction where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic UserAction _
-instance EncodeJson UserAction where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson UserAction where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic (Tuple2 a b) _
 derive instance Newtype (Tuple2 a b) _
-instance (EncodeJson a, EncodeJson b) => EncodeJson (Tuple2 a b) where encodeJson a = genericEncodeJsonWith enc a
-instance (DecodeJsonField a, DecodeJsonField b) => DecodeJson (Tuple2 a b) where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic (Alt2 a b) _
-instance (EncodeJson a, EncodeJson b) => EncodeJson (Alt2 a b) where encodeJson a = genericEncodeJsonWith enc a
-instance (DecodeJsonField a, DecodeJsonField b) => DecodeJson (Alt2 a b) where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic (Alt3 a b c) _
-instance (EncodeJson a, EncodeJson b, EncodeJson c) => EncodeJson (Alt3 a b c) where encodeJson a = genericEncodeJsonWith enc a
-instance (DecodeJsonField a, DecodeJsonField b, DecodeJsonField c) => DecodeJson (Alt3 a b c) where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic BroadcastMessage _
 derive instance Newtype BroadcastMessage _
-instance EncodeJson BroadcastMessage where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson BroadcastMessage where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic MessagesAction _
-instance EncodeJson MessagesAction where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson MessagesAction where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Request' _
-instance EncodeJson Request' where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Request' where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic ClientRequest _
 derive instance Newtype ClientRequest _
-instance EncodeJson ClientRequest where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson ClientRequest where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Sender _
-instance EncodeJson Sender where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Sender where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic MessageToClient _
 derive instance Newtype MessageToClient _
-instance EncodeJson MessageToClient where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson MessageToClient where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Notification _
-instance EncodeJson Notification where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Notification where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic GroupActionResponse _
-instance EncodeJson GroupActionResponse where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson GroupActionResponse where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic MediumActionResponse _
-instance EncodeJson MediumActionResponse where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson MediumActionResponse where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic UserActionResponse _
-instance EncodeJson UserActionResponse where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson UserActionResponse where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Reason _
-instance EncodeJson Reason where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Reason where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Message' _
 derive instance Newtype Message' _
-instance EncodeJson Message' where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Message' where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Edited _
 derive instance Newtype Edited _
-instance EncodeJson Edited where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Edited where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Response' _
-instance EncodeJson Response' where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Response' where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic ServerResponse _
 derive instance Newtype ServerResponse _
-instance EncodeJson ServerResponse where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson ServerResponse where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Response_ _
-instance EncodeJson Response_ where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Response_ where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Message_ _
-instance EncodeJson Message_ where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Message_ where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Request_ _
-instance EncodeJson Request_ where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Request_ where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic User_ _
-instance EncodeJson User_ where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson User_ where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Group_ _
-instance EncodeJson Group_ where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Group_ where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Channel_ _
-instance EncodeJson Channel_ where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Channel_ where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Medium_ _
-instance EncodeJson Medium_ where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Medium_ where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic UUser_ _
-instance EncodeJson UUser_ where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson UUser_ where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Entity_ _
-instance EncodeJson Entity_ where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Entity_ where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Text_ _
-instance EncodeJson Text_ where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Text_ where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Invitation_ _
-instance EncodeJson Invitation_ where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Invitation_ where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Bio_ _
-instance EncodeJson Bio_ where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Bio_ where decodeJson a = genericDecodeJsonWith enc a
 derive instance Generic Info_ _
-instance EncodeJson Info_ where encodeJson a = genericEncodeJsonWith enc a
-instance DecodeJson Info_ where decodeJson a = genericDecodeJsonWith enc a
-
--- TODO what message data should be stored along its id on the client?
--- sender alias
--- time
--- which message it is a response to
--- how many messages respond this one
-
--- TODO show when a message was received
-
--- Generics tutorial
--- https://harry.garrood.me/blog/write-your-own-generics/
--- we encode from generic repr into target
--- we decode our initial type into generic
-
--- Workflow with generics
--- https://jordanmartinez.github.io/purescript-jordans-reference-site/content/31-Design-Patterns/22-Generics.html
+-- -}
 
 
--- TODO
--- Can we read JSON and convert it into Generic representation?
+class MyJson a where
+  myEncodeJson :: a -> Json
+  myDecodeJson :: Json -> Either JsonDecodeError a
 
--- When converting from Generic into JSON, we need to insert some specific expressions like `(tag)`
--- When converting from JSON into Generic, we need to eliminate them
+newtype MyJ a = MyJ a
 
--- we need then our own `to'` and `from'` functions to operate on 
+instance (Generic a b, EncodeRep b, DecodeRep b) => MyJson a where 
+  myEncodeJson = genericEncodeJsonWith enc
+  myDecodeJson = genericDecodeJsonWith enc
+
+instance (MyJson a) => EncodeJson (MyJ a) where encodeJson (MyJ a) = myEncodeJson a
+instance (MyJson a) => DecodeJson (MyJ a) where 
+  decodeJson j = 
+    case myDecodeJson j of
+      Left err -> Left err
+      Right a -> Right $ MyJ a
+
+pt ∷ String
+pt = stringify $ encodeJson $ MyJ (SAlias {alias : "usr"} :: SAlias Group_)
