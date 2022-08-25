@@ -15,10 +15,9 @@ build-type:     Simple
 
 library
   exposed-modules:
-      Common
-      Message
-      MessageTH
       State
+      TransportTypes
+      TransportTypesTH
   other-modules:
       Paths_backend
   hs-source-dirs:

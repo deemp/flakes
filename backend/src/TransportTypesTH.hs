@@ -1,7 +1,7 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module MessageTH (options) where
+module TransportTypesTH (options) where
 
 import Data.Aeson.TH
   ( Options (..),
