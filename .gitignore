@@ -28,3 +28,4 @@ _default.nix
 _shell.nix
 result
 log
+.psc-ide-port
