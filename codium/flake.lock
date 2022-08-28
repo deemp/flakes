@@ -1,0 +1,130 @@
+{
+  "nodes": {
+    "easy-purescript-nix": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1661176895,
+        "narHash": "sha256-fA0HEajsXLgI+dRJBYysFExELU8o/TgRnrm2UAju6Q0=",
+        "owner": "justinwoo",
+        "repo": "easy-purescript-nix",
+        "rev": "5926981701ac781f08b02e31e4705e46b799299d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "justinwoo",
+        "repo": "easy-purescript-nix",
+        "rev": "5926981701ac781f08b02e31e4705e46b799299d",
+        "type": "github"
+      }
+    },
+    "flake-utils": {
+      "locked": {
+        "lastModified": 1656928814,
+        "narHash": "sha256-RIFfgBuKz6Hp89yRr7+NR5tzIAbn52h8vT6vXkYjZoM=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "7e2a3b3dfd9af950a856d66b0a7d01e3c18aa249",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "7e2a3b3dfd9af950a856d66b0a7d01e3c18aa249",
+        "type": "github"
+      }
+    },
+    "my-vscode-marketplace": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1661643490,
+        "narHash": "sha256-YtHENz656vOF5owUHOeMdGRrLJVYLpeV643hf6ppJQw=",
+        "owner": "br4ch1st0chr0n3",
+        "repo": "nix-vscode-marketplace",
+        "rev": "94fd67826a10bc4d9c27f06b342cf2e17b848841",
+        "type": "github"
+      },
+      "original": {
+        "owner": "br4ch1st0chr0n3",
+        "repo": "nix-vscode-marketplace",
+        "rev": "94fd67826a10bc4d9c27f06b342cf2e17b848841",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1660722407,
+        "narHash": "sha256-ERp5KP2dbnMWNWlVtUm594xernNNvpZx7uKOe2ips7M=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "cd8bbdd4fdb15f7758fd3c8df531e9d42bee239d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "cd8bbdd4fdb15f7758fd3c8df531e9d42bee239d",
+        "type": "github"
+      }
+    },
+    "npmlock2nix_": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1654775747,
+        "narHash": "sha256-9pXHDpIjmsK5390wmpGHu9aA4QOPpegPBvThHeBlef4=",
+        "owner": "nix-community",
+        "repo": "npmlock2nix",
+        "rev": "5c4f247688fc91d665df65f71c81e0726621aaa8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "npmlock2nix",
+        "rev": "5c4f247688fc91d665df65f71c81e0726621aaa8",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "easy-purescript-nix": "easy-purescript-nix",
+        "flake-utils": "flake-utils",
+        "my-vscode-marketplace": "my-vscode-marketplace",
+        "nixpkgs": "nixpkgs",
+        "npmlock2nix_": "npmlock2nix_",
+        "vscode-marketplace": "vscode-marketplace"
+      }
+    },
+    "vscode-marketplace": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1661482953,
+        "narHash": "sha256-eLRiaRHQjHtr/aUu085EODxHfPXlaJS5V7kBiGr7VDo=",
+        "owner": "AmeerTaweel",
+        "repo": "nix-vscode-marketplace",
+        "rev": "499969e5c64daf3d20cb077a6230438d490200c1",
+        "type": "github"
+      },
+      "original": {
+        "owner": "AmeerTaweel",
+        "repo": "nix-vscode-marketplace",
+        "rev": "499969e5c64daf3d20cb077a6230438d490200c1",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
