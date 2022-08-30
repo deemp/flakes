@@ -1,5 +1,6 @@
 {
   # keys are extension IDs (see https://code.visualstudio.com/docs/editor/extension-marketplace)
+  # or pre-defined names (workbench, editor)
   # in case of ID clashes, an extension setting should have a full name
 
   haskell = {
@@ -22,7 +23,6 @@
     "purescript.packagePath" = "./front";
     "purescript.sourcePath" = "./front/src";
     "purescript.formatter" = "purs-tidy";
-    # "editor.defaultFormatter" = "nwolverson.ide-purescript";
   };
 
   vscode-dhall-lsp-server = {
@@ -35,53 +35,5 @@
 
   editor = {
     "editor.formatOnSave" = true;
-  };
-
-  multi-command = {
-    "multiCommand.commands" = [
-      {
-        command = "multiCommand.addTypeHole";
-        sequence = [
-          {
-            args =
-              {
-                snippet = "(\${TM_SELECTED_TEXT} :: ?_)";
-              };
-            command = "editor.action.insertSnippet";
-          }
-          {
-            command = "cursorLeft";
-          }
-        ];
-      }
-      {
-        command = "multiCommand.addTypeHoleAutoSelect";
-        sequence = [
-          {
-            command = "editor.action.addSelectionToNextFindMatch";
-          }
-          {
-            args = {
-              command = "multiCommand.addTypeHole";
-            };
-            command = "extension.multiCommand.execute";
-          }
-        ];
-      }
-      {
-        command = "multiCommand.removeTypeHole";
-        sequence = [
-          {
-            "command" = "extension.selectParenthesisOuter";
-          }
-          {
-            args = {
-              snippet = "\${TM_SELECTED_TEXT/\\((.*) :: \\?_\\)/$1/}";
-            };
-            command = "editor.action.insertSnippet";
-          }
-        ];
-      }
-    ];
   };
 }

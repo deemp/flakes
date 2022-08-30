@@ -17,7 +17,7 @@
       flake = false;
     };
     my-vscode-marketplace = {
-      url = "github:br4ch1st0chr0n3/nix-vscode-marketplace/94fd67826a10bc4d9c27f06b342cf2e17b848841";
+      url = "github:br4ch1st0chr0n3/nix-vscode-marketplace/a582ecb728bf4d49671210d110f1764271467e1c";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
@@ -42,36 +42,52 @@
           my-vscode-extensions = my-vscode-marketplace.packages.${system}.vscode;
         in
         {
-          inherit (open-vsx.nwolverson) ide-purescript language-purescript;
-          inherit (open-vsx.haskell) haskell;
-          inherit (open-vsx.mkhl) direnv;
-          inherit (open-vsx.dhall) dhall-lang vscode-dhall-lsp-server;
-          inherit (open-vsx.usernamehw) errorlens;
-          inherit (open-vsx.github) vscode-pull-request-github;
-          inherit (open-vsx.eamodio) gitlens;
-          inherit (open-vsx.justusadam) language-haskell;
-          inherit (open-vsx.ms-vscode) vscode-typescript-next;
-          inherit (vscode.ryuta46) multi-command;
-          inherit (open-vsx.jnoortheen) nix-ide;
-          inherit (open-vsx.gruntfuggly) todo-tree;
-          inherit (open-vsx.redhat) vscode-yaml;
-          inherit (my-vscode-extensions.ms-vscode-remote) remote-containers;
-          inherit (my-vscode-extensions.visortelle) haskell-spotlight;
-          inherit (my-vscode-extensions.br4ch1st0chr0n3) purs-hotkeys;
+          haskell = {
+            inherit (open-vsx.haskell) haskell;
+            inherit (open-vsx.justusadam) language-haskell;
+            inherit (my-vscode-extensions.visortelle) haskell-spotlight;
+            inherit (open-vsx.redhat) vscode-yaml;
+          };
+          purescript = {
+            inherit (open-vsx.nwolverson) ide-purescript language-purescript;
+            inherit (open-vsx.dhall) dhall-lang vscode-dhall-lsp-server;
+            inherit (my-vscode-extensions.br4ch1st0chr0n3) purs-keybindings;
+          };
+          github = {
+            inherit (open-vsx.github) vscode-pull-request-github;
+            inherit (open-vsx.eamodio) gitlens;
+          };
+          typescript = {
+            inherit (open-vsx.ms-vscode) vscode-typescript-next;
+          };
+          misc = {
+            inherit (open-vsx.usernamehw) errorlens;
+            inherit (open-vsx.gruntfuggly) todo-tree;
+            inherit (my-vscode-extensions.ms-vscode-remote) remote-containers;
+          };
+          nix = {
+            inherit (open-vsx.mkhl) direnv;
+            inherit (open-vsx.jnoortheen) nix-ide;
+          };
         };
 
-      # tools you may need for PureScript development
+      # shell tools for Purescript development
       pursTools =
         let
           easy-ps = import easy-purescript-nix { inherit pkgs; };
         in
         {
           inherit (pkgs) nodejs-16_x dhall-lsp-server;
-          inherit (easy-ps) purs-0_15_4 spago purescript-language-server;
+          inherit (easy-ps) purs-0_15_4 spago purescript-language-server purs-tidy;
         };
 
       nodeTools = {
         npmlock2nix = import npmlock2nix_ { inherit pkgs; };
+      };
+
+      # shell tools for nix development
+      nixTools = {
+        inherit (pkgs) rnix-lsp;
       };
 
       # create a codium with a given set of extensions
@@ -90,7 +106,7 @@
       # settings.todo-tree // settings.purescript
       settings-nix = import ./settings.nix;
 
-      # write project settings into nix/store and create a symlink in the project directory
+      # write project settings.json into nix/store and create a symlink in the project directory
       # set -> IO ()
       writeSettingsJson = settings:
         let
@@ -113,12 +129,14 @@
         };
 
       # convert json to nix
-      # Example: nix develop; json2nix ./settings.json ./settings.nix
+      # no need to provide the full path to a file if it's 
+      # in the current working directory
+      # Example: nix run .#json2nix settings.json settings.nix
       json2nix = pkgs.writeScriptBin "json2nix" ''
         json_path=$1
         nix_path=$2
         pkgs="with import ${nixpkgs} { }"
-        p="$pkgs; with builtins; fromJSON (readFile $json_path)"
+        p="$pkgs; with builtins; fromJSON (readFile ./$json_path)"
         nix-instantiate --eval "$p" -E  > $nix_path
         sed -i -E "s/(\[|\{)/\1\n/g" $nix_path
         nix run ${nixpkgs}#nixpkgs-fmt $nix_path
@@ -126,11 +144,24 @@
     in
     {
       packages = {
-        inherit vscode-extensions pursTools nodeTools
-          mkCodium settings-nix writeSettingsJson json2nix;
+        inherit
+          json2nix
+          mkCodium
+          nixTools
+          nodeTools
+          pursTools
+          settings-nix
+          vscode-extensions
+          writeSettingsJson;
       };
-      devShells.default = pkgs.mkShell {
-        buildInputs = [ json2nix ];
+      devShells = {
+        default = pkgs.mkShell rec {
+          buildInputs = [ json2nix ];
+          shellHook = ''
+            printf "Now you can convert .json to .nix via json2nix. E.g. run:\n"
+            printf "json2nix settings.json settings.nix\n"
+          '';
+        };
       };
     });
 }
