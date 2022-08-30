@@ -136,6 +136,8 @@
       settingsNix = import ./settings.nix;
 
       # write settings.json somewhere into nix/store and create a symlink in .vscode
+      # Example:
+      # buildDependencies: [writeSettingsJson settingsNix]
       writeSettingsJson = settings:
         let
           s = "settings.json";
@@ -176,6 +178,7 @@
       packages = {
         inherit
           allVSCodeExtensions
+          allShellTools
           codium
           json2nix
           mergeValues
