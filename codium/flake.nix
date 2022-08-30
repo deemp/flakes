@@ -7,7 +7,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
-    npmlock2nix_ = {
+    npmlock2nix = {
       url = "github:nix-community/npmlock2nix/5c4f247688fc91d665df65f71c81e0726621aaa8";
       # url = "github:tlxzilia/npmlock2nix/f63dc087b144fb608e99e6239ceb69c68449482b";
       flake = false;
@@ -16,7 +16,14 @@
       url = "github:justinwoo/easy-purescript-nix/5926981701ac781f08b02e31e4705e46b799299d";
       flake = false;
     };
-    my-vscode-marketplace = {
+    haskell-language-server = {
+      url = "github:haskell/haskell-language-server/7760340e999693d07fdbea49c9e20a3dd5458ad3";
+      inputs.poetry2nix.inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
+    };
+    nix-vsode-marketplace = {
       url = "github:br4ch1st0chr0n3/nix-vscode-marketplace/a582ecb728bf4d49671210d110f1764271467e1c";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
@@ -28,18 +35,19 @@
     , nixpkgs
     , vscode-marketplace
     , easy-purescript-nix
-    , npmlock2nix_
-    , my-vscode-marketplace
+    , npmlock2nix
+    , nix-vsode-marketplace
+    , haskell-language-server
     }: flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
 
       # A set of VS Code extensions
       # Biased towards FP languages
-      vscode-extensions =
+      vscodeExtensions =
         let
           inherit (vscode-marketplace.packages.${system}) vscode open-vsx;
-          my-vscode-extensions = my-vscode-marketplace.packages.${system}.vscode;
+          my-vscode-extensions = nix-vsode-marketplace.packages.${system}.vscode;
         in
         {
           haskell = {
@@ -77,34 +85,38 @@
       # mergeValues {a = {b = 1;}; c = {d = 1;};} => {b = 1; d = 1;}
       # or
       # mergeValues ({inherit (vscode-extensions) haskell purescript;})
-      mergeValues = set@{...}: builtins.foldl' pkgs.lib.mergeAttrs {} (builtins.attrValues set);
-    
+      mergeValues = set@{ ... }:
+        builtins.foldl' pkgs.lib.mergeAttrs { } (builtins.attrValues set);
+
       # a set of all extensions
-      all-extensions = mergeValues vscode-extensions;
+      allExtensions = mergeValues vscodeExtensions;
 
-      # shell tools for Purescript development
-      pursTools =
-        let
-          easy-ps = import easy-purescript-nix { inherit pkgs; };
-        in
-        {
-          inherit (pkgs) nodejs-16_x dhall-lsp-server;
-          inherit (easy-ps) purs-0_15_4 spago purescript-language-server purs-tidy;
+      # shell tools for development
+      # mergeValues { inherit (settings) todo-tree purescript; }
+      shellTools = {
+        purescript =
+          let
+            easy-ps = import easy-purescript-nix { inherit pkgs; };
+          in
+          {
+            inherit (pkgs) dhall-lsp-server;
+            inherit (easy-ps) purs-0_15_4 spago purescript-language-server purs-tidy;
+          };
+        node = {
+          inherit (pkgs) nodejs-16_x;
+          npmlock2nix = import npmlock2nix { inherit pkgs; };
         };
-
-      nodeTools = {
-        npmlock2nix = import npmlock2nix_ { inherit pkgs; };
-      };
-
-      # shell tools for nix development
-      nixTools = {
-        inherit (pkgs) rnix-lsp;
+        nix = {
+          inherit (pkgs) rnix-lsp;
+        };
+        haskell = {
+          inherit haskell-language-server;
+        };
       };
 
       # create a codium with a given set of extensions
-      # the structure of extensions should be similar to `vscode-extensions` 
-      # E.g.: mkCodium {inherit (vscode-extensions) haskell purescript;}
-      mkCodium = extensions@{...}:
+      # mkCodium {inherit (vscode-extensions) haskell purescript;}
+      mkCodium = extensions@{ ... }:
         let
           inherit (pkgs) vscode-with-extensions vscodium;
         in
@@ -114,18 +126,16 @@
         });
 
 
-      # a set of settings for settings.json
-      # pre-defined settings can be combined as follows
-      # settings.todo-tree // settings.purescript
-      settings-nix = import ./settings.nix;
+      # nixified settings.json
+      # mergeValues { inherit (settings) todo-tree purescript; }
+      settingsNix = import ./settings.nix;
 
-      # write project settings.json into nix/store and create a symlink in the project directory
-      # set -> IO ()
+      # write settings.json somewhere into nix/store and create a symlink in .vscode
       writeSettingsJson = settings:
         let
           s = "settings.json";
           settingsJson = builtins.toJSON settings;
-          write-settings = pkgs.mkShell {
+          writeSettings = pkgs.mkShell {
             buildInputs = [ pkgs.python38 ];
             buildPhase = ''
               mkdir -p $out
@@ -134,16 +144,15 @@
           };
         in
         pkgs.mkShell {
-          buildInputs = [ write-settings ];
+          buildInputs = [ writeSettings ];
           shellHook = ''
             mkdir -p .vscode
-            ln -sf ${write-settings}/${s} .vscode/${s}
+            ln -sf ${writeSettings}/${s} .vscode/${s}
           '';
         };
 
       # convert json to nix
-      # no need to provide the full path to a file if it's 
-      # in the current working directory
+      # no need to provide the full path to a file if it's in the cwd
       # Example: nix run .#json2nix settings.json settings.nix
       json2nix = pkgs.writeScriptBin "json2nix" ''
         json_path=$1
@@ -158,16 +167,15 @@
     {
       packages = {
         inherit
-          all-extensions
+          allExtensions
           json2nix
           mergeValues
           mkCodium
-          nixTools
-          nodeTools
-          pursTools
-          settings-nix
-          vscode-extensions
-          writeSettingsJson;
+          shellTools
+          settingsNix
+          vscodeExtensions
+          writeSettingsJson
+          ;
       };
       devShells = {
         default = pkgs.mkShell rec {
