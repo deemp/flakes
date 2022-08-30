@@ -77,16 +77,18 @@
         };
 
       # if a set's attribute values are all sets, merge these values
+      # Examples:
       # mergeValues {a = {b = 1;}; c = {d = 1;};} => {b = 1; d = 1;}
-      # or
       # mergeValues ({inherit (vscode-extensions) haskell purescript;})
       mergeValues = set@{ ... }:
         builtins.foldl' pkgs.lib.mergeAttrs { } (builtins.attrValues set);
+      # builtins.foldl' (x: y: x // y) { } (builtins.attrValues set);
 
       # a set of all extensions
-      allExtensions = mergeValues vscodeExtensions;
+      allVSCodeExtensions = mergeValues vscodeExtensions;
 
       # shell tools for development
+      # Example
       # mergeValues { inherit (settings) todo-tree purescript; }
       shellTools = {
         purescript =
@@ -101,7 +103,7 @@
           inherit (pkgs) nodejs-16_x;
         };
         nix = {
-          inherit (pkgs) rnix-lsp;
+          inherit (pkgs) rnix-lsp nixpkgs-fmt;
           inherit json2nix;
         };
         haskell = {
@@ -112,7 +114,11 @@
         };
       };
 
+      # a set of all shell tools
+      allShellTools = mergeValues shellTools;
+
       # create a codium with a given set of extensions
+      # Example:
       # mkCodium {inherit (vscode-extensions) haskell purescript;}
       mkCodium = extensions@{ ... }:
         let
@@ -125,6 +131,7 @@
 
 
       # nixified settings.json
+      # Example:
       # mergeValues { inherit (settings) todo-tree purescript; }
       settingsNix = import ./settings.nix;
 
@@ -151,7 +158,8 @@
 
       # convert json to nix
       # no need to provide the full path to a file if it's in the cwd
-      # Example: nix run .#json2nix settings.json settings.nix
+      # Example: 
+      # nix run .#json2nix settings.json settings.nix
       json2nix = pkgs.writeScriptBin "json2nix" ''
         json_path=$1
         nix_path=$2
@@ -161,11 +169,14 @@
         sed -i -E "s/(\[|\{)/\1\n/g" $nix_path
         nix run ${nixpkgs}#nixpkgs-fmt $nix_path
       '';
+
+      codium = mkCodium vscodeExtensions;
     in
     {
       packages = {
         inherit
-          allExtensions
+          allVSCodeExtensions
+          codium
           json2nix
           mergeValues
           mkCodium
@@ -177,7 +188,8 @@
       };
       devShells = {
         default = pkgs.mkShell rec {
-          buildInputs = builtins.attrValues (mergeValues shellTools);
+          buildInputs = (builtins.attrValues (mergeValues shellTools)) ++ [ codium ]
+          ;
         };
       };
     });
