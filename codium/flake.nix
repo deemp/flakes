@@ -53,6 +53,10 @@
             inherit (open-vsx.dhall) dhall-lang vscode-dhall-lsp-server;
             inherit (my-vscode-extensions.br4ch1st0chr0n3) purs-keybindings;
           };
+          nix = {
+            inherit (open-vsx.mkhl) direnv;
+            inherit (open-vsx.jnoortheen) nix-ide;
+          };
           github = {
             inherit (open-vsx.github) vscode-pull-request-github;
             inherit (open-vsx.eamodio) gitlens;
@@ -63,13 +67,20 @@
           misc = {
             inherit (open-vsx.usernamehw) errorlens;
             inherit (open-vsx.gruntfuggly) todo-tree;
+          };
+          docker = {
             inherit (my-vscode-extensions.ms-vscode-remote) remote-containers;
           };
-          nix = {
-            inherit (open-vsx.mkhl) direnv;
-            inherit (open-vsx.jnoortheen) nix-ide;
-          };
         };
+
+      # if a set's attribute values are all sets, merge these values
+      # mergeValues {a = {b = 1;}; c = {d = 1;};} => {b = 1; d = 1;}
+      # or
+      # mergeValues ({inherit (vscode-extensions) haskell purescript;})
+      mergeValues = set@{...}: builtins.foldl' pkgs.lib.mergeAttrs {} (builtins.attrValues set);
+    
+      # a set of all extensions
+      all-extensions = mergeValues vscode-extensions;
 
       # shell tools for Purescript development
       pursTools =
@@ -91,13 +102,15 @@
       };
 
       # create a codium with a given set of extensions
-      mkCodium =
+      # the structure of extensions should be similar to `vscode-extensions` 
+      # E.g.: mkCodium {inherit (vscode-extensions) haskell purescript;}
+      mkCodium = extensions@{...}:
         let
           inherit (pkgs) vscode-with-extensions vscodium;
         in
-        attrSet: (vscode-with-extensions.override {
+        (vscode-with-extensions.override {
           vscode = vscodium;
-          vscodeExtensions = builtins.attrValues attrSet;
+          vscodeExtensions = builtins.attrValues (mergeValues extensions);
         });
 
 
@@ -145,7 +158,9 @@
     {
       packages = {
         inherit
+          all-extensions
           json2nix
+          mergeValues
           mkCodium
           nixTools
           nodeTools
