@@ -7,11 +7,6 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
-    npmlock2nix = {
-      url = "github:nix-community/npmlock2nix/5c4f247688fc91d665df65f71c81e0726621aaa8";
-      # url = "github:tlxzilia/npmlock2nix/f63dc087b144fb608e99e6239ceb69c68449482b";
-      flake = false;
-    };
     easy-purescript-nix = {
       url = "github:justinwoo/easy-purescript-nix/5926981701ac781f08b02e31e4705e46b799299d";
       flake = false;
@@ -35,10 +30,10 @@
     , nixpkgs
     , vscode-marketplace
     , easy-purescript-nix
-    , npmlock2nix
     , nix-vsode-marketplace
     , haskell-language-server
-    }: flake-utils.lib.eachDefaultSystem (system:
+    }:
+    flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
 
@@ -104,13 +99,16 @@
           };
         node = {
           inherit (pkgs) nodejs-16_x;
-          npmlock2nix = import npmlock2nix { inherit pkgs; };
         };
         nix = {
           inherit (pkgs) rnix-lsp;
+          inherit json2nix;
         };
         haskell = {
-          inherit haskell-language-server;
+          inherit (haskell-language-server.packages.${system})
+            haskell-language-server-902
+            # haskell-language-server-924
+            ;
         };
       };
 
@@ -179,12 +177,17 @@
       };
       devShells = {
         default = pkgs.mkShell rec {
-          buildInputs = [ json2nix ];
-          shellHook = ''
-            printf "Now you can convert .json to .nix via json2nix. E.g. run:\n"
-            printf "json2nix settings.json settings.nix\n"
-          '';
+          buildInputs = builtins.attrValues (mergeValues shellTools);
         };
       };
     });
+
+  nixConfig = {
+    extra-substituters = [
+      "https://haskell-language-server.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "haskell-language-server.cachix.org-1:juFfHrwkOxqIOZShtC4YC1uT1bBcq2RSvC7OMKx0Nz8="
+    ];
+  };
 }

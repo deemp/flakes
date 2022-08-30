@@ -393,23 +393,6 @@
         "type": "github"
       }
     },
-    "npmlock2nix": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1654775747,
-        "narHash": "sha256-9pXHDpIjmsK5390wmpGHu9aA4QOPpegPBvThHeBlef4=",
-        "owner": "nix-community",
-        "repo": "npmlock2nix",
-        "rev": "5c4f247688fc91d665df65f71c81e0726621aaa8",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "npmlock2nix",
-        "rev": "5c4f247688fc91d665df65f71c81e0726621aaa8",
-        "type": "github"
-      }
-    },
     "poetry2nix": {
       "inputs": {
         "flake-utils": "flake-utils_3",
@@ -461,7 +444,6 @@
         "haskell-language-server": "haskell-language-server",
         "nix-vsode-marketplace": "nix-vsode-marketplace",
         "nixpkgs": "nixpkgs_3",
-        "npmlock2nix": "npmlock2nix",
         "vscode-marketplace": "vscode-marketplace"
       }
     },
