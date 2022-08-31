@@ -110,7 +110,6 @@
         haskell = {
           inherit (pkgs.haskellPackages)
             # formatters
-            fourmolu_0_8_0_0
             ormolu
             floskell
             brittany
@@ -127,9 +126,27 @@
             hkgr_0_4_2
             # Easy dependency management for Nix projects.
             niv
+            # The Haskell Tool Stack
+            stack
             ;
         };
       };
+
+      haskell-tools-versions =
+        let
+          versions = [ "902" "924" ];
+          select-haskell-tools = version:
+            let
+              hpkgs = pkgs.haskell.packages."ghc${version}";
+            in
+            {
+              inherit (hpkgs) ghc;
+              "haskell-language-server-${version}" =
+                (haskell-language-server.packages.${system})."haskell-language-server-${version}"
+              ;
+            };
+        in
+        builtins.foldl' (x: y: x // ({ ${y} = select-haskell-tools y; })) { } versions;
 
       # a set of all shell tools
       allShellTools = mergeValues shellTools;
@@ -181,7 +198,7 @@
       # nix run .#json2nix settings.json settings.nix
       json2nix = pkgs.writeScriptBin "json2nix" ''
         json_path=$1
-        nix_path=$2
+        nix_path=$2selectHaskellT
         pkgs="with import ${nixpkgs} { }"
         p="$pkgs; with builtins; fromJSON (readFile ./$json_path)"
         nix-instantiate --eval "$p" -E  > $nix_path
@@ -204,11 +221,17 @@
           settingsNix
           vscodeExtensions
           writeSettingsJson
+          haskell-tools-versions
           ;
       };
       devShells = {
         default = pkgs.mkShell {
-          buildInputs = (builtins.attrValues (mergeValues shellTools)) ++ [ codium ];
+          name = "codium-default";
+          buildInputs =
+            (builtins.attrValues (mergeValues shellTools)) ++
+            [ codium ] ++
+            (builtins.attrValues haskell-tools-versions."902")
+          ;
         };
         writeSettings = writeSettingsJson settingsNix;
       };
