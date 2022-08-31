@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/cd8bbdd4fdb15f7758fd3c8df531e9d42bee239d";
+    nixpkgs.url = "github:NixOS/nixpkgs/0e304ff0d9db453a4b230e9386418fd974d5804a";
     flake-utils.url = "github:numtide/flake-utils/7e2a3b3dfd9af950a856d66b0a7d01e3c18aa249";
     vscode-marketplace = {
       url = "github:AmeerTaweel/nix-vscode-marketplace/499969e5c64daf3d20cb077a6230438d490200c1";
@@ -74,6 +74,7 @@
             inherit (open-vsx.gruntfuggly) todo-tree;
           };
           docker = {
+            # TODO update VS Code to 1.71.0
             inherit (my-vscode-extensions.ms-vscode-remote) remote-containers;
           };
         };
@@ -228,7 +229,7 @@
       };
       devShells = {
         default = pkgs.mkShell {
-          name = "codium-default";
+          name = "codium";
           buildInputs =
             (builtins.attrValues (mergeValues shellTools)) ++
             [ codium ] ++
