@@ -91,6 +91,9 @@
       # settingsNix.haskell // settingsNix.purescript
       settingsNix = import ./settings.nix;
 
+      # a convenience function that flattens
+      toList = x: builtins.attrValues (mergeValues x);
+
       # shell tools for development
       # Example
       # mergeValues { inherit (settings) todo-tree purescript; }
@@ -135,6 +138,7 @@
         };
       };
 
+      # tools for specific versions of ghc
       haskell-tools-versions =
         let
           versions = [ "902" "924" ];
@@ -164,7 +168,7 @@
         in
         (vscode-with-extensions.override {
           vscode = vscodium;
-          vscodeExtensions = builtins.attrValues (mergeValues extensions);
+          vscodeExtensions = toList extensions;
         });
 
       # write settings.json somewhere into nix/store and create a symlink in .vscode
@@ -225,13 +229,14 @@
           vscodeExtensions
           writeSettingsJson
           haskell-tools-versions
+          toList
           ;
       };
       devShells = {
         default = pkgs.mkShell {
           name = "codium";
           buildInputs =
-            (builtins.attrValues (mergeValues shellTools)) ++
+            (toList shellTools) ++
             [ codium ] ++
             (builtins.attrValues haskell-tools-versions."902")
           ;
