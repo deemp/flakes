@@ -3,9 +3,10 @@
   # or pre-defined names (workbench, editor)
   # in case of ID clashes, an extension setting should have a full name
 
-  
+
   haskell = {
     "haskell.serverExecutablePath" = "haskell-language-server";
+    "haskell.manageHLS" = "PATH";
   };
 
   todo-tree = {
@@ -17,6 +18,7 @@
       "**/.spago/**" = true;
     };
     "files.refactoring.autoSave" = true;
+    "files.autoSave" = "afterDelay";
   };
 
   ide-purescript = {
@@ -36,5 +38,20 @@
 
   editor = {
     "editor.formatOnSave" = true;
+  };
+
+  gitlens = {
+    "gitlens.currentLine.enabled" = false;
+    "gitlens.hovers.currentLine.over" = "line";
+    "gitlens.codeLens.enabled" = false;
+    "gitlens.statusBar.enabled" = false;
+  };
+
+  git = {
+    "git.autofetch" = true;
+  };
+
+  window = {
+    "window.zoomLevel" = 1;
   };
 }
