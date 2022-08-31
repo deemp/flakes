@@ -87,6 +87,11 @@
       # a set of all extensions
       allVSCodeExtensions = mergeValues vscodeExtensions;
 
+      # nixified and restructured settings.json
+      # one can combine the settings as follows:
+      # settingsNix.haskell // settingsNix.purescript
+      settingsNix = import ./settings.nix;
+
       # shell tools for development
       # Example
       # mergeValues { inherit (settings) todo-tree purescript; }
@@ -129,34 +134,33 @@
           vscodeExtensions = builtins.attrValues (mergeValues extensions);
         });
 
-
-      # nixified settings.json
-      # Example:
-      # mergeValues { inherit (settings) todo-tree purescript; }
-      settingsNix = import ./settings.nix;
-
       # write settings.json somewhere into nix/store and create a symlink in .vscode
       # Example:
-      # buildDependencies: [writeSettingsJson settingsNix]
+      # see devShells.writeSettings
       writeSettingsJson = settings:
         let
           s = "settings.json";
-          settingsJson = builtins.toJSON settings;
+          settingsJson = builtins.toJSON (mergeValues settings);
+
           writeSettings = pkgs.mkShell {
+            name = "write-to-store";
             buildInputs = [ pkgs.python38 ];
             buildPhase = ''
               mkdir -p $out
+              ls $out
               printf "%s" '${settingsJson}' | python -m json.tool > $out/${s}
             '';
           };
         in
         pkgs.mkShell {
-          buildInputs = [ writeSettings ];
+          name = "write-to-project";
           shellHook = ''
             mkdir -p .vscode
-            ln -sf ${writeSettings}/${s} .vscode/${s}
+            ls ${writeSettings.out}
+            ln -sf ${writeSettings.out}/${s} .vscode/${s}
           '';
         };
+
 
       # convert json to nix
       # no need to provide the full path to a file if it's in the cwd
@@ -190,10 +194,10 @@
           ;
       };
       devShells = {
-        default = pkgs.mkShell rec {
-          buildInputs = (builtins.attrValues (mergeValues shellTools)) ++ [ codium ]
-          ;
+        default = pkgs.mkShell {
+          buildInputs = (builtins.attrValues (mergeValues shellTools)) ++ [ codium ];
         };
+        writeSettings = writeSettingsJson settingsNix;
       };
     });
 

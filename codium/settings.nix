@@ -3,6 +3,7 @@
   # or pre-defined names (workbench, editor)
   # in case of ID clashes, an extension setting should have a full name
 
+  
   haskell = {
     "haskell.serverExecutablePath" = "haskell-language-server";
   };
