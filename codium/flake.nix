@@ -214,7 +214,7 @@
       '';
 
       # codium with all extensions enabled
-      codium = mkCodium vscodeExtensions;
+      codium = [(mkCodium vscodeExtensions) pkgs.bashInteractive];
     in
     {
       packages = {
@@ -237,7 +237,7 @@
           name = "codium";
           buildInputs =
             (toList shellTools) ++
-            [ (pkgs.bashInteractive) codium ] ++
+            [ codium ] ++
             (builtins.attrValues haskellTools."902")
           ;
         };
