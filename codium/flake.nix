@@ -237,7 +237,7 @@
           name = "codium";
           buildInputs =
             (toList shellTools) ++
-            [ codium ] ++
+            [ (pkgs.bashInteractive) codium ] ++
             (builtins.attrValues haskellTools."902")
           ;
         };
