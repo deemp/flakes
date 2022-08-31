@@ -19,7 +19,7 @@
       };
     };
     nix-vsode-marketplace = {
-      url = "github:br4ch1st0chr0n3/nix-vscode-marketplace/a582ecb728bf4d49671210d110f1764271467e1c";
+      url = "github:br4ch1st0chr0n3/nix-vscode-marketplace/d567fba043784bb456407f60c21230ea4d82253f";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
@@ -55,6 +55,8 @@
             inherit (open-vsx.nwolverson) ide-purescript language-purescript;
             inherit (open-vsx.dhall) dhall-lang vscode-dhall-lsp-server;
             inherit (my-vscode-extensions.br4ch1st0chr0n3) purs-keybindings;
+            inherit (my-vscode-extensions.ryuta46) multi-command;
+            inherit (my-vscode-extensions.chunsen) bracket-select;
           };
           nix = {
             inherit (open-vsx.mkhl) direnv;
