@@ -82,10 +82,6 @@
       # mergeValues ({inherit (vscode-extensions) haskell purescript;})
       mergeValues = set@{ ... }:
         builtins.foldl' pkgs.lib.mergeAttrs { } (builtins.attrValues set);
-      # builtins.foldl' (x: y: x // y) { } (builtins.attrValues set);
-
-      # a set of all extensions
-      allVSCodeExtensions = mergeValues vscodeExtensions;
 
       # nixified and restructured settings.json
       # one can combine the settings as follows:
@@ -112,9 +108,25 @@
           inherit json2nix;
         };
         haskell = {
-          inherit (haskell-language-server.packages.${system})
-            haskell-language-server-902
-            # haskell-language-server-924
+          inherit (pkgs.haskellPackages)
+            # formatters
+            fourmolu_0_8_0_0
+            ormolu
+            floskell
+            brittany
+            stylish-haskell
+            # Lookup Haskell documentation
+            hoogle
+            # auto generate LSP hie.yaml file from cabal
+            implicit-hie
+            # Automatically discover and run Hspec tests
+            hspec-discover_2_10_0_1
+            # Automation of Haskell package release process.
+            releaser
+            # Simple Hackage release workflow for package maintainers
+            hkgr_0_4_2
+            # Easy dependency management for Nix projects.
+            niv
             ;
         };
       };
@@ -123,8 +135,9 @@
       allShellTools = mergeValues shellTools;
 
       # create a codium with a given set of extensions
-      # Example:
+      # Examples:
       # mkCodium {inherit (vscode-extensions) haskell purescript;}
+      # mkCodium {inherit allVSCodeExtensions}
       mkCodium = extensions@{ ... }:
         let
           inherit (pkgs) vscode-with-extensions vscodium;
@@ -176,12 +189,12 @@
         nix run ${nixpkgs}#nixpkgs-fmt $nix_path
       '';
 
+      # codium with all extensions enabled
       codium = mkCodium vscodeExtensions;
     in
     {
       packages = {
         inherit
-          allVSCodeExtensions
           allShellTools
           codium
           json2nix
