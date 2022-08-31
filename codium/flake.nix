@@ -139,7 +139,7 @@
       };
 
       # tools for specific versions of ghc
-      haskell-tools-versions =
+      haskellTools =
         let
           versions = [ "902" "924" ];
           select-haskell-tools = version:
@@ -228,7 +228,7 @@
           settingsNix
           vscodeExtensions
           writeSettingsJson
-          haskell-tools-versions
+          haskellTools
           toList
           ;
       };
@@ -238,7 +238,7 @@
           buildInputs =
             (toList shellTools) ++
             [ codium ] ++
-            (builtins.attrValues haskell-tools-versions."902")
+            (builtins.attrValues haskellTools."902")
           ;
         };
         writeSettings = writeSettingsJson settingsNix;
