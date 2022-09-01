@@ -17,7 +17,6 @@
     flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-
       inherit (my-codium.packages.${system})
         writeSettingsJson
         settingsNix
@@ -45,9 +44,15 @@
             "
         '';
       };
-      python3 = pkgs.python3.withPackages (p: with p; [ pyyaml ]);
+      python3 = pkgs.python3.withPackages (p: with p; [
+        pyyaml
+        # pip
+        (pkgs.python310Packages.pip)
+        # mypy
+        # (pkgs.python310Packages.types-pyyaml)
+      ]);
       addProblem = pkgs.writeScriptBin "problem" ''
-        ${python3}/bin/python -c """from scripts import problem; problem('$1', '$2')"""
+        ${python3}/bin/python -c """from scripts.scripts import problem; problem('$1', '$2')"""
       '';
     in
     {
@@ -64,17 +69,28 @@
                 json2nix
                 python3
                 addProblem
-                (pkgs.rustup)
               ]
             ;
           };
           writeSettings = writeSettingsJson (
             settingsNix // {
-              python = { "python.defaultInterpreterPath" = "${python3}/bin/python"; };
+              python = {
+                "python.defaultInterpreterPath" = "${python3}/bin/python";
+                "python.linting.mypyCategorySeverity.error" = "Hint";
+                "python.linting.mypyEnabled" = true;
+              };
               window = { "window.zoomLevel" = 0.3; };
             }
           );
-          # inherit addProblem;
         };
     });
+
+  nixConfig = {
+    extra-substituters = [
+      "https://nix-community.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+    ];
+  };
 }
