@@ -134,6 +134,8 @@
             niv
             # The Haskell Tool Stack
             stack
+            # GHCi based bare bones IDE
+            ghcid
             ;
         };
       };
