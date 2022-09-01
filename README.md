@@ -1,6 +1,6 @@
 # Codium for Haskell
 
-This is a Nix flake for Haskell development or problem-solving. It can be used for OJ, e.g., ACPOJ (hosted by @ParfenovIgor).
+This is a Nix flake for Haskell development or problem-solving. It can be used for OJ, e.g., ACPOJ (hosted by [@ParfenovIgor](https://github.com/ParfenovIgor)).
 
 It contains:
 - Codium with all necessary extensions for Haskell and Nix
