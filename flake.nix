@@ -45,6 +45,10 @@
             "
         '';
       };
+      python3 = pkgs.python3.withPackages (p: with p; [ pyyaml ]);
+      addProblem = pkgs.writeScriptBin "problem" ''
+        ${python3}/bin/python -c """from scripts import problem; problem('$1', '$2')"""
+      '';
     in
     {
       devShells =
@@ -58,10 +62,19 @@
                 (builtins.attrValues haskellTools."902")
                 stack-wrapped
                 json2nix
+                python3
+                addProblem
+                (pkgs.rustup)
               ]
             ;
           };
-          writeSettings = writeSettingsJson (settingsNix);
+          writeSettings = writeSettingsJson (
+            settingsNix // {
+              python = { "python.defaultInterpreterPath" = "${python3}/bin/python"; };
+              window = { "window.zoomLevel" = 0.3; };
+            }
+          );
+          # inherit addProblem;
         };
     });
 }

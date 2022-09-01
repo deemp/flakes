@@ -6,7 +6,6 @@ cabal-version: 1.12
 
 name:           acpoj
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/acpoj#readme>
 homepage:       https://github.com/githubuser/acpoj#readme
 bug-reports:    https://github.com/githubuser/acpoj/issues
 author:         Author name here
@@ -15,47 +14,16 @@ copyright:      2022 Author name here
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
-extra-source-files:
-    README.md
-    CHANGELOG.md
 
 source-repository head
   type: git
   location: https://github.com/githubuser/acpoj
 
-library
-  exposed-modules:
-      Lib
+executable A-exe
+  main-is: ./contest/A.hs
   other-modules:
       Paths_acpoj
-  hs-source-dirs:
-      src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
-  default-language: Haskell2010
-
-executable acpoj-exe
-  main-is: Main.hs
-  other-modules:
-      Paths_acpoj
-  hs-source-dirs:
-      app
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      acpoj
-    , base >=4.7 && <5
-  default-language: Haskell2010
-
-test-suite acpoj-test
-  type: exitcode-stdio-1.0
-  main-is: Spec.hs
-  other-modules:
-      Paths_acpoj
-  hs-source-dirs:
-      test
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
-  build-depends:
-      acpoj
-    , base >=4.7 && <5
   default-language: Haskell2010

@@ -1,2 +1,4 @@
 .stack-work/
 *~
+.direnv
+__pycache__
