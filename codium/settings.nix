@@ -41,9 +41,13 @@
   };
 
   gitlens = {
-    "gitlens.currentLine.enabled" = false;
-    "gitlens.hovers.currentLine.over" = "line";
+    "gitlens.codeLens.authors.enabled" = false;
     "gitlens.codeLens.enabled" = false;
+    "gitlens.codeLens.recentChange.enabled" = false;
+    "gitlens.currentLine.enabled" = false;
+    "gitlens.currentLine.pullRequests.enabled" = false;
+    "gitlens.hovers.currentLine.over" = "line";
+    "gitlens.hovers.enabled" = false;
     "gitlens.statusBar.enabled" = false;
   };
 
