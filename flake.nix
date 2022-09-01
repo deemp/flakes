@@ -3,7 +3,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/0e304ff0d9db453a4b230e9386418fd974d5804a";
     flake-utils.url = "github:numtide/flake-utils";
     my-codium = {
-      url = "github:br4ch1st0chr0n3/flakes?dir=codium&rev=cd6e1ce937177cb9d8229919a0fe8eac841cfac9";
+      url = "github:br4ch1st0chr0n3/flakes?dir=codium&rev=281792cdafcf6c4322a1ed244ee24a319eab90d7";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
@@ -46,10 +46,7 @@
       };
       python3 = pkgs.python3.withPackages (p: with p; [
         pyyaml
-        # pip
         (pkgs.python310Packages.pip)
-        # mypy
-        # (pkgs.python310Packages.types-pyyaml)
       ]);
       addProblem = pkgs.writeScriptBin "problem" ''
         ${python3}/bin/python -c """from scripts.scripts import problem; problem('$1', '$2')"""
@@ -76,8 +73,6 @@
             settingsNix // {
               python = {
                 "python.defaultInterpreterPath" = "${python3}/bin/python";
-                "python.linting.mypyCategorySeverity.error" = "Hint";
-                "python.linting.mypyEnabled" = true;
               };
               window = { "window.zoomLevel" = 0.3; };
             }
