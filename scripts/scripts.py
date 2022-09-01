@@ -5,10 +5,32 @@ import os
 # write a template into several files
 contest = "contest"
 
-template = (
-  'main :: IO ()\n'
-  'main = print "hello, world!"'
-)
+template ='''
+module Main(main, readInts, readString, toDoubles, toDouble, ceil, floor) where
+import Data.Functor ((<&>))
+import GHC.Float.RealFracMethods (ceilingDoubleInt, floorDoubleInt)
+import Prelude hiding (floor)
+
+readInts :: IO [Int]
+readInts = getLine <&> words <&> fmap read
+
+readString :: IO String
+readString = getLine
+
+toDoubles :: (Functor f, Integral a) => f a -> f Double
+toDoubles xs = (\\x -> fromIntegral x :: Double) <$> xs
+
+toDouble :: (Integral a) => a -> Double
+toDouble = fromIntegral
+
+ceil :: Double -> Int
+ceil = ceilingDoubleInt
+
+floor :: Double -> Int
+floor = floorDoubleInt
+
+main :: IO ()
+main = print "hello, world!"'''
 
 def write_templates():
   os.makedirs(path = contest, exist_ok=True)
@@ -163,22 +185,23 @@ def handle_hie_yaml(name: str, src: str, command: Command) -> Unit | Failure:
   return unit
     
 
-def problem(mode: str, name: str):
+def problem(mode: str, name: str) -> Unit | Failure:
   
   command: Command | Failure = handle_command(mode=mode)
   
   match command:
-    case Unsupported() | Failure(): return
+    case Unsupported() | Failure(): return fail
+  
+  match write_template(name, command):
+    case Failure(): return fail
   
   src = f'./{contest}/{name}.hs'
   
   match handle_package_yaml(name, src, command):
-    case Failure():
-      return
+    case Failure(): return fail
   
   match handle_hie_yaml(name, src, command):
-    case Failure():
-      return
+    case Failure(): return fail
   
   # print(json.dumps(t, indent=4))
   match command:
@@ -186,3 +209,5 @@ def problem(mode: str, name: str):
       print(f"Added problem {name} as {src}")
     case Rm():
       print(f"Removed problem {name} ({src})")
+  
+  return unit
