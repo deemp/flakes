@@ -8,14 +8,33 @@ on:
   pull_request:
   push:
 
+# It'd be nice to support these platforms:
+# x86_64-darwin
+# aarch64-darwin
+# aarch64-linux
+# i686-linux
+# x86_64-linux
+
+# GitHub only supports these:
+# https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
+# x86_64-linux
+# x86_64-darwin
+
+# With an extension, we can add
+# aarch64-linux
+
 jobs:
   cache:
+    name: Build on ${{ matrix.distro }} ${{ matrix.arch }}
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
         cache: ["br4ch1st0chr0n3-flakes"]
-    runs-on: ${{ matrix.os }}
-    steps:
+        include:
+          # aarch64-linux
+          - arch: aarch64
+            distro: ubuntu20.04
+    steps: &steps
       - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v17
         with:
@@ -46,3 +65,12 @@ jobs:
           cd codium
           nix develop --profile dev-profile
           cachix push ${{ matrix.cache }} dev-profile
+  
+  cache-supported:
+    name: Build on ${{ matrix.arch }}-${{ matrix.distro }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, macos-11]
+        cache: ["br4ch1st0chr0n3-flakes"]
+    runs-on: ${{ matrix.os }}
+    steps: *steps
