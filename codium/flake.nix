@@ -184,7 +184,7 @@
         # nix run .#json2nix settings.json settings.nix
         json2nix = pkgs.writeScriptBin "json2nix" ''
           json_path=$1
-          nix_path=$2selectHaskellT
+          nix_path=$2
           pkgs="with import ${nixpkgs} { }"
           p="$pkgs; with builtins; fromJSON (readFile ./$json_path)"
           nix-instantiate --eval "$p" -E  > $nix_path
@@ -211,8 +211,10 @@
         devShells = {
           default = pkgs.mkShell {
             name = "codium";
-            buildInputs = (toList shellTools) ++ [ codium ]
-            ;
+            buildInputs = pkgs.lib.lists.flatten [
+              (toList shellTools)
+              codium
+            ];
           };
           writeSettings = writeSettingsJson settingsNix;
         };
