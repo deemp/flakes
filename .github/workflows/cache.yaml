@@ -23,7 +23,12 @@ on:
 
 jobs:
   cache:
-    name: Build on ${{ matrix.os }}
+
+    # environment variables
+    # https://docs.github.com/en/actions/learn-github-actions/environment-variables
+    # you can get runner.arch == ARM if you use a self-hosted runner
+    # https://docs.github.com/en/actions/learn-github-actions/contexts#example-contents-of-the-runner-context
+    name: Build on ${{ runner.os }} - ${{ runner.arch }}
     strategy:
       matrix:
         os: [ubuntu-20.04, ubuntu-22.04, macos-11, macos-12]
@@ -35,9 +40,6 @@ jobs:
         with:
           # about GITHUB_TOKEN
           # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#about-the-github_token-secret
-
-          # environment variables
-          # https://docs.github.com/en/actions/learn-github-actions/environment-variables
           extra_nix_config: |
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
             substituters =  https://cache.nixos.org/ https://hydra.iohk.io https://haskell-language-server.cachix.org
