@@ -11,13 +11,6 @@
       url = "github:justinwoo/easy-purescript-nix/5926981701ac781f08b02e31e4705e46b799299d";
       flake = false;
     };
-    haskell-language-server = {
-      url = "github:haskell/haskell-language-server/7760340e999693d07fdbea49c9e20a3dd5458ad3";
-      inputs.poetry2nix.inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
-      };
-    };
     nix-vsode-marketplace = {
       url = "github:br4ch1st0chr0n3/nix-vscode-marketplace/d567fba043784bb456407f60c21230ea4d82253f";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -31,10 +24,8 @@
     , vscode-marketplace
     , easy-purescript-nix
     , nix-vsode-marketplace
-    , haskell-language-server
     }:
-    # these systems due to HLS
-    flake-utils.lib.eachSystem (builtins.attrValues { inherit (flake-utils.lib.system) x86_64-linux x86_64-darwin aarch64-darwin; }) (
+    flake-utils.lib.eachDefaultSystem (
       system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
@@ -76,7 +67,7 @@
               inherit (open-vsx.gruntfuggly) todo-tree;
             };
             docker = {
-              # TODO update VS Code to 1.71.0
+              # TODO update vscodium to 1.71.0
               inherit (my-vscode-extensions.ms-vscode-remote) remote-containers;
             };
           };
@@ -138,34 +129,18 @@
               stack
               # GHCi based bare bones IDE
               ghcid
+              # LSP server for GHC
+              haskell-language-server
               ;
           };
         };
-
-        # tools for specific versions of ghc
-        haskellTools =
-          let
-            versions = [ "902" "924" ];
-            select-haskell-tools = version:
-              let
-                hpkgs = pkgs.haskell.packages."ghc${version}";
-              in
-              {
-                inherit (hpkgs) ghc;
-                "haskell-language-server-${version}" =
-                  (haskell-language-server.packages.${system})."haskell-language-server-${version}"
-                ;
-              };
-          in
-          builtins.foldl' (x: y: x // ({ ${y} = select-haskell-tools y; })) { } versions;
 
         # a set of all shell tools
         allShellTools = mergeValues shellTools;
 
         # create a codium with a given set of extensions
-        # Examples:
-        # mkCodium {inherit (vscode-extensions) haskell purescript;}
-        # mkCodium {inherit allVSCodeExtensions}
+        # Examples: 
+        # see `codium`
         mkCodium = extensions@{ ... }:
           let
             inherit (pkgs) vscode-with-extensions vscodium;
@@ -231,16 +206,12 @@
           settingsNix
           vscodeExtensions
           writeSettingsJson
-          haskellTools
           toList
           ;
         devShells = {
           default = pkgs.mkShell {
             name = "codium";
-            buildInputs =
-              (toList shellTools) ++
-              [ codium ] ++
-              (builtins.attrValues haskellTools."902")
+            buildInputs = (toList shellTools) ++ [ codium ]
             ;
           };
           writeSettings = writeSettingsJson settingsNix;
