@@ -33,12 +33,9 @@ jobs:
           name: br4ch1st0chr0n3-flakes
           # If you chose API tokens for write access OR if you have a private cache
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
-      - name: Go to codium
-        run: |
-          cd codium
-      #     nix flake check
       - name: Push inputs to cachix
         run: |
+          cd codium
           # https://docs.cachix.org/pushing#flakes
 
           nix flake archive --json \
@@ -46,5 +43,6 @@ jobs:
             | cachix push ${{ matrix.cache }}
       - name: Push devshell to cachix
         run: |
+          cd codium
           nix develop --profile dev-profile
           cachix push ${{ matrix.cache }} dev-profile
