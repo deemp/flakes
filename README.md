@@ -14,7 +14,7 @@ It contains:
   sh <(curl -L https://nixos.org/nix/install) --no-daemon
   ```
 
-- Enable [flakes](https://nixos.wiki/wiki/Flakes#Permanent)
+- Enable [flakes](https://nixos.wiki/wiki/Flakes#Permanent). Create a file if missing
 
 - Enter the repo
   ```sh
@@ -24,19 +24,23 @@ It contains:
 
 - Install [direnv](https://nix.dev/tutorials/declarative-and-reproducible-developer-environments#direnv-automatically-activating-the-environment-on-directory-change) - steps 1, 2
 
+- Log out, Log in
+
 - Allow direnv here
   ```sh
   direnv allow
   ```
 
-- Now, everything should load. You may have to wait
+- Now, when prompted, answer `y`
+
+- Everything should start loading. If no, run `nix develop`
 
 - After that, run
   ```sh
   codium .
   ```
 
-- A Codium instance with all promised tools should open
+- A Codium instance with the promised tools should open.
 
 - Try to add a problem:
   ```sh
@@ -51,3 +55,5 @@ It contains:
 - When you open a problem file (e.g. `A.hs`), you should see Haskell Language Server load and show info when you hover over a term.
 
 - In case of problems, try to reload the window (`Ctrl` + `Shift` + `P` > `Reload Window`)
+
+- Feel free to create an issue or contact me at [Telegram](https://daniladanko.t.me)
