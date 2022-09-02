@@ -25,6 +25,7 @@ executable A-exe
       Paths_acpoj
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
+      array
+    , base >=4.7 && <5
     , mtl
   default-language: Haskell2010

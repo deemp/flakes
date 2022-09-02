@@ -5,6 +5,7 @@ copyright: 2022 Author name here
 dependencies:
 - base >= 4.7 && < 5
 - mtl
+- array
 
 executables:
   A-exe:
