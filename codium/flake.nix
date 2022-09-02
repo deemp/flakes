@@ -196,18 +196,20 @@
         codium = [ (mkCodium vscodeExtensions) pkgs.bashInteractive ];
       in
       {
-        inherit
-          allShellTools
-          codium
-          json2nix
-          mergeValues
-          mkCodium
-          shellTools
-          settingsNix
-          vscodeExtensions
-          writeSettingsJson
-          toList
-          ;
+        packages = {
+          inherit
+            allShellTools
+            codium
+            json2nix
+            mergeValues
+            mkCodium
+            shellTools
+            settingsNix
+            vscodeExtensions
+            writeSettingsJson
+            toList
+            ;
+        };
         devShells = {
           default = pkgs.mkShell {
             name = "codium";
