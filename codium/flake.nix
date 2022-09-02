@@ -33,193 +33,194 @@
     , nix-vsode-marketplace
     , haskell-language-server
     }:
-    flake-utils.lib.eachDefaultSystem (system:
-    let
-      pkgs = nixpkgs.legacyPackages.${system};
+    # these systems due to HLS
+    flake-utils.lib.eachSystem (builtins.attrValues { inherit (flake-utils.lib.system) x86_64-linux x86_64-darwin aarch64-darwin; }) (
+      system:
+      let
+        pkgs = nixpkgs.legacyPackages.${system};
 
-      # A set of VS Code extensions
-      # Biased towards FP languages
-      vscodeExtensions =
-        let
-          inherit (vscode-marketplace.packages.${system}) vscode open-vsx;
-          my-vscode-extensions = nix-vsode-marketplace.packages.${system}.vscode;
-        in
-        {
-          haskell = {
-            inherit (open-vsx.haskell) haskell;
-            inherit (open-vsx.justusadam) language-haskell;
-            inherit (my-vscode-extensions.visortelle) haskell-spotlight;
-            inherit (open-vsx.redhat) vscode-yaml;
-          };
-          purescript = {
-            inherit (open-vsx.nwolverson) ide-purescript language-purescript;
-            inherit (open-vsx.dhall) dhall-lang vscode-dhall-lsp-server;
-            inherit (my-vscode-extensions.br4ch1st0chr0n3) purs-keybindings;
-            inherit (my-vscode-extensions.ryuta46) multi-command;
-            inherit (my-vscode-extensions.chunsen) bracket-select;
-          };
-          nix = {
-            inherit (open-vsx.mkhl) direnv;
-            inherit (open-vsx.jnoortheen) nix-ide;
-          };
-          github = {
-            inherit (open-vsx.github) vscode-pull-request-github;
-            inherit (open-vsx.eamodio) gitlens;
-          };
-          typescript = {
-            inherit (open-vsx.ms-vscode) vscode-typescript-next;
-          };
-          misc = {
-            inherit (open-vsx.usernamehw) errorlens;
-            inherit (open-vsx.gruntfuggly) todo-tree;
-          };
-          docker = {
-            # TODO update VS Code to 1.71.0
-            inherit (my-vscode-extensions.ms-vscode-remote) remote-containers;
-          };
-        };
-
-      # if a set's attribute values are all sets, merge these values
-      # Examples:
-      # mergeValues {a = {b = 1;}; c = {d = 1;};} => {b = 1; d = 1;}
-      # mergeValues ({inherit (vscode-extensions) haskell purescript;})
-      mergeValues = set@{ ... }:
-        builtins.foldl' pkgs.lib.mergeAttrs { } (builtins.attrValues set);
-
-      # nixified and restructured settings.json
-      # one can combine the settings as follows:
-      # settingsNix.haskell // settingsNix.purescript
-      settingsNix = import ./settings.nix;
-
-      # a convenience function that flattens
-      toList = x: builtins.attrValues (mergeValues x);
-
-      # shell tools for development
-      # Example
-      # mergeValues { inherit (settings) todo-tree purescript; }
-      shellTools = {
-        purescript =
+        # A set of VS Code extensions
+        # Biased towards FP languages
+        vscodeExtensions =
           let
-            easy-ps = import easy-purescript-nix { inherit pkgs; };
+            inherit (vscode-marketplace.packages.${system}) vscode open-vsx;
+            my-vscode-extensions = nix-vsode-marketplace.packages.${system}.vscode;
           in
           {
-            inherit (pkgs) dhall-lsp-server;
-            inherit (easy-ps) purs-0_15_4 spago purescript-language-server purs-tidy;
+            haskell = {
+              inherit (open-vsx.haskell) haskell;
+              inherit (open-vsx.justusadam) language-haskell;
+              inherit (my-vscode-extensions.visortelle) haskell-spotlight;
+              inherit (open-vsx.redhat) vscode-yaml;
+            };
+            purescript = {
+              inherit (open-vsx.nwolverson) ide-purescript language-purescript;
+              inherit (open-vsx.dhall) dhall-lang vscode-dhall-lsp-server;
+              inherit (my-vscode-extensions.br4ch1st0chr0n3) purs-keybindings;
+              inherit (my-vscode-extensions.ryuta46) multi-command;
+              inherit (my-vscode-extensions.chunsen) bracket-select;
+            };
+            nix = {
+              inherit (open-vsx.mkhl) direnv;
+              inherit (open-vsx.jnoortheen) nix-ide;
+            };
+            github = {
+              inherit (open-vsx.github) vscode-pull-request-github;
+              inherit (open-vsx.eamodio) gitlens;
+            };
+            typescript = {
+              inherit (open-vsx.ms-vscode) vscode-typescript-next;
+            };
+            misc = {
+              inherit (open-vsx.usernamehw) errorlens;
+              inherit (open-vsx.gruntfuggly) todo-tree;
+            };
+            docker = {
+              # TODO update VS Code to 1.71.0
+              inherit (my-vscode-extensions.ms-vscode-remote) remote-containers;
+            };
           };
-        node = {
-          inherit (pkgs) nodejs-16_x;
-        };
-        nix = {
-          inherit (pkgs) rnix-lsp nixpkgs-fmt;
-          inherit json2nix;
-        };
-        haskell = {
-          inherit (pkgs.haskellPackages)
-            # formatters
-            ormolu
-            floskell
-            brittany
-            stylish-haskell
-            # Lookup Haskell documentation
-            hoogle
-            # auto generate LSP hie.yaml file from cabal
-            implicit-hie
-            # Automatically discover and run Hspec tests
-            hspec-discover_2_10_0_1
-            # Automation of Haskell package release process.
-            releaser
-            # Simple Hackage release workflow for package maintainers
-            hkgr_0_4_2
-            # Easy dependency management for Nix projects.
-            niv
-            # The Haskell Tool Stack
-            stack
-            # GHCi based bare bones IDE
-            ghcid
-            ;
-        };
-      };
 
-      # tools for specific versions of ghc
-      haskellTools =
-        let
-          versions = [ "902" "924" ];
-          select-haskell-tools = version:
+        # if a set's attribute values are all sets, merge these values
+        # Examples:
+        # mergeValues {a = {b = 1;}; c = {d = 1;};} => {b = 1; d = 1;}
+        # mergeValues ({inherit (vscode-extensions) haskell purescript;})
+        mergeValues = set@{ ... }:
+          builtins.foldl' pkgs.lib.mergeAttrs { } (builtins.attrValues set);
+
+        # nixified and restructured settings.json
+        # one can combine the settings as follows:
+        # settingsNix.haskell // settingsNix.purescript
+        settingsNix = import ./settings.nix;
+
+        # a convenience function that flattens
+        toList = x: builtins.attrValues (mergeValues x);
+
+        # shell tools for development
+        # Example
+        # mergeValues { inherit (settings) todo-tree purescript; }
+        shellTools = {
+          purescript =
             let
-              hpkgs = pkgs.haskell.packages."ghc${version}";
+              easy-ps = import easy-purescript-nix { inherit pkgs; };
             in
             {
-              inherit (hpkgs) ghc;
-              "haskell-language-server-${version}" =
-                (haskell-language-server.packages.${system})."haskell-language-server-${version}"
-              ;
+              inherit (pkgs) dhall-lsp-server;
+              inherit (easy-ps) purs-0_15_4 spago purescript-language-server purs-tidy;
             };
-        in
-        builtins.foldl' (x: y: x // ({ ${y} = select-haskell-tools y; })) { } versions;
-
-      # a set of all shell tools
-      allShellTools = mergeValues shellTools;
-
-      # create a codium with a given set of extensions
-      # Examples:
-      # mkCodium {inherit (vscode-extensions) haskell purescript;}
-      # mkCodium {inherit allVSCodeExtensions}
-      mkCodium = extensions@{ ... }:
-        let
-          inherit (pkgs) vscode-with-extensions vscodium;
-        in
-        (vscode-with-extensions.override {
-          vscode = vscodium;
-          vscodeExtensions = toList extensions;
-        });
-
-      # write settings.json somewhere into nix/store and create a symlink in .vscode
-      # Example:
-      # see devShells.writeSettings
-      writeSettingsJson = settings:
-        let
-          s = "settings.json";
-          settingsJson = builtins.toJSON (mergeValues settings);
-
-          writeSettings = pkgs.mkShell {
-            name = "write-to-store";
-            buildInputs = [ pkgs.python38 ];
-            buildPhase = ''
-              mkdir -p $out
-              ls $out
-              printf "%s" '${settingsJson}' | python -m json.tool > $out/${s}
-            '';
+          node = {
+            inherit (pkgs) nodejs-16_x;
           };
-        in
-        pkgs.mkShell {
-          name = "write-to-project";
-          shellHook = ''
-            mkdir -p .vscode
-            ls ${writeSettings.out}
-            ln -sf ${writeSettings.out}/${s} .vscode/${s}
-          '';
+          nix = {
+            inherit (pkgs) rnix-lsp nixpkgs-fmt;
+            inherit json2nix;
+          };
+          haskell = {
+            inherit (pkgs.haskellPackages)
+              # formatters
+              ormolu
+              floskell
+              brittany
+              stylish-haskell
+              # Lookup Haskell documentation
+              hoogle
+              # auto generate LSP hie.yaml file from cabal
+              implicit-hie
+              # Automatically discover and run Hspec tests
+              hspec-discover_2_10_0_1
+              # Automation of Haskell package release process.
+              releaser
+              # Simple Hackage release workflow for package maintainers
+              hkgr_0_4_2
+              # Easy dependency management for Nix projects.
+              niv
+              # The Haskell Tool Stack
+              stack
+              # GHCi based bare bones IDE
+              ghcid
+              ;
+          };
         };
 
+        # tools for specific versions of ghc
+        haskellTools =
+          let
+            versions = [ "902" "924" ];
+            select-haskell-tools = version:
+              let
+                hpkgs = pkgs.haskell.packages."ghc${version}";
+              in
+              {
+                inherit (hpkgs) ghc;
+                "haskell-language-server-${version}" =
+                  (haskell-language-server.packages.${system})."haskell-language-server-${version}"
+                ;
+              };
+          in
+          builtins.foldl' (x: y: x // ({ ${y} = select-haskell-tools y; })) { } versions;
 
-      # convert json to nix
-      # no need to provide the full path to a file if it's in the cwd
-      # Example: 
-      # nix run .#json2nix settings.json settings.nix
-      json2nix = pkgs.writeScriptBin "json2nix" ''
-        json_path=$1
-        nix_path=$2selectHaskellT
-        pkgs="with import ${nixpkgs} { }"
-        p="$pkgs; with builtins; fromJSON (readFile ./$json_path)"
-        nix-instantiate --eval "$p" -E  > $nix_path
-        sed -i -E "s/(\[|\{)/\1\n/g" $nix_path
-        nix run ${nixpkgs}#nixpkgs-fmt $nix_path
-      '';
+        # a set of all shell tools
+        allShellTools = mergeValues shellTools;
 
-      # codium with all extensions enabled
-      codium = [(mkCodium vscodeExtensions) pkgs.bashInteractive];
-    in
-    {
-      packages = {
+        # create a codium with a given set of extensions
+        # Examples:
+        # mkCodium {inherit (vscode-extensions) haskell purescript;}
+        # mkCodium {inherit allVSCodeExtensions}
+        mkCodium = extensions@{ ... }:
+          let
+            inherit (pkgs) vscode-with-extensions vscodium;
+          in
+          (vscode-with-extensions.override {
+            vscode = vscodium;
+            vscodeExtensions = toList extensions;
+          });
+
+        # write settings.json somewhere into nix/store and create a symlink in .vscode
+        # Example:
+        # see devShells.writeSettings
+        writeSettingsJson = settings:
+          let
+            s = "settings.json";
+            settingsJson = builtins.toJSON (mergeValues settings);
+
+            writeSettings = pkgs.mkShell {
+              name = "write-to-store";
+              buildInputs = [ pkgs.python38 ];
+              buildPhase = ''
+                mkdir -p $out
+                ls $out
+                printf "%s" '${settingsJson}' | python -m json.tool > $out/${s}
+              '';
+            };
+          in
+          pkgs.mkShell {
+            name = "write-to-project";
+            shellHook = ''
+              mkdir -p .vscode
+              ls ${writeSettings.out}
+              ln -sf ${writeSettings.out}/${s} .vscode/${s}
+            '';
+          };
+
+
+        # convert json to nix
+        # no need to provide the full path to a file if it's in the cwd
+        # Example: 
+        # nix run .#json2nix settings.json settings.nix
+        json2nix = pkgs.writeScriptBin "json2nix" ''
+          json_path=$1
+          nix_path=$2selectHaskellT
+          pkgs="with import ${nixpkgs} { }"
+          p="$pkgs; with builtins; fromJSON (readFile ./$json_path)"
+          nix-instantiate --eval "$p" -E  > $nix_path
+          sed -i -E "s/(\[|\{)/\1\n/g" $nix_path
+          nix run ${nixpkgs}#nixpkgs-fmt $nix_path
+        '';
+
+        # codium with all extensions enabled
+        codium = [ (mkCodium vscodeExtensions) pkgs.bashInteractive ];
+      in
+      {
         inherit
           allShellTools
           codium
@@ -233,19 +234,19 @@
           haskellTools
           toList
           ;
-      };
-      devShells = {
-        default = pkgs.mkShell {
-          name = "codium";
-          buildInputs =
-            (toList shellTools) ++
-            [ codium ] ++
-            (builtins.attrValues haskellTools."902")
-          ;
+        devShells = {
+          default = pkgs.mkShell {
+            name = "codium";
+            buildInputs =
+              (toList shellTools) ++
+              [ codium ] ++
+              (builtins.attrValues haskellTools."902")
+            ;
+          };
+          writeSettings = writeSettingsJson settingsNix;
         };
-        writeSettings = writeSettingsJson settingsNix;
-      };
-    });
+      }
+    );
 
   nixConfig = {
     extra-substituters = [
