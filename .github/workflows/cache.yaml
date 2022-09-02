@@ -20,21 +20,16 @@ on:
 # x86_64-linux
 # x86_64-darwin
 
-# With an extension, we can add
-# aarch64-linux
 
 jobs:
   cache:
-    name: Build on ${{ matrix.distro }} ${{ matrix.arch }}
-    runs-on: ubuntu-20.04
+    name: Build on ${{ matrix.arch }}-${{ matrix.distro }}
     strategy:
       matrix:
+        os: [ubuntu-20.04, ubuntu-22.04, macos-11, macos-12]
         cache: ["br4ch1st0chr0n3-flakes"]
-        include:
-          # aarch64-linux
-          - arch: aarch64
-            distro: ubuntu20.04
-    steps: &steps
+    runs-on: ${{ matrix.os }}
+    steps:
       - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v17
         with:
@@ -66,11 +61,3 @@ jobs:
           nix develop --profile dev-profile
           cachix push ${{ matrix.cache }} dev-profile
   
-  cache-supported:
-    name: Build on ${{ matrix.arch }}-${{ matrix.distro }}
-    strategy:
-      matrix:
-        os: [ubuntu-20.04, macos-11]
-        cache: ["br4ch1st0chr0n3-flakes"]
-    runs-on: ${{ matrix.os }}
-    steps: *steps
