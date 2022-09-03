@@ -171,12 +171,12 @@
             vscodeExtensions = toList extensions;
           });
 
-        # write settings.json somewhere into nix/store and create a symlink in .vscode
+        # write settings.json into ./.vscode
         # Example:
-        # see devShells.writeSettings
+        # see devShells.default.shellHook
         writeSettingsJson = settings:
           let
-            s = "settings.json";
+            s = "setings.json";
             settingsJson = builtins.toJSON (mergeValues settings);
 
             writeSettings = pkgs.mkShell {
@@ -184,19 +184,14 @@
               buildInputs = [ pkgs.python38 ];
               buildPhase = ''
                 mkdir -p $out
-                ls $out
                 printf "%s" '${settingsJson}' | python -m json.tool > $out/${s}
               '';
             };
           in
-          pkgs.mkShell {
-            name = "write-to-project";
-            shellHook = ''
-              mkdir -p .vscode
-              ls ${writeSettings.out}
-              ln -sf ${writeSettings.out}/${s} .vscode/${s}
-            '';
-          };
+          pkgs.writeScriptBin "write-settings" ''
+            mkdir -p .vscode
+            cp ${writeSettings.out}/${s} .vscode/${s}
+          '';
 
 
         # convert json to nix
@@ -237,9 +232,12 @@
             buildInputs = pkgs.lib.lists.flatten [
               (toList shellTools)
               codium
+              (writeSettingsJson settingsNix)
             ];
+            shellHook = ''
+              write-settings
+            '';
           };
-          writeSettings = writeSettingsJson settingsNix;
         };
       }
     );
