@@ -99,13 +99,16 @@
               inherit (pkgs) dhall-lsp-server;
               inherit (easy-ps) purs-0_15_4 spago purescript-language-server purs-tidy;
             };
+
           node = {
             inherit (pkgs) nodejs-16_x;
           };
+
           nix = {
             inherit (pkgs) rnix-lsp nixpkgs-fmt;
             inherit json2nix;
           };
+
           haskell = {
             inherit (pkgs.haskellPackages)
               # formatters
@@ -126,15 +129,32 @@
               # Easy dependency management for Nix projects.
               niv
               # The Haskell Tool Stack
-              stack
               # GHCi based bare bones IDE
               ghcid
               # LSP server for GHC
               haskell-language-server
               ;
+            inherit stack-wrapped;
           };
         };
 
+        # Wrap Stack to work with our Nix integration. 
+        stack-wrapped = pkgs.symlinkJoin {
+          # will be available as the usual `stack` in terminal
+          name = "stack";
+          paths = [ pkgs.stack ];
+          buildInputs = [ pkgs.makeWrapper ];
+          # --system-ghc    # Use the existing GHC on PATH (will come from this Nix file)
+          # --no-install-ghc  # Don't try to install GHC if no matching GHC found on PATH
+          postBuild = ''
+            wrapProgram $out/bin/stack \
+              --add-flags "\
+                --system-ghc \
+                --no-install-ghc \
+              "
+          '';
+        };
+        
         # a set of all shell tools
         allShellTools = mergeValues shellTools;
 
