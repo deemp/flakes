@@ -187,18 +187,24 @@
                 printf "%s" '${settingsJson}' | python -m json.tool > $out/${s}
               '';
             };
+            path = "${writeSettings.out}/${s}";
+            vscode = ".vscode";
           in
-          pkgs.writeScriptBin "write-settings" ''
-            mkdir -p .vscode
-            cp ${writeSettings.out}/${s} .vscode/${s}
-          '';
+          pkgs.writeShellApplication
+            {
+              name = "write-settings";
+              text = ''
+                mkdir -p ${vscode}
+                cat ${path} > ${vscode}/${s}
+              '';
+            };
 
 
-        # convert json to nix
-        # no need to provide the full path to a file if it's in the cwd
-        # Example: 
-        # nix run .#json2nix settings.json settings.nix
-        json2nix = pkgs.writeScriptBin "json2nix" ''
+            # convert json to nix
+            # no need to provide the full path to a file if it's in the cwd
+            # Example: 
+            # nix run .#json2nix settings.json settings.nix
+            json2nix = pkgs.writeScriptBin "json2nix" ''
           json_path=$1
           nix_path=$2
           pkgs="with import ${nixpkgs} { }"
@@ -228,7 +234,7 @@
         };
         devShells = {
           default = pkgs.mkShell {
-            name = "codium";
+            name = "my-codium";
             buildInputs = pkgs.lib.lists.flatten [
               (toList shellTools)
               codium
