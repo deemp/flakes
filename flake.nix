@@ -3,7 +3,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/0e304ff0d9db453a4b230e9386418fd974d5804a";
     flake-utils.url = "github:numtide/flake-utils";
     my-codium = {
-      url = "github:br4ch1st0chr0n3/flakes?dir=codium&rev=80fae01958519a663f81891e91674d0808a5ca3f";
+      url = "github:br4ch1st0chr0n3/flakes?dir=codium&rev=5317c7a3882a96bc8ee92bb4979edaac6047a183";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };

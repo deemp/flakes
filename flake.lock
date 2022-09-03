@@ -46,18 +46,18 @@
       },
       "locked": {
         "dir": "codium",
-        "lastModified": 1662211629,
-        "narHash": "sha256-BOjM3Q6fkKRLUkevoI0mdhoRKnW0TPLfKVSkGaIwDfw=",
+        "lastModified": 1662226924,
+        "narHash": "sha256-mdAPOA//k75H9/8h/yR3FKb8STVzy/MvgFVIwXThI4U=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "80fae01958519a663f81891e91674d0808a5ca3f",
+        "rev": "5d05a78038c8f6b4d58ce74a043249be0bddfaa4",
         "type": "github"
       },
       "original": {
         "dir": "codium",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "80fae01958519a663f81891e91674d0808a5ca3f",
+        "rev": "5d05a78038c8f6b4d58ce74a043249be0bddfaa4",
         "type": "github"
       }
     },
