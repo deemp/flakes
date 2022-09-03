@@ -132,9 +132,9 @@
               # GHCi based bare bones IDE
               ghcid
               # LSP server for GHC
-              haskell-language-server
               ;
             # The Haskell Tool Stack
+            inherit (pkgs) haskell-language-server;
             inherit stack-wrapped;
           };
         };
