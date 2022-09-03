@@ -128,17 +128,18 @@
               hkgr_0_4_2
               # Easy dependency management for Nix projects.
               niv
-              # The Haskell Tool Stack
               # GHCi based bare bones IDE
               ghcid
               # LSP server for GHC
               haskell-language-server
               ;
+            # The Haskell Tool Stack
             inherit stack-wrapped;
           };
         };
 
         # Wrap Stack to work with our Nix integration. 
+        # If you use this stack version, you should supply the appropriate ghc in your .nix
         stack-wrapped = pkgs.symlinkJoin {
           # will be available as the usual `stack` in terminal
           name = "stack";
@@ -154,7 +155,7 @@
               "
           '';
         };
-        
+
         # a set of all shell tools
         allShellTools = mergeValues shellTools;
 
