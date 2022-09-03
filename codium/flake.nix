@@ -176,7 +176,7 @@
         # see devShells.default.shellHook
         writeSettingsJson = settings:
           let
-            s = "setings.json";
+            s = "settings.json";
             settingsJson = builtins.toJSON (mergeValues settings);
 
             writeSettings = pkgs.mkShell {
