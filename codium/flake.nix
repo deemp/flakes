@@ -53,7 +53,7 @@
             };
             nix = {
               inherit (open-vsx.mkhl) direnv;
-              inherit (open-vsx.arrterian) nix-env-selector;
+              # inherit (open-vsx.arrterian) nix-env-selector;
               inherit (open-vsx.jnoortheen) nix-ide;
             };
             github = {
