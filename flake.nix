@@ -3,7 +3,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/0e304ff0d9db453a4b230e9386418fd974d5804a";
     flake-utils.url = "github:numtide/flake-utils";
     my-codium = {
-      url = "github:br4ch1st0chr0n3/flakes?dir=codium&rev=281792cdafcf6c4322a1ed244ee24a319eab90d7";
+      url = "github:br4ch1st0chr0n3/flakes?dir=codium&rev=80fae01958519a663f81891e91674d0808a5ca3f";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
@@ -24,59 +24,47 @@
         codium
         mergeValues
         toList
-        haskellTools
         shellTools
         json2nix
         ;
-      # Wrap Stack to work with our Nix integration. 
-      stack-wrapped = pkgs.symlinkJoin {
-        # will be available as the usual `stack` in terminal
-        name = "stack";
-        paths = [ pkgs.stack ];
-        buildInputs = [ pkgs.makeWrapper ];
-        # --system-ghc    # Use the existing GHC on PATH (will come from this Nix file)
-        # --no-install-ghc  # Don't try to install GHC if no matching GHC found on PATH
-        postBuild = ''
-          wrapProgram $out/bin/stack \
-            --add-flags "\
-              --system-ghc \
-              --no-install-ghc \
-            "
-        '';
-      };
       python3 = pkgs.python3.withPackages (p: with p; [
         pyyaml
         (pkgs.python310Packages.pip)
       ]);
       addProblem = pkgs.writeScriptBin "problem" ''
-        ${python3}/bin/python -c """from scripts.scripts import problem; problem('$1', '$2')"""
+        ${python3}/bin/python -c "from scripts.scripts import problem; problem('$1', '$2')"
       '';
+      writeSettings = writeSettingsJson ((pkgs.lib.recursiveUpdate
+        settingsNix
+        {
+          python."python.defaultInterpreterPath" = "${python3}/bin/python";
+          window."window.zoomLevel" = 0.3;
+        })
+        // {
+          vscode-dhall-lsp-server = { };
+          ide-purescript = { };
+        }
+      );
     in
     {
       devShells =
         {
           default = pkgs.mkShell {
             name = "codium";
-            buildInputs =
-              (toList { inherit (shellTools) haskell nix; }) ++
+            buildInputs = pkgs.lib.lists.flatten
               [
+                (toList { inherit (shellTools) haskell nix; })
+                (pkgs.haskell.compiler.ghc902)
                 codium
-                (builtins.attrValues haskellTools."902")
-                stack-wrapped
                 json2nix
                 python3
                 addProblem
-              ]
-            ;
+                writeSettings
+              ];
+            shellHook = ''
+              write-settings
+            '';
           };
-          writeSettings = writeSettingsJson (
-            settingsNix // {
-              python = {
-                "python.defaultInterpreterPath" = "${python3}/bin/python";
-              };
-              window = { "window.zoomLevel" = 0.3; };
-            }
-          );
         };
     });
 
