@@ -7,12 +7,17 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
+    flake-compat = {
+      url = "github:edolstra/flake-compat/b4a34015c698c7793d592d66adbab377907a2be8";
+      flake = false;
+    };
   };
   outputs =
     { self
     , flake-utils
     , nixpkgs
     , my-codium
+    , flake-compat
     }:
     flake-utils.lib.eachDefaultSystem (system:
     let
@@ -32,7 +37,7 @@
         (pkgs.python310Packages.pip)
       ]);
       addProblem = pkgs.writeScriptBin "problem" ''
-        ${python3}/bin/python -c "from scripts.scripts import problem; problem('$1', '$2')"
+        ${python3}/bin/python -c "from tools.scripts.problem import problem; problem('$1', '$2')"
       '';
       writeSettings = writeSettingsJson ((pkgs.lib.recursiveUpdate
         settingsNix
@@ -40,10 +45,10 @@
           python."python.defaultInterpreterPath" = "${python3}/bin/python";
           window."window.zoomLevel" = 0.3;
         })
-        // {
-          vscode-dhall-lsp-server = { };
-          ide-purescript = { };
-        }
+      // {
+        vscode-dhall-lsp-server = { };
+        ide-purescript = { };
+      }
       );
     in
     {
@@ -65,6 +70,18 @@
               write-settings
             '';
           };
+        };
+
+      stack-shell = { ghcVersion }:
+
+        pkgs.haskell.lib.buildStackProject {
+          name = "acpoj-stack-shell";
+
+          ghc = pkgs.haskell.compiler.${ghcVersion};
+
+          buildInputs = [
+            pkgs.zlib
+          ];
         };
     });
 

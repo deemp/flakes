@@ -1,4 +1,0 @@
-cradle:
-  stack:
-  - path: ./contest/A.hs
-    component: acpoj:exe:A-exe

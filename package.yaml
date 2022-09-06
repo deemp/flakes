@@ -6,10 +6,32 @@ dependencies:
 - base >= 4.7 && < 5
 - mtl
 - array
+- directory
+- system-filepath
+- aeson
+- ansi-terminal
+- bytestring
+- text
+- optparse-applicative
+- errors
+- filepath
+- yaml
+- unordered-containers
+- lens-aeson
+- lens
+- pretty-show
+- vector
+- containers
+- contravariant
+- profunctors
 
 executables:
   A-exe:
-    main: ./contest/A.hs
+    main: ./Contest/A.hs
+  problem-exe:
+    main: ./tools/scripts/problem.hs
+  Contest-exe:
+    main: ./Templates/Contest.hs
 
 ghc-options:
 - -Wall
@@ -19,8 +41,12 @@ ghc-options:
 - -Wincomplete-uni-patterns
 - -Wmissing-export-lists
 - -Wmissing-home-modules
-- -Wpartial-fields
 - -Wredundant-constraints
+- -Wno-unused-imports
+- -Wno-missing-signatures
+- -Wno-missing-export-lists
+- -Wno-unused-top-binds
+- -haddock
 
 github: githubuser/acpoj
 

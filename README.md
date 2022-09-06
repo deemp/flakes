@@ -22,7 +22,7 @@ It contains:
   cd acpoj
   ```
 
-- Install [direnv](https://nix.dev/tutorials/declarative-and-reproducible-developer-environments#direnv-automatically-activating-the-environment-on-directory-change) - steps 1, 2
+- Complete [direnv](https://direnv.net/docs/installation.html#from-system-packages) Installation
 
 - Log out, Log in
 

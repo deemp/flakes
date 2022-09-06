@@ -3,10 +3,11 @@ import yaml
 import os
 
 # write a template into several files
-contest = "contest"
+contest = "Contest"
 
-template ='''
-module Main(main, readInts, readString, toDoubles, toDouble, ceil, floor) where
+template = lambda name: \
+f'''\
+module Contest.{name}(main, readInts, readString, toDoubles, toDouble, ceil, floor) where
 import Data.Functor ((<&>))
 import GHC.Float.RealFracMethods (ceilingDoubleInt, floorDoubleInt)
 import Prelude hiding (floor)
@@ -31,12 +32,6 @@ floor = floorDoubleInt
 
 main :: IO ()
 main = print "hello, world!"'''
-
-def write_templates():
-  os.makedirs(path = contest, exist_ok=True)
-  for i in range(ord('A'),ord('Z')+1):
-    with open(f'{contest}/{chr(i)}.hs', 'w') as f:
-      f.write(template)
 
 
 # add or remove files
@@ -92,7 +87,7 @@ def handle_command(mode: str) -> Command | Failure:
     os.makedirs(name = contest, exist_ok=True)
   except Exception as e:
     print(e)
-    print(f"Can't create a directory ./{contest}")
+    print(f"Can't create a directory {contest}")
     return Unsupported()
 
   return command
@@ -103,7 +98,7 @@ def write_template(name: str, command: Command) -> Unit | None:
   match command:
     case Add():      
       with open(src, 'w') as f:
-        f.write(template)
+        f.write(template(name))
     case _:
       try:
         os.remove(src)
@@ -146,44 +141,7 @@ def handle_package_yaml(name: str, src: str, command: Command) -> Unit:
         return unit
       
   return unit
-        
-def handle_hie_yaml(name: str, src: str, command: Command) -> Unit | Failure:
-   # handle hie.yaml
-  hie_yaml = "hie.yaml"
-  t = None
-  with open(f'{hie_yaml}', 'r') as f:
-      try:
-        t = yaml.safe_load(f)
-      except yaml.YAMLError as exc:
-        print(exc)
-        return fail
-      
-  cradle = "cradle"
-  stack = "stack"
-  if not t[cradle] or t[cradle] and not t[cradle][stack]:
-    t[cradle] = {stack : {}}
-    
-  component = f"acpoj:exe:{name}-exe"
-  
-  r = t[cradle][stack]
-  s = list(filter(lambda x: not (x["path"] == src), r))
-  match command:
-    case Add():
-      p = s + [{"path" : src, "component": component}]
-    case Rm():
-      p = s
-  
-  t[cradle][stack] = p
-  
-  with open(f'{hie_yaml}', 'w') as f:
-      try:
-        yaml.dump(data = t, stream = f, Dumper=MyDumper,sort_keys=False)
-      except yaml.YAMLError as exc:
-        print(exc)
-        print (f"Can't write into {hie_yaml}")
-        return fail
-  return unit
-    
+
 
 def problem(mode: str, name: str) -> Unit | Failure:
   
@@ -198,9 +156,6 @@ def problem(mode: str, name: str) -> Unit | Failure:
   src = f'./{contest}/{name}.hs'
   
   match handle_package_yaml(name, src, command):
-    case Failure(): return fail
-  
-  match handle_hie_yaml(name, src, command):
     case Failure(): return fail
   
   # print(json.dumps(t, indent=4))

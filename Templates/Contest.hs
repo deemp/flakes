@@ -1,4 +1,5 @@
-module Main(main, readInts, readString, toDoubles, toDouble, ceil, floor) where
+module Main where
+
 import Data.Functor ((<&>))
 import GHC.Float.RealFracMethods (ceilingDoubleInt, floorDoubleInt)
 import Prelude hiding (floor)

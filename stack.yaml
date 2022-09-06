@@ -2,7 +2,14 @@ resolver:
   url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/21.yaml
 
 ghc-options:
-  "$everything": -haddock
+  "$everything":
+    -Wno-missing-signatures
+    -Wno-unused-top-binds
+    -haddock
+
+nix:
+  enable: true
+  shell-file: ./stack.nix
 
 packages:
-- .
+  - .
