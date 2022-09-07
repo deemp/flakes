@@ -1,5 +1,6 @@
 {
   inputs = {
+    # nixpkgs-stable.url = "github:NixOS/nixpkgs/67e45078141102f45eff1589a831aeaa3182b41e";
     nixpkgs.url = "github:NixOS/nixpkgs/0e304ff0d9db453a4b230e9386418fd974d5804a";
     flake-utils.url = "github:numtide/flake-utils";
     my-codium = {
@@ -11,6 +12,10 @@
       url = "github:edolstra/flake-compat/b4a34015c698c7793d592d66adbab377907a2be8";
       flake = false;
     };
+    hls = {
+      url = "github:haskell/haskell-language-server/7760340e999693d07fdbea49c9e20a3dd5458ad3";
+      # inputs.nixpkgs.follows = "nixpkgs-stable";
+    };
   };
   outputs =
     { self
@@ -18,6 +23,8 @@
     , nixpkgs
     , my-codium
     , flake-compat
+    , hls
+    # , nixpkgs-stable
     }:
     flake-utils.lib.eachDefaultSystem (system:
     let
@@ -50,6 +57,7 @@
         ide-purescript = { };
       }
       );
+      ghcV = "902";
     in
     {
       devShells =
@@ -58,13 +66,14 @@
             name = "codium";
             buildInputs = pkgs.lib.lists.flatten
               [
-                (toList { inherit (shellTools) haskell nix; })
-                (pkgs.haskell.compiler.ghc902)
+                (toList { inherit (shellTools) nix; haskell = builtins.removeAttrs shellTools.haskell ["haskell-language-server"];})
+                (pkgs.haskell.compiler."ghc${ghcV}")
                 codium
                 json2nix
                 python3
                 addProblem
                 writeSettings
+                hls.packages.${system}."haskell-language-server-${ghcV}"
               ];
             shellHook = ''
               write-settings

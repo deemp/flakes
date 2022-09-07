@@ -24,7 +24,6 @@ dependencies:
 - containers
 - contravariant
 - profunctors
-- managed
 
 executables:
   A-exe:
