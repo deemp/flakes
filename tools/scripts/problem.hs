@@ -25,6 +25,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Main (main) where
 
@@ -187,11 +188,13 @@ instance Exception Ex
 
 data ExMonoid = forall e. Exception e => ExMonoid [e]
 
--- getExs :: Exception e => ExMonoid -> [Maybe e]
--- getExs (ExMonoid em) = fromException <$> em
+getE :: forall e' e. (Exception e, Exception e') => e -> Maybe e'
+getE = fromException . toException
 
--- exs :: [Maybe Ex]
--- exs = getExs $ ExMonoid [SomeException (Ex "a"), SomeException (ExMonoid [Ex "a"])]
+fmapE :: forall e a. Exception e => (e -> a) -> ExMonoid -> [Maybe a]
+fmapE f (ExMonoid s) = (f <$>) . (getE @e) <$> s
+
+-- filterE 
 
 {-
 >>>exs
@@ -207,24 +210,35 @@ bracketOnError' :: IO a -> (a -> IO b) -> (a -> IO c) -> IO c
 bracketOnError' before after thing =
   mask $ \restore -> do
     a <- before
-    (restore (thing a) `catch` (\(x :: SomeException) -> throwIO $ ExMonoid [x])) `onException'` after a
+    ( restore (thing a)
+        `catch` ( \(x :: SomeException) ->
+                    case fromException x of
+                      Just (ExMonoid x') -> throwIO $ ExMonoid x'
+                      _ -> throwIO $ ExMonoid [x]
+                )
+      )
+      `onException'` after a
 
 onException' :: IO a -> IO b -> IO a
 onException' io what = io `catch` (\x'@(ExMonoid x) -> do _ <- what `catch` (\y -> throwIO $ ExMonoid (y : x)); throwIO x')
--- onException' io what = io `catch` (\x'@(ExMonoid x) -> do _ <- what `catch` (\y -> throwIO $ ExMonoid (y : x)); throwIO x')
 
-
--- throw' :: Exception e => e -> a
 throw' :: Exception e => e -> IO a
 throw' e = throwIO $ ExMonoid [e]
 
 tryManaged' :: IO ()
-tryManaged' = runManaged $ do
-  _ <- managed (bracketOnError' (do' "A") (\_ -> undo' "A" >> throw (Ex "A")))
-  _ <- managed (bracketOnError' (do' "B") (\_ -> undo' "B" >> throw (Ex "B")))
-  _ <- managed (bracketOnError' (do' "C") (\_ -> undo' "C" >> throw (Ex "C")))
-  _ <- managed (bracketOnError' (do' "D" >> throw (Ex "Da")) (\_ -> undo' "D" >> throw (Ex "Dr")))
-  liftIO $ throw $ Ex "final1"
+tryManaged' = handle (print . getE @ExMonoid @SomeException)
+  -- ( \(x :: SomeException) ->
+  --     case fromException x of
+  --       Just (ExMonoid s) -> print x
+  --         -- print (fromException $ toException (Prelude.head s) :: Maybe Ex)
+  --       Nothing -> print x
+  -- )
+  $ runManaged $ do
+    _ <- managed (bracketOnError' (do' "A") (\_ -> undo' "A" >> throw (Ex "Arelease")))
+    _ <- managed (bracketOnError' (do' "B") (\_ -> undo' "B" >> throw (Ex "B")))
+    _ <- managed (bracketOnError' (do' "C") (\_ -> undo' "C" >> throw (Ex "C")))
+    _ <- managed (bracketOnError' (do' "D" >> throw (Ex "Da")) (\_ -> undo' "D" >> throw (Ex "Dr")))
+    liftIO $ throw $ Ex "final1"
 
 tryManaged :: IO ()
 tryManaged = runManaged $ do
