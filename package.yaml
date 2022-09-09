@@ -4,52 +4,16 @@ copyright: 2022 Author name here
 
 dependencies:
 - base >= 4.7 && < 5
-- mtl
-- array
-- directory
-- system-filepath
-- aeson
-- ansi-terminal
-- bytestring
-- text
-- optparse-applicative
-- errors
-- filepath
-- yaml
-- unordered-containers
-- lens-aeson
-- lens
-- pretty-show
-- vector
-- containers
-- contravariant
-- profunctors
-- managed
 
 executables:
-  A-exe:
-    main: ./Contest/A.hs
-  B-exe:
-    main: ./Contest/B.hs
-  Contest-exe:
-    main: ./Templates/Contest.hs
-  problem-exe:
-    main: ./tools/scripts/problem.hs
+  A:
+    main: ./Modules/A.hs
+  templates-Contest:
+    main: ./templates/Contest.hs
 
 ghc-options:
 - -Wall
-- -Wcompat
-- -Widentities
-- -Wincomplete-record-updates
-- -Wincomplete-uni-patterns
-- -Wmissing-export-lists
-- -Wmissing-home-modules
-- -Wredundant-constraints
-- -Wno-unused-imports
-- -Wno-missing-signatures
-- -Wno-missing-export-lists
-- -Wno-unused-top-binds
-- -haddock
+- -Wunused-packages
 
 github: githubuser/acpoj
 

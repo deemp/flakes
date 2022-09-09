@@ -18,7 +18,6 @@
     "haskell.serverExecutablePath": "haskell-language-server",
     "nix.enableLanguageServer": true,
     "nix.serverPath": "rnix-lsp",
-    "python.defaultInterpreterPath": "/nix/store/jifdqzrpnc3n2s95bm7sbw092r7c77gv-python3-3.10.6-env/bin/python",
     "todo-tree.regex.regex": "((--\\s*($TAGS))|\\{-\\s($TAGS).*(\\n.*)*-})",
     "window.zoomLevel": 0.3,
     "workbench.sideBar.location": "right"

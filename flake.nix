@@ -16,6 +16,10 @@
       url = "github:haskell/haskell-language-server/7760340e999693d07fdbea49c9e20a3dd5458ad3";
       # inputs.nixpkgs.follows = "nixpkgs-stable";
     };
+    gitignore = {
+      url = "github:hercules-ci/gitignore.nix/a20de23b925fd8264fd7fad6454652e142fd7f73";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
   outputs =
     { self
@@ -24,11 +28,18 @@
     , my-codium
     , flake-compat
     , hls
-    # , nixpkgs-stable
+    , gitignore
     }:
     flake-utils.lib.eachDefaultSystem (system:
     let
+      ghcV = "902";
       pkgs = nixpkgs.legacyPackages.${system};
+      inherit (pkgs.haskell.packages."ghc${ghcV}") callCabal2nix;
+      inherit (pkgs.haskell.lib) justStaticExecutables;
+      inherit (gitignore.lib) gitignoreSource;
+
+      manager = justStaticExecutables (callCabal2nix "manager" (gitignoreSource ./manager) {});
+      
       inherit (my-codium.packages.${system})
         writeSettingsJson
         settingsNix
@@ -39,25 +50,11 @@
         shellTools
         json2nix
         ;
-      python3 = pkgs.python3.withPackages (p: with p; [
-        pyyaml
-        (pkgs.python310Packages.pip)
-      ]);
-      addProblem = pkgs.writeScriptBin "problem" ''
-        ${python3}/bin/python -c "from tools.scripts.problem import problem; problem('$1', '$2')"
-      '';
-      writeSettings = writeSettingsJson ((pkgs.lib.recursiveUpdate
-        settingsNix
+      writeSettings = writeSettingsJson
         {
-          python."python.defaultInterpreterPath" = "${python3}/bin/python";
+          inherit (settingsNix) haskell todo-tree files workbench editor gitlens git nix-ide;
           window."window.zoomLevel" = 0.3;
-        })
-      // {
-        vscode-dhall-lsp-server = { };
-        ide-purescript = { };
-      }
-      );
-      ghcV = "902";
+        };
     in
     {
       devShells =
@@ -66,13 +63,12 @@
             name = "codium";
             buildInputs = pkgs.lib.lists.flatten
               [
-                (toList { inherit (shellTools) nix; haskell = builtins.removeAttrs shellTools.haskell ["haskell-language-server"];})
+                (toList { inherit (shellTools) nix; haskell = builtins.removeAttrs shellTools.haskell [ "haskell-language-server" ]; })
                 (pkgs.haskell.compiler."ghc${ghcV}")
                 codium
                 json2nix
-                python3
-                addProblem
                 writeSettings
+                manager
                 hls.packages.${system}."haskell-language-server-${ghcV}"
               ];
             shellHook = ''

@@ -19,122 +19,20 @@ source-repository head
   type: git
   location: https://github.com/githubuser/acpoj
 
-executable A-exe
-  main-is: ./Contest/A.hs
+executable A
+  main-is: ./Modules/A.hs
   other-modules:
       Paths_acpoj
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wredundant-constraints -Wno-unused-imports -Wno-missing-signatures -Wno-missing-export-lists -Wno-unused-top-binds -haddock
+  ghc-options: -Wall -Wunused-packages
   build-depends:
-      aeson
-    , ansi-terminal
-    , array
-    , base >=4.7 && <5
-    , bytestring
-    , containers
-    , contravariant
-    , directory
-    , errors
-    , filepath
-    , lens
-    , lens-aeson
-    , managed
-    , mtl
-    , optparse-applicative
-    , pretty-show
-    , profunctors
-    , system-filepath
-    , text
-    , unordered-containers
-    , vector
-    , yaml
+      base >=4.7 && <5
   default-language: Haskell2010
 
-executable B-exe
-  main-is: ./Contest/B.hs
+executable templates-Contest
+  main-is: ./templates/Contest.hs
   other-modules:
       Paths_acpoj
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wredundant-constraints -Wno-unused-imports -Wno-missing-signatures -Wno-missing-export-lists -Wno-unused-top-binds -haddock
+  ghc-options: -Wall -Wunused-packages
   build-depends:
-      aeson
-    , ansi-terminal
-    , array
-    , base >=4.7 && <5
-    , bytestring
-    , containers
-    , contravariant
-    , directory
-    , errors
-    , filepath
-    , lens
-    , lens-aeson
-    , managed
-    , mtl
-    , optparse-applicative
-    , pretty-show
-    , profunctors
-    , system-filepath
-    , text
-    , unordered-containers
-    , vector
-    , yaml
-  default-language: Haskell2010
-
-executable Contest-exe
-  main-is: ./Templates/Contest.hs
-  other-modules:
-      Paths_acpoj
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wredundant-constraints -Wno-unused-imports -Wno-missing-signatures -Wno-missing-export-lists -Wno-unused-top-binds -haddock
-  build-depends:
-      aeson
-    , ansi-terminal
-    , array
-    , base >=4.7 && <5
-    , bytestring
-    , containers
-    , contravariant
-    , directory
-    , errors
-    , filepath
-    , lens
-    , lens-aeson
-    , managed
-    , mtl
-    , optparse-applicative
-    , pretty-show
-    , profunctors
-    , system-filepath
-    , text
-    , unordered-containers
-    , vector
-    , yaml
-  default-language: Haskell2010
-
-executable problem-exe
-  main-is: ./tools/scripts/problem.hs
-  other-modules:
-      Paths_acpoj
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wredundant-constraints -Wno-unused-imports -Wno-missing-signatures -Wno-missing-export-lists -Wno-unused-top-binds -haddock
-  build-depends:
-      aeson
-    , ansi-terminal
-    , array
-    , base >=4.7 && <5
-    , bytestring
-    , containers
-    , contravariant
-    , directory
-    , errors
-    , filepath
-    , lens
-    , lens-aeson
-    , managed
-    , mtl
-    , optparse-applicative
-    , pretty-show
-    , profunctors
-    , system-filepath
-    , text
-    , unordered-containers
-    , vector
-    , yaml
+      base >=4.7 && <5
   default-language: Haskell2010

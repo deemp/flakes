@@ -4,8 +4,8 @@ This is a Nix flake for Haskell development or problem-solving. It can be used f
 
 It contains:
 - Codium with all necessary extensions for Haskell and Nix
-- Shell tools for Haskell and Nix, like ghc, stack, ghcid
-- A hand-made tool for adding and removing problems (template file to be supported)
+- Shell tools for Haskell and Nix, like ghc, stack, ghcid, rnix-lsp
+- A hand-made tool for adding and removing modules and file templates (`manager`)
 
 ## Quick start
 
@@ -42,18 +42,25 @@ It contains:
 
 - A Codium instance with the promised tools should open.
 
-- Try to add a problem:
+- Learn about `manager`'s supported commands
   ```sh
-  problem add F
+  manager --help
   ```
 
-- Or remove it
+- Or, see the documentation for a specific command
   ```sh
-  problem rm F
+  manager add --help
   ```
 
-- When you open a problem file (e.g. `A.hs`), you should see Haskell Language Server load and show info when you hover over a term.
+- Now, create a module:
+  ```sh
+  manager add B
+  ```
 
-- In case of problems, try to reload the window (`Ctrl` + `Shift` + `P` > `Reload Window`)
+- When you open the newly created file, `./Modules/B.hs`, and hover over a term, you should see Haskell Language Server load and show info.
+
+- In case of problems, try to
+  - Restart HLS: `Ctrl` + `Shift` + `P` > `Restart Haskell LSP Server`
+  - Reload the window: `Ctrl` + `Shift` + `P` > `Reload Window`
 
 - Feel free to create an issue or contact me at [Telegram](https://daniladanko.t.me)

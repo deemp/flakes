@@ -1,4 +1,4 @@
-module Main where
+module Main(main) where
 
 import Data.Functor ((<&>))
 import GHC.Float.RealFracMethods (ceilingDoubleInt, floorDoubleInt)
@@ -24,3 +24,5 @@ floor = floorDoubleInt
 
 main :: IO ()
 main = print "hello, world!"
+
+t = "hey"
