@@ -11,15 +11,12 @@ dependencies:
 - bytestring
 - text
 - optparse-applicative
-- errors
 - filepath
 - yaml
 - unordered-containers
 - lens-aeson
 - lens
-- pretty-show
 - vector
-- containers
 - managed
 
 executables:

@@ -28,8 +28,8 @@ executable A
       base >=4.7 && <5
   default-language: Haskell2010
 
-executable templates-Contest
-  main-is: ./templates/Contest.hs
+executable Templates.Contest
+  main-is: ./Templates/Contest.hs
   other-modules:
       Paths_acpoj
   ghc-options: -Wall -Wunused-packages

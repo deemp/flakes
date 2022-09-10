@@ -1,23 +1,3 @@
-{- stack
-  script
-  --resolver lts-19.21
-  --package mtl
-  --package array
-  --package system-filepath
-  --package aeson
-  --package bytestring
-  --package text
-  --package directory
-  --package optparse-applicative
-  --package errors
-  --package yaml
-  --package unordered-containers
-  --package lens-aeson
-  --package lens
-  --package pretty-show
-  --package filepath
--}
-
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE InstanceSigs #-}
@@ -34,45 +14,73 @@
 
 module Main (main) where
 
-import Control.Error (handleExceptT, hoistEither, isLeft, throwE)
-import Control.Exception (catch)
+import Control.Exception (Exception, catch)
 import Control.Exception.Base
-import Control.Lens (At (at), Identity, Profunctor, filtered, has, hasn't, indices, non, only, over, withIndex, (%=), (%~), (.~), (?~), (^.), (^..), (^?), (^?!), _2)
-import Control.Monad (unless, when)
-import Control.Monad.Cont (ContT)
+  ( Exception (fromException),
+    SomeException,
+    handle,
+    mask,
+    throw,
+    throwIO,
+  )
+import Control.Lens (At (at), Identity, filtered, non, over, withIndex, (^..), (^?!), _2)
 import Control.Monad.Except
+  ( MonadIO (liftIO),
+    unless,
+    when,
+  )
 import Control.Monad.Managed (MonadManaged, managed, runManaged)
-import Data.Aeson (ToJSON (toJSON), Value (..), (.:), (.=))
-import qualified Data.Aeson as JSON
-import Data.Aeson.KeyMap as KM hiding (traverse)
-import Data.Aeson.Lens (AsNumber (_Number), AsValue (..), key, members, values, _String)
-import Data.ByteString (readFile)
+import Data.Aeson (Value (..))
+import Data.Aeson.KeyMap as KM (fromHashMapText)
+import Data.Aeson.Lens (AsValue (..), key, members, _String)
 import qualified Data.ByteString as BS
-import Data.ByteString.Char8 as C hiding (putStrLn)
-import Data.ByteString.Lazy (toStrict)
+import Data.ByteString.Char8 as C
+  ( cons,
+    head,
+    lines,
+    null,
+    tail,
+    unlines,
+  )
 import Data.Char (isAlpha)
-import Data.Either (fromRight)
 import Data.Foldable (traverse_)
 import Data.Function ((&))
 import Data.Functor ((<&>))
-import Data.HashMap.Strict as HM
-import Data.List ()
-import Data.Map (Map)
-import qualified Data.Map as Map
+import Data.HashMap.Strict as HM (fromList)
+import Data.List (intercalate)
 import Data.Maybe ()
+import Data.String (IsString)
 import Data.Text (Text)
 import qualified Data.Text as T
-import qualified Data.Text.Encoding as T.Encoding
 import Data.Traversable ()
-import Data.Vector as Vector
-import Data.Yaml as Y (FromJSON, Object, ParseException, Value (Object), decodeEither', decodeFileThrow, encode, encodeFile)
+import Data.Vector as Vector ()
+import Data.Yaml as Y (ParseException, decodeEither', encode)
 import Filesystem.Path.CurrentOS as Path ()
-import GHC.Generics (Generic)
-import Options.Applicative (Parser, ParserInfo, argument, command, customExecParser, fullDesc, header, help, helper, info, long, metavar, optional, prefs, progDesc, short, showHelpOnError, str, strOption, subparser, value)
-import System.Directory
+import Options.Applicative
+  ( Alternative ((<|>)),
+    Parser,
+    argument,
+    command,
+    customExecParser,
+    fullDesc,
+    header,
+    help,
+    helper,
+    info,
+    long,
+    metavar,
+    prefs,
+    progDesc,
+    short,
+    showHelpOnError,
+    str,
+    strOption,
+    subparser,
+    value,
+  )
+import System.Directory (createDirectoryIfMissing, listDirectory, removeDirectory, removeFile)
+import System.FilePath (isValid, pathSeparator, splitDirectories, (<.>), (</>))
 import System.FilePath.Posix (takeDirectory)
-import System.IO (IOMode (WriteMode), hClose, openFile)
-import Text.Show.Pretty (pPrint, ppShow)
 import Prelude
 
 -- Dealing with exceptions
@@ -86,10 +94,37 @@ import Prelude
 
 -- https://stackoverflow.com/a/51408207
 
-modulesDir, templatesDir, packageYaml :: FilePath
+main :: IO ()
+main = do
+  command' <-
+    customExecParser
+      (prefs showHelpOnError)
+      ( info
+          (helper <*> generalCommand)
+          ( fullDesc
+              <> header "manager - manage module and template files easily"
+              <> progDesc "Organize Haskell files so that HLS accepts them"
+          )
+      )
+
+  handleCommand command'
+    >> putStrLn "Done!"
+    `catch` (\(ExMonoid x) -> putStrLn ("The following problems occured:\n" <> intercalate "\n" (show <$> x)))
+
+modulesDir :: FilePath
 modulesDir = "./Modules"
-templatesDir = "./templates"
+
+templatesDir :: FilePath
+templatesDir = "./Templates"
+
+packageYaml :: String
 packageYaml = "./package.yaml"
+
+managerDir :: FilePath
+managerDir = "./manager"
+
+ghci :: FilePath
+ghci = "./.ghci"
 
 data Command
   = CommandList
@@ -105,16 +140,113 @@ data Command
       }
   deriving (Show)
 
-moduleSubCommand :: Parser Command
-moduleSubCommand =
+data Target = TargetModule | TargetTemplate
+
+data GeneralCommand = GeneralCommand
+  { target :: Target,
+    command_ :: Command
+  }
+
+data PathType = FileHs | TemplateHs | PackageYaml | Ghci | Directory
+
+instance Show PathType where
+  show :: PathType -> String
+  show = \case
+    FileHs -> "file"
+    TemplateHs -> "template"
+    PackageYaml -> packageYaml
+    Ghci -> ".ghci"
+    Directory -> "directory"
+
+data ErrorType = ERead | EWrite | ERemove
+
+instance Show ErrorType where
+  show :: ErrorType -> String
+  show = \case
+    ERead -> "reading"
+    EWrite -> "writing"
+    ERemove -> "removing"
+
+data ProcessError
+  = FileError
+      { errorType :: ErrorType,
+        fileType :: PathType,
+        filePath :: FilePath,
+        message :: String
+      }
+  | NameError {name :: String}
+
+instance Show ProcessError where
+  show :: ProcessError -> String
+  show FileError {..} = "Error" <-> show errorType <-> show fileType <-> qq filePath <-> ":" <-> message
+  show NameError {name} = "Error: the name" <-> qq name <-> "contains not only alphanumeric characters and/or '/'-s"
+
+instance Exception ProcessError
+
+newtype Ex = Ex String deriving (Show)
+
+instance Exception Ex
+
+newtype ExMonoid = ExMonoid [SomeException]
+
+instance Show ExMonoid where
+  show :: ExMonoid -> String
+  show (ExMonoid s) = show s
+
+instance Exception ExMonoid
+
+eitherTarget :: p -> p -> Target -> p
+eitherTarget f g x =
+  case x of
+    TargetModule -> f
+    TargetTemplate -> g
+
+makeSubCommand :: Target -> Parser Command
+makeSubCommand target =
   subparser
-    ( f "add" addCommand "Add a module at './Modules/NAME.hs'. It will be added to the './package.yaml'"
-        <> f "rm" removeCommand "Remove a module at './Modules/NAME.hs'"
-        <> f "list" listCommand "List modules available in './package.yaml'"
-        <> f "set" setCommand "Set a module so that it's loaded when a 'ghci'-session starts. When 'ghcid' starts, it will run this module's 'main'"
-        -- TODO add subcommand for creating templates
-        -- problem template add/rm/list
+    ( f
+        "add"
+        addCommand
+        ( ("Add a" <-> name <-> "at '" <> dir </> "NAME.hs'. It will also appear in the './package.yaml'.")
+            <-> "Note that a NAME should contain only alphanumeric characters and/or '/'."
+            <-> ("E.g., a NAME can be 'A/A' and refer to a" <-> name <-> "at" <-> qq (dir </> "A/A.hs"))
+        )
+        <> f
+          "rm"
+          removeCommand
+          ( ("Remove a" <-> name <-> "at '" <> dir </> "NAME.hs' and its empty parent directories.")
+              <-> ("This" <-> name <-> "will also be removed from './package.yaml'")
+          )
+        <> f
+          "list"
+          listCommand
+          ( "List " <> name <> "s available in './package.yaml'"
+          )
+        <> f
+          "set"
+          setCommand
+          ( ("Set a " <> name <> " so that it's loaded when a 'ghci' session starts.")
+              <-> ("When 'ghcid' starts, it will run this " <> name <> "'s 'main'")
+          )
     )
+  where
+    f name' command' desc = command name' (info (helper <*> command') (fullDesc <> progDesc desc))
+    (dir, name) =
+      case target of
+        TargetModule -> (modulesDir, "module")
+        TargetTemplate -> (templatesDir, "template")
+
+templatesSubCommand :: Parser Command
+templatesSubCommand = makeSubCommand TargetTemplate
+
+modulesSubCommand :: Parser Command
+modulesSubCommand = makeSubCommand TargetModule
+
+generalCommand :: Parser GeneralCommand
+generalCommand =
+  -- TODO some description for modules command
+  (GeneralCommand TargetModule <$> modulesSubCommand)
+    <|> GeneralCommand TargetTemplate <$> subparser (f "template" templatesSubCommand "Manipulate templates")
   where
     f name' command' desc = command name' (info (helper <*> command') (fullDesc <> progDesc desc))
 
@@ -131,7 +263,14 @@ parseFileName :: Parser String
 parseFileName = argument str (metavar "NAME")
 
 parseTemplate :: Parser String
-parseTemplate = strOption (long "template" <> short 't' <> metavar "NAME" <> value defaultTemplate <> help "A template NAME")
+parseTemplate =
+  strOption
+    ( long "template"
+        <> short 't'
+        <> metavar "NAME"
+        <> value defaultTemplate
+        <> help "A template NAME"
+    )
 
 addCommand :: Parser Command
 addCommand = CommandAdd <$> parseFileName <*> parseTemplate
@@ -139,78 +278,22 @@ addCommand = CommandAdd <$> parseFileName <*> parseTemplate
 removeCommand :: Parser Command
 removeCommand = CommandRemove <$> parseFileName
 
-main :: IO ()
-main = do
-  command_ <-
-    customExecParser
-      (prefs showHelpOnError)
-      ( info
-          (helper <*> moduleSubCommand)
-          ( fullDesc
-              <> header "module - manage project modules easily"
-              <> progDesc "Manage modules in this project so that HLS accepts them"
-          )
-      )
-  -- print command_
+-- | concatenate strings with a space
+(<->) :: (IsString a, Semigroup a) => a -> a -> a
+x <-> y = x <> " " <> y
 
-  -- todo handle exceptions
-  h <- handleCommand command_
-  putStrLn "Done!"
-
--- either (pPrint . renderProcessError) return h
-
-data FileType = FileHs | TemplateHs | PackageYaml | Ghci
-
-instance Show FileType where
-  show = \case
-    FileHs -> "file"
-    TemplateHs -> "template"
-    PackageYaml -> packageYaml
-    Ghci -> ".ghci"
-
-data ErrorType = ERead | EWrite | ERemove
-
-instance Show ErrorType where
-  show = \case
-    ERead -> "reading"
-    EWrite -> "writing"
-    ERemove -> "removing"
-
-data ProcessError = ProcessError
-  { errorType :: ErrorType,
-    fileType :: FileType,
-    filePath :: FilePath,
-    message :: String
-  }
-
-instance Show ProcessError where
-  show ProcessError {..} = "Error " <> show errorType <> " " <> show fileType <> " '" <> filePath <> "' : " <> message
+-- | enclose a string into single quotes
+qq :: (IsString a, Semigroup a) => a -> a
+qq s = "'" <> s <> "'"
 
 renderProcessError :: ProcessError -> Text
 renderProcessError = T.pack . show
 
-do' x = putStrLn ("do " <> x)
+do' :: String -> IO ()
+do' x = putStrLn ("do" <-> x)
 
 undo' :: String -> IO ()
-undo' x = putStrLn ("undo " <> x)
-
-instance Exception ProcessError
-
--- newtype MyEx = MyEx ProcessError deriving (Show)
-
--- instance Exception MyEx
-
-newtype Ex = Ex String deriving (Show)
-
-instance Exception Ex
-
-newtype ExMonoid = ExMonoid [SomeException]
-
-instance Show ExMonoid where
-  show :: ExMonoid -> String
-  show (ExMonoid s) = show s
-
-instance Exception ExMonoid
+undo' x = putStrLn ("undo" <-> x)
 
 fmapE :: forall e a. Exception e => (e -> a) -> ExMonoid -> [Maybe a]
 fmapE f (ExMonoid s) = (f <$>) . fromException <$> s
@@ -220,101 +303,172 @@ filterMapE f (ExMonoid s) = Prelude.foldr (\x m -> maybe m ((: m) . f) (fromExce
 
 bracketOnError' :: IO a -> (a -> IO b) -> (a -> IO c) -> IO c
 bracketOnError' before after thing =
-  mask $ \restore -> do
-    a <- before
-    ( restore (thing a)
-        `catch` ( \(x :: SomeException) ->
-                    case fromException x of
-                      Just (ExMonoid x') -> throwIO $ ExMonoid x'
-                      _ -> throwIO $ ExMonoid [x]
-                )
+  mask $ \restore ->
+    -- in case the 'before' action throws
+    catchThrow
+      ( do
+          a <- before
+          catchThrow (restore (thing a))
+            `onException'` after a
       )
-      `onException'` after a
+  where
+    catchThrow y = y `catch` (\(x :: SomeException) -> throwIO $ ExMonoid $ maybe [x] (\(ExMonoid x') -> x') (fromException x))
 
+-- | perform an action A
+-- if it causes an exception, perform an action B
+-- collect exceptions of both actions into a monoid
 onException' :: IO a -> IO b -> IO a
-onException' io what = io `catch` (\x'@(ExMonoid x) -> do _ <- what `catch` (\y -> throwIO $ ExMonoid (y : x)); throwIO x')
+onException' io what =
+  io
+    `catch` ( \x'@(ExMonoid x) -> do
+                _ <- what `catch` (\y -> throwIO $ ExMonoid (y : x))
+                throwIO x'
+            )
 
+-- | managed bracketOnError' that should restore in case of errors
 mBracketOnError :: MonadManaged m => IO a -> (a -> IO b) -> m a
 mBracketOnError x y = managed (bracketOnError' x y)
 
+-- | managed bracketOnError' that shouldn't restore in case of errors
 mWith :: MonadManaged m => IO a -> m a
 mWith x = mBracketOnError x (const (return ()))
 
+-- | demo collect exceptions into a monoid
 tryManaged' :: IO ()
 tryManaged' = handle (\(x :: ExMonoid) -> print $ filterMapE @Ex (\(Ex t) -> "Print " <> t) x) $
   runManaged $ do
-    _ <- managed (bracketOnError' (do' "A") (\_ -> undo' "A" >> throw (Ex "Arelease")))
-    _ <- managed (bracketOnError' (do' "B") (\_ -> undo' "B" >> throw (Ex "B")))
-    _ <- managed (bracketOnError' (do' "C") (\_ -> undo' "C" >> throw (Ex "C")))
-    _ <- managed (bracketOnError' (do' "D" >> throw (Ex "Da")) (\_ -> undo' "D" >> throw (Ex "Dr")))
+    _ <- mBracketOnError (do' "A" >> throw (Ex "Arelease")) (\_ -> undo' "A" >> throw (Ex "Arelease"))
+    _ <- mBracketOnError (do' "B") (\_ -> undo' "B" >> throw (Ex "B"))
+    _ <- mBracketOnError (do' "C") (\_ -> undo' "C" >> throw (Ex "C"))
+    _ <- mBracketOnError (do' "D" >> throw (Ex "Da")) (\_ -> undo' "D" >> throw (Ex "Dr"))
     liftIO $ throw $ Ex "final1"
 
-handleCommand :: Command -> IO ()
-handleCommand c = runManaged $ case c of
+-- | safely handle command
+-- collect into a monoid and rethrow the exceptions that occur when doing or undoing actions
+handleCommand :: GeneralCommand -> IO ()
+handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
   CommandAdd {name, template} -> do
-    liftIO $ putStrLn $ "Reading template at '" <> templateHs <> "'"
-    t <- mWith ((BS.readFile templateHs `catch'`) ERead TemplateHs templateHs)
-    liftIO $ putStrLn $ "Writing the template into '" <> fileHs <> "'"
-    liftIO $ createDirectoryIfMissing True modulesDir
+    throwIfBadName name
+    throwIfBadName template
+    liftIO $ putStrLn $ "Reading template at" <-> qq templateHs
+    t <- mWith ((BS.readFile templateHs `catchThrow`) ERead TemplateHs templateHs)
+    liftIO $ putStrLn $ "Writing the template into" <-> qq fileHs
     mBracketOnError
-      ((BS.writeFile fileHs t `catch'`) EWrite FileHs fileHs)
-      (\_ -> (removeFile fileHs `catch'`) ERemove FileHs fileHs)
+      ((createDirectoryIfMissing True targetDir `catchThrow`) EWrite Directory fileHs)
+      (\_ -> (removeFile fileHs `catchThrow`) ERemove Directory fileHs)
+    mBracketOnError
+      ((BS.writeFile fileHs t `catchThrow`) EWrite FileHs fileHs)
+      (\_ -> (removeFile fileHs `catchThrow`) ERemove FileHs fileHs)
     readPackageYaml $ \y1 atKey nempty -> do
-      let y2 = y1 & over (key executables . atKey (mkExe name) . nempty . atKey main') (\_ -> Just $ String (T.pack fileHs))
+      let y2 =
+            y1
+              & over
+                (key executables . atKey (mkExe name) . nempty . atKey main')
+                (\_ -> Just $ String (T.pack fileHs))
       writePackageYaml y2
     where
-      fileHs = mkFileHs name
-      templateHs = templatesDir <> "/" <> template <> ".hs"
+      fileHs = mkTargetHs name
+      templateHs = templatesDir </> template <.> "hs"
+      targetDir = takeDirectory fileHs
   CommandList -> do
     readPackageYaml $ \y1 _ _ -> do
       liftIO $ putStrLn "Executables:"
-      let check x = takeDirectory (T.unpack x) `Prelude.notElem` ["./tools/scripts", templatesDir]
-          y2 = (y1 ^.. key executables . members . filtered (\x -> check (x ^?! key main' . _String)) . withIndex) <&> over _2 (\y -> y ^?! key main' . _String)
-      traverse_ (\(name, path) -> liftIO $ putStrLn $ T.unpack $ name <> " ( " <> path <> " )") y2
+      let check x =
+            (\(a : b : _) -> a </> b) (splitDirectories (T.unpack x))
+              `Prelude.notElem` [managerDir, targetTopDirComplementary]
+          y2 =
+            (y1 ^.. key executables . members . filtered (\x -> check (x ^?! key main' . _String)) . withIndex)
+              <&> over _2 (\y -> y ^?! key main' . _String)
+      traverse_ (\(name, path) -> liftIO $ putStrLn $ T.unpack $ name <-> "(" <-> path <-> ")") y2
   CommandRemove {name} -> do
-    t <- mWith ((BS.readFile fileHs `catch'`) ERead FileHs fileHs)
-    liftIO $ putStrLn $ "Removing '" <> fileHs <> "'"
+    throwIfBadName name
+    t <- mWith ((BS.readFile fileHs `catchThrow`) ERead FileHs fileHs)
+    liftIO $ putStrLn $ "Removing" <-> qq fileHs
     mBracketOnError
-      ((removeFile fileHs `catch'`) ERemove FileHs fileHs)
+      ((removeFile fileHs `catchThrow`) ERemove FileHs fileHs)
       -- restore the contents
-      (\_ -> (BS.writeFile fileHs t `catch'`) EWrite FileHs fileHs)
+      (\_ -> (BS.writeFile fileHs t `catchThrow`) EWrite FileHs fileHs)
+    mBracketOnError
+      ((traverse_ removeDirectoryIfEmpty targetDirParents `catchThrow`) ERemove Directory targetDir)
+      -- restore the contents
+      (\_ -> (createDirectoryIfMissing True targetDir `catchThrow`) EWrite Directory targetDir)
     readPackageYaml $ \y1 _ _ -> do
-      let y2 = y1 & over (key executables) (\x -> Object $ KM.fromHashMapText $ HM.fromList (x ^.. members . withIndex . filtered (\(y, _) -> y /= exe)))
+      let y2 =
+            y1
+              & over
+                (key executables)
+                ( \x ->
+                    Object $
+                      KM.fromHashMapText $
+                        HM.fromList
+                          ( x ^.. members . withIndex . filtered (\(y, _) -> y /= exe)
+                          )
+                )
       writePackageYaml y2
     where
-      fileHs = mkFileHs name
+      targetDir = takeDirectory fileHs
+      targetDirParents = take (length (splitDirectories targetDir)) (iterate takeDirectory targetDir)
+      fileHs = mkTargetHs name
       exe = mkExe name
   CommandSet {name} -> do
-    mWith ((Prelude.writeFile ghci txt `catch'`) EWrite Ghci ghci)
+    throwIfBadName name
+    mWith ((Prelude.writeFile ghci txt `catchThrow`) EWrite Ghci ghci)
     where
-      ghci = "./.ghci"
-      txt = ":set -isrc\n:load " <> mkFileHs name
+      txt = ":set -isrc\n:load" <-> mkTargetHs name
   where
     main' = "main"
     executables = "executables"
-    mkExe x = T.pack x
-    mkFileHs x = modulesDir <> "/" <> x <> ".hs"
+    targetTopDir = eitherTarget modulesDir templatesDir target
+    targetTopDirComplementary = eitherTarget templatesDir modulesDir target
+    mkTargetHs x = targetTopDir </> x <.> "hs"
+    isOkName name = isValid name && all (all (`elem` alphabet)) (splitDirectories name)
+      where
+        alphabet = ['A' .. 'Z'] ++ ['a' .. 'z'] ++ ['0' .. '9'] ++ ['_']
+    throwIfBadName name = mWith (liftIO $ unless (isOkName name) (throwIO $ NameError name))
+    removeDirectoryIfEmpty dir = do
+      isEmptyDir <- Prelude.null <$> listDirectory dir
+      when isEmptyDir (removeDirectory dir)
+    mkExe x =
+      T.pack $
+        eitherTarget "" "Templates." target
+          <> ((\y -> if y == pathSeparator then '.' else y) <$> x)
+    -- safely read a package.yaml and run the continuation ok if everything is OK
     readPackageYaml ok = do
-      liftIO $ putStrLn $ "Reading '" <> packageYaml <> "'"
+      liftIO $ putStrLn $ "Reading" <-> qq packageYaml
       y1 <-
         mBracketOnError
-          ((BS.readFile packageYaml `catch'`) ERead PackageYaml packageYaml)
-          -- restore the inital contents
-          (\x -> (BS.writeFile packageYaml x `catch'`) EWrite PackageYaml packageYaml)
+          ((BS.readFile packageYaml `catchThrow`) ERead PackageYaml packageYaml)
+          -- restore the contents
+          (\x -> (BS.writeFile packageYaml x `catchThrow`) EWrite PackageYaml packageYaml)
       let (y2 :: Either ParseException Value) = decodeEither' y1
       case y2 of
-        Left e -> liftIO $ throwIO $ ProcessError ERead PackageYaml packageYaml (show e)
+        Left l -> liftIO $ throwIO $ FileError ERead PackageYaml packageYaml (show l)
         Right r ->
           let atKey :: Text -> (Maybe Value -> Identity (Maybe Value)) -> Value -> Identity Value
               atKey k = _Object . at k
               nempty :: (Value -> Identity Value) -> Maybe Value -> Identity (Maybe Value)
               nempty = non (Object mempty)
            in ok r atKey nempty
+    -- safely write package.yaml
     writePackageYaml y1 = do
-      liftIO $ putStrLn $ "Updating '" <> packageYaml <> "'"
-      let y2 = C.lines (Y.encode y1) <&> (\x -> if not (C.null x) && isAlpha (C.head x) then C.cons '\n' x else x) & C.unlines & C.tail
-      mBracketOnError
-        ((BS.writeFile packageYaml y2 `catch'`) EWrite PackageYaml packageYaml)
-        -- we'll write the initial contents anyway
-        (\_ -> return ())
-    catch' x errorType fileType filePath = x `catch` (\(e :: SomeException) -> throwIO $ ProcessError errorType fileType filePath (show e))
+      liftIO $ putStrLn $ "Updating" <-> qq packageYaml
+      let y2 =
+            C.lines (Y.encode y1)
+              <&> (\x -> if not (C.null x) && isAlpha (C.head x) then C.cons '\n' x else x)
+              & C.unlines
+              & C.tail
+      -- we'll anyway restore content on an exceptio
+      mWith ((BS.writeFile packageYaml y2 `catchThrow`) EWrite PackageYaml packageYaml)
+    -- translate an exception into a custom exception for easier handling
+    catchThrow :: IO a -> ErrorType -> PathType -> FilePath -> IO a
+    catchThrow x errorType fileType filePath =
+      x `catch` (\(e :: SomeException) -> throwIO $ FileError errorType fileType filePath (show e))
+
+dr = d
+  where
+    cond = const True
+    x = "./Modules/A/A/A"
+    d = take (length (splitDirectories x)) (iterate takeDirectory x)
+
+-- >>>dr
+-- ["./Modules/A/A/A","./Modules/A/A","./Modules/A","./Modules","."]

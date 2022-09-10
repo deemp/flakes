@@ -8,8 +8,8 @@ dependencies:
 executables:
   A:
     main: ./Modules/A.hs
-  templates-Contest:
-    main: ./templates/Contest.hs
+  Templates.Contest:
+    main: ./Templates/Contest.hs
 
 ghc-options:
 - -Wall

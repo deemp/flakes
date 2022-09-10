@@ -27,16 +27,13 @@ executable manager
       aeson
     , base >=4.7 && <5
     , bytestring
-    , containers
     , directory
-    , errors
     , filepath
     , lens
     , lens-aeson
     , managed
     , mtl
     , optparse-applicative
-    , pretty-show
     , system-filepath
     , text
     , unordered-containers
