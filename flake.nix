@@ -73,6 +73,7 @@
               ];
             shellHook = ''
               write-settings
+              source <(manager --bash-completion-script `which manager`)
             '';
           };
         };
