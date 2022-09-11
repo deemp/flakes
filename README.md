@@ -33,7 +33,15 @@ This flake contains:
 
 - Now, when prompted, answer `y`
 
-- Everything should start loading. If no, run `nix develop`
+- Everything should start loading. If no, run:
+  ```
+  nix develop
+  ```
+
+- You should build the project to verify HLS can also build it
+  ```
+  stack build
+  ```
 
 - After that, run
   ```sh
@@ -71,8 +79,8 @@ This flake contains:
 - When you open the newly created file, `./Modules/B.hs`, and hover over a term, you should see Haskell Language Server load and show info.
 
 - In case of problems, try to
-  - Restart HLS: `Ctrl` + `Shift` + `P` > `Restart Haskell LSP Server`
-  - Reload the window: `Ctrl` + `Shift` + `P` > `Reload Window`
+  - restart HLS: `Ctrl` + `Shift` + `P` > `Restart Haskell LSP Server`
+  - reload the window: `Ctrl` + `Shift` + `P` > `Reload Window`
 
 - Feel free to create an issue or contact me at [Telegram](https://daniladanko.t.me)
 
