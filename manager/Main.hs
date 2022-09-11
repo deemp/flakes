@@ -61,6 +61,7 @@ import Options.Applicative
     Parser,
     argument,
     command,
+    commandGroup,
     customExecParser,
     fullDesc,
     header,
@@ -79,9 +80,10 @@ import Options.Applicative
     value,
   )
 import System.Directory (createDirectoryIfMissing, listDirectory, removeDirectory, removeFile)
-import System.FilePath (isValid, pathSeparator, splitDirectories, (<.>), (</>))
+import System.FilePath (dropTrailingPathSeparator, isValid, pathSeparator, splitDirectories, (<.>), (</>))
 import System.FilePath.Posix (takeDirectory)
 import Prelude
+import System.Exit (exitFailure)
 
 -- Dealing with exceptions
 -- http://www.mega-nerd.com/erikd/Blog/CodeHacking/Haskell/what_do_you_mean.html
@@ -108,8 +110,12 @@ main = do
       )
 
   handleCommand command'
-    >> putStrLn "Done!"
-    `catch` (\(ExMonoid x) -> putStrLn ("The following problems occured:\n" <> intercalate "\n" (show <$> x)))
+    `catch` ( \(ExMonoid x) -> do
+                putStrLn ("The following problems occured:\n" <> intercalate "\n" (show <$> x))
+                exitFailure
+            )
+
+  putStrLn "Done!"
 
 modulesDir :: FilePath
 modulesDir = "./Modules"
@@ -140,12 +146,13 @@ data Command
       }
   deriving (Show)
 
-data Target = TargetModule | TargetTemplate
+data Target = TargetModule | TargetTemplate deriving (Show)
 
 data GeneralCommand = GeneralCommand
   { target :: Target,
     command_ :: Command
   }
+  deriving (Show)
 
 data PathType = FileHs | TemplateHs | PackageYaml | Ghci | Directory
 
@@ -158,10 +165,10 @@ instance Show PathType where
     Ghci -> ".ghci"
     Directory -> "directory"
 
-data ErrorType = ERead | EWrite | ERemove
+data ActionType = ERead | EWrite | ERemove
 
-instance Show ErrorType where
-  show :: ErrorType -> String
+instance Show ActionType where
+  show :: ActionType -> String
   show = \case
     ERead -> "reading"
     EWrite -> "writing"
@@ -169,7 +176,7 @@ instance Show ErrorType where
 
 data ProcessError
   = FileError
-      { errorType :: ErrorType,
+      { actionType :: ActionType,
         fileType :: PathType,
         filePath :: FilePath,
         message :: String
@@ -178,8 +185,10 @@ data ProcessError
 
 instance Show ProcessError where
   show :: ProcessError -> String
-  show FileError {..} = "Error" <-> show errorType <-> show fileType <-> qq filePath <-> ":" <-> message
-  show NameError {name} = "Error: the name" <-> qq name <-> "contains not only alphanumeric characters and/or '/'-s"
+  show FileError {..} = "Error" <-> show actionType <-> show fileType <-> qq filePath <-> ":" <-> message
+  show NameError {name} =
+    ("Error: the path or name" <-> qq name <-> "is bad.")
+      <-> "It should be of form 'A(/A)*' like 'A' or 'A/A', where 'A' is an alphanumeric sequence."
 
 instance Exception ProcessError
 
@@ -208,8 +217,11 @@ makeSubCommand target =
         "add"
         addCommand
         ( ("Add a" <-> name <-> "at '" <> dir </> "NAME.hs'. It will also appear in the './package.yaml'.")
-            <-> "Note that a NAME should contain only alphanumeric characters and/or '/'."
-            <-> ("E.g., a NAME can be 'A/A' and refer to a" <-> name <-> "at" <-> qq (dir </> "A/A.hs"))
+            <-> "A NAME should be of form 'A(/A)*', like 'A' or 'A/A', where 'A' is an alphanumeric sequence."
+            <-> "A NAME 'A/A' refers to a"
+            <-> name
+            <-> "at"
+            <-> qq (dir </> "A/A.hs")
         )
         <> f
           "rm"
@@ -246,7 +258,7 @@ generalCommand :: Parser GeneralCommand
 generalCommand =
   -- TODO some description for modules command
   (GeneralCommand TargetModule <$> modulesSubCommand)
-    <|> GeneralCommand TargetTemplate <$> subparser (f "template" templatesSubCommand "Manipulate templates")
+    <|> GeneralCommand TargetTemplate <$> subparser (f "template" templatesSubCommand "Manipulate templates" <> commandGroup "Template commands:")
   where
     f name' command' desc = command name' (info (helper <*> command') (fullDesc <> progDesc desc))
 
@@ -421,8 +433,9 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
     targetTopDir = eitherTarget modulesDir templatesDir target
     targetTopDirComplementary = eitherTarget templatesDir modulesDir target
     mkTargetHs x = targetTopDir </> x <.> "hs"
-    isOkName name = isValid name && all (all (`elem` alphabet)) (splitDirectories name)
+    isOkName name = isValid name && hasNoTrailingSeparator && all (all (`elem` alphabet)) (splitDirectories name)
       where
+        hasNoTrailingSeparator = dropTrailingPathSeparator name == name
         alphabet = ['A' .. 'Z'] ++ ['a' .. 'z'] ++ ['0' .. '9'] ++ ['_']
     throwIfBadName name = mWith (liftIO $ unless (isOkName name) (throwIO $ NameError name))
     removeDirectoryIfEmpty dir = do
@@ -460,15 +473,6 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
       -- we'll anyway restore content on an exceptio
       mWith ((BS.writeFile packageYaml y2 `catchThrow`) EWrite PackageYaml packageYaml)
     -- translate an exception into a custom exception for easier handling
-    catchThrow :: IO a -> ErrorType -> PathType -> FilePath -> IO a
-    catchThrow x errorType fileType filePath =
-      x `catch` (\(e :: SomeException) -> throwIO $ FileError errorType fileType filePath (show e))
-
-dr = d
-  where
-    cond = const True
-    x = "./Modules/A/A/A"
-    d = take (length (splitDirectories x)) (iterate takeDirectory x)
-
--- >>>dr
--- ["./Modules/A/A/A","./Modules/A/A","./Modules/A","./Modules","."]
+    catchThrow :: IO a -> ActionType -> PathType -> FilePath -> IO a
+    catchThrow x actionType fileType filePath =
+      x `catch` (\(e :: SomeException) -> throwIO $ FileError actionType fileType filePath (show e))
