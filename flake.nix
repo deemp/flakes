@@ -38,8 +38,8 @@
       inherit (pkgs.haskell.lib) justStaticExecutables;
       inherit (gitignore.lib) gitignoreSource;
 
-      manager = justStaticExecutables (callCabal2nix "manager" (gitignoreSource ./manager) {});
-      
+      manager = justStaticExecutables (callCabal2nix "manager" (gitignoreSource ./manager) { });
+
       inherit (my-codium.packages.${system})
         writeSettingsJson
         settingsNix
@@ -52,9 +52,9 @@
         ;
       writeSettings = writeSettingsJson
         {
-          inherit (settingsNix) haskell todo-tree files workbench editor gitlens git nix-ide;
+          inherit (settingsNix) haskell todo-tree files editor gitlens git nix-ide;
           window."window.zoomLevel" = 0.3;
-          workbench."workbench.colorTheme" = "Monokai";
+          workbench = settingsNix.workbench // { "workbench.colorTheme" = "Monokai"; };
         };
     in
     {

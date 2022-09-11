@@ -20,5 +20,6 @@
     "nix.serverPath": "rnix-lsp",
     "todo-tree.regex.regex": "((--\\s*($TAGS))|\\{-\\s($TAGS).*(\\n.*)*-})",
     "window.zoomLevel": 0.3,
+    "workbench.colorTheme": "Monokai",
     "workbench.sideBar.location": "right"
 }
