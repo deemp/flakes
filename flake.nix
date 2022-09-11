@@ -54,6 +54,7 @@
         {
           inherit (settingsNix) haskell todo-tree files workbench editor gitlens git nix-ide;
           window."window.zoomLevel" = 0.3;
+          workbench."workbench.colorTheme" = "Monokai";
         };
     in
     {
