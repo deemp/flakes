@@ -1,11 +1,11 @@
-# Codium for Haskell
+# nix-managed
 
-This is a Nix flake for Haskell development or problem-solving. It can be used for OJ, e.g., ACPOJ (hosted by [@ParfenovIgor](https://github.com/ParfenovIgor)).
+This is a Nix flake for trying Haskell. Its Haskell files are managed by `manager`, which uses the [managed](https://hackage.haskell.org/package/managed-1.0.9) package.
 
-It contains:
-- Codium with all necessary extensions for Haskell and Nix
-- Shell tools for Haskell and Nix, like ghc, stack, ghcid, rnix-lsp
-- A hand-made tool for adding and removing modules and file templates (`manager`)
+This flake contains:
+- [VSCodium](https://vscodium.com/) with all necessary extensions for Haskell and Nix
+- Shell tools for Haskell (`GHC 9.0.2`) and Nix, like `ghc`, `stack`, `ghcid`, `rnix-lsp`
+- A hand-made tool for managing modules and file templates (`manager`)
 
 ## Quick start
 
@@ -57,6 +57,17 @@ It contains:
   manager add B
   ```
 
+- Autocomplete may work for you when pressing the `TAB` button. Remove this module
+  ```sh
+  $ manager <TAB>
+  --help    -h        add       list      rm        set       template
+  $ manager rm B
+  Removing './Modules/B.hs'
+  Reading './package.yaml'
+  Updating './package.yaml'
+  Done!
+  ```
+
 - When you open the newly created file, `./Modules/B.hs`, and hover over a term, you should see Haskell Language Server load and show info.
 
 - In case of problems, try to
@@ -64,3 +75,15 @@ It contains:
   - Reload the window: `Ctrl` + `Shift` + `P` > `Reload Window`
 
 - Feel free to create an issue or contact me at [Telegram](https://daniladanko.t.me)
+
+## Miscellaneous
+
+* Dealing with exceptions - [src](http://www.mega-nerd.com/erikd/Blog/CodeHacking/Haskell/what_do_you_mean.html)
+
+* Lenses - [src](https://en.wikibooks.org/wiki/Haskell/Lenses_and_functional_references)
+  * lens-aeson examples - [src](https://github.com/danidiaz/lens-aeson-examples/blob/master/src/Data/Aeson/Lens/Examples.hs)
+  * more examples - [src](https://www.snoyman.com/blog/2017/05/playing-with-lens-aeson/)
+
+* Safe Resource handling - [src](https://mmhaskell.com/blog/2022/6/23/resources-and-bracket)
+
+* [managed](https://hackage.haskell.org/package/managed-1.0.9) package - with this package, we can collect into a monoid the exceptions that occur when doing and undoing actions. See [manager](./manager/)

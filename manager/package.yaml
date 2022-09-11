@@ -18,14 +18,34 @@ dependencies:
 - lens
 - vector
 - managed
+- temporary
+
+library:
+  source-dirs: src
 
 executables:
   manager:
-    main: ./Main.hs
-  
+    main: Main.hs
+    source-dirs: app
+    dependencies: manager
+
+default-extensions:
+  - DuplicateRecordFields
+  - ExistentialQuantification
+  - FlexibleContexts
+  - InstanceSigs
+  - LambdaCase
+  - NamedFieldPuns
+  - OverloadedStrings
+  - RankNTypes
+  - RecordWildCards
+  - KindSignatures
+  - ScopedTypeVariables
+  - TypeApplications
+
 ghc-options:
 - -Wall
-- -Wunused-packages
+# - -Wunused-packages
 
 github: githubuser/manager
 

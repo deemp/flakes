@@ -4,6 +4,10 @@ copyright: 2022 Author name here
 
 dependencies:
 - base >= 4.7 && < 5
+- text
+- managed
+- directory
+- bytestring
 
 executables:
   A:
@@ -13,7 +17,6 @@ executables:
 
 ghc-options:
 - -Wall
-- -Wunused-packages
 
 github: githubuser/acpoj
 
