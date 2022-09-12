@@ -201,11 +201,11 @@
             };
 
 
-            # convert json to nix
-            # no need to provide the full path to a file if it's in the cwd
-            # Example: 
-            # nix run .#json2nix settings.json settings.nix
-            json2nix = pkgs.writeScriptBin "json2nix" ''
+        # convert json to nix
+        # no need to provide the full path to a file if it's in the cwd
+        # Example: 
+        # nix run .#json2nix settings.json settings.nix
+        json2nix = pkgs.writeScriptBin "json2nix" ''
           json_path=$1
           nix_path=$2
           pkgs="with import ${nixpkgs} { }"
@@ -245,6 +245,11 @@
               write-settings
             '';
           };
+          
+          # From here: https://docs.haskellstack.org/en/stable/nix_integration/
+          # Make external Nix c libraries like zlib known to GHC, like pkgs.haskell.lib.buildStackProject does
+          # https://github.com/NixOS/nixpkgs/blob/d64780ea0e22b5f61cd6012a456869c702a72f20/pkgs/development/haskell-modules/generic-stack-builder.nix#L38
+          LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath myDevTools;
         };
       }
     );
