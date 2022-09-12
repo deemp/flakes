@@ -122,11 +122,11 @@
               # auto generate LSP hie.yaml file from cabal
               implicit-hie
               # Automatically discover and run Hspec tests
-              hspec-discover_2_10_0_1
+              hspec-discover
               # Automation of Haskell package release process.
               releaser
               # Simple Hackage release workflow for package maintainers
-              hkgr_0_4_2
+              hkgr
               # Easy dependency management for Nix projects.
               niv
               # GHCi based bare bones IDE
