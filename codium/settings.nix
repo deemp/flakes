@@ -34,6 +34,7 @@
 
   workbench = {
     "workbench.sideBar.location" = "right";
+    "workbench.colorTheme" = "Monokai";
   };
 
   editor = {
