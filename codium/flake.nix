@@ -233,24 +233,28 @@
             toList
             ;
         };
-        devShells = {
-          default = pkgs.mkShell {
-            name = "my-codium";
-            buildInputs = pkgs.lib.lists.flatten [
+        devShells =
+          let
+            myDevTools = pkgs.lib.lists.flatten [
               (toList shellTools)
               codium
               (writeSettingsJson settingsNix)
             ];
-            shellHook = ''
-              write-settings
-            '';
+          in
+          {
+            default = pkgs.mkShell {
+              name = "my-codium";
+              buildInputs = myDevTools;
+              shellHook = ''
+                write-settings
+              '';
+            };
+
+            # From here: https://docs.haskellstack.org/en/stable/nix_integration/
+            # Make external Nix c libraries like zlib known to GHC, like pkgs.haskell.lib.buildStackProject does
+            # https://github.com/NixOS/nixpkgs/blob/d64780ea0e22b5f61cd6012a456869c702a72f20/pkgs/development/haskell-modules/generic-stack-builder.nix#L38
+            LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath myDevTools;
           };
-          
-          # From here: https://docs.haskellstack.org/en/stable/nix_integration/
-          # Make external Nix c libraries like zlib known to GHC, like pkgs.haskell.lib.buildStackProject does
-          # https://github.com/NixOS/nixpkgs/blob/d64780ea0e22b5f61cd6012a456869c702a72f20/pkgs/development/haskell-modules/generic-stack-builder.nix#L38
-          LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath myDevTools;
-        };
       }
     );
 
