@@ -32,7 +32,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04, ubuntu-22.04, macos-11, macos-12]
-        cache: [br4ch1st0chr0n3-acpoj]
+        cache: [br4ch1st0chr0n3-nix-managed]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -42,8 +42,8 @@ jobs:
           # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#about-the-github_token-secret
           extra_nix_config: |
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-            substituters = https://br4ch1st0chr0n3-acpoj.cachix.org https://br4ch1st0chr0n3-flakes.cachix.org https://cache.nixos.org/ https://hydra.iohk.io https://nix-community.cachix.org
-            trusted-public-keys = br4ch1st0chr0n3-acpoj.cachix.org-1:OYzTMty0XgyEIcm+o9tjKotr9ZjNeC4JCWmc0P0nx3U= br4ch1st0chr0n3-flakes.cachix.org-1:Dyc2yLlRIkdbq8CtfOe24QQhQVduQaezkyV8J9RhuZ8= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=
+            substituters = https://br4ch1st0chr0n3-nix-managed.cachix.org https://br4ch1st0chr0n3-acpoj.cachix.org https://br4ch1st0chr0n3-flakes.cachix.org https://cache.nixos.org/ https://hydra.iohk.io https://nix-community.cachix.org
+            trusted-public-keys = br4ch1st0chr0n3-nix-managed.cachix.org-1:sDKsfgu5fCCxNwVhZg+AWeGvbLlEtZoyzkSNKRM/KAo= br4ch1st0chr0n3-acpoj.cachix.org-1:OYzTMty0XgyEIcm+o9tjKotr9ZjNeC4JCWmc0P0nx3U= br4ch1st0chr0n3-flakes.cachix.org-1:Dyc2yLlRIkdbq8CtfOe24QQhQVduQaezkyV8J9RhuZ8= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=
       - uses: cachix/cachix-action@v10
         with:
           name: ${{ matrix.cache }}

@@ -82,7 +82,7 @@
       stack-shell = { ghcVersion }:
 
         pkgs.haskell.lib.buildStackProject {
-          name = "acpoj-stack-shell";
+          name = "nix-managed-stack-shell";
 
           ghc = pkgs.haskell.compiler.${ghcVersion};
 

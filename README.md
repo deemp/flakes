@@ -6,6 +6,7 @@ This flake contains:
 - [VSCodium](https://vscodium.com/) with all necessary extensions for Haskell and Nix
 - Shell tools for Haskell (`GHC 9.0.2`) and Nix, like `ghc`, `stack`, `ghcid`, `rnix-lsp`
 - A hand-made tool for managing modules and file templates (`manager`)
+- `stack.nix` which provides Nix packages from [flake.nix](flake.nix) (see `stack-shell` there)
 
 ## Quick start
 
@@ -38,7 +39,9 @@ This flake contains:
   nix develop
   ```
 
-- You should build the project to verify HLS can also build it
+- This will load the shell tools and write `settings.json`. You can configure the necessary settings in `writeSettings` ([flake.nix](flake.nix))
+
+- Okay, build the project to verify HLS can also build it
   ```
   stack build
   ```
