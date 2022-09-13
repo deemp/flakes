@@ -232,10 +232,13 @@
         callCabalGHC = ghcVersion: name: path: args:
           let
             inherit (pkgs.haskell.packages."ghc${ghcVersion}") callCabal2nix;
-            inherit (pkgs.haskell.lib) justStaticExecutables;
             inherit (gitignore.lib) gitignoreSource;
           in
           callCabal2nix name (gitignoreSource path) args;
+
+        # actually build an executable
+        # my-package-exe = justStaticExecutables 
+        inherit (pkgs.haskell.lib) justStaticExecutables;
 
         # stack and ghc of a specific version
         # they should come together so that stack doesn't use the system ghc
@@ -272,6 +275,7 @@
             writeSettingsJson
             toList
             toolsGHC
+            justStaticExecutables
             ;
         };
         devShells =
