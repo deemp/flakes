@@ -161,16 +161,20 @@
         allShellTools = mergeValues shellTools;
 
         # create a codium with a given set of extensions
+        # bashInteractive is necessary for correct work
         # Examples: 
         # see `codium`
         mkCodium = extensions@{ ... }:
           let
             inherit (pkgs) vscode-with-extensions vscodium;
           in
+          [
           (vscode-with-extensions.override {
             vscode = vscodium;
             vscodeExtensions = toList extensions;
-          });
+            })
+            pkgs.bashInteractive
+          ];
 
         # write settings.json into ./.vscode
         # Example:
