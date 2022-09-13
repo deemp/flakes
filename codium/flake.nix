@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/0e304ff0d9db453a4b230e9386418fd974d5804a";
+    nixpkgs.url = "github:NixOS/nixpkgs/a0b7e70db7a55088d3de0cc370a59f9fbcc906c3";
     flake-utils.url = "github:numtide/flake-utils/7e2a3b3dfd9af950a856d66b0a7d01e3c18aa249";
     vscode-marketplace = {
       url = "github:AmeerTaweel/nix-vscode-marketplace/499969e5c64daf3d20cb077a6230438d490200c1";
@@ -16,6 +16,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
+    gitignore = {
+      url = "github:hercules-ci/gitignore.nix/a20de23b925fd8264fd7fad6454652e142fd7f73";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    haskell-language-server = {
+      url = "github:haskell/haskell-language-server/7760340e999693d07fdbea49c9e20a3dd5458ad3";
+    };
   };
   outputs =
     { self
@@ -24,6 +31,8 @@
     , vscode-marketplace
     , easy-purescript-nix
     , nix-vsode-marketplace
+    , gitignore
+    , haskell-language-server
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
@@ -127,16 +136,13 @@
               niv
               # GHCi based bare bones IDE
               ghcid
-              # LSP server for GHC
               ;
             # The Haskell Tool Stack
             inherit (pkgs) haskell-language-server;
-            inherit stack-wrapped;
           };
         };
 
         # Wrap Stack to work with our Nix integration. 
-        # If you use this stack version, you should supply the appropriate ghc in your .nix
         stack-wrapped = pkgs.symlinkJoin {
           # will be available as the usual `stack` in terminal
           name = "stack";
@@ -165,9 +171,9 @@
             inherit (pkgs) vscode-with-extensions vscodium;
           in
           [
-          (vscode-with-extensions.override {
-            vscode = vscodium;
-            vscodeExtensions = toList extensions;
+            (vscode-with-extensions.override {
+              vscode = vscodium;
+              vscodeExtensions = toList extensions;
             })
             pkgs.bashInteractive
           ];
@@ -217,9 +223,43 @@
 
         # codium with all extensions enabled
         codium = [ (mkCodium vscodeExtensions) pkgs.bashInteractive ];
+
+        # a convenience function for building haskell packages
+        # can be used for a project with GHC 9.0.2 as follows:
+        # callCabal = callCabalGHC "902";
+        # dep = callCabal "dep-name" ./dep-path { };
+        # my-package = callCabal "my-package-name" ./my-package-path { inherit dep; };
+        callCabalGHC = ghcVersion: name: path: args:
+          let
+            inherit (pkgs.haskell.packages."ghc${ghcVersion}") callCabal2nix;
+            inherit (pkgs.haskell.lib) justStaticExecutables;
+            inherit (gitignore.lib) gitignoreSource;
+          in
+          callCabal2nix name (gitignoreSource path) args;
+
+        # stack and ghc of a specific version
+        # they should come together so that stack doesn't use the system ghc
+        stack = ghcVersion: [
+          stack-wrapped
+          pkgs.haskell.compiler."ghc${ghcVersion}"
+        ];
+
+        # this version of HLS is only for aarch64-darwin, x86_64-darwin, x86_64-linux
+        hls = ghcVersion: haskell-language-server.packages.${system}."haskell-language-server-${ghcVersion}";
+
+        # tools for a specific GHC version
+        toolsGHC = ghcVersion: {
+          hls = hls ghcVersion;
+          stack = stack ghcVersion;
+          callCabal = callCabalGHC ghcVersion;
+        };
+
+        tools902 = builtins.attrValues ({
+          inherit (toolsGHC "902") hls stack;
+        });
       in
       {
-        packages = {
+        tools = {
           inherit
             allShellTools
             codium
@@ -231,15 +271,18 @@
             vscodeExtensions
             writeSettingsJson
             toList
+            toolsGHC
             ;
         };
         devShells =
           let
-            myDevTools = pkgs.lib.lists.flatten [
-              (toList shellTools)
-              codium
-              (writeSettingsJson settingsNix)
-            ];
+            myDevTools =
+              [
+                (toList shellTools)
+                codium
+                tools902
+                (writeSettingsJson settingsNix)
+              ];
           in
           {
             default = pkgs.mkShell {
