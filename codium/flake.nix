@@ -101,10 +101,6 @@
               inherit (easy-ps) purs-0_15_4 spago purescript-language-server purs-tidy;
             };
 
-          node = {
-            inherit (pkgs) nodejs-16_x;
-          };
-
           nix = {
             inherit (pkgs) rnix-lsp nixpkgs-fmt;
             inherit json2nix;
