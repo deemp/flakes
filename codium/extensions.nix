@@ -32,7 +32,8 @@ in
   misc = {
     inherit (open-vsx.usernamehw) errorlens;
     inherit (open-vsx.gruntfuggly) todo-tree;
-    inherit (vscode.bierner) github-markdown-preview;
+    # TODO fix extension packs
+    inherit (my-extensions.bierner) github-markdown-preview;
   };
   docker = {
     inherit (my-extensions.ms-vscode-remote) remote-containers;

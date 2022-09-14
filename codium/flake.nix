@@ -12,7 +12,7 @@
       flake = false;
     };
     vscodium-extensions = {
-      url = "github:br4ch1st0chr0n3/vscodium-extensions/cb21ecd83d378aea1372b043c74a9c1f18cfc499";
+      url = "github:br4ch1st0chr0n3/vscodium-extensions/18ba2377fffc56046f4ba46e266c83c86f8e047e";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };

@@ -508,17 +508,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1662937225,
-        "narHash": "sha256-KA4Ade0H6xqrVypF6SbV6J34VXG3V5vQvdgizxWwdFw=",
+        "lastModified": 1663169505,
+        "narHash": "sha256-o7UhhIe9X8lkTu3y9UlBoS8ZO/X+33fSfKD/1+gci6c=",
         "owner": "br4ch1st0chr0n3",
         "repo": "vscodium-extensions",
-        "rev": "cb21ecd83d378aea1372b043c74a9c1f18cfc499",
+        "rev": "18ba2377fffc56046f4ba46e266c83c86f8e047e",
         "type": "github"
       },
       "original": {
         "owner": "br4ch1st0chr0n3",
         "repo": "vscodium-extensions",
-        "rev": "cb21ecd83d378aea1372b043c74a9c1f18cfc499",
+        "rev": "18ba2377fffc56046f4ba46e266c83c86f8e047e",
         "type": "github"
       }
     }
