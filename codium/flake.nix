@@ -2,8 +2,8 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/a0b7e70db7a55088d3de0cc370a59f9fbcc906c3";
     flake-utils.url = "github:numtide/flake-utils/7e2a3b3dfd9af950a856d66b0a7d01e3c18aa249";
-    vscode-marketplace = {
-      url = "github:AmeerTaweel/nix-vscode-marketplace/499969e5c64daf3d20cb077a6230438d490200c1";
+    nix-vscode-marketplace = {
+      url = "github:AmeerTaweel/nix-vscode-marketplace/e6b8eb76872a6d1401bae61f93f0f87f16301463";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
@@ -11,8 +11,8 @@
       url = "github:justinwoo/easy-purescript-nix/5926981701ac781f08b02e31e4705e46b799299d";
       flake = false;
     };
-    nix-vsode-marketplace = {
-      url = "github:br4ch1st0chr0n3/nix-vscode-marketplace/d567fba043784bb456407f60c21230ea4d82253f";
+    vscodium-extensions = {
+      url = "github:br4ch1st0chr0n3/vscodium-extensions/cb21ecd83d378aea1372b043c74a9c1f18cfc499";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
@@ -28,9 +28,9 @@
     { self
     , flake-utils
     , nixpkgs
-    , vscode-marketplace
+    , nix-vscode-marketplace
     , easy-purescript-nix
-    , nix-vsode-marketplace
+    , vscodium-extensions
     , gitignore
     , haskell-language-server
     }:
@@ -39,48 +39,13 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        # A set of VS Code extensions
-        # Biased towards FP languages
-        vscodeExtensions =
-          let
-            inherit (vscode-marketplace.packages.${system}) vscode open-vsx;
-            my-vscode-extensions = nix-vsode-marketplace.packages.${system}.vscode;
-          in
-          {
-            haskell = {
-              inherit (open-vsx.haskell) haskell;
-              inherit (open-vsx.justusadam) language-haskell;
-              inherit (my-vscode-extensions.visortelle) haskell-spotlight;
-              inherit (open-vsx.redhat) vscode-yaml;
-            };
-            purescript = {
-              inherit (open-vsx.nwolverson) ide-purescript language-purescript;
-              inherit (open-vsx.dhall) dhall-lang vscode-dhall-lsp-server;
-              inherit (my-vscode-extensions.br4ch1st0chr0n3) purs-keybindings;
-              inherit (my-vscode-extensions.ryuta46) multi-command;
-              inherit (my-vscode-extensions.chunsen) bracket-select;
-            };
-            nix = {
-              inherit (open-vsx.mkhl) direnv;
-              # inherit (open-vsx.arrterian) nix-env-selector;
-              inherit (open-vsx.jnoortheen) nix-ide;
-            };
-            github = {
-              inherit (open-vsx.github) vscode-pull-request-github;
-              inherit (open-vsx.eamodio) gitlens;
-            };
-            typescript = {
-              inherit (open-vsx.ms-vscode) vscode-typescript-next;
-            };
-            misc = {
-              inherit (open-vsx.usernamehw) errorlens;
-              inherit (open-vsx.gruntfuggly) todo-tree;
-            };
-            docker = {
-              # TODO update vscodium to 1.71.0
-              inherit (my-vscode-extensions.ms-vscode-remote) remote-containers;
-            };
-          };
+        # A set of VSCodium extensions
+        extensions = import ./extensions.nix {
+          inherit
+            system
+            nix-vscode-marketplace
+            vscodium-extensions;
+        };
 
         # if a set's attribute values are all sets, merge these values
         # Examples:
@@ -222,7 +187,7 @@
         '';
 
         # codium with all extensions enabled
-        codium = [ (mkCodium vscodeExtensions) pkgs.bashInteractive ];
+        codium = [ (mkCodium extensions) pkgs.bashInteractive ];
 
         # a convenience function for building haskell packages
         # can be used for a project with GHC 9.0.2 as follows:
@@ -271,7 +236,7 @@
             mkCodium
             shellTools
             settingsNix
-            vscodeExtensions
+            extensions
             writeSettingsJson
             toList
             toolsGHC
