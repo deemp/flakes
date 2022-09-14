@@ -8,6 +8,44 @@ on:
   pull_request:
   push:
 
+jobs:
+  codium:
+    name: Build on ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: ${{ matrix.dir }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, ubuntu-22.04, macos-11, macos-12]
+        cache: [br4ch1st0chr0n3-flakes]
+        dir: [codium]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v17
+        with:
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+            substituters =  https://cache.nixos.org/ https://hydra.iohk.io https://haskell-language-server.cachix.org
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= haskell-language-server.cachix.org-1:juFfHrwkOxqIOZShtC4YC1uT1bBcq2RSvC7OMKx0Nz8=
+      - uses: cachix/cachix-action@v10
+        with:
+          name: ${{ matrix.cache }}
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+      - name: Use cache
+        run: cachix use ${{ matrix.cache }}
+      - name: Push inputs to cachix
+        run: |
+          # https://docs.cachix.org/pushing#flakes
+
+          nix flake archive --json \
+            | jq -r '.path,(.inputs|to_entries[].value.path)' \
+            | cachix push ${{ matrix.cache }}
+      - name: Push devshell to cachix
+        run: |
+          nix develop --profile dev-profile
+          cachix push ${{ matrix.cache }} dev-profile
+
 # It'd be nice to support these platforms:
 # x86_64-darwin
 # aarch64-darwin
@@ -20,49 +58,10 @@ on:
 # x86_64-linux
 # x86_64-darwin
 
+# environment variables
+# https://docs.github.com/en/actions/learn-github-actions/environment-variables
+# you can get runner.arch == ARM if you use a self-hosted runner
+# https://docs.github.com/en/actions/learn-github-actions/contexts#example-contents-of-the-runner-context
 
-jobs:
-  cache:
-
-    # environment variables
-    # https://docs.github.com/en/actions/learn-github-actions/environment-variables
-    # you can get runner.arch == ARM if you use a self-hosted runner
-    # https://docs.github.com/en/actions/learn-github-actions/contexts#example-contents-of-the-runner-context
-    name: Build on ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-20.04, ubuntu-22.04, macos-11, macos-12]
-        cache: [br4ch1st0chr0n3-flakes]
-        dir: [codium]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v3
-      - uses: cachix/install-nix-action@v17
-        with:
-          # about GITHUB_TOKEN
-          # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#about-the-github_token-secret
-          extra_nix_config: |
-            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-            substituters =  https://cache.nixos.org/ https://hydra.iohk.io https://haskell-language-server.cachix.org
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= haskell-language-server.cachix.org-1:juFfHrwkOxqIOZShtC4YC1uT1bBcq2RSvC7OMKx0Nz8=
-      - uses: cachix/cachix-action@v10
-        with:
-          name: ${{ matrix.cache }}
-          # If you chose API tokens for write access OR if you have a private cache
-          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
-      - name: Use cache
-        run: cachix use ${{ matrix.cache }}
-      - name: Push inputs to cachix
-        run: |
-          cd ${{ matrix.dir }}
-          # https://docs.cachix.org/pushing#flakes
-
-          nix flake archive --json \
-            | jq -r '.path,(.inputs|to_entries[].value.path)' \
-            | cachix push ${{ matrix.cache }}
-      - name: Push devshell to cachix
-        run: |
-          cd ${{ matrix.dir }}
-          nix develop --profile dev-profile
-          cachix push ${{ matrix.cache }} dev-profile
-  
+# about GITHUB_TOKEN
+# https://docs.github.com/en/actions/security-guides/automatic-token-authentication#about-the-github_token-secret
