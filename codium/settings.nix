@@ -56,10 +56,6 @@
     "git.autofetch" = true;
   };
 
-  window = {
-    "window.zoomLevel" = 0.5;
-  };
-
   nix-ide = {
     "nix.serverPath" = "rnix-lsp";
     "nix.enableLanguageServer" = true;
