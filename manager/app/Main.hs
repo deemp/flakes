@@ -48,6 +48,8 @@ main = do
 
   putStrLn "Done!"
 
+-- Constants
+
 modulesDir :: FilePath
 modulesDir = "./Modules"
 
@@ -60,8 +62,13 @@ packageYaml = "./package.yaml"
 managerDir :: FilePath
 managerDir = "./manager"
 
+defaultTemplate :: String
+defaultTemplate = "Contest"
+
 ghci :: FilePath
 ghci = "./.ghci"
+
+-- Types
 
 data Command
   = CommandList
@@ -123,11 +130,49 @@ instance Show ProcessError where
 
 instance Exception ProcessError
 
-eitherTarget :: p -> p -> Target -> p
-eitherTarget f g x =
-  case x of
-    TargetModule -> f
-    TargetTemplate -> g
+
+-- Parsers
+
+templatesSubCommand :: Parser Command
+templatesSubCommand = makeSubCommand TargetTemplate
+
+modulesSubCommand :: Parser Command
+modulesSubCommand = makeSubCommand TargetModule
+
+generalCommand :: Parser GeneralCommand
+generalCommand =
+  -- TODO some description for modules command
+  (GeneralCommand TargetModule <$> modulesSubCommand)
+    <|> GeneralCommand TargetTemplate <$> subparser (f "template" templatesSubCommand "Manipulate templates" <> commandGroup "Template commands:")
+  where
+    f name' command' desc = command name' (info (helper <*> command') (fullDesc <> progDesc desc))
+
+setCommand :: Parser Command
+setCommand = CommandSet <$> parseFileName
+
+listCommand :: Parser Command
+listCommand = pure CommandList
+
+addCommand :: Parser Command
+addCommand = CommandAdd <$> parseFileName <*> parseTemplate
+
+removeCommand :: Parser Command
+removeCommand = CommandRemove <$> parseFileName
+
+parseFileName :: Parser String
+parseFileName = argument str (metavar "NAME")
+
+parseTemplate :: Parser String
+parseTemplate =
+  strOption
+    ( long "template"
+        <> short 't'
+        <> metavar "NAME"
+        <> value defaultTemplate
+        <> help "A template NAME"
+    )
+
+-- Helper functions
 
 makeSubCommand :: Target -> Parser Command
 makeSubCommand target =
@@ -137,10 +182,7 @@ makeSubCommand target =
         addCommand
         ( ("Add a" <-> name <-> "at '" <> dir </> "NAME.hs'. It will also appear in the './package.yaml'.")
             <-> "A NAME should be of form 'A(/A)*', like 'A' or 'A/A', where 'A' is an alphanumeric sequence."
-            <-> "A NAME 'A/A' refers to a"
-            <-> name
-            <-> "at"
-            <-> qq (dir </> "A/A.hs")
+            <-> ("A NAME 'A/A' refers to a" <-> name <-> "at" <-> qq (dir </> "A/A.hs"))
         )
         <> f
           "rm"
@@ -167,47 +209,14 @@ makeSubCommand target =
         TargetModule -> (modulesDir, "module")
         TargetTemplate -> (templatesDir, "template")
 
-templatesSubCommand :: Parser Command
-templatesSubCommand = makeSubCommand TargetTemplate
 
-modulesSubCommand :: Parser Command
-modulesSubCommand = makeSubCommand TargetModule
+-- | Select an option depending on the Target constructor
+eitherTarget :: p -> p -> Target -> p
+eitherTarget f g x =
+  case x of
+    TargetModule -> f
+    TargetTemplate -> g
 
-generalCommand :: Parser GeneralCommand
-generalCommand =
-  -- TODO some description for modules command
-  (GeneralCommand TargetModule <$> modulesSubCommand)
-    <|> GeneralCommand TargetTemplate <$> subparser (f "template" templatesSubCommand "Manipulate templates" <> commandGroup "Template commands:")
-  where
-    f name' command' desc = command name' (info (helper <*> command') (fullDesc <> progDesc desc))
-
-defaultTemplate :: String
-defaultTemplate = "Contest"
-
-setCommand :: Parser Command
-setCommand = CommandSet <$> parseFileName
-
-listCommand :: Parser Command
-listCommand = pure CommandList
-
-parseFileName :: Parser String
-parseFileName = argument str (metavar "NAME")
-
-parseTemplate :: Parser String
-parseTemplate =
-  strOption
-    ( long "template"
-        <> short 't'
-        <> metavar "NAME"
-        <> value defaultTemplate
-        <> help "A template NAME"
-    )
-
-addCommand :: Parser Command
-addCommand = CommandAdd <$> parseFileName <*> parseTemplate
-
-removeCommand :: Parser Command
-removeCommand = CommandRemove <$> parseFileName
 
 -- | concatenate strings with a space
 (<->) :: (IsString a, Semigroup a) => a -> a -> a
@@ -216,9 +225,6 @@ x <-> y = x <> " " <> y
 -- | enclose a string into single quotes
 qq :: (IsString a, Semigroup a) => a -> a
 qq s = "'" <> s <> "'"
-
-renderProcessError :: ProcessError -> Text
-renderProcessError = T.pack . show
 
 -- | safely handle command
 -- collect into a monoid and rethrow the exceptions that occur when doing or undoing actions
@@ -289,7 +295,7 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
       T.pack $
         eitherTarget "" "Templates." target
           <> ((\y -> if y == pathSeparator then '.' else y) <$> x)
-    -- safely read a package.yaml and run the continuation ok if everything is OK
+    -- read a package.yaml and run the continuation ok if everything is OK
     readPackageYaml ok = do
       liftIO $ putStrLn $ "Reading" <-> qq packageYaml
       y1 <- tReadFile packageYaml (mapThrow ERead PackageYaml packageYaml)
@@ -302,7 +308,7 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
               nempty :: (Value -> Identity Value) -> Maybe Value -> Identity (Maybe Value)
               nempty = non (Object mempty)
            in ok r atKey nempty
-    -- safely write package.yaml
+    -- write package.yaml
     writePackageYaml y1 = do
       liftIO $ putStrLn $ "Updating" <-> qq packageYaml
       let y2 =
