@@ -41,17 +41,21 @@
       inherit (my-codium.tools.${system})
         writeSettingsJson
         settingsNix
-        extensions
         codium
-        mergeValues
         toList
         shellTools
+        toolsGHC
         ;
       writeSettings = writeSettingsJson
         {
-          inherit (settingsNix) haskell todo-tree files editor gitlens git nix-ide;
-          workbench = settingsNix.workbench // { "workbench.colorTheme" = "Monokai"; };
+          inherit (settingsNix) haskell todo-tree files editor gitlens git nix-ide workbench;
         };
+      tools902 = builtins.attrValues ({
+        inherit (toolsGHC "902") hls stack;
+      });
+      tools = toList {
+        inherit (shellTools) nix haskell;
+      };
     in
     {
       devShells =
@@ -60,12 +64,12 @@
             name = "codium";
             buildInputs = pkgs.lib.lists.flatten
               [
-                (toList { inherit (shellTools) nix; haskell = builtins.removeAttrs shellTools.haskell [ "haskell-language-server" ]; })
-                (pkgs.haskell.compiler."ghc${ghcV}")
+                tools
+                pkgs.hpack
                 codium
                 writeSettings
                 manager
-                hls.packages.${system}."haskell-language-server-${ghcV}"
+                tools902
               ];
             shellHook = ''
               write-settings
