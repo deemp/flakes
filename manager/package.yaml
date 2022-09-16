@@ -19,6 +19,7 @@ dependencies:
 - vector
 - managed
 - temporary
+- process
 
 library:
   source-dirs: src

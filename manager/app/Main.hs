@@ -26,6 +26,7 @@ import Options.Applicative (Alternative ((<|>)), Parser, argument, command, comm
 import System.Exit (exitFailure)
 import System.FilePath (dropTrailingPathSeparator, isValid, pathSeparator, splitDirectories, (<.>), (</>))
 import System.FilePath.Posix (takeDirectory)
+import System.Process
 
 main :: IO ()
 main = do
@@ -45,7 +46,6 @@ main = do
                 putStrLn ("The following problems occured:\n" <> intercalate "\n" (show <$> x))
                 exitFailure
             )
-
   putStrLn "Done!"
 
 -- Constants
@@ -130,7 +130,6 @@ instance Show ProcessError where
 
 instance Exception ProcessError
 
-
 -- Parsers
 
 templatesSubCommand :: Parser Command
@@ -209,14 +208,12 @@ makeSubCommand target =
         TargetModule -> (modulesDir, "module")
         TargetTemplate -> (templatesDir, "template")
 
-
 -- | Select an option depending on the Target constructor
 eitherTarget :: p -> p -> Target -> p
 eitherTarget f g x =
   case x of
     TargetModule -> f
     TargetTemplate -> g
-
 
 -- | concatenate strings with a space
 (<->) :: (IsString a, Semigroup a) => a -> a -> a
@@ -225,6 +222,11 @@ x <-> y = x <> " " <> y
 -- | enclose a string into single quotes
 qq :: (IsString a, Semigroup a) => a -> a
 qq s = "'" <> s <> "'"
+
+updateCabal :: IO ()
+updateCabal = do
+  putStrLn "Updating .cabal"
+  callCommand "hpack"
 
 -- | safely handle command
 -- collect into a monoid and rethrow the exceptions that occur when doing or undoing actions
@@ -245,6 +247,7 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
                 (key executables . atKey (mkExe name) . nempty . atKey main')
                 (\_ -> Just $ String (T.pack fileHs))
       writePackageYaml y2
+    liftIO updateCabal
     where
       fileHs = mkTargetHs name
       templateHs = templatesDir </> template <.> "hs"
@@ -271,6 +274,7 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
                 HM.fromList (x ^.. members . withIndex . filtered (\(y, _) -> y /= exe))
           y2 = y1 & over (key executables) withoutExe
       writePackageYaml y2
+    liftIO updateCabal
     where
       fileHs = mkTargetHs name
       targetDir = takeDirectory fileHs
