@@ -50,13 +50,13 @@ library
     , managed
     , mtl
     , optparse-applicative
+    , process
     , system-filepath
     , temporary
     , text
     , unordered-containers
     , vector
     , yaml
-    , process
   default-language: Haskell2010
 
 executable manager
@@ -91,11 +91,11 @@ executable manager
     , manager
     , mtl
     , optparse-applicative
+    , process
     , system-filepath
     , temporary
     , text
     , unordered-containers
     , vector
     , yaml
-    , process
   default-language: Haskell2010
