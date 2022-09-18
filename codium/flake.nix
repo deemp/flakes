@@ -145,32 +145,21 @@
 
         # write settings.json into ./.vscode
         # Example:
-        # see devShells.default.shellHook
+        # see devShells
         writeSettingsJson = settings:
           let
+            vscode = ".vscode";
             s = "settings.json";
             settingsJson = builtins.toJSON (mergeValues settings);
-
-            writeSettings = pkgs.mkShell {
-              name = "write-to-store";
-              buildInputs = [ pkgs.python38 ];
-              buildPhase = ''
-                mkdir -p $out
-                printf "%s" '${settingsJson}' | python -m json.tool > $out/${s}
-              '';
-            };
-            path = "${writeSettings.out}/${s}";
-            vscode = ".vscode";
           in
-          pkgs.writeShellApplication
-            {
-              name = "write-settings";
-              text = ''
-                mkdir -p ${vscode}
-                cat ${path} > ${vscode}/${s}
-              '';
-            };
-
+          pkgs.mkShell {
+            # name = "write-to-store";
+            buildInputs = [ pkgs.python38 ];
+            shellHook = ''
+              mkdir -p ${vscode}
+              printf "%s" '${settingsJson}' | python -m json.tool > ${vscode}/${s}
+            '';
+          };
 
         # convert json to nix
         # no need to provide the full path to a file if it's in the cwd
@@ -250,17 +239,15 @@
                 (toList shellTools)
                 codium
                 tools902
-                (writeSettingsJson settingsNix)
               ];
           in
           {
             default = pkgs.mkShell {
               name = "my-codium";
               buildInputs = myDevTools;
-              shellHook = ''
-                write-settings
-              '';
             };
+
+            write-settings = writeSettingsJson settingsNix;
 
             # From here: https://docs.haskellstack.org/en/stable/nix_integration/
             # Make external Nix c libraries like zlib known to GHC, like pkgs.haskell.lib.buildStackProject does
