@@ -25,15 +25,23 @@ in
   github = {
     inherit (open-vsx.github) vscode-pull-request-github;
     inherit (open-vsx.eamodio) gitlens;
+    inherit (open-vsx.cschleiden) vscode-github-actions;
   };
   typescript = {
     inherit (open-vsx.ms-vscode) vscode-typescript-next;
   };
+  markdown = {
+    inherit (my-extensions.bierner)
+      github-markdown-preview
+      markdown-emoji
+      markdown-checkbox
+      markdown-yaml-preamble
+      markdown-footnotes
+      ;
+  };
   misc = {
     inherit (open-vsx.usernamehw) errorlens;
     inherit (open-vsx.gruntfuggly) todo-tree;
-    # TODO fix extension packs
-    inherit (my-extensions.bierner) github-markdown-preview;
   };
   docker = {
     inherit (my-extensions.ms-vscode-remote) remote-containers;

@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/a0b7e70db7a55088d3de0cc370a59f9fbcc906c3";
+    nixpkgs.url = "github:NixOS/nixpkgs/0cfb3c002b61807ca0bab3efe514476bdf2e5478";
     flake-utils.url = "github:numtide/flake-utils/7e2a3b3dfd9af950a856d66b0a7d01e3c18aa249";
     nix-vscode-marketplace = {
       url = "github:AmeerTaweel/nix-vscode-marketplace/e6b8eb76872a6d1401bae61f93f0f87f16301463";
@@ -12,7 +12,7 @@
       flake = false;
     };
     vscodium-extensions = {
-      url = "github:br4ch1st0chr0n3/vscodium-extensions/18ba2377fffc56046f4ba46e266c83c86f8e047e";
+      url = "github:br4ch1st0chr0n3/vscodium-extensions/6710aaffe852d3526654c26c0cb94cf05c4665f1";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
@@ -187,7 +187,7 @@
         '';
 
         # codium with all extensions enabled
-        codium = [ (mkCodium extensions) pkgs.bashInteractive ];
+        codium = [ (mkCodium extensions) ];
 
         # a convenience function for building haskell packages
         # can be used for a project with GHC 9.0.2 as follows:

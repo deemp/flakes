@@ -400,17 +400,17 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1662934689,
-        "narHash": "sha256-mXi8hmhiunOVTeHiuouWXb0vTqjzp9v9kshMmI561Us=",
+        "lastModified": 1663419078,
+        "narHash": "sha256-cxEeMnaTGMTeDAvXnZmqcF50qoyJOsQENhYxSnW9ZMs=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "a0b7e70db7a55088d3de0cc370a59f9fbcc906c3",
+        "rev": "0cfb3c002b61807ca0bab3efe514476bdf2e5478",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "a0b7e70db7a55088d3de0cc370a59f9fbcc906c3",
+        "rev": "0cfb3c002b61807ca0bab3efe514476bdf2e5478",
         "type": "github"
       }
     },
@@ -508,17 +508,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1663169505,
-        "narHash": "sha256-o7UhhIe9X8lkTu3y9UlBoS8ZO/X+33fSfKD/1+gci6c=",
+        "lastModified": 1663492066,
+        "narHash": "sha256-DibQFiNhUvUEuRqdbpTCGCTBSrTIXrct4Pwa/h+/tjw=",
         "owner": "br4ch1st0chr0n3",
         "repo": "vscodium-extensions",
-        "rev": "18ba2377fffc56046f4ba46e266c83c86f8e047e",
+        "rev": "6710aaffe852d3526654c26c0cb94cf05c4665f1",
         "type": "github"
       },
       "original": {
         "owner": "br4ch1st0chr0n3",
         "repo": "vscodium-extensions",
-        "rev": "18ba2377fffc56046f4ba46e266c83c86f8e047e",
+        "rev": "6710aaffe852d3526654c26c0cb94cf05c4665f1",
         "type": "github"
       }
     }
