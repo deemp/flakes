@@ -52,6 +52,13 @@
     "gitlens.statusBar.enabled" = false;
   };
 
+  yaml = {
+    "yaml.schemas" = {
+      "https://json.schemastore.org/github-workflow" = "workflows/**/*.yml";
+      "https://json.schemastore.org/github-action" = "actions/**/action.yml";
+    };
+  };
+
   git = {
     "git.autofetch" = true;
   };
@@ -60,5 +67,4 @@
     "nix.serverPath" = "rnix-lsp";
     "nix.enableLanguageServer" = true;
   };
-
 }
