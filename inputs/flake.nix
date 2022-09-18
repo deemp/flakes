@@ -7,7 +7,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     my-codium = {
-      url = "github:br4ch1st0chr0n3/flakes?dir=codium&rev=f33f695c27d0e8702f6e57bc75892fd2b7f7143e";
+      url = "github:br4ch1st0chr0n3/flakes?dir=codium";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
