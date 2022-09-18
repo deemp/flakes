@@ -830,11 +830,11 @@
       },
       "locked": {
         "dir": "codium",
-        "lastModified": 1663538608,
-        "narHash": "sha256-wf1dk1XUHimXGoh/RA9F7M7yZUjsbrIzzNCrtOwB02c=",
+        "lastModified": 1663539226,
+        "narHash": "sha256-TsHXAfY2fhWQ0lUfhhAoa8/qgqeNOAjCNucwpoLEg50=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "c292d0b33b1252df19af70500683befe450cc239",
+        "rev": "1d1b9ac4334c981a5f5c8d524aecdf0b50914f4c",
         "type": "github"
       },
       "original": {
