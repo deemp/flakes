@@ -54,8 +54,8 @@
 
   yaml = {
     "yaml.schemas" = {
-      "https://json.schemastore.org/github-workflow" = "workflows/**/*.yml";
-      "https://json.schemastore.org/github-action" = "actions/**/action.yml";
+      "https://json.schemastore.org/github-workflow.json" = "workflows/**/*.yml";
+      "https://json.schemastore.org/github-action.json" = "actions/**/action.yml";
     };
   };
 
