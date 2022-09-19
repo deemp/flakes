@@ -152,13 +152,14 @@
             s = "settings.json";
             settingsJson = builtins.toJSON (mergeValues settings);
           in
-          pkgs.mkShell {
-            # name = "write-to-store";
-            buildInputs = [ pkgs.python38 ];
-            shellHook = ''
+          pkgs.writeShellApplication {
+            name = "write-settings-json";
+            runtimeInputs = [ pkgs.python38 ];
+            text = ''
               mkdir -p ${vscode}
-              printf "%s" '${settingsJson}' | python -m json.tool > ${vscode}/${s}
+              printf "%s" ${pkgs.lib.escapeShellArg settingsJson} | python -m json.tool > ${vscode}/${s}
             '';
+            checkPhase = "";
           };
 
         # convert json to nix
@@ -247,7 +248,14 @@
               buildInputs = myDevTools;
             };
 
-            write-settings = writeSettingsJson settingsNix;
+            # if you want to use codium, you'd want to have the appropriate settings
+            codium = pkgs.mkShell {
+              buildInputs = [ codium (writeSettingsJson settingsNix) ];
+              shellHook = ''
+                write-settings-json
+                codium .
+              '';
+            };
 
             # From here: https://docs.haskellstack.org/en/stable/nix_integration/
             # Make external Nix c libraries like zlib known to GHC, like pkgs.haskell.lib.buildStackProject does
