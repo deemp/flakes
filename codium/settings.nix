@@ -9,9 +9,27 @@
     "haskell.manageHLS" = "PATH";
   };
 
-  todo-tree = {
-    "todo-tree.regex.regex" = "((--\\s*($TAGS))|\\{-\\s($TAGS).*(\\n.*)*-})";
-  };
+  todo-tree =
+    {
+      "todo-tree.regex.regex" =
+        let
+          # https://github.com/Gruntfuggly/todo-tree/wiki/Configuration-Examples#haskell
+          haskell = "((--\\s*($TAGS))|\\{-\\s($TAGS).*(\\n.*)*-})";
+          javadoc = "(//|#|<!--|/\\*|^\\s*\\*)\\s*($TAGS)";
+        in
+        "${haskell}|${javadoc}";
+      "todo-tree.filtering.excludeGlobs" = [
+        "**/vendor/**"
+        "**/node_modules/**"
+        "**/dist/**"
+        "**/bower_components/**"
+        "**/build/**"
+        "**/_output/**"
+        "**/*.min.*"
+        "**/*.map"
+        "**/*.stack-work"
+      ];
+    };
 
   files = {
     "files.watcherExclude" = {
