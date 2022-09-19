@@ -1,23 +1,12 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/0e304ff0d9db453a4b230e9386418fd974d5804a";
-    flake-utils.url = "github:numtide/flake-utils";
-    my-codium = {
-      url = "github:br4ch1st0chr0n3/flakes?dir=codium&rev=1ba5800e9d39fad3f040083f586bac354cbf6c1b";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
-    };
-    flake-compat = {
-      url = "github:edolstra/flake-compat/b4a34015c698c7793d592d66adbab377907a2be8";
-      flake = false;
-    };
-    hls = {
-      url = "github:haskell/haskell-language-server/7760340e999693d07fdbea49c9e20a3dd5458ad3";
-    };
-    gitignore = {
-      url = "github:hercules-ci/gitignore.nix/a20de23b925fd8264fd7fad6454652e142fd7f73";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    inputs.url = "github:br4ch1st0chr0n3/flakes?dir=inputs";
+    nixpkgs.follows = "inputs/nixpkgs";
+    flake-utils.follows = "inputs/flake-utils";
+    my-codium.follows = "inputs/my-codium";
+    flake-compat.follows = "inputs/flake-compat";
+    hls.follows = "inputs/haskell-language-server";
+    gitignore.follows = "inputs/gitignore";
   };
   outputs =
     { self
@@ -27,17 +16,12 @@
     , flake-compat
     , hls
     , gitignore
+    , inputs
     }:
     flake-utils.lib.eachDefaultSystem (system:
     let
-      ghcV = "902";
       pkgs = nixpkgs.legacyPackages.${system};
-      inherit (pkgs.haskell.packages."ghc${ghcV}") callCabal2nix;
-      inherit (pkgs.haskell.lib) justStaticExecutables;
-      inherit (gitignore.lib) gitignoreSource;
-
-      manager = justStaticExecutables (callCabal2nix "manager" (gitignoreSource ./manager) { });
-
+      ghcVersion = "902";
       inherit (my-codium.tools.${system})
         writeSettingsJson
         settingsNix
@@ -46,36 +30,41 @@
         shellTools
         toolsGHC
         ;
+      inherit (toolsGHC ghcVersion) hls stack callCabal staticExecutable;
+
+      # should come together
+      manager = [ (staticExecutable "manager" ./manager) (pkgs.hpack) ];
+
       writeSettings = writeSettingsJson
         {
           inherit (settingsNix) haskell todo-tree files editor gitlens git nix-ide workbench;
         };
-      tools902 = builtins.attrValues ({
-        inherit (toolsGHC "902") hls stack;
-      });
-      tools = toList {
-        inherit (shellTools) nix haskell;
+
+      tools = (
+        toList {
+          inherit (shellTools) nix haskell;
+        }) ++ [ stack hls manager ];
+
+      codiumWithSettings = pkgs.mkShell {
+        buildInputs = [ writeSettings codium ];
+        shellHook = ''
+          write-settings-json
+          codium .
+        '';
       };
     in
     {
       devShells =
         {
           default = pkgs.mkShell {
-            name = "codium";
-            buildInputs = pkgs.lib.lists.flatten
-              [
-                tools
-                pkgs.hpack
-                codium
-                writeSettings
-                manager
-                tools902
-              ];
+            name = "dev-tools";
+            buildInputs = tools;
             shellHook = ''
-              write-settings
               source <(manager --bash-completion-script `which manager`)
             '';
           };
+
+          codium = codiumWithSettings;
         };
 
       stack-shell = { ghcVersion }:
