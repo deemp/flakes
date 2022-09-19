@@ -195,6 +195,14 @@
         # my-package-exe = justStaticExecutables 
         inherit (pkgs.haskell.lib) justStaticExecutables;
 
+        # build an executable without local dependencies (empty args)
+        staticExecutable = ghcVersion: name: path:
+          let
+            inherit (pkgs.haskell.packages."ghc${ghcVersion}") callCabal2nix;
+            inherit (gitignore.lib) gitignoreSource;
+          in
+          justStaticExecutables (callCabal2nix name (gitignoreSource path) { });
+
         # stack and ghc of a specific version
         # they should come together so that stack doesn't use the system ghc
         stack = ghcVersion: [
@@ -231,6 +239,7 @@
             toList
             toolsGHC
             justStaticExecutables
+            staticExecutable
             ;
         };
         devShells =
@@ -238,7 +247,6 @@
             myDevTools =
               [
                 (toList shellTools)
-                codium
                 tools902
               ];
           in
