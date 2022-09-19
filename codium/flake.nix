@@ -218,6 +218,7 @@
           hls = hls ghcVersion;
           stack = stack ghcVersion;
           callCabal = callCabalGHC ghcVersion;
+          staticExecutable = staticExecutable ghcVersion;
         };
 
         tools902 = builtins.attrValues ({
@@ -239,7 +240,6 @@
             toList
             toolsGHC
             justStaticExecutables
-            staticExecutable
             ;
         };
         devShells =
