@@ -32,8 +32,23 @@
         ;
       inherit (toolsGHC ghcVersion) hls stack callCabal staticExecutable;
 
-      # should come together
-      manager = [ (staticExecutable "manager" ./manager) (pkgs.hpack) ];
+      manager =
+        let
+          manager-exe = staticExecutable "manager" ./manager;
+        in
+        pkgs.symlinkJoin {
+          name = "manager";
+          paths = [ manager-exe ];
+          buildInputs = [ pkgs.makeWrapper ];
+          postBuild = ''
+            wrapProgram $out/bin/manager \
+              --set PATH ${
+                pkgs.lib.makeBinPath [
+                  pkgs.hpack
+                ]
+              }
+          '';
+        };
 
       writeSettings = writeSettingsJson
         {
