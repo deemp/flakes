@@ -1,31 +1,17 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/0cfb3c002b61807ca0bab3efe514476bdf2e5478";
-    flake-utils.url = "github:numtide/flake-utils/7e2a3b3dfd9af950a856d66b0a7d01e3c18aa249";
-    nix-vscode-marketplace = {
-      url = "github:AmeerTaweel/nix-vscode-marketplace/e6b8eb76872a6d1401bae61f93f0f87f16301463";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
-    };
-    easy-purescript-nix = {
-      url = "github:justinwoo/easy-purescript-nix/5926981701ac781f08b02e31e4705e46b799299d";
-      flake = false;
-    };
-    vscodium-extensions = {
-      url = "github:br4ch1st0chr0n3/vscodium-extensions/6710aaffe852d3526654c26c0cb94cf05c4665f1";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
-    };
-    gitignore = {
-      url = "github:hercules-ci/gitignore.nix/a20de23b925fd8264fd7fad6454652e142fd7f73";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    haskell-language-server = {
-      url = "github:haskell/haskell-language-server/7760340e999693d07fdbea49c9e20a3dd5458ad3";
-    };
+    inputs.url = github:br4ch1st0chr0n3/flakes?dir=inputs;
+    nixpkgs.follows = "inputs/nixpkgs";
+    flake-utils.follows = "inputs/flake-utils";
+    gitignore.follows = "inputs/gitignore";
+    easy-purescript-nix.follows = "inputs/easy-purescript-nix";
+    haskell-language-server.follows = "inputs/haskell-language-server";
+    nix-vscode-marketplace.follows = "inputs/nix-vscode-marketplace";
+    vscodium-extensions.follows = "inputs/vscodium-extensions";
   };
   outputs =
     { self
+    , inputs
     , flake-utils
     , nixpkgs
     , nix-vscode-marketplace
