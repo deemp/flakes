@@ -770,11 +770,11 @@
       },
       "locked": {
         "dir": "inputs",
-        "lastModified": 1663620801,
-        "narHash": "sha256-yspNzqTgsrp+lCzL2wS42PAhMM0cg1S0R8sCN+18SYI=",
+        "lastModified": 1663666174,
+        "narHash": "sha256-x7IKJ9OV2flBP6KkMyMuhwFiyd3ZE4KUuZJ+472dMdc=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "5dc8dbc443ddea88a26ace97e4822c0641ce0dd0",
+        "rev": "008f63cb1399f5313ef0fdfe023bd55a13719ff3",
         "type": "github"
       },
       "original": {
