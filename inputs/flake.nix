@@ -16,7 +16,8 @@
       flake = false;
     };
     dream2nix = {
-      url = "github:nix-community/dream2nix/25be741ec92c77b8308ca6a7ab89593fe37b6542";
+      url = "github:nix-community/dream2nix/0f3b6c5dd1630d601ae6f456421b4dfed178f260";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-vscode-marketplace = {
       url = "github:AmeerTaweel/nix-vscode-marketplace/6378ef43e48faa8e7c6432c69a4cce471305783a";
@@ -34,6 +35,10 @@
     flake-compat = {
       url = "github:edolstra/flake-compat/b4a34015c698c7793d592d66adbab377907a2be8";
       flake = false;
+    };
+    poetry2nix = {
+      url = "github:nix-community/poetry2nix/4f8d61cd936f853242a4ce1fd476f5488c288c26";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
   };
   outputs = inputs: { };
