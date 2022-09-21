@@ -40,6 +40,7 @@ in
       ;
     inherit (open-vsx.davidanson)
       vscode-markdownlint;
+    inherit (open-vsx.yzhang) markdown-all-in-one;
   };
   misc = {
     inherit (open-vsx.usernamehw) errorlens;
