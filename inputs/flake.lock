@@ -1442,11 +1442,11 @@
       },
       "locked": {
         "dir": "codium",
-        "lastModified": 1663693714,
-        "narHash": "sha256-eMFcLXRi5zR4iEA1OvYi0W6cooCUt5iVe2HfVE/ZPuY=",
+        "lastModified": 1663753827,
+        "narHash": "sha256-yz0DoZkj10UmaRP7NBSGiJOAo3H+TNremSucT4n+4wU=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "02ec42bde7312e36b71a325456d622d19f08dcec",
+        "rev": "14cd22f1d6e618c576136c28974fd968b2a46913",
         "type": "github"
       },
       "original": {
