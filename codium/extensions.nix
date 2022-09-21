@@ -50,7 +50,8 @@ in
     inherit (open-vsx.donjayamanne) python-extension-pack;
     inherit (open-vsx.njpwerner) autodocstring;
     inherit (open-vsx.ms-python) python;
-    inherit (open-vsx.wholroyd) jinja;
+    inherit (open-vsx.samuelcolvin) jinjahtml;
+    inherit (vscode.monosans) djlint;
     inherit (open-vsx.batisteo) vscode-django;
     inherit (open-vsx.kevinrose) vsc-python-indent;
     inherit (my-extensions.visualstudioexptteam) vscodeintellicode;

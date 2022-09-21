@@ -37,6 +37,17 @@
     };
     "files.refactoring.autoSave" = true;
     "files.autoSave" = "afterDelay";
+    "files.associations" = {
+      "*.html" = "html";
+      "*.jinja" = "jinja-html";
+    };
+  };
+
+  # enable IntelliSense (but not yet info on hover :( ) in jinja files
+  emmet = {
+    "emmet.includeLanguages" = {
+      "jinja-html" = "html";
+    };
   };
 
   # set your path instead of `front`
@@ -85,5 +96,11 @@
   nix-ide = {
     "nix.serverPath" = "rnix-lsp";
     "nix.enableLanguageServer" = true;
+  };
+
+  python = {
+    "python.formatting.provider" = "black";
+    "python.linting.mypyCategorySeverity.error" = "Error";
+    "python.linting.mypyEnabled" = true;
   };
 }
