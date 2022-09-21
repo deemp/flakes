@@ -38,7 +38,7 @@ in
       markdown-yaml-preamble
       markdown-footnotes
       ;
-    inherit (open-vsx.DavidAnson)
+    inherit (open-vsx.davidanson)
       vscode-markdownlint;
   };
   misc = {
