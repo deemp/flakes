@@ -25,7 +25,7 @@
       inputs.flake-utils.follows = "flake-utils";
     };
     vscodium-extensions = {
-      url = "github:br4ch1st0chr0n3/vscodium-extensions/6710aaffe852d3526654c26c0cb94cf05c4665f1";
+      url = "github:br4ch1st0chr0n3/vscodium-extensions";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
