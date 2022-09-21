@@ -38,6 +38,8 @@ in
       markdown-yaml-preamble
       markdown-footnotes
       ;
+    inherit (open-vsx.DavidAnson)
+      vscode-markdownlint;
   };
   misc = {
     inherit (open-vsx.usernamehw) errorlens;
