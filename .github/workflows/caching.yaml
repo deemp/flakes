@@ -49,5 +49,5 @@ jobs:
           do
             nix develop .#$devShell --profile dev-profile
             cachix push ${{ env.cache }} dev-profile
-          end
+          done
   
