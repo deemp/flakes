@@ -14,6 +14,7 @@ jobs:
     name: Build on ${{ matrix.os }}
     env:
       cache: br4ch1st0chr0n3
+      devShells: (default codium)
     strategy:
       matrix:
         os: [ubuntu-20.04, ubuntu-22.04, macos-11, macos-12]
@@ -37,8 +38,11 @@ jobs:
           nix flake archive --json \
             | jq -r '.path,(.inputs|to_entries[].value.path)' \
             | cachix push ${{ env.cache }}
-      - name: Push devshell to cachix
+      - name: Push devshells to cachix
         run: |
-          nix develop --profile dev-profile
-          cachix push ${{ env.cache }} dev-profile
+          for devShell in ${{ env.devShells }}
+          do
+            nix develop --profile dev-profile
+            cachix push ${{ env.cache }} dev-profile
+          end
   
