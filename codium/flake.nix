@@ -1,13 +1,13 @@
 {
   inputs = {
     my-inputs.url = github:br4ch1st0chr0n3/flakes?dir=inputs;
-    nixpkgs.follows = "inputs/nixpkgs";
-    flake-utils.follows = "inputs/flake-utils";
-    gitignore.follows = "inputs/gitignore";
-    easy-purescript-nix.follows = "inputs/easy-purescript-nix";
-    haskell-language-server.follows = "inputs/haskell-language-server";
-    nix-vscode-marketplace.follows = "inputs/nix-vscode-marketplace";
-    vscodium-extensions.follows = "inputs/vscodium-extensions";
+    nixpkgs.follows = "my-inputs/nixpkgs";
+    flake-utils.follows = "my-inputs/flake-utils";
+    gitignore.follows = "my-inputs/gitignore";
+    easy-purescript-nix.follows = "my-inputs/easy-purescript-nix";
+    haskell-language-server.follows = "my-inputs/haskell-language-server";
+    nix-vscode-marketplace.follows = "my-inputs/nix-vscode-marketplace";
+    vscodium-extensions.follows = "my-inputs/vscodium-extensions";
   };
   outputs =
     { self
