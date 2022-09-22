@@ -9,7 +9,7 @@ on:
   push:
 
 jobs:
-  codium:
+  caching:
     name: Build on ${{ matrix.os }}
     defaults:
       run:
