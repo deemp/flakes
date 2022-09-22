@@ -15,7 +15,7 @@ jobs:
     name: Build on ${{ matrix.os }}
     env:
       cache: br4ch1st0chr0n3
-      devShells: (default codium)
+      devShells: "default codium"
     strategy:
       matrix:
         os: [ubuntu-20.04, ubuntu-22.04, macos-11, macos-12]
@@ -45,9 +45,9 @@ jobs:
             | cachix push ${{ env.cache }}
       - name: Push devshells to cachix
         run: |
-          for devShell in ${{ env.devShells }}
+          for devShell in ${{ env.devShells }} ;
           do
-            nix develop --profile dev-profile
+            nix develop .#$devShell --profile dev-profile
             cachix push ${{ env.cache }} dev-profile
           end
   
