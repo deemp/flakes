@@ -38,8 +38,7 @@ in
       markdown-yaml-preamble
       markdown-footnotes
       ;
-    inherit (open-vsx.davidanson)
-      vscode-markdownlint;
+    inherit (open-vsx.davidanson) vscode-markdownlint;
     inherit (open-vsx.yzhang) markdown-all-in-one;
   };
   misc = {
@@ -48,6 +47,7 @@ in
   };
   docker = {
     inherit (my-extensions.ms-vscode-remote) remote-containers;
+    inherit (open-vsx.ms-azuretools) vscode-docker;
   };
   python = {
     inherit (open-vsx.donjayamanne) python-extension-pack;
