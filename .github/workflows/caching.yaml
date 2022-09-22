@@ -36,13 +36,13 @@ jobs:
         with:
           name: ${{ env.cache }}
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
-      - name: Push inputs to cachix
-        run: |
-          # https://docs.cachix.org/pushing#flakes
+      # - name: Push inputs to cachix
+      #   run: |
+      #     # https://docs.cachix.org/pushing#flakes
 
-          nix flake archive --json \
-            | jq -r '.path,(.inputs|to_entries[].value.path)' \
-            | cachix push ${{ env.cache }}
+      #     nix flake archive --json \
+      #       | jq -r '.path,(.inputs|to_entries[].value.path)' \
+      #       | cachix push ${{ env.cache }}
       - name: Push devshells to cachix
         run: |
           for devShell in ${{ env.devShells }} ;
