@@ -2,8 +2,8 @@ name: "Caching"
 
 on:
   schedule:
-    # * is a special character in YAML so you have to quote this string
     # https://crontab.guru/#30_5,17_*_*_*
+    # * is a special character in YAML so you have to quote this string
     - cron: "30 5,17 * * *"
   pull_request:
   push:
@@ -17,8 +17,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04, ubuntu-22.04, macos-11, macos-12]
-        cache: [br4ch1st0chr0n3-flakes]
-        dir: [codium]
+        cache: [br4ch1st0chr0n3]
+        dir: [codium, inputs]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -26,8 +26,8 @@ jobs:
         with:
           extra_nix_config: |
             access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-            substituters =  https://cache.nixos.org/ https://hydra.iohk.io https://haskell-language-server.cachix.org
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= haskell-language-server.cachix.org-1:juFfHrwkOxqIOZShtC4YC1uT1bBcq2RSvC7OMKx0Nz8=
+            substituters = https://cache.nixos.org/ https://hydra.iohk.io https://haskell-language-server.cachix.org https://br4ch1st0chr0n3.cachix.org
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= haskell-language-server.cachix.org-1:juFfHrwkOxqIOZShtC4YC1uT1bBcq2RSvC7OMKx0Nz8= br4ch1st0chr0n3.cachix.org-1:o1FA93L5vL4LWi+jk2ECFk1L1rDlMoTH21R1FHtSKaU=
       - uses: cachix/cachix-action@v10
         with:
           name: ${{ matrix.cache }}
@@ -36,8 +36,6 @@ jobs:
         run: cachix use ${{ matrix.cache }}
       - name: Push inputs to cachix
         run: |
-          # https://docs.cachix.org/pushing#flakes
-
           nix flake archive --json \
             | jq -r '.path,(.inputs|to_entries[].value.path)' \
             | cachix push ${{ matrix.cache }}
@@ -65,3 +63,6 @@ jobs:
 
 # about GITHUB_TOKEN
 # https://docs.github.com/en/actions/security-guides/automatic-token-authentication#about-the-github_token-secret
+
+# push flakes to cachix
+# https://docs.cachix.org/pushing#flakes
