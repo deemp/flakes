@@ -41,5 +41,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
-  outputs = inputs: { };
+  outputs = { nixpkgs, flake-utils, ... }:
+    flake-utils.lib.eachDefaultSystem (system:
+      let
+        pkgs = nixpkgs.legacyPackages.${system};
+      in
+      {
+        # dummy devshell for caching
+        devShells.default = pkgs.mkShell { };
+      }
+    );
 }
