@@ -34,6 +34,8 @@
 
 ### Docs
 
+1. [nix-lib](https://teu5us.github.io/nix-lib.html)
+
 1. It's recommended to add bookmarks for search engines in your browser, like described here [Browser](README.md#browser)
 
 1. Nix [Documentation gaps](https://nixos.wiki/wiki/Documentation_Gaps)
