@@ -4344,11 +4344,11 @@
       },
       "locked": {
         "dir": "codium",
-        "lastModified": 1663966599,
-        "narHash": "sha256-hGYBTgMD3pHQ3Gd59W6JvUG3cIpZNQiHbbxvYG1WF4U=",
+        "lastModified": 1663966621,
+        "narHash": "sha256-I1vDJvTd+jSLYmydjAD9EJfrO7D29LTDbXFXHN7XEgY=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "967effc486c3f1d45464212e77069113d04de87e",
+        "rev": "7dcdcad5e10a1af9410bfb74c4655d861284c9c3",
         "type": "github"
       },
       "original": {
@@ -5438,22 +5438,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-latest_2": {
-      "locked": {
-        "lastModified": 1663905476,
-        "narHash": "sha256-0CSwRKaYravh9v6qSlBpM0gNg0UhKT2lL7Yn6Zbx7UM=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "e14f9fb57315f0d4abde222364f19f88c77d2b79",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixpkgs-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "nixpkgs_10": {
       "locked": {
         "lastModified": 1663165252,
@@ -5690,17 +5674,17 @@
     },
     "nixpkgs_24": {
       "locked": {
-        "lastModified": 1663491030,
-        "narHash": "sha256-MVsfBhE9US5DvLtBAaTRjwYdv1tLO8xjahM8qLXTgTo=",
+        "lastModified": 1663905476,
+        "narHash": "sha256-0CSwRKaYravh9v6qSlBpM0gNg0UhKT2lL7Yn6Zbx7UM=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "767542707d394ff15ac1981e903e005ba69528b5",
+        "rev": "e14f9fb57315f0d4abde222364f19f88c77d2b79",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "767542707d394ff15ac1981e903e005ba69528b5",
+        "rev": "e14f9fb57315f0d4abde222364f19f88c77d2b79",
         "type": "github"
       }
     },
@@ -6716,7 +6700,6 @@
         "my-codium": "my-codium",
         "nix-vscode-marketplace": "nix-vscode-marketplace_8",
         "nixpkgs": "nixpkgs_24",
-        "nixpkgs-latest": "nixpkgs-latest_2",
         "poetry2nix": "poetry2nix_21",
         "vscodium-extensions": "vscodium-extensions_8"
       }
