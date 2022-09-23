@@ -5,7 +5,7 @@
     flake-utils.follows = "my-inputs/flake-utils";
     my-codium.follows = "my-inputs/my-codium";
     flake-compat.follows = "my-inputs/flake-compat";
-    hls.follows = "my-inputs/haskell-language-server";
+    # hls.follows = "my-inputs/haskell-language-server";
     gitignore.follows = "my-inputs/gitignore";
   };
   outputs =
@@ -14,7 +14,7 @@
     , nixpkgs
     , my-codium
     , flake-compat
-    , hls
+      # , hls
     , gitignore
     , my-inputs
     }:
@@ -31,7 +31,9 @@
         mkCodium
         extensions
         ;
-      inherit (toolsGHC ghcVersion) hls stack callCabal staticExecutable;
+      inherit (toolsGHC ghcVersion) stack callCabal staticExecutable; # hls;
+
+      hls = pkgs.haskell-language-server;
 
       manager =
         let
