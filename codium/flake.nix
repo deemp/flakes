@@ -130,23 +130,26 @@
           checkPhase = "";
         });
 
-        # write .vscode/settings.json
-        writeSettingsJson = settings:
+        # String -> String -> String -> String -> Set -> IO ()
+        # make a shell app called `name` which writes `data` (a Nix expression) as json into `dir`/`file`
+        writeJson = name: dir: file: dataNix:
           let
-            vscode = ".vscode";
-            s = "settings.json";
-            settingsJson = builtins.toJSON (mergeValues settings);
+            dataJson = builtins.toJSON dataNix;
           in
           writeShellApplicationUnchecked {
-            name = "write-settings-json";
+            name = "write-${name}-json";
             runtimeInputs = [ pkgs.python38 ];
             text = ''
-              mkdir -p ${vscode}
-              printf "%s" ${pkgs.lib.escapeShellArg settingsJson} | python -m json.tool > ${vscode}/${s}
+              mkdir -p ${dir}
+              printf "%s" ${pkgs.lib.escapeShellArg dataJson} | python -m json.tool > ${dir}/${file}
             '';
           };
 
+        # write .vscode/settings.json
+        writeSettingsJson = settings: writeJson "settings" ".vscode" "settings.json" (mergeValues settings);
 
+        # write .vscode/tasks.json
+        writeTasksJson = tasks: writeJson "tasks" ".vscode" "tasks.json" tasks;
 
         # convert json to nix
         # no need to provide the full path to a file if it's in the cwd
@@ -218,16 +221,19 @@
           inherit
             allShellTools
             codium
+            extensions
             json2nix
+            justStaticExecutables
             mergeValues
             mkCodium
-            shellTools
             settingsNix
-            extensions
-            writeSettingsJson
+            shellTools
             toList
             toolsGHC
-            justStaticExecutables
+            writeJson
+            writeSettingsJson
+            writeShellApplicationUnchecked
+            writeTasksJson
             ;
         };
         devShells =
