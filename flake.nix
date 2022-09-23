@@ -25,10 +25,11 @@
       inherit (my-codium.tools.${system})
         writeSettingsJson
         settingsNix
-        codium
         toList
         shellTools
         toolsGHC
+        mkCodium
+        extensions
         ;
       inherit (toolsGHC ghcVersion) hls stack callCabal staticExecutable;
 
@@ -59,6 +60,10 @@
         toList {
           inherit (shellTools) nix haskell;
         }) ++ [ stack hls manager ];
+
+      codium = mkCodium {
+        inherit (extensions) nix haskell misc github;
+      };
 
       codiumWithSettings = pkgs.mkShell {
         buildInputs = [ writeSettings codium ];
