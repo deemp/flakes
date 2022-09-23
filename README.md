@@ -34,7 +34,7 @@ This flake contains:
 
 - Now, when prompted, answer `y`
 
-- Everything should start loading. If no, run:
+- This should load `haskell-language-server` and `stack` into shell. If no, run:
   ```
   nix develop
   ```
@@ -47,8 +47,8 @@ This flake contains:
   ```
 
 - After that, run
-  ```sh
-  codium .
+  ```console
+  nix develop .#codium
   ```
 
 - A Codium instance with the promised tools should open.
@@ -76,14 +76,17 @@ This flake contains:
   Removing './Modules/B.hs'
   Reading './package.yaml'
   Updating './package.yaml'
+  Updating .cabal
+  generated nix-managed.cabal
   Done!
   ```
 
 - When you open the newly created file, `./Modules/B.hs`, and hover over a term, you should see Haskell Language Server load and show info.
 
 - In case of problems, try to
-  - restart HLS: `Ctrl` + `Shift` + `P` > `Restart Haskell LSP Server`
-  - reload the window: `Ctrl` + `Shift` + `P` > `Reload Window`
+  - Open `Command Palette`: `Ctrl` (`Cmd`) + `Shift` + `P`
+    - Restart HLS: `Command Palette` > `Restart Haskell LSP Server`
+    - Reload the window: `Command Palette` > `Reload Window`
 
 - Feel free to create an issue or contact me at [Telegram](https://daniladanko.t.me)
 
