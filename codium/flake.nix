@@ -35,22 +35,18 @@
 
         # if a set's attribute values are all sets, merge these values
         # Examples:
-        # mergeValues {a = {b = 1;}; c = {d = 1;};} => {b = 1; d = 1;}
-        # mergeValues ({inherit (vscode-extensions) haskell purescript;})
+        # mergeValues {a = {b = 1;}; c = {d = 2;};} => {b = 1; d = 2;}
         mergeValues = set@{ ... }:
           builtins.foldl' pkgs.lib.mergeAttrs { } (builtins.attrValues set);
 
         # nixified and restructured settings.json
-        # one can combine the settings as follows:
-        # settingsNix.haskell // settingsNix.purescript
         settingsNix = import ./settings.nix;
 
-        # a convenience function that flattens
+        # a convenience function that flattens a set with set attribute values
+        # toList {a = {b = 1;}; c = {d = 2;};} => [1 2]
         toList = x: builtins.attrValues (mergeValues x);
 
         # shell tools for development
-        # Example
-        # mergeValues { inherit (settings) todo-tree purescript; }
         shellTools = {
           purescript =
             let
@@ -85,6 +81,8 @@
               hkgr
               # Easy dependency management for Nix projects.
               niv
+              # Easy dependency management for Nix projects.
+              hpack
               # GHCi based bare bones IDE
               ghcid
               ;
@@ -115,8 +113,6 @@
 
         # create a codium with a given set of extensions
         # bashInteractive is necessary for correct work
-        # Examples: 
-        # see `codium`
         mkCodium = extensions@{ ... }:
           let
             inherit (pkgs) vscode-with-extensions vscodium;
@@ -129,38 +125,44 @@
             pkgs.bashInteractive
           ];
 
-        # write settings.json into ./.vscode
-        # Example:
-        # see devShells
+        # ignore shellcheck when writing a shell application
+        writeShellApplicationUnchecked = args@{ ... }: pkgs.writeShellApplication (args // {
+          checkPhase = "";
+        });
+
+        # write .vscode/settings.json
         writeSettingsJson = settings:
           let
             vscode = ".vscode";
             s = "settings.json";
             settingsJson = builtins.toJSON (mergeValues settings);
           in
-          pkgs.writeShellApplication {
+          writeShellApplicationUnchecked {
             name = "write-settings-json";
             runtimeInputs = [ pkgs.python38 ];
             text = ''
               mkdir -p ${vscode}
               printf "%s" ${pkgs.lib.escapeShellArg settingsJson} | python -m json.tool > ${vscode}/${s}
             '';
-            checkPhase = "";
           };
+
+
 
         # convert json to nix
         # no need to provide the full path to a file if it's in the cwd
-        # Example: 
-        # nix run .#json2nix settings.json settings.nix
-        json2nix = pkgs.writeScriptBin "json2nix" ''
-          json_path=$1
-          nix_path=$2
-          pkgs="with import ${nixpkgs} { }"
-          p="$pkgs; with builtins; fromJSON (readFile ./$json_path)"
-          nix-instantiate --eval "$p" -E  > $nix_path
-          sed -i -E "s/(\[|\{)/\1\n/g" $nix_path
-          nix run ${nixpkgs}#nixpkgs-fmt $nix_path
-        '';
+        # json2nix .vscode/settings.json my-settings.nix
+        json2nix = writeShellApplicationUnchecked {
+          name = "json2nix";
+          runtimeInputs = [ pkgs.nixpkgs-fmt ];
+          text =
+            ''
+              json_path=$1
+              nix_path=$2
+              nix eval --impure --expr "with builtins; fromJSON (readFile ./$json_path)" > $nix_path
+              sed -i -E "s/(\[|\{)/\1\n/g" $nix_path
+              nixpkgs-fmt $nix_path
+            '';
+        };
 
         # codium with all extensions enabled
         codium = [ (mkCodium extensions) ];
