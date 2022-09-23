@@ -3760,11 +3760,11 @@
       },
       "locked": {
         "dir": "codium",
-        "lastModified": 1663963862,
-        "narHash": "sha256-/X77EDJzmxGIZcku2SIJlOghte3fKUr0Y+aFTBQXuaQ=",
+        "lastModified": 1663963897,
+        "narHash": "sha256-jnaRfxY7HuFwjmUnBOil2g9d/FXg/xzI5Kz6+HxO7/g=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "9afa310d4cc442af6637513184d73c711a567ecc",
+        "rev": "6a157a264b49e60de75f76c4d0aae2461c463d49",
         "type": "github"
       },
       "original": {
@@ -4184,11 +4184,11 @@
       },
       "locked": {
         "dir": "inputs",
-        "lastModified": 1663963738,
-        "narHash": "sha256-YeFi+cjkNno6OU9lp0WjuOUrY9fG95YSaOPy+pDzD6M=",
+        "lastModified": 1663963862,
+        "narHash": "sha256-/X77EDJzmxGIZcku2SIJlOghte3fKUr0Y+aFTBQXuaQ=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "9393087fbd9e401cad84c2434a94278e34d42e50",
+        "rev": "9afa310d4cc442af6637513184d73c711a567ecc",
         "type": "github"
       },
       "original": {
@@ -4613,6 +4613,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-latest": {
+      "locked": {
+        "lastModified": 1663905476,
+        "narHash": "sha256-0CSwRKaYravh9v6qSlBpM0gNg0UhKT2lL7Yn6Zbx7UM=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e14f9fb57315f0d4abde222364f19f88c77d2b79",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs_10": {
       "locked": {
         "lastModified": 1663165252,
@@ -4802,17 +4818,17 @@
     },
     "nixpkgs_21": {
       "locked": {
-        "lastModified": 1663905476,
-        "narHash": "sha256-0CSwRKaYravh9v6qSlBpM0gNg0UhKT2lL7Yn6Zbx7UM=",
+        "lastModified": 1663491030,
+        "narHash": "sha256-MVsfBhE9US5DvLtBAaTRjwYdv1tLO8xjahM8qLXTgTo=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "e14f9fb57315f0d4abde222364f19f88c77d2b79",
+        "rev": "767542707d394ff15ac1981e903e005ba69528b5",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
-        "ref": "nixpkgs-unstable",
         "repo": "nixpkgs",
+        "rev": "767542707d394ff15ac1981e903e005ba69528b5",
         "type": "github"
       }
     },
@@ -5686,6 +5702,7 @@
         "my-codium": "my-codium",
         "nix-vscode-marketplace": "nix-vscode-marketplace_7",
         "nixpkgs": "nixpkgs_21",
+        "nixpkgs-latest": "nixpkgs-latest",
         "poetry2nix": "poetry2nix_18",
         "vscodium-extensions": "vscodium-extensions_7"
       }
