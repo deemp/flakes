@@ -135,13 +135,15 @@
         writeJson = name: dir: file: dataNix:
           let
             dataJson = builtins.toJSON dataNix;
+            name_ = "write-${name}-json"; 
           in
-          writeShellApplicationUnchecked {
-            name = "write-${name}-json";
+          writeShellApplicationUnchecked {  
+            name = name_;
             runtimeInputs = [ pkgs.python38 ];
             text = ''
               mkdir -p ${dir}
               printf "%s" ${pkgs.lib.escapeShellArg dataJson} | python -m json.tool > ${dir}/${file}
+              printf "\n[ok %s]\n" "${name_}"
             '';
           };
 
@@ -215,6 +217,7 @@
         tools902 = builtins.attrValues ({
           inherit (toolsGHC "902") hls stack;
         });
+        writeSettings = writeSettingsJson settingsNix;
       in
       {
         tools = {
@@ -236,6 +239,9 @@
             writeTasksJson
             ;
         };
+        packages = {
+          write-settings = writeSettings;
+        };
         devShells =
           let
             myDevTools =
@@ -252,7 +258,7 @@
 
             # if you want to use codium, you'd want to have the appropriate settings
             codium = pkgs.mkShell {
-              buildInputs = [ codium (writeSettingsJson settingsNix) ];
+              buildInputs = [ codium writeSettings ];
               shellHook = ''
                 write-settings-json
                 codium .
