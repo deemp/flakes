@@ -127,31 +127,34 @@
 
         # ignore shellcheck when writing a shell application
         writeShellApplicationUnchecked = args@{ ... }: pkgs.writeShellApplication (args // {
+          runtimeInputs = pkgs.lib.lists.flatten args.runtimeInputs;
           checkPhase = "";
         });
 
-        # String -> String -> String -> String -> Set -> IO ()
-        # make a shell app called `name` which writes `data` (a Nix expression) as json into `dir`/`file`
-        writeJson = name: dir: file: dataNix:
+        # String -> String -> Set -> IO ()
+        # make a shell app called `name` which writes `data` (a Nix expression) as json into `path`
+        writeJson = name: path: dataNix:
           let
             dataJson = builtins.toJSON dataNix;
-            name_ = "write-${name}-json"; 
+            name_ = "write-${name}-json";
+            dir = builtins.dirOf path;
+            file = builtins.baseNameOf path;
           in
           writeShellApplicationUnchecked {  
             name = name_;
-            runtimeInputs = [ pkgs.python38 ];
+            runtimeInputs = [ pkgs.python310 ];
             text = ''
               mkdir -p ${dir}
-              printf "%s" ${pkgs.lib.escapeShellArg dataJson} | python -m json.tool > ${dir}/${file}
+              printf "%s" ${pkgs.lib.escapeShellArg dataJson} | python -m json.tool > ${path}
               printf "\n[ok %s]\n" "${name_}"
             '';
           };
 
         # write .vscode/settings.json
-        writeSettingsJson = settings: writeJson "settings" ".vscode" "settings.json" (mergeValues settings);
+        writeSettingsJson = settings: writeJson "settings" "./.vscode/settings.json" (mergeValues settings);
 
         # write .vscode/tasks.json
-        writeTasksJson = tasks: writeJson "tasks" ".vscode" "tasks.json" tasks;
+        writeTasksJson = tasks: writeJson "tasks" "./.vscode/tasks.json" tasks;
 
         # convert json to nix
         # no need to provide the full path to a file if it's in the cwd
@@ -220,6 +223,8 @@
         writeSettings = writeSettingsJson settingsNix;
       in
       {
+        # use just these tools
+        # packages and devShells are just for demo purposes
         tools = {
           inherit
             allShellTools
@@ -240,7 +245,7 @@
             ;
         };
         packages = {
-          write-settings = writeSettings;
+          inherit writeSettings;
         };
         devShells =
           let
