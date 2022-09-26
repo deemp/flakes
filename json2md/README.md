@@ -7,5 +7,12 @@ It reads `JSON` from a given file and in case of successful convertation ouputs 
 Sample usage:
 
 ```sh
-nix run .#docs.json
+nix shell .#
+json2md docs.json
+```
+
+or
+
+```sh
+nix run .# docs.json
 ```
