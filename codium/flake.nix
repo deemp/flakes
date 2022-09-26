@@ -126,7 +126,7 @@
           ];
 
         # ignore shellcheck when writing a shell application
-        writeShellApplicationUnchecked = args@{ ... }: pkgs.writeShellApplication (args // {
+        writeShellApp = args@{ ... }: pkgs.writeShellApplication (args // {
           runtimeInputs = pkgs.lib.lists.flatten args.runtimeInputs;
           checkPhase = "";
         });
@@ -140,7 +140,7 @@
             dir = builtins.dirOf path;
             file = builtins.baseNameOf path;
           in
-          writeShellApplicationUnchecked {  
+          writeShellApp {  
             name = name_;
             runtimeInputs = [ pkgs.python310 ];
             text = ''
@@ -159,7 +159,7 @@
         # convert json to nix
         # no need to provide the full path to a file if it's in the cwd
         # json2nix .vscode/settings.json my-settings.nix
-        json2nix = writeShellApplicationUnchecked {
+        json2nix = writeShellApp {
           name = "json2nix";
           runtimeInputs = [ pkgs.nixpkgs-fmt ];
           text =
@@ -240,12 +240,12 @@
             toolsGHC
             writeJson
             writeSettingsJson
-            writeShellApplicationUnchecked
+            writeShellApp
             writeTasksJson
             ;
         };
         packages = {
-          inherit writeSettings;
+          inherit writeSettings json2nix codium ;
         };
         devShells =
           let
