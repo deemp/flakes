@@ -242,6 +242,7 @@
           )
           shells;
 
+        # makes shells with their runtime dependencies
         mkDevShellsWithDefault = defaultShellAdditional: shells@{ ... }:
           let
             shells_ = mkDevShells shells;
@@ -251,10 +252,44 @@
                 text = defaultShellAdditional.text or "";
               };
             };
+            devShells_ = shells_ // defaultShell;
           in
-          shells_ // defaultShell;
+          devShells_;
 
-        devShells = mkDevShellsWithDefault
+        # after the first run of default shell saves the shells into .envrc
+        mkDevShellsWithDirenv = defaultShellAdditional: shells@{ ... }:
+          let
+            devShells_ = mkDevShellsWithDefault defaultShellAdditional shells;
+            writeDirenv_ = writeDirenv devShells_;
+            defaultName = devShells_.default.name;
+            devShellsWrapped = devShells_ // {
+              default = writeShellApp {
+                name = defaultName;
+                runtimeInputs = [ writeDirenv_ ];
+                text = ''${writeDirenv_.name}; ${defaultName}'';
+              };
+            };
+          in
+          devShellsWrapped;
+
+        # write .envrc to make shells available after codium starts
+        writeDirenv = devShells:
+          let
+            envrc = ".envrc";
+            pathAdd = "PATH_add";
+          in
+          writeShellApp (
+            let shells = builtins.attrValues devShells; in
+            {
+              name = "write-direnv";
+              runtimeInputs = shells;
+              text =
+                let text_ = builtins.concatStringsSep "\n" (builtins.map (pkg: "${pathAdd} ${pkg.outPath}/bin") shells);
+                in ''printf "%s\n" '${text_}' > ${envrc}'';
+            }
+          );
+
+        devShells = mkDevShellsWithDirenv
           {
             runtimeInputs = (toList shellTools) ++ tools902;
           }
@@ -290,18 +325,19 @@
             writeTasksJson
             mkDevShells
             mkDevShellsWithDefault
+            mkDevShellsWithDirenv
             ;
         };
         packages = devShells;
-          devShells = {
+        devShells = {
 
-              # TODO add this to scripts in case something goes wrong
+          # TODO add this to scripts in case something goes wrong
 
-              # From here: https://docs.haskellstack.org/en/stable/nix_integration/
-              # Make external Nix c libraries like zlib known to GHC, like pkgs.haskell.lib.buildStackProject does
-              # https://github.com/NixOS/nixpkgs/blob/d64780ea0e22b5f61cd6012a456869c702a72f20/pkgs/development/haskell-modules/generic-stack-builder.nix#L38
-              # LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath myDevTools;
-            };
+          # From here: https://docs.haskellstack.org/en/stable/nix_integration/
+          # Make external Nix c libraries like zlib known to GHC, like pkgs.haskell.lib.buildStackProject does
+          # https://github.com/NixOS/nixpkgs/blob/d64780ea0e22b5f61cd6012a456869c702a72f20/pkgs/development/haskell-modules/generic-stack-builder.nix#L38
+          # LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath myDevTools;
+        };
       }
     );
 
