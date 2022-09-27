@@ -226,7 +226,7 @@
         mkDevShells = shells@{ ... }: builtins.mapAttrs
           (name: value:
             writeShellApp ({
-              runtimeInputs = value.runtimeInputs or [ ];
+              runtimeInputs = value.runtimeInputs ++ [ pkgs.awk ];
               inherit name;
               text = let MY_SHELL_NAME = "MY_SHELL_NAME"; in
                 ''
