@@ -261,12 +261,12 @@
           let
             devShells_ = mkDevShellsWithDefault defaultShellAdditional shells;
             writeDirenv_ = writeDirenv devShells_;
-            defaultName = devShells_.default.name;
+            defaultShell = devShells_.default;
             devShellsWrapped = devShells_ // {
               default = writeShellApp {
-                name = defaultName;
-                runtimeInputs = [ writeDirenv_ ];
-                text = ''${writeDirenv_.name}; ${defaultName}'';
+                name = defaultShell.name;
+                runtimeInputs = [ writeDirenv_ defaultShell ];
+                text = ''${writeDirenv_.name}; ${defaultShell.name}'';
               };
             };
           in
