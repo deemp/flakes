@@ -127,7 +127,7 @@
 
         # ignore shellcheck when writing a shell application
         writeShellApp = args@{ ... }: pkgs.writeShellApplication (args // {
-          runtimeInputs = pkgs.lib.lists.flatten args.runtimeInputs;
+          runtimeInputs = pkgs.lib.lists.flatten (args.runtimeInputs or []);
           checkPhase = "";
         });
 
@@ -226,7 +226,7 @@
         mkDevShells = shells@{ ... }: builtins.mapAttrs
           (name: value:
             writeShellApp ({
-              inherit (value) runtimeInputs;
+              runtimeInputs = value.runtimeInputs or [];
               inherit name;
               text = let MY_SHELL_NAME = "MY_SHELL_NAME"; in
                 ''
