@@ -262,6 +262,7 @@
             writeSettingsJson
             writeShellApp
             writeTasksJson
+            mkDevShells
             ;
         };
         packages = {
