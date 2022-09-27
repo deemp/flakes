@@ -226,7 +226,7 @@
         mkDevShells = shells@{ ... }: builtins.mapAttrs
           (name: value:
             writeShellApp ({
-              runtimeInputs = (value.runtimeInputs or []) ++ [ pkgs.awk ];
+              runtimeInputs = (value.runtimeInputs or [ ]) ++ [ pkgs.gawk ];
               inherit name;
               text = let MY_SHELL_NAME = "MY_SHELL_NAME"; in
                 ''
@@ -248,13 +248,13 @@
           shells;
 
         # makes shells with their runtime dependencies
-        mkDevShellsWithDefault = defaultShellAdditional: shells@{ ... }:
+        mkDevShellsWithDefault = defaultAttrs@{ runtimeInputs ? [ ], text ? "" }: shells@{ ... }:
           let
             shells_ = mkDevShells shells;
             defaultShell = mkDevShells {
               default = {
-                runtimeInputs = (defaultShellAdditional.runtimeInputs or [ ]) ++ (builtins.attrValues shells_);
-                text = defaultShellAdditional.text or "";
+                runtimeInputs = runtimeInputs ++ (builtins.attrValues shells_);
+                inherit text;
               };
             };
             devShells_ = shells_ // defaultShell;
@@ -262,9 +262,9 @@
           devShells_;
 
         # after the first run of default shell saves the shells into .envrc
-        mkDevShellsWithDirenv = defaultShellAdditional: shells@{ ... }:
+        mkDevShellsWithDirenv = defaultAttrs: shells@{ ... }:
           let
-            devShells_ = mkDevShellsWithDefault defaultShellAdditional shells;
+            devShells_ = mkDevShellsWithDefault defaultAttrs shells;
             writeDirenv_ = writeDirenv devShells_;
             defaultShell = devShells_.default;
             devShellsWrapped = devShells_ // {
