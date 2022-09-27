@@ -7,7 +7,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     my-codium = {
-      url = "../codium";
+      url = "github:br4ch1st0chr0n3/flakes?dir=codium";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
@@ -33,7 +33,7 @@
       url = "github:haskell/haskell-language-server/ff4f29f859244f6e828ecf74fab6e8a6b745c020";
     };
     json2md = {
-      url = "../json2md";
+      url = "github:br4ch1st0chr0n3/flakes?dir=json2md";
     };
     flake-compat = {
       url = "github:edolstra/flake-compat/b4a34015c698c7793d592d66adbab377907a2be8";

@@ -225,22 +225,48 @@
         # create compilable devshells
         mkDevShells = shells@{ ... }: builtins.mapAttrs
           (name: value:
-            writeShellApp (value // {
+            writeShellApp ({
+              inherit (value) runtimeInputs;
               inherit name;
-              text =
-                let
-                  MY_SHELL_NAME = "MY_SHELL_NAME";
-                in
-                ''${MY_SHELL_NAME}=${name} bash --rcfile ${./scripts/devshells.sh}'';
+              text = let MY_SHELL_NAME = "MY_SHELL_NAME"; in
+                ''
+                  bash --rcfile <(
+                      echo '
+                        ${MY_SHELL_NAME}=${name}
+                        . ${./scripts/devshells.sh}; 
+                        ${value.text or ""}
+                      '
+                  )
+                '';
             })
           )
           shells;
 
-        devShells = mkDevShells {
-          myShell = {
-            runtimeInputs = [ json2nix writeSettings ];
+        mkDevShellsWithDefault = defaultShellAdditional: shells@{ ... }:
+          let
+            shells_ = mkDevShells shells;
+            defaultShell = mkDevShells {
+              default = {
+                runtimeInputs = (defaultShellAdditional.runtimeInputs or [ ]) ++ (builtins.attrValues shells_);
+                text = defaultShellAdditional.text or "";
+              };
+            };
+          in
+          shells_ // defaultShell;
+
+        devShells = mkDevShellsWithDefault
+          {
+            runtimeInputs = (toList shellTools) ++ tools902;
+          }
+          {
+            start-codium = {
+              runtimeInputs = [ codium writeSettings ];
+              text = ''
+                ${writeSettings.name}
+                codium .
+              '';
+            };
           };
-        };
       in
       {
         # use just these tools
@@ -263,39 +289,19 @@
             writeShellApp
             writeTasksJson
             mkDevShells
+            mkDevShellsWithDefault
             ;
         };
-        packages = {
-          inherit writeSettings json2nix codium;
-        } // devShells;
-        devShells =
-          let
-            myDevTools =
-              [
-                (toList shellTools)
-                tools902
-              ];
-          in
-          {
-            default = pkgs.mkShell {
-              name = "my-codium";
-              buildInputs = myDevTools;
-            };
+        packages = devShells;
+          devShells = {
 
-            # if you want to use codium, you'd want to have the appropriate settings
-            codium = pkgs.mkShell {
-              buildInputs = [ codium writeSettings ];
-              shellHook = ''
-                write-settings-json
-                codium .
-              '';
-            };
+              # TODO add this to scripts in case something goes wrong
 
-            # From here: https://docs.haskellstack.org/en/stable/nix_integration/
-            # Make external Nix c libraries like zlib known to GHC, like pkgs.haskell.lib.buildStackProject does
-            # https://github.com/NixOS/nixpkgs/blob/d64780ea0e22b5f61cd6012a456869c702a72f20/pkgs/development/haskell-modules/generic-stack-builder.nix#L38
-            LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath myDevTools;
-          };
+              # From here: https://docs.haskellstack.org/en/stable/nix_integration/
+              # Make external Nix c libraries like zlib known to GHC, like pkgs.haskell.lib.buildStackProject does
+              # https://github.com/NixOS/nixpkgs/blob/d64780ea0e22b5f61cd6012a456869c702a72f20/pkgs/development/haskell-modules/generic-stack-builder.nix#L38
+              # LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath myDevTools;
+            };
       }
     );
 
