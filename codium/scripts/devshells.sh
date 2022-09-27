@@ -1,5 +1,3 @@
-. ~/.bashrc
-
 MY_SHELL_NAMES=$(
 	if [[ -n $MY_SHELL_NAMES ]]; then
 		echo $MY_SHELL_NAMES", "$MY_SHELL_NAME

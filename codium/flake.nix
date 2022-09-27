@@ -127,7 +127,7 @@
 
         # ignore shellcheck when writing a shell application
         writeShellApp = args@{ ... }: pkgs.writeShellApplication (args // {
-          runtimeInputs = pkgs.lib.lists.flatten (args.runtimeInputs or []);
+          runtimeInputs = pkgs.lib.lists.flatten (args.runtimeInputs or [ ]);
           checkPhase = "";
         });
 
@@ -226,14 +226,19 @@
         mkDevShells = shells@{ ... }: builtins.mapAttrs
           (name: value:
             writeShellApp ({
-              runtimeInputs = value.runtimeInputs or [];
+              runtimeInputs = value.runtimeInputs or [ ];
               inherit name;
               text = let MY_SHELL_NAME = "MY_SHELL_NAME"; in
                 ''
                   bash --rcfile <(
                       echo '
-                        ${MY_SHELL_NAME}=${name}
-                        . ${./scripts/devshells.sh}; 
+                        
+                        export ${MY_SHELL_NAME}=${name}
+
+                        source <( cat ~/.bashrc | awk -f ${./scripts/without-direnv-hook.awk} )
+                        
+                        source ${./scripts/devshells.sh};
+                        
                         ${value.text or ""}
                       '
                   )
@@ -266,26 +271,34 @@
               default = writeShellApp {
                 name = defaultShell.name;
                 runtimeInputs = [ writeDirenv_ defaultShell ];
-                text = ''${writeDirenv_.name}; ${defaultShell.name}'';
+                text = ''
+                  ${writeDirenv_.name}
+                '';
               };
             };
           in
           devShellsWrapped;
 
         # write .envrc to make shells available after codium starts
+        envrc = ".envrc";
         writeDirenv = devShells:
           let
-            envrc = ".envrc";
             pathAdd = "PATH_add";
           in
           writeShellApp (
-            let shells = builtins.attrValues devShells; in
+            let
+              shells = builtins.attrValues devShells;
+              defaultName = "default";
+            in
             {
               name = "write-direnv";
               runtimeInputs = shells;
               text =
                 let text_ = builtins.concatStringsSep "\n" (builtins.map (pkg: "${pathAdd} ${pkg.outPath}/bin") shells);
-                in ''printf "%s\n" '${text_}' > ${envrc}'';
+                in
+                ''
+                  printf "%s\n%s\n" '${text_}' '${defaultName}' > ${envrc}
+                '';
             }
           );
 
