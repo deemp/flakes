@@ -2,3 +2,4 @@ result
 .direnv
 out
 .vscode
+.envrc
