@@ -8,4 +8,4 @@ MY_SHELL_NAMES=$(
 
 export MY_SHELL_NAMES
 
-export PS1=$PS1"nix develop [$MY_SHELL_NAMES] > "
+export PS1=$PS1"[$MY_SHELL_NAMES] > "

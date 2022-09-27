@@ -1,1 +1,0 @@
-$1 == "eval" && $4 ~ "bash.*" {next}{print}

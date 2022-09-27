@@ -235,7 +235,7 @@
                         
                         export ${MY_SHELL_NAME}=${name}
 
-                        source <( cat ~/.bashrc | awk -f ${./scripts/without-direnv-hook.awk} )
+                        source <( cat ~/.bashrc | awk '/direnv/{next}{print}' )
                         
                         source ${./scripts/devshells.sh};
                         
