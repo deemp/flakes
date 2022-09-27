@@ -140,7 +140,7 @@
             dir = builtins.dirOf path;
             file = builtins.baseNameOf path;
           in
-          writeShellApp {  
+          writeShellApp {
             name = name_;
             runtimeInputs = [ pkgs.python310 ];
             text = ''
@@ -221,6 +221,26 @@
           inherit (toolsGHC "902") hls stack;
         });
         writeSettings = writeSettingsJson settingsNix;
+
+        # create compilable devshells
+        mkDevShells = shells@{ ... }: builtins.mapAttrs
+          (name: value:
+            writeShellApp (value // {
+              inherit name;
+              text =
+                let
+                  MY_SHELL_NAME = "MY_SHELL_NAME";
+                in
+                ''${MY_SHELL_NAME}=${name} bash --rcfile ${./scripts/devshells.sh}'';
+            })
+          )
+          shells;
+
+        devShells = mkDevShells {
+          myShell = {
+            runtimeInputs = [ json2nix writeSettings ];
+          };
+        };
       in
       {
         # use just these tools
@@ -245,8 +265,8 @@
             ;
         };
         packages = {
-          inherit writeSettings json2nix codium ;
-        };
+          inherit writeSettings json2nix codium;
+        } // devShells;
         devShells =
           let
             myDevTools =
