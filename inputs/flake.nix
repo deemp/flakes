@@ -6,11 +6,6 @@
       url = "github:hercules-ci/gitignore.nix/a20de23b925fd8264fd7fad6454652e142fd7f73";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    my-codium = {
-      url = "github:br4ch1st0chr0n3/flakes?dir=codium";
-      inputs.nixpkgs.follows = "nixpkgs";
-      inputs.flake-utils.follows = "flake-utils";
-    };
     easy-purescript-nix = {
       url = "github:justinwoo/easy-purescript-nix/3d8b602e80c0fa7d97d7f03cb8e2f8b06967d509";
       flake = false;
