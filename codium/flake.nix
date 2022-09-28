@@ -126,7 +126,7 @@
           ];
 
         # ignore shellcheck when writing a shell application
-        writeShellApp = args@{ ... }: pkgs.writeShellApplication (args // {
+        writeShellApp = args@{ runtimeInputs ? [ ], name, text }: pkgs.writeShellApplication (args // {
           runtimeInputs = pkgs.lib.lists.flatten (args.runtimeInputs or [ ]);
           checkPhase = "";
         });
@@ -270,7 +270,7 @@
             devShellsWrapped = devShells_ // {
               default = writeShellApp {
                 name = defaultShell.name;
-                runtimeInputs = [ writeDirenv_ defaultShell ];
+                runtimeInputs = [ writeDirenv_ ];
                 text = ''
                   ${writeDirenv_.name}
                 '';
