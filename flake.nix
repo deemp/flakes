@@ -42,7 +42,7 @@
               codium = mkCodium { inherit (extensions) nix markdown github misc; };
               shellTools_ = toList { inherit (shellTools) nix; };
             in
-            [ codium shellTools_ updateFlakes pushToCachix ];
+            [ codium shellTools_ updateFlakes pushToCachix];
         }
         { };
       packages.default = updateFlakes;

@@ -90,9 +90,7 @@
           inherit (pkgs) haskell-language-server;
         };
 
-        markdown = {
-
-        };
+        markdown = { };
       };
 
       # Wrap Stack to work with our Nix integration.
@@ -288,15 +286,24 @@
         '';
       };
 
-      runInEachDir = args@{ root, dirs, command, name, runtimeInputs ? [] }: writeShellApp {
+      runInEachDir = args@{ root, dirs, command, name, runtimeInputs ? [ ] }: writeShellApp {
         name = "${name}-in-each-dir";
         inherit runtimeInputs;
-        text = builtins.concatStringsSep "\n"
-          (builtins.map (dir: ''
-            cd ${root}/${dir} &&
+        text = ''
+          INITIAL_PWD=$(echo $(pwd))
+
+        '' +
+        builtins.concatStringsSep "\n"
+          (builtins.map
+            (dir: ''
+              printf "[ %s ]" "$INITIAL_PWD/${dir}"
+
+              cd $INITIAL_PWD/${dir}
             
-            ${command}
-          '') dirs);
+              ${command}
+
+            '')
+            dirs);
       };
 
       # create devshells

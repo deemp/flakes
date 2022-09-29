@@ -14,8 +14,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04, ubuntu-22.04, macos-11, macos-12]
-    env:
-      cache: br4ch1st0chr0n3
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -27,16 +25,12 @@ jobs:
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= haskell-language-server.cachix.org-1:juFfHrwkOxqIOZShtC4YC1uT1bBcq2RSvC7OMKx0Nz8= br4ch1st0chr0n3.cachix.org-1:o1FA93L5vL4LWi+jk2ECFk1L1rDlMoTH21R1FHtSKaU=
       - uses: cachix/cachix-action@v10
         with:
-          name: ${{ matrix.cache }}
+          name: ${{ secrets.CACHIX_CACHE }}
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
       - name: Use cache
         run: cachix use ${{ secrets.CACHIX_CACHE }}
       - name: Push inputs to cachix
-        run: |
-          nix flake archive --json \
-            | jq -r '.path,(.inputs|to_entries[].value.path)' \
-            | cachix push ${{ secrets.CACHIX_CACHE }}
-      
+        run: CACHIX_CACHE=${{ secrets.CACHIX_CACHE }} nix develop -c "update"
 
 # It'd be nice to support these platforms:
 # x86_64-darwin
