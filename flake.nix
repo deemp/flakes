@@ -13,16 +13,13 @@
     let
       inherit (my-codium.tools.${system}) writeShellApp;
       dirs = [ "source" "codium" "json2md" "inputs" "." ];
+      updateFlakes = writeShellApp {
+        name = "update-flakes";
+        text = builtins.concatStringsSep "\n"
+          (builtins.map (dir: '' (cd ${dir} && nix flake update) '') dirs);
+      };
     in
     {
-      packages.default = writeShellApp {
-        name = "default";
-        text = builtins.concatStringsSep "\n"
-          (builtins.map
-            (dir: ''
-              (cd ${dir} && nix flake update)
-            '')
-            dirs);
-      };
+      packages.default = updateFlakes;
     });
 }
