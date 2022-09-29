@@ -89,6 +89,10 @@
           # Haskell-language-server
           inherit (pkgs) haskell-language-server;
         };
+
+        markdown = {
+
+        };
       };
 
       # Wrap Stack to work with our Nix integration.
@@ -283,6 +287,18 @@
           ${pushPackagesToCachix.name}
         '';
       };
+
+      runInEachDir = args@{ root, dirs, command, name, runtimeInputs ? [] }: writeShellApp {
+        name = "${name}-in-each-dir";
+        inherit runtimeInputs;
+        text = builtins.concatStringsSep "\n"
+          (builtins.map (dir: ''
+            cd ${root}/${dir} &&
+            
+            ${command}
+          '') dirs);
+      };
+
       # create devshells
       # notice the dependency on fish
       mkDevShells = shells@{ ... }:
@@ -389,6 +405,7 @@
           pushDevShellsToCachix
           pushPackagesToCachix
           pushInputsToCachix
+          pushAllToCachix
 
           # functions
           justStaticExecutables
@@ -396,6 +413,7 @@
           mkCodium
           mkDevShells
           mkDevShellsWithEntryPoint
+          runInEachDir
           toList
           toolsGHC
           writeJson

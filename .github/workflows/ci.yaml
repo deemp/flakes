@@ -11,14 +11,11 @@ on:
 jobs:
   caching:
     name: Build on ${{ matrix.os }}
-    defaults:
-      run:
-        working-directory: ${{ matrix.dir }}
     strategy:
       matrix:
         os: [ubuntu-20.04, ubuntu-22.04, macos-11, macos-12]
-        cache: [br4ch1st0chr0n3]
-        dir: [codium, inputs]
+    env:
+      cache: br4ch1st0chr0n3
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -33,16 +30,13 @@ jobs:
           name: ${{ matrix.cache }}
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
       - name: Use cache
-        run: cachix use ${{ matrix.cache }}
+        run: cachix use ${{ secrets.CACHIX_CACHE }}
       - name: Push inputs to cachix
         run: |
           nix flake archive --json \
             | jq -r '.path,(.inputs|to_entries[].value.path)' \
-            | cachix push ${{ matrix.cache }}
-      - name: Push devshell to cachix
-        run: |
-          nix develop --profile dev-profile
-          cachix push ${{ matrix.cache }} dev-profile
+            | cachix push ${{ secrets.CACHIX_CACHE }}
+      
 
 # It'd be nice to support these platforms:
 # x86_64-darwin
