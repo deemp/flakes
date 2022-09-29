@@ -1,5 +1,5 @@
 # A set of VSCodium extensions
-{ system, nix-vscode-marketplace, vscodium-extensions }:
+{ system, nix-vscode-marketplace, vscodium-extensions, }:
 let
   inherit (nix-vscode-marketplace.packages.${system}) vscode open-vsx;
   my-extensions = vscodium-extensions.packages.${system}.vscode;
@@ -27,17 +27,11 @@ in
     inherit (open-vsx.eamodio) gitlens;
     inherit (open-vsx.cschleiden) vscode-github-actions;
   };
-  typescript = {
-    inherit (open-vsx.ms-vscode) vscode-typescript-next;
-  };
+  typescript = { inherit (open-vsx.ms-vscode) vscode-typescript-next; };
   markdown = {
     inherit (my-extensions.bierner)
-      github-markdown-preview
-      markdown-emoji
-      markdown-checkbox
-      markdown-yaml-preamble
-      markdown-footnotes
-      ;
+      github-markdown-preview markdown-emoji markdown-checkbox
+      markdown-yaml-preamble markdown-footnotes;
     inherit (open-vsx.davidanson) vscode-markdownlint;
     inherit (open-vsx.yzhang) markdown-all-in-one;
   };
@@ -59,7 +53,5 @@ in
     inherit (open-vsx.kevinrose) vsc-python-indent;
     inherit (my-extensions.visualstudioexptteam) vscodeintellicode;
   };
-  toml = {
-    inherit (open-vsx.tamasfe) even-better-toml;
-  };
+  toml = { inherit (open-vsx.tamasfe) even-better-toml; };
 }

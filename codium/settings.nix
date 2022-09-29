@@ -3,38 +3,34 @@
   # or pre-defined names (workbench, editor)
   # in case of ID clashes, an extension setting should have a full name
 
-
   haskell = {
     "haskell.serverExecutablePath" = "haskell-language-server";
     "haskell.manageHLS" = "PATH";
   };
 
-  todo-tree =
-    {
-      "todo-tree.regex.regex" =
-        let
-          # https://github.com/Gruntfuggly/todo-tree/wiki/Configuration-Examples#haskell
-          haskell = "((--\\s*($TAGS))|\\{-\\s($TAGS).*(\\n.*)*-})";
-          javadoc = "(//|#|<!--|/\\*|^\\s*\\*)\\s*($TAGS)";
-        in
-        "${haskell}|${javadoc}";
-      "todo-tree.filtering.excludeGlobs" = [
-        "**/vendor/**"
-        "**/node_modules/**"
-        "**/dist/**"
-        "**/bower_components/**"
-        "**/build/**"
-        "**/_output/**"
-        "**/*.min.*"
-        "**/*.map"
-        "**/*.stack-work"
-      ];
-    };
+  todo-tree = {
+    "todo-tree.regex.regex" =
+      let
+        # https://github.com/Gruntfuggly/todo-tree/wiki/Configuration-Examples#haskell
+        haskell = "((--\\s*($TAGS))|\\{-\\s($TAGS).*(\\n.*)*-})";
+        javadoc = "(//|#|<!--|/\\*|^\\s*\\*)\\s*($TAGS)";
+      in
+      "${haskell}|${javadoc}";
+    "todo-tree.filtering.excludeGlobs" = [
+      "**/vendor/**"
+      "**/node_modules/**"
+      "**/dist/**"
+      "**/bower_components/**"
+      "**/build/**"
+      "**/_output/**"
+      "**/*.min.*"
+      "**/*.map"
+      "**/*.stack-work"
+    ];
+  };
 
   files = {
-    "files.watcherExclude" = {
-      "**/.spago/**" = true;
-    };
+    "files.watcherExclude" = { "**/.spago/**" = true; };
     "files.refactoring.autoSave" = true;
     "files.autoSave" = "afterDelay";
     "files.associations" = {
@@ -44,11 +40,7 @@
   };
 
   # enable IntelliSense (but not yet info on hover :( ) in jinja files
-  emmet = {
-    "emmet.includeLanguages" = {
-      "jinja-html" = "html";
-    };
-  };
+  emmet = { "emmet.includeLanguages" = { "jinja-html" = "html"; }; };
 
   # set your path instead of `front`
   ide-purescript = {
@@ -67,9 +59,7 @@
     "workbench.colorTheme" = "Monokai";
   };
 
-  editor = {
-    "editor.formatOnSave" = true;
-  };
+  editor = { "editor.formatOnSave" = true; };
 
   gitlens = {
     "gitlens.codeLens.authors.enabled" = false;
@@ -84,14 +74,14 @@
 
   yaml = {
     "yaml.schemas" = {
-      "https://json.schemastore.org/github-workflow.json" = "workflows/**/*.yml";
-      "https://json.schemastore.org/github-action.json" = "actions/**/action.yml";
+      "https://json.schemastore.org/github-workflow.json" =
+        "workflows/**/*.yml";
+      "https://json.schemastore.org/github-action.json" =
+        "actions/**/action.yml";
     };
   };
 
-  git = {
-    "git.autofetch" = true;
-  };
+  git = { "git.autofetch" = true; };
 
   nix-ide = {
     "nix.serverPath" = "rnix-lsp";
