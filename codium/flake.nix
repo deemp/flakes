@@ -122,7 +122,7 @@
         ];
 
       # ignore shellcheck when writing a shell application
-      writeShellApp = args@{ runtimeInputs ? [ ], name, text, }:
+      writeShellApp = args@{ name, text, runtimeInputs ? [ ] }:
         pkgs.writeShellApplication (args // {
           runtimeInputs = pkgs.lib.lists.flatten (args.runtimeInputs or [ ]);
           checkPhase = "";
@@ -236,33 +236,53 @@
           ' -i;
         '';
 
-      # collect and pushe all store paths for all packages in a flake
+
+      runFishScript = { name, fishScriptPath, runtimeInputs ? [ ], text ? "" }: writeShellApp {
+        inherit name;
+        runtimeInputs = runtimeInputs ++ builtins.attrValues { inherit (pkgs) fish jq cachix; };
+        text =
+          let CURRENT_SYSTEM = "CURRENT_SYSTEM"; in
+          ''
+            export CURRENT_SYSTEM=${system}
+            
+            ${text}
+
+            fish ${fishScriptPath}
+          '';
+      };
+
+      # a helper function for pushing to cachix
+      pushXToCachix = inp@{ name, fishScriptPath, runtimeInputs ? [ ], text ? "" }:
+        runFishScript (inp // { name = "push-${name}-to-cachix"; });
+
+      # push full closures (build and runtime dependencies) of all flake's packages to cachix
       # expected env variables:
       # CACHIX_CACHE - cachix cache name
       # [PATHS_FOR_PACKAGES] - (optional) temporary file where to store the build output paths
-      pushPackagesToCachix = writeShellApp {
-        name = "push-packages-to-cachix";
-        runtimeInputs = [ pkgs.fish ];
-        text = ''
-          export CURRENT_SYSTEM=${system}
-          echo $CURRENT_SYSTEM
-          fish ${scripts/cache-packages.fish}
-        '';
-      };
+      pushPackagesToCachix = pushXToCachix { name = "packages"; fishScriptPath = ./scripts/cache-packages.fish; };
 
-      # collect and push all store paths for all devshells in a flake
+      # push full closures (build and runtime dependencies) of all flake's devshells to cachix
       # expected env variables:
       # CACHIX_CACHE - cachix cache name
       # [PROFILES_FOR_DEVSHELLS] - (optional) temporary dir where to store the dev profiles
-      pushDevShellsToCachix = writeShellApp {
-        name = "push-devshells-to-cachix";
-        runtimeInputs = [ pkgs.fish ];
+      pushDevShellsToCachix = pushXToCachix { name = "devshells"; fishScriptPath = ./scripts/cache-devshells.fish; };
+
+      # push all flake inputs to cachi
+      # expected env variables:
+      # CACHIX_CACHE - cachix cache name
+      # [PROFILES_FOR_DEVSHELLS] - (optional) temporary dir where to store the dev profiles
+      pushInputsToCachix = pushXToCachix { name = "flake-inputs"; fishScriptPath = ./scripts/cache-inputs.fish; };
+
+      # Push inputs and outputs (packages and devShells) of a flake to cachix
+      pushAllToCachix = writeShellApp {
+        name = "push-all-to-cachix";
+        runtimeInputs = [ pushPackagesToCachix pushDevShellsToCachix pushInputsToCachix ];
         text = ''
-          export CURRENT_SYSTEM=${system}
-          fish ${scripts/cache-devshells.fish}
+          ${pushInputsToCachix.name} &&
+          ${pushDevShellsToCachix.name} &&
+          ${pushPackagesToCachix.name}
         '';
       };
-
       # create devshells
       # notice the dependency on fish
       mkDevShells = shells@{ ... }:
@@ -323,14 +343,23 @@
       devShells = mkDevShellsWithEntryPoint "enter" { }
         (
           let
-            buildInputs = (toList shellTools) ++ tools902 ++ [ codium ]
-              ++ [ pushDevShellsToCachix pushPackagesToCachix ];
+            buildInputs = pkgs.lib.lists.flatten [
+              (toList shellTools)
+              tools902
+              [ codium ]
+              [
+                pushDevShellsToCachix
+                pushPackagesToCachix
+                pushInputsToCachix
+                pushAllToCachix
+              ]
+            ]
+            ;
           in
           {
             inherit buildInputs;
             # shellHook = "stack --version";
-            LD_LIBRARY_PATH =
-              pkgs.lib.makeLibraryPath (pkgs.lib.lists.flatten [ buildInputs ]);
+            LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
           }
         )
         {
@@ -339,7 +368,7 @@
         };
 
       packages = {
-        default = codium;
+        default = writeShellApp { name = "codium-start"; runtimeInputs = [ codium ]; text = "codium ."; };
         inherit json2nix;
         inherit pushDevShellsToCachix;
       };
@@ -356,12 +385,23 @@
           extensions settingsNix
 
           # shell apps
-          json2nix pushDevShellsToCachix pushPackagesToCachix
+          json2nix
+          pushDevShellsToCachix
+          pushPackagesToCachix
+          pushInputsToCachix
 
           # functions
-          justStaticExecutables mergeValues mkCodium mkDevShells
-          mkDevShellsWithEntryPoint toList toolsGHC writeJson
-          writeSettingsJson writeShellApp writeTasksJson
+          justStaticExecutables
+          mergeValues
+          mkCodium
+          mkDevShells
+          mkDevShellsWithEntryPoint
+          toList
+          toolsGHC
+          writeJson
+          writeSettingsJson
+          writeShellApp
+          writeTasksJson
 
           # tool sets
           shellTools;
@@ -373,16 +413,16 @@
 
   nixConfig = {
     extra-substituters = [
-      "https://haskell-language-server.cachix.org"
-      "https://nix-community.cachix.org"
-      "https://hydra.iohk.io"
-      "https://br4ch1st0chr0n3.cachix.org"
+      https://haskell-language-server.cachix.org
+      https://nix-community.cachix.org
+      https://hydra.iohk.io
+      https://br4ch1st0chr0n3.cachix.org
     ];
     extra-trusted-public-keys = [
-      "haskell-language-server.cachix.org-1:juFfHrwkOxqIOZShtC4YC1uT1bBcq2RSvC7OMKx0Nz8="
-      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
-      "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
-      "br4ch1st0chr0n3.cachix.org-1:o1FA93L5vL4LWi+jk2ECFk1L1rDlMoTH21R1FHtSKaU="
+      haskell-language-server.cachix.org-1:juFfHrwkOxqIOZShtC4YC1uT1bBcq2RSvC7OMKx0Nz8=
+      nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=
+      hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
+      br4ch1st0chr0n3.cachix.org-1:o1FA93L5vL4LWi+jk2ECFk1L1rDlMoTH21R1FHtSKaU=
     ];
   };
 }

@@ -29,6 +29,10 @@
     ];
   };
 
+  markdown-all-in-one = {
+    "markdown.extension.orderedList.autoRenumber" = false;
+  };
+
   files = {
     "files.watcherExclude" = { "**/.spago/**" = true; };
     "files.refactoring.autoSave" = true;
