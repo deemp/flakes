@@ -327,11 +327,10 @@
           shells;
 
       # make shells
-      # The default shell will have the ${entryPointName} command available
-      # This command will run a shell app needed and start a fish shell
-      # Fish shell will not keep the
-      mkDevShellsWithEntryPoint = entryPointName:
-        defaultEntryAttrs@{ runtimeInputs ? [ ], text ? "", }:
+      # The default shell will have the ${name} command available
+      # This command will run a shell app constructed from ${runtimeInputs} and ${text} and start a fish shell
+      mkDevShellsWithEntryPoint =
+        defaultEntryAttrs@{ name, runtimeInputs ? [ ], text ? "", }:
         defaultShellAttrs@{ buildInputs ? [ ], shellHook ? "", ... }:
         shells@{ ... }:
         let
@@ -339,9 +338,9 @@
           shells_ = mkDevShells shells { inherit fish; };
           entryPoint = writeShellApp {
             runtimeInputs = buildInputs ++ runtimeInputs ++ [ fish ];
-            name = entryPointName;
+            inherit name;
             text = fishHook {
-              shellName = entryPointName;
+              shellName = name;
               hook = text;
               inherit fish;
             };
@@ -363,7 +362,7 @@
 
       writeSettings = writeSettingsJson settingsNix;
 
-      devShells = mkDevShellsWithEntryPoint "enter" { }
+      devShells = mkDevShellsWithEntryPoint { name = "enter"; }
         (
           let
             buildInputs = pkgs.lib.lists.flatten [

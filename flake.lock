@@ -3385,7 +3385,7 @@
       },
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-8zjrOT9ib1iLDDFRN6ja0BsFDuecldBxttYBh1WGppc=",
+        "narHash": "sha256-LN9Fne5jgFxYagZGexVlh2nim3/3JvO0GKOpzJ64AQE=",
         "path": "../codium",
         "type": "path"
       },
@@ -3452,7 +3452,7 @@
       },
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-wVgDpHfo1R3vBTit3HN3U7TbF8d67BTviUwDY2jvm6g=",
+        "narHash": "sha256-ZTMk77GeAjpWT51V2mXV7x44safQ6E+VXJHGRiMZ8/I=",
         "path": "./inputs",
         "type": "path"
       },

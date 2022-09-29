@@ -28,8 +28,9 @@
       pushToCachix = runInEachDir { inherit dirs; name = "push-to-cachix"; command = "${pushAllToCachix.name}"; runtimeInputs = [ pushAllToCachix ]; root = ./.; };
     in
     {
-      devShells = mkDevShellsWithEntryPoint "update"
+      devShells = mkDevShellsWithEntryPoint
         {
+          name = "update";
           runtimeInputs = [ updateFlakes pushToCachix ];
           text = ''
             ${updateFlakes.name}
@@ -42,7 +43,7 @@
               codium = mkCodium { inherit (extensions) nix markdown github misc; };
               shellTools_ = toList { inherit (shellTools) nix; };
             in
-            [ codium shellTools_ updateFlakes pushToCachix];
+            [ codium shellTools_ updateFlakes pushToCachix ];
         }
         { };
       packages.default = updateFlakes;
