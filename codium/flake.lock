@@ -554,19 +554,14 @@
         "vscodium-extensions": "vscodium-extensions"
       },
       "locked": {
-        "dir": "inputs",
-        "lastModified": 1664410058,
-        "narHash": "sha256-HdyHwHzIxRVVI+c7i0mLfvtCti8fECz8Ff13K3/JyzQ=",
-        "owner": "br4ch1st0chr0n3",
-        "repo": "flakes",
-        "rev": "83ddc04ce0bae1e84e0a03c766fc6ed1eae44b73",
-        "type": "github"
+        "lastModified": 1,
+        "narHash": "sha256-8xGnSILlHfurz3dS+LeH04N4P8a1N9UMTJvGInkwIFw=",
+        "path": "../source",
+        "type": "path"
       },
       "original": {
-        "dir": "inputs",
-        "owner": "br4ch1st0chr0n3",
-        "repo": "flakes",
-        "type": "github"
+        "path": "../source",
+        "type": "path"
       }
     },
     "myst-parser": {
@@ -861,11 +856,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1664326489,
-        "narHash": "sha256-3pO1BPdCGQ019m7h4Le0RRyMt/cXmfjLxejCgofiR5M=",
+        "lastModified": 1664413161,
+        "narHash": "sha256-Hztk+cUJlwLgfHtkUJoaB9qNXyxSHgIxMdhdyUnu+Mg=",
         "owner": "br4ch1st0chr0n3",
         "repo": "vscodium-extensions",
-        "rev": "962e2a412828302887380c06a04ba55311e9fdd4",
+        "rev": "615ae3270dc8d260725717e94acb5c03d01b24e4",
         "type": "github"
       },
       "original": {

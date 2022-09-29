@@ -1,6 +1,6 @@
 {
   inputs = {
-    my-inputs.url = github:br4ch1st0chr0n3/flakes?dir=inputs;
+    my-inputs.url = path:../source;
     nixpkgs.follows = "my-inputs/nixpkgs";
     flake-utils.follows = "my-inputs/flake-utils";
     gitignore.follows = "my-inputs/gitignore";
@@ -302,17 +302,34 @@
             }
           );
 
+        listPackagesOutputs = writeShellApp {
+          name = "list-packages-outputs";
+          
+          text = ''
+            nix flake show --json |\
+              jq  '.packages."${system}"|keys[]' |\
+              xargs -I {} nix build --print-out-paths .#{}|\
+              # jq -r '.[].outputs.out'
+          '';
+        };
+        # TODO output runtime closure without duplicates
+        # nix-store -qR 
+
         devShells = mkDevShellsWithDirenv
           {
-            runtimeInputs = (toList shellTools) ++ tools902;
+            # runtimeInputs = []
+            # (toList shellTools) ++ tools902 ++ 
+            # listPackagesOutputs
+            # ;
           }
           {
             start-codium = {
-              runtimeInputs = [ codium writeSettings ];
-              text = ''
-                ${writeSettings.name}
-                codium .
-              '';
+              # runtimeInputs = [ codium writeSettings ];
+              # text = ''
+              #   ${writeSettings.name}
+              #   codium .
+              # '';
+              
             };
           };
       in
@@ -339,9 +356,10 @@
             mkDevShells
             mkDevShellsWithDefault
             mkDevShellsWithDirenv
+            listPackagesOutputs
             ;
         };
-        packages = devShells;
+        packages = devShells // { list = listPackagesOutputs; };
         devShells = {
 
           # TODO add this to scripts in case something goes wrong

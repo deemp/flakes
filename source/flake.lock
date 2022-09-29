@@ -17,7 +17,6 @@
         "fenix": "fenix",
         "flakeCompat": "flakeCompat",
         "nixpkgs": [
-          "my-inputs",
           "dream2nix",
           "nixpkgs"
         ]
@@ -118,7 +117,6 @@
         "gomod2nix": "gomod2nix",
         "mach-nix": "mach-nix",
         "nixpkgs": [
-          "my-inputs",
           "nixpkgs"
         ],
         "poetry2nix": "poetry2nix",
@@ -159,7 +157,6 @@
     "fenix": {
       "inputs": {
         "nixpkgs": [
-          "my-inputs",
           "dream2nix",
           "alejandra",
           "nixpkgs"
@@ -355,7 +352,6 @@
     "gitignore": {
       "inputs": {
         "nixpkgs": [
-          "my-inputs",
           "nixpkgs"
         ]
       },
@@ -540,30 +536,6 @@
         "type": "indirect"
       }
     },
-    "my-inputs": {
-      "inputs": {
-        "dream2nix": "dream2nix",
-        "easy-purescript-nix": "easy-purescript-nix",
-        "flake-compat": "flake-compat",
-        "flake-utils": "flake-utils",
-        "gitignore": "gitignore",
-        "haskell-language-server": "haskell-language-server",
-        "nix-vscode-marketplace": "nix-vscode-marketplace",
-        "nixpkgs": "nixpkgs_3",
-        "poetry2nix": "poetry2nix_3",
-        "vscodium-extensions": "vscodium-extensions"
-      },
-      "locked": {
-        "lastModified": 1,
-        "narHash": "sha256-8xGnSILlHfurz3dS+LeH04N4P8a1N9UMTJvGInkwIFw=",
-        "path": "../source",
-        "type": "path"
-      },
-      "original": {
-        "path": "../source",
-        "type": "path"
-      }
-    },
     "myst-parser": {
       "flake": false,
       "locked": {
@@ -584,11 +556,9 @@
     "nix-vscode-marketplace": {
       "inputs": {
         "flake-utils": [
-          "my-inputs",
           "flake-utils"
         ],
         "nixpkgs": [
-          "my-inputs",
           "nixpkgs"
         ]
       },
@@ -695,7 +665,6 @@
       "inputs": {
         "flake-utils": "flake-utils_4",
         "nixpkgs": [
-          "my-inputs",
           "nixpkgs"
         ]
       },
@@ -717,12 +686,10 @@
     "pre-commit-hooks": {
       "inputs": {
         "flake-utils": [
-          "my-inputs",
           "dream2nix",
           "flake-utils-pre-commit"
         ],
         "nixpkgs": [
-          "my-inputs",
           "dream2nix",
           "nixpkgs"
         ]
@@ -767,19 +734,16 @@
     },
     "root": {
       "inputs": {
-        "dream2nix": [
-          "my-inputs",
-          "dream2nix"
-        ],
-        "flake-utils": [
-          "my-inputs",
-          "flake-utils"
-        ],
-        "gitignore": [
-          "my-inputs",
-          "gitignore"
-        ],
-        "my-inputs": "my-inputs"
+        "dream2nix": "dream2nix",
+        "easy-purescript-nix": "easy-purescript-nix",
+        "flake-compat": "flake-compat",
+        "flake-utils": "flake-utils",
+        "gitignore": "gitignore",
+        "haskell-language-server": "haskell-language-server",
+        "nix-vscode-marketplace": "nix-vscode-marketplace",
+        "nixpkgs": "nixpkgs_3",
+        "poetry2nix": "poetry2nix_3",
+        "vscodium-extensions": "vscodium-extensions"
       }
     },
     "rust-analyzer-src": {
@@ -831,11 +795,9 @@
     "vscodium-extensions": {
       "inputs": {
         "flake-utils": [
-          "my-inputs",
           "flake-utils"
         ],
         "nixpkgs": [
-          "my-inputs",
           "nixpkgs"
         ]
       },

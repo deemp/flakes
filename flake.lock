@@ -41,6 +41,7 @@
         "fenix": "fenix",
         "flakeCompat": "flakeCompat",
         "nixpkgs": [
+          "my-inputs",
           "json2md",
           "my-inputs",
           "dream2nix",
@@ -66,6 +67,7 @@
         "fenix": "fenix_2",
         "flakeCompat": "flakeCompat_2",
         "nixpkgs": [
+          "my-inputs",
           "my-codium",
           "my-inputs",
           "dream2nix",
@@ -91,6 +93,7 @@
         "fenix": "fenix_3",
         "flakeCompat": "flakeCompat_3",
         "nixpkgs": [
+          "my-inputs",
           "source",
           "dream2nix",
           "nixpkgs"
@@ -338,6 +341,7 @@
         "gomod2nix": "gomod2nix",
         "mach-nix": "mach-nix",
         "nixpkgs": [
+          "my-inputs",
           "json2md",
           "my-inputs",
           "nixpkgs"
@@ -369,6 +373,7 @@
         "gomod2nix": "gomod2nix_2",
         "mach-nix": "mach-nix_2",
         "nixpkgs": [
+          "my-inputs",
           "my-codium",
           "my-inputs",
           "nixpkgs"
@@ -400,6 +405,7 @@
         "gomod2nix": "gomod2nix_3",
         "mach-nix": "mach-nix_3",
         "nixpkgs": [
+          "my-inputs",
           "source",
           "nixpkgs"
         ],
@@ -475,6 +481,7 @@
     "fenix": {
       "inputs": {
         "nixpkgs": [
+          "my-inputs",
           "json2md",
           "my-inputs",
           "dream2nix",
@@ -500,6 +507,7 @@
     "fenix_2": {
       "inputs": {
         "nixpkgs": [
+          "my-inputs",
           "my-codium",
           "my-inputs",
           "dream2nix",
@@ -525,6 +533,7 @@
     "fenix_3": {
       "inputs": {
         "nixpkgs": [
+          "my-inputs",
           "source",
           "dream2nix",
           "alejandra",
@@ -1065,6 +1074,7 @@
     "gitignore": {
       "inputs": {
         "nixpkgs": [
+          "my-inputs",
           "json2md",
           "my-inputs",
           "nixpkgs"
@@ -1104,6 +1114,7 @@
     "gitignore_3": {
       "inputs": {
         "nixpkgs": [
+          "my-inputs",
           "my-codium",
           "my-inputs",
           "nixpkgs"
@@ -1143,6 +1154,7 @@
     "gitignore_5": {
       "inputs": {
         "nixpkgs": [
+          "my-inputs",
           "source",
           "nixpkgs"
         ]
@@ -1499,21 +1511,24 @@
     "json2md": {
       "inputs": {
         "dream2nix": [
+          "my-inputs",
           "json2md",
           "my-inputs",
           "dream2nix"
         ],
         "flake-utils": [
+          "my-inputs",
           "json2md",
           "my-inputs",
           "flake-utils"
         ],
         "gitignore": [
+          "my-inputs",
           "json2md",
           "my-inputs",
           "gitignore"
         ],
-        "my-inputs": "my-inputs"
+        "my-inputs": "my-inputs_2"
       },
       "locked": {
         "lastModified": 1,
@@ -1661,37 +1676,44 @@
     "my-codium": {
       "inputs": {
         "easy-purescript-nix": [
+          "my-inputs",
           "my-codium",
           "my-inputs",
           "easy-purescript-nix"
         ],
         "flake-utils": [
+          "my-inputs",
           "my-codium",
           "my-inputs",
           "flake-utils"
         ],
         "gitignore": [
+          "my-inputs",
           "my-codium",
           "my-inputs",
           "gitignore"
         ],
         "haskell-language-server": [
+          "my-inputs",
           "my-codium",
           "my-inputs",
           "haskell-language-server"
         ],
-        "my-inputs": "my-inputs_2",
+        "my-inputs": "my-inputs_3",
         "nix-vscode-marketplace": [
+          "my-inputs",
           "my-codium",
           "my-inputs",
           "nix-vscode-marketplace"
         ],
         "nixpkgs": [
+          "my-inputs",
           "my-codium",
           "my-inputs",
           "nixpkgs"
         ],
         "vscodium-extensions": [
+          "my-inputs",
           "my-codium",
           "my-inputs",
           "vscodium-extensions"
@@ -1709,6 +1731,73 @@
       }
     },
     "my-inputs": {
+      "inputs": {
+        "dream2nix": [
+          "my-inputs",
+          "source",
+          "dream2nix"
+        ],
+        "easy-purescript-nix": [
+          "my-inputs",
+          "source",
+          "easy-purescript-nix"
+        ],
+        "flake-compat": [
+          "my-inputs",
+          "source",
+          "flake-compat"
+        ],
+        "flake-utils": [
+          "my-inputs",
+          "source",
+          "flake-utils"
+        ],
+        "gitignore": [
+          "my-inputs",
+          "source",
+          "gitignore"
+        ],
+        "haskell-language-server": [
+          "my-inputs",
+          "source",
+          "haskell-language-server"
+        ],
+        "json2md": "json2md",
+        "my-codium": "my-codium",
+        "nix-vscode-marketplace": [
+          "my-inputs",
+          "source",
+          "nix-vscode-marketplace"
+        ],
+        "nixpkgs": [
+          "my-inputs",
+          "source",
+          "nixpkgs"
+        ],
+        "poetry2nix": [
+          "my-inputs",
+          "source",
+          "poetry2nix"
+        ],
+        "source": "source",
+        "vscodium-extensions": [
+          "my-inputs",
+          "source",
+          "vscodium-extensions"
+        ]
+      },
+      "locked": {
+        "lastModified": 1,
+        "narHash": "sha256-XGMEw0d6bI/3tt4wONKviGBm/VWs2oYGlGUsEFre6vU=",
+        "path": "./inputs",
+        "type": "path"
+      },
+      "original": {
+        "path": "./inputs",
+        "type": "path"
+      }
+    },
+    "my-inputs_2": {
       "inputs": {
         "dream2nix": "dream2nix",
         "easy-purescript-nix": "easy-purescript-nix",
@@ -1732,7 +1821,7 @@
         "type": "path"
       }
     },
-    "my-inputs_2": {
+    "my-inputs_3": {
       "inputs": {
         "dream2nix": "dream2nix_2",
         "easy-purescript-nix": "easy-purescript-nix_2",
@@ -1810,11 +1899,13 @@
     "nix-vscode-marketplace": {
       "inputs": {
         "flake-utils": [
+          "my-inputs",
           "json2md",
           "my-inputs",
           "flake-utils"
         ],
         "nixpkgs": [
+          "my-inputs",
           "json2md",
           "my-inputs",
           "nixpkgs"
@@ -1838,11 +1929,13 @@
     "nix-vscode-marketplace_2": {
       "inputs": {
         "flake-utils": [
+          "my-inputs",
           "my-codium",
           "my-inputs",
           "flake-utils"
         ],
         "nixpkgs": [
+          "my-inputs",
           "my-codium",
           "my-inputs",
           "nixpkgs"
@@ -1866,10 +1959,12 @@
     "nix-vscode-marketplace_3": {
       "inputs": {
         "flake-utils": [
+          "my-inputs",
           "source",
           "flake-utils"
         ],
         "nixpkgs": [
+          "my-inputs",
           "source",
           "nixpkgs"
         ]
@@ -2071,6 +2166,7 @@
       "inputs": {
         "flake-utils": "flake-utils_4",
         "nixpkgs": [
+          "my-inputs",
           "json2md",
           "my-inputs",
           "nixpkgs"
@@ -2132,6 +2228,7 @@
       "inputs": {
         "flake-utils": "flake-utils_8",
         "nixpkgs": [
+          "my-inputs",
           "my-codium",
           "my-inputs",
           "nixpkgs"
@@ -2193,6 +2290,7 @@
       "inputs": {
         "flake-utils": "flake-utils_12",
         "nixpkgs": [
+          "my-inputs",
           "source",
           "nixpkgs"
         ]
@@ -2215,12 +2313,14 @@
     "pre-commit-hooks": {
       "inputs": {
         "flake-utils": [
+          "my-inputs",
           "json2md",
           "my-inputs",
           "dream2nix",
           "flake-utils-pre-commit"
         ],
         "nixpkgs": [
+          "my-inputs",
           "json2md",
           "my-inputs",
           "dream2nix",
@@ -2244,12 +2344,14 @@
     "pre-commit-hooks_2": {
       "inputs": {
         "flake-utils": [
+          "my-inputs",
           "my-codium",
           "my-inputs",
           "dream2nix",
           "flake-utils-pre-commit"
         ],
         "nixpkgs": [
+          "my-inputs",
           "my-codium",
           "my-inputs",
           "dream2nix",
@@ -2273,11 +2375,13 @@
     "pre-commit-hooks_3": {
       "inputs": {
         "flake-utils": [
+          "my-inputs",
           "source",
           "dream2nix",
           "flake-utils-pre-commit"
         ],
         "nixpkgs": [
+          "my-inputs",
           "source",
           "dream2nix",
           "nixpkgs"
@@ -2371,49 +2475,15 @@
     },
     "root": {
       "inputs": {
-        "dream2nix": [
-          "source",
-          "dream2nix"
-        ],
-        "easy-purescript-nix": [
-          "source",
-          "easy-purescript-nix"
-        ],
-        "flake-compat": [
-          "source",
-          "flake-compat"
-        ],
         "flake-utils": [
-          "source",
+          "my-inputs",
           "flake-utils"
         ],
-        "gitignore": [
-          "source",
-          "gitignore"
+        "my-codium": [
+          "my-inputs",
+          "my-codium"
         ],
-        "haskell-language-server": [
-          "source",
-          "haskell-language-server"
-        ],
-        "json2md": "json2md",
-        "my-codium": "my-codium",
-        "nix-vscode-marketplace": [
-          "source",
-          "nix-vscode-marketplace"
-        ],
-        "nixpkgs": [
-          "source",
-          "nixpkgs"
-        ],
-        "poetry2nix": [
-          "source",
-          "poetry2nix"
-        ],
-        "source": "source",
-        "vscodium-extensions": [
-          "source",
-          "vscodium-extensions"
-        ]
+        "my-inputs": "my-inputs"
       }
     },
     "rust-analyzer-src": {
@@ -2581,11 +2651,13 @@
     "vscodium-extensions": {
       "inputs": {
         "flake-utils": [
+          "my-inputs",
           "json2md",
           "my-inputs",
           "flake-utils"
         ],
         "nixpkgs": [
+          "my-inputs",
           "json2md",
           "my-inputs",
           "nixpkgs"
@@ -2608,11 +2680,13 @@
     "vscodium-extensions_2": {
       "inputs": {
         "flake-utils": [
+          "my-inputs",
           "my-codium",
           "my-inputs",
           "flake-utils"
         ],
         "nixpkgs": [
+          "my-inputs",
           "my-codium",
           "my-inputs",
           "nixpkgs"
@@ -2635,10 +2709,12 @@
     "vscodium-extensions_3": {
       "inputs": {
         "flake-utils": [
+          "my-inputs",
           "source",
           "flake-utils"
         ],
         "nixpkgs": [
+          "my-inputs",
           "source",
           "nixpkgs"
         ]
