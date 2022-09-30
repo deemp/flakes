@@ -29,7 +29,10 @@
           flakesUpdateAndPushToCachix
           flakesFormat
           ;
-        codium = mkCodium { extensions = { inherit (extensions) nix; }; };
+        codium = mkCodium { 
+          extensions = { inherit (extensions) nix misc; };
+          runtimeDependencies = toList { inherit (shellTools) nix; };
+        };
       in
       {
         devShells = mkDevShellsWithDefault

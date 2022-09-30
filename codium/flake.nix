@@ -90,8 +90,6 @@
             # Haskell-language-server
             inherit (pkgs) haskell-language-server;
           };
-
-          markdown = { };
         };
 
         # Wrap Stack to work with our Nix integration.
@@ -114,15 +112,28 @@
         # create a codium with a given set of extensions
         # bashInteractive is necessary for correct work
         mkCodium = { extensions ? { }, runtimeDependencies ? [ ] }:
-          let inherit (pkgs) vscode-with-extensions vscodium;
+          let
+            codium =
+              let inherit (pkgs) vscode-with-extensions vscodium;
+              in  
+              (vscode-with-extensions.override {
+                vscode = vscodium;
+                vscodeExtensions = toList extensions;
+              });
+            deps = pkgs.lib.lists.flatten [
+              pkgs.bashInteractive
+              runtimeDependencies
+            ];
           in
-          [
-            (vscode-with-extensions.override {
-              vscode = vscodium;
-              vscodeExtensions = toList extensions;
-            })
-            pkgs.bashInteractive
-          ];
+          pkgs.symlinkJoin {
+            name = "codium";
+            paths = [ codium ];
+            buildInputs = [ pkgs.makeBinaryWrapper ];
+            postBuild = ''
+              wrapProgram $out/bin/codium \
+                --prefix PATH : ${pkgs.lib.makeBinPath deps}
+            '';
+          };
 
         # ignore shellcheck when writing a shell application
         mkShellApp = args@{ name, text, runtimeInputs ? [ ] }:
