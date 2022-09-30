@@ -308,6 +308,10 @@
               dirs);
         };
 
+        # make shell apps
+        # arg should be a set of sets of inputs
+        mkShellApps = appsInputs@{ ... }: builtins.mapAttrs (name: value: mkShellApp (value // { inherit name; })) appsInputs;
+
         # create devshells
         # notice the dependency on fish
         mkDevShells = shells@{ ... }: { fish }:
@@ -422,35 +426,34 @@
         # packages and devShells are just for demo purposes
         tools = {
           inherit
-            # build inputs
-            codium
-
             # configs
-            extensions settingsNix
+            extensions
+            settingsNix
 
             # shell apps
             json2nix
-            pushDevShellsToCachix
-            pushPackagesToCachix
-            pushInputsToCachix
             pushAllToCachix
+            pushDevShellsToCachix
+            pushInputsToCachix
+            pushPackagesToCachix
 
             # functions
+            flakesPushToCachix
+            flakesUpdate
+            flakesUpdateAndPushToCachix
             justStaticExecutables
             mergeValues
             mkCodium
             mkDevShells
             mkDevShellsWithDefault
+            mkShellApp
+            mkShellApps
             runInEachDir
             toList
             toolsGHC
             writeJson
             writeSettingsJson
-            mkShellApp
             writeTasksJson
-            flakesUpdateAndPushToCachix
-            flakesUpdate
-            flakesPushToCachix
 
             # tool sets
             shellTools;
