@@ -30,7 +30,7 @@
           flakesFormat
           ;
         codium = mkCodium { 
-          extensions = { inherit (extensions) nix misc; };
+          extensions = { inherit (extensions) nix misc github; };
           runtimeDependencies = toList { inherit (shellTools) nix; };
         };
       in
