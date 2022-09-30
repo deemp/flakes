@@ -3351,7 +3351,7 @@
       },
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-FjlUGv0dtuKF76BpVii6RVQI7+Ltuyh5lUOb1VwJOx8=",
+        "narHash": "sha256-MJCvNTeC4OlFJDWC9kB6IM+v0CO2RfyvpFkGypzcxs0=",
         "path": "../codium",
         "type": "path"
       },

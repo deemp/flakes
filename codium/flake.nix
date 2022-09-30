@@ -124,7 +124,7 @@
         ];
 
       # ignore shellcheck when writing a shell application
-      writeShellApp = args@{ name, text, runtimeInputs ? [ ] }:
+      mkShellApp = args@{ name, text, runtimeInputs ? [ ] }:
         pkgs.writeShellApplication (args // {
           runtimeInputs = pkgs.lib.lists.flatten (args.runtimeInputs or [ ]);
           checkPhase = "";
@@ -139,7 +139,7 @@
           dir = builtins.dirOf path;
           file = builtins.baseNameOf path;
         in
-        writeShellApp {
+        mkShellApp {
           name = name_;
           runtimeInputs = [ pkgs.python310 ];
           text = ''
@@ -161,7 +161,7 @@
       # convert json to nix
       # no need to provide the full path to a file if it's in the cwd
       # json2nix .vscode/settings.json my-settings.nix
-      json2nix = writeShellApp {
+      json2nix = mkShellApp {
         name = "json2nix";
         runtimeInputs = [ pkgs.nixpkgs-fmt ];
         text = ''
@@ -239,7 +239,7 @@
         '';
 
 
-      runFishScript = { name, fishScriptPath, runtimeInputs ? [ ], text ? "" }: writeShellApp {
+      runFishScript = { name, fishScriptPath, runtimeInputs ? [ ], text ? "" }: mkShellApp {
         inherit name;
         runtimeInputs = runtimeInputs ++ builtins.attrValues { inherit (pkgs) fish jq cachix; };
         text =
@@ -276,7 +276,7 @@
       pushInputsToCachix = pushXToCachix { name = "flake-inputs"; fishScriptPath = ./scripts/cache-inputs.fish; };
 
       # Push inputs and outputs (packages and devShells) of a flake to cachix
-      pushAllToCachix = writeShellApp {
+      pushAllToCachix = mkShellApp {
         name = "push-all-to-cachix";
         runtimeInputs = [ pushPackagesToCachix pushDevShellsToCachix pushInputsToCachix ];
         text = ''
@@ -286,7 +286,7 @@
         '';
       };
 
-      runInEachDir = args@{ root, dirs, command, name, runtimeInputs ? [ ] }: writeShellApp {
+      runInEachDir = args@{ root, dirs, command, name, runtimeInputs ? [ ] }: mkShellApp {
         name = "${name}-in-each-dir";
         inherit runtimeInputs;
         text = ''
@@ -336,7 +336,7 @@
         let
           inherit (pkgs) fish;
           shells_ = mkDevShells shells { inherit fish; };
-          entryPoint = writeShellApp {
+          entryPoint = mkShellApp {
             runtimeInputs = buildInputs ++ runtimeInputs ++ [ fish ];
             inherit name;
             text = fishHook {
@@ -362,7 +362,7 @@
         command = "nix flake update";
         root = rootPath;
       };
-      
+
       # push to cachix all about flakes in specified directories
       pushToCachix = rootPath: dirs: runInEachDir {
         inherit dirs; name = "push-to-cachix";
@@ -373,11 +373,11 @@
 
       # combined update and push to cachix
       fullUpdate = rootPath: dirs:
-        let 
-        updateFlakes_ = updateFlakes rootPath dirs;
-        pushToCachix_ = pushToCachix rootPath dirs;
+        let
+          updateFlakes_ = updateFlakes rootPath dirs;
+          pushToCachix_ = pushToCachix rootPath dirs;
         in
-        writeShellApp {
+        mkShellApp {
           name = "full-update";
           runtimeInputs = [ updateFlakes_ pushToCachix_ ];
           text = ''
@@ -421,7 +421,7 @@
         };
 
       packages = {
-        default = writeShellApp { name = "codium-start"; runtimeInputs = [ codium ]; text = "codium ."; };
+        default = mkShellApp { name = "codium-start"; runtimeInputs = [ codium ]; text = "codium ."; };
         inherit json2nix;
         inherit pushDevShellsToCachix;
       };
@@ -455,12 +455,12 @@
           toolsGHC
           writeJson
           writeSettingsJson
-          writeShellApp
+          mkShellApp
           writeTasksJson
           fullUpdate
           updateFlakes
           pushToCachix
-          
+
           # tool sets
           shellTools;
       };
