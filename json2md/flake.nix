@@ -1,25 +1,29 @@
 {
   inputs = {
-    my-inputs.url = path:../source;
-    flake-utils.follows = "my-inputs/flake-utils";
-    gitignore.follows = "my-inputs/gitignore";
-    dream2nix.follows = "my-inputs/dream2nix";
+    source-flake.url = path:../source-flake;
+    flake-utils.follows = "source-flake/flake-utils";
+    gitignore.follows = "source-flake/gitignore";
+    dream2nix.follows = "source-flake/dream2nix";
   };
   outputs =
     { self
-    , my-inputs
+    , source-flake
     , flake-utils
     , gitignore
     , dream2nix
     }:
-    dream2nix.lib.makeFlakeOutputs {
-      systems = flake-utils.lib.defaultSystems;
-      config.projectRoot = ./.;
-      source = gitignore.lib.gitignoreSource ./.;
-      settings = [
+    (
+      dream2nix.lib.makeFlakeOutputs
         {
-          subsystemInfo.nodejs = 16;
+          systems = flake-utils.lib.defaultSystems;
+          config.projectRoot = ./.;
+          source = gitignore.lib.gitignoreSource ./.;
+          settings = [
+            {
+              subsystemInfo.nodejs = 16;
+            }
+          ];
         }
-      ];
-    };
+    ) // { inherit (source-flake) formatter; }
+  ;
 }

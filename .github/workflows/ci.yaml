@@ -29,8 +29,10 @@ jobs:
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
       - name: Use cache
         run: cachix use ${{ secrets.CACHIX_CACHE }}
+      - name: Format .nix files
+        run: nix fmt **/*.nix
       - name: Push flakes to cachix
-        run: CACHIX_CACHE=${{ secrets.CACHIX_CACHE }} nix develop -c "update"
+        run: CACHIX_CACHE=${{ secrets.CACHIX_CACHE }} nix run
 
 # It'd be nice to support these platforms:
 # x86_64-darwin

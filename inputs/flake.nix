@@ -1,18 +1,18 @@
 {
   inputs = {
-    source.url = path:../source;
-    nixpkgs.follows = "source/nixpkgs";
-    flake-utils.follows = "source/flake-utils";
-    gitignore.follows = "source/gitignore";
-    easy-purescript-nix.follows = "source/easy-purescript-nix";
-    dream2nix.follows = "source/dream2nix";
-    nix-vscode-marketplace.follows = "source/nix-vscode-marketplace";
-    vscodium-extensions.follows = "source/vscodium-extensions";
-    haskell-language-server.follows = "source/haskell-language-server";
-    flake-compat.follows = "source/flake-compat";
-    poetry2nix.follows = "source/poetry2nix";
+    source-flake.url = path:../source-flake;
+    nixpkgs.follows = "source-flake/nixpkgs";
+    flake-utils.follows = "source-flake/flake-utils";
+    gitignore.follows = "source-flake/gitignore";
+    easy-purescript-nix.follows = "source-flake/easy-purescript-nix";
+    dream2nix.follows = "source-flake/dream2nix";
+    nix-vscode-marketplace.follows = "source-flake/nix-vscode-marketplace";
+    vscodium-extensions.follows = "source-flake/vscodium-extensions";
+    haskell-language-server.follows = "source-flake/haskell-language-server";
+    flake-compat.follows = "source-flake/flake-compat";
+    poetry2nix.follows = "source-flake/poetry2nix";
     my-codium.url = path:../codium;
     json2md.url = path:../json2md;
   };
-  outputs = inputs: { };
+  outputs = { source-flake, ... }: { inherit (source-flake) formatter; };
 }

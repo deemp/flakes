@@ -36,5 +36,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
-  outputs = inputs: { };
+  outputs = { flake-utils, nixpkgs, ... }: flake-utils.lib.eachDefaultSystem (system: {
+    formatter = nixpkgs.legacyPackages.${system}.nixpkgs-fmt;
+  });
 }
