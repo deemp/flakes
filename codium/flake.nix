@@ -356,6 +356,37 @@
         in
         devShells_;
 
+      # update flakes in specified directories
+      updateFlakes = rootPath: dirs: runInEachDir {
+        inherit dirs; name = "update-flakes";
+        command = "nix flake update";
+        root = rootPath;
+      };
+      
+      # push to cachix all about flakes in specified directories
+      pushToCachix = rootPath: dirs: runInEachDir {
+        inherit dirs; name = "push-to-cachix";
+        command = "${pushAllToCachix.name}";
+        runtimeInputs = [ pushAllToCachix ];
+        root = rootPath;
+      };
+
+      # combined update and push to cachix
+      fullUpdate = rootPath: dirs:
+        let 
+        updateFlakes_ = updateFlakes rootPath dirs;
+        pushToCachix_ = pushToCachix rootPath dirs;
+        in
+        writeShellApp {
+          name = "full-update";
+          runtimeInputs = [ updateFlakes_ pushToCachix_ ];
+          text = ''
+            ${updateFlakes_.name}
+            ${pushToCachix_.name}
+          '';
+        };
+
+
       # Stuff for tests
 
       tools902 = builtins.attrValues { inherit (toolsGHC "902") hls stack; };
@@ -426,7 +457,10 @@
           writeSettingsJson
           writeShellApp
           writeTasksJson
-
+          fullUpdate
+          updateFlakes
+          pushToCachix
+          
           # tool sets
           shellTools;
       };

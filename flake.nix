@@ -22,20 +22,22 @@
         mkDevShellsWithEntryPoint
         pushDevShellsToCachix
         pushPackagesToCachix
+        fullUpdate
+        updateFlakes
+        pushToCachix
         ;
       dirs = [ "source" "codium" "json2md" "inputs" "." ];
-      updateFlakes = runInEachDir { inherit dirs; name = "update-flakes"; command = "nix flake update"; root = ./.; };
-      pushToCachix = runInEachDir { inherit dirs; name = "push-to-cachix"; command = "${pushAllToCachix.name}"; runtimeInputs = [ pushAllToCachix ]; root = ./.; };
+      rootDir = ./.;
+      updateFlakes_ = updateFlakes rootDir dirs;
+      pushToCachix_ = pushToCachix rootDir dirs;
+      update = fullUpdate rootDir dirs;
     in
     {
       devShells = mkDevShellsWithEntryPoint
         {
           name = "update";
-          runtimeInputs = [ updateFlakes pushToCachix ];
-          text = ''
-            ${updateFlakes.name}
-            ${pushToCachix.name}
-          '';
+          runtimeInputs = [ update ];
+          text = ''${update.name}'';
         }
         {
           buildInputs =
@@ -43,9 +45,9 @@
               codium = mkCodium { inherit (extensions) nix markdown github misc; };
               shellTools_ = toList { inherit (shellTools) nix; };
             in
-            [ codium shellTools_ updateFlakes pushToCachix ];
+            [ codium shellTools_ updateFlakes_ pushToCachix_ ];
         }
         { };
-      packages.default = updateFlakes;
+      packages.default = updateFlakes_;
     });
 }
