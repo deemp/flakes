@@ -72,7 +72,7 @@
               stylish-haskell
               # Lookup Haskell documentation
               hoogle
-              # auto generate LSP hie.yaml file from cabal
+              # auto generate LSP hie.yaml file fm cabal
               implicit-hie
               # Automatically discover and run Hspec tests
               hspec-discover
@@ -287,8 +287,8 @@
           '';
         };
 
-        # run a command in each given dir relative to a root
-        runInEachDir = args@{ root, dirs, command, name, runtimeInputs ? [ ] }: mkShellApp {
+        # run a command in each given dir relative to pwd
+        runInEachDir = args@{ dirs, command, name, runtimeInputs ? [ ] }: mkShellApp {
           name = "${name}-in-each-dir";
           inherit runtimeInputs;
           text = ''
@@ -351,26 +351,24 @@
           in
           devShells_;
 
-        # update flakes in specified directories
-        flakesUpdate = rootPath: dirs: runInEachDir {
+        # update flakes in specified directories relative to PWD
+        flakesUpdate = dirs: runInEachDir {
           inherit dirs; name = "flake-update";
           command = "nix flake update";
-          root = rootPath;
         };
 
-        # push to cachix all about flakes in specified directories
-        flakesPushToCachix = rootPath: dirs: runInEachDir {
+        # push to cachix all about flakes in specified directories relative to PWD
+        flakesPushToCachix = dirs: runInEachDir {
           inherit dirs; name = "flake-push-to-cachix";
           command = "${pushAllToCachix.name}";
           runtimeInputs = [ pushAllToCachix ];
-          root = rootPath;
         };
 
-        # combined in given directories update and push flakes to cachix
-        flakesUpdateAndPushToCachix = rootPath: dirs:
+        # update and push flakes to cachix in specified directories relative to PWD
+        flakesUpdateAndPushToCachix = dirs:
           let
-            flakesUpdate_ = flakesUpdate rootPath dirs;
-            flakesPushToCachix_ = flakesPushToCachix rootPath dirs;
+            flakesUpdate_ = flakesUpdate dirs;
+            flakesPushToCachix_ = flakesPushToCachix dirs;
           in
           mkShellApp {
             name = "flake-update-and-push";
@@ -381,6 +379,21 @@
             '';
           };
 
+        # format all .nix files with the formatter specified in the flake in the PWD
+        flakesFormat = mkShellApp {
+          name = "flake-format";
+          text = ''
+            nix fmt **/*.nix
+          '';
+        };
+
+        # just inherit necessary functions
+        mkFlakesUtils = dirs: {
+          flakesUpdate = flakesUpdate dirs;
+          flakesPushToCachix = flakesPushToCachix dirs;
+          flakesUpdateAndPushToCachix = flakesUpdateAndPushToCachix dirs;
+          flakesFormat = flakesFormat;
+        };
 
         # Stuff for tests
 
@@ -438,6 +451,7 @@
             pushPackagesToCachix
 
             # functions
+            flakesFormat
             flakesPushToCachix
             flakesUpdate
             flakesUpdateAndPushToCachix
@@ -446,6 +460,7 @@
             mkCodium
             mkDevShells
             mkDevShellsWithDefault
+            mkFlakesUtils
             mkShellApp
             mkShellApps
             runInEachDir

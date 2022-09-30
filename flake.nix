@@ -2,8 +2,8 @@
   inputs = {
     my-inputs.url = path:./inputs;
     flake-utils.follows = "my-inputs/flake-utils";
-    my-codium.follows = "my-inputs/my-codium";
     nixpkgs.follows = "my-inputs/nixpkgs";
+    my-codium.url = path:./codium;
   };
   outputs =
     { self
@@ -20,32 +20,25 @@
           shellTools
           mkCodium
           mkDevShellsWithDefault
-          flakesUpdateAndPushToCachix
-          flakesUpdate
-          flakesPushToCachix
+          mkFlakesUtils
           ;
         pkgs = nixpkgs.legacyPackages.${system};
-        dirs = [ "source-flake" "codium" "json2md" "inputs" "." ];
-        rootDir = ./.;
-        flakesUpdate_ = flakesUpdate rootDir dirs;
-        flakesPushToCachix_ = flakesPushToCachix rootDir dirs;
-        update = flakesUpdateAndPushToCachix rootDir dirs;
+        inherit (mkFlakesUtils [ "source-flake" "codium" "json2md" "inputs" "." ])
+          flakesUpdate
+          flakesPushToCachix
+          flakesUpdateAndPushToCachix
+          flakesFormat
+          ;
         codium = mkCodium { extensions = { inherit (extensions) nix; }; };
       in
       {
         devShells = mkDevShellsWithDefault
           {
-            buildInputs = [ codium update flakesUpdate_ flakesPushToCachix_ ];
+            buildInputs = [ codium flakesUpdateAndPushToCachix flakesUpdate flakesPushToCachix flakesFormat ];
           }
           {
-            update = {
-              buildInputs = [ update flakesUpdate_ flakesPushToCachix_ ];
-              shellHook = ''
-                ${update.name}
-                nix fmt **/*.nix
-              '';
-            };
+            enter = { };
           };
-        packages.default = update;
+        packages.default = flakesUpdateAndPushToCachix;
       }) // { inherit (my-inputs) formatter; };
 }
