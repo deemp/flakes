@@ -1627,19 +1627,14 @@
         "vscodium-extensions": "vscodium-extensions"
       },
       "locked": {
-        "dir": "source-flake",
-        "lastModified": 1664596441,
-        "narHash": "sha256-cZVJi5JxIUabz2yXkCPoijgvP8PVIcLGtFIrbGALKOw=",
-        "owner": "br4ch1st0chr0n3",
-        "repo": "flakes",
-        "rev": "4e8bdd26cabd08daa41697c70ef04efb1ac7a35a",
-        "type": "github"
+        "lastModified": 1,
+        "narHash": "sha256-T3dSfkcW2SlXGjkSsw2Z68oTVaYgvMKH6XnKrPDO7Bg=",
+        "path": "../source-flake",
+        "type": "path"
       },
       "original": {
-        "dir": "source-flake",
-        "owner": "br4ch1st0chr0n3",
-        "repo": "flakes",
-        "type": "github"
+        "path": "../source-flake",
+        "type": "path"
       }
     },
     "sphinx_rtd_theme": {

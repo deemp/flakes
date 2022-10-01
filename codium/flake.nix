@@ -1,7 +1,6 @@
 {
   inputs = {
-    # source-flake.url = "path:../source-flake";
-    source-flake.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake";
+    source-flake.url = path:../source-flake;
     nixpkgs.follows = "source-flake/nixpkgs";
     flake-utils.follows = "source-flake/flake-utils";
     gitignore.follows = "source-flake/gitignore";
@@ -266,16 +265,7 @@
             '';
         };
 
-        # cachix-wrapped = let cachix_ = cachix.packages.${system}.cachix; in
-        #   pkgs.stdenv.mkDerivation {
-        #     name = "cachix-wrapped";
-        #     buildInputs = [ cachix_ ];
-        #     src = cachix_.src;
-        #     postInstall = ''
-        #       cp ${cachix_}/bin/cachix $out/bin/cachix-wrapped
-        #     '';
-        #   };
-
+        # to not interfere with the GH Action's cachix
         cachix-wrapped = let cachix_ = cachix.packages.${system}.cachix; in pkgs.symlinkJoin {
           name = "cachix-wrapped";
           paths = [ cachix_ ];
@@ -486,6 +476,7 @@
             pushDevShellsToCachix
             pushInputsToCachix
             pushPackagesToCachix
+            cachix-wrapped
 
             # functions
             flakesFormat
