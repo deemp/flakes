@@ -328,7 +328,7 @@
             builtins.concatStringsSep "\n"
               (builtins.map
                 (dir: ''
-                  printf "\n\n[ %s ]\n\n" "${"$" + INITIAL_PWD}/${dir}"
+                  printf "\n\n[ ${name} in %s ]\n\n" "${"$" + INITIAL_PWD}/${dir}"
 
                   cd ${"$" + INITIAL_PWD}/${dir}
             
@@ -441,7 +441,7 @@
               toggler = dir: name: ''
                 cd ${"$" + INITIAL_PWD}/${dir}
 
-                printf "\n[ toggling in %s ]\n" "${"$" + INITIAL_PWD}/${dir}"
+                printf "\n[ toggle-relative-path in %s ]\n" "${"$" + INITIAL_PWD}/${dir}"
                 
                 cat ${flakeNix} | \
                   awk '
@@ -491,15 +491,15 @@
           name = "push-to-github";
           runtimeInputs = [ pkgs.git toggleRelativePaths_ flakesUpdate_ ];
           text = ''
-            # commit changes with relative paths
+            # toggle path:gh as if they containt current changes
+            ${toggleRelativePaths_.name}
             git add .
             git commit -m "push current changes: $COMMIT_MESSAGE"
             git push
 
-            # update flakes to use current changes from gh
+            # update flakes to actually use current changes from gh
             ${flakesUpdate_.name}
 
-            ${toggleRelativePaths_.name}
             # push updated flakes
             git add .
             git commit -m "use current changes: $COMMIT_MESSAGE"
