@@ -25,6 +25,7 @@
           mkFlakesUtils
           mkShellApp
           flakesToggleRelativePaths
+          pushToGithub
           ;
         pkgs = nixpkgs.legacyPackages.${system};
         flakesUtils = (mkFlakesUtils [ "source-flake" "codium" "json2md" "inputs" "." ]);
@@ -44,41 +45,23 @@
           in
           flakesToggleRelativePaths toggleConfig flakesUtils.flakesUpdate;
 
+        pushToGithub_ = pushToGithub toggleRelativePaths_ flakesUtils.flakesUpdate;
+
         codium = mkCodium {
           extensions = { inherit (extensions) nix misc github; };
           runtimeDependencies = [
             (toList { inherit (shellTools) nix; })
             toggleRelativePaths_
             pkgs.pre-commit
+            pushToGithub_
           ];
         };
 
-        pushToGithub = mkShellApp {
-          name = "push-to-github";
-          runtimeInputs = [ pkgs.git toggleRelativePaths_ flakesUtils.flakesUpdate ];
-          text = ''
-            # switch to path:github
-            ${toggleRelativePaths_.name}
-            git add .
-            git commit -m "switch to path:github"
-            git push
-
-            # update flakes with gh inputs
-            ${flakesUtils.flakesUpdate.name}
-
-            git add .
-            git commit -m "switch to path:github"
-            git push
-
-            # switch to path:./
-            ${toggleRelativePaths_.name}
-          '';
-        };
       in
       {
         devShells = mkDevShellsWithDefault
           {
-            buildInputs = [ codium (builtins.attrValues flakesUtils) toggleRelativePaths_ pushToGithub ];
+            buildInputs = [ codium (builtins.attrValues flakesUtils) toggleRelativePaths_ pushToGithub_ ];
           }
           {
             enter = { };

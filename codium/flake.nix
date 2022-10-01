@@ -267,13 +267,14 @@
         };
 
         # to not interfere with the GH Action's cachix
-        cachix-wrapped = let cachix_ = cachix.packages.${system}.cachix; in pkgs.symlinkJoin {
-          name = "cachix-wrapped";
-          paths = [ cachix_ ];
-          postBuild = ''
-            cp $out/bin/cachix $out/bin/cachix-wrapped
-          '';
-        };
+        cachix-wrapped = let cachix_ = cachix.packages.${system}.cachix; in
+          pkgs.symlinkJoin {
+            name = "cachix-wrapped";
+            paths = [ cachix_ ];
+            postBuild = ''
+              cp $out/bin/cachix $out/bin/cachix-wrapped
+            '';
+          };
 
         # a helper function for pushing to cachix
         pushXToCachix = inp@{ name, fishScriptPath, runtimeInputs ? [ ], text ? "" }:
@@ -317,24 +318,24 @@
         runInEachDir = args@{ dirs, command, name, runtimeInputs ? [ ] }: mkShellApp {
           name = "${name}-in-each-dir";
           inherit runtimeInputs;
-          text = 
+          text =
             let INITIAL_PWD = "INITIAL_PWD";
             in
-          ''
-            ${INITIAL_PWD}=$PWD
+            ''
+              ${INITIAL_PWD}=$PWD
 
-          '' +
-          builtins.concatStringsSep "\n"
-            (builtins.map
-              (dir: ''
-                printf "\n\n[ %s ]\n\n" "${"$" + INITIAL_PWD}/${dir}"
+            '' +
+            builtins.concatStringsSep "\n"
+              (builtins.map
+                (dir: ''
+                  printf "\n\n[ %s ]\n\n" "${"$" + INITIAL_PWD}/${dir}"
 
-                cd ${"$" + INITIAL_PWD}/${dir}
+                  cd ${"$" + INITIAL_PWD}/${dir}
             
-                ${command}
+                  ${command}
 
-              '')
-              dirs);
+                '')
+                dirs);
         };
 
         # make shell apps
@@ -468,9 +469,11 @@
               (
                 configEntry: concatStrings
                   (
-                    mapAttrsToList (
-                      dir: entries: concatMapStringsSep "\n" (entry: toggler dir entry) entries
-                    ) configEntry
+                    mapAttrsToList
+                      (
+                        dir: entries: concatMapStringsSep "\n" (entry: toggler dir entry) entries
+                      )
+                      configEntry
                   )
               )
               toggleConfig
@@ -482,6 +485,29 @@
               ${flakesUpdate_.name}
             ''
           ;
+        };
+
+        pushToGithub = toggleRelativePaths_: flakesUpdate_: mkShellApp {
+          name = "push-to-github";
+          runtimeInputs = [ pkgs.git toggleRelativePaths_ flakesUpdate_ ];
+          text = ''
+            # push current changes
+            ${toggleRelativePaths_.name}
+            git add .
+            git commit -m "switch to path:github"
+            git push
+
+            # update flakes to use current changes from gh
+            ${flakesUpdate_.name}
+
+            # push updated flakes
+            git add .
+            git commit -m "switch to path:github"
+            git push
+
+            # switch back to relative paths for local use
+            ${toggleRelativePaths_.name}
+          '';
         };
 
         # Stuff for tests
@@ -560,6 +586,7 @@
             mkFlakesUtils
             mkShellApp
             mkShellApps
+            pushToGithub
             runInEachDir
             toList
             toolsGHC
