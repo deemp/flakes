@@ -8,6 +8,7 @@
     haskell-language-server.follows = "source-flake/haskell-language-server";
     nix-vscode-marketplace.follows = "source-flake/nix-vscode-marketplace";
     vscodium-extensions.follows = "source-flake/vscodium-extensions";
+    cachix.url = "github:cachix/cachix/4c9397689598a3f2ea6123ddc556a105fe7b4c9c";
   };
   outputs =
     { self
@@ -19,7 +20,7 @@
     , vscodium-extensions
     , gitignore
     , haskell-language-server
-    ,
+    , cachix
     }:
     flake-utils.lib.eachDefaultSystem
       (system:
@@ -115,7 +116,7 @@
           let
             codium =
               let inherit (pkgs) vscode-with-extensions vscodium;
-              in  
+              in
               (vscode-with-extensions.override {
                 vscode = vscodium;
                 vscodeExtensions = toList extensions;
@@ -250,10 +251,9 @@
             ' -i;
           '';
 
-
         runFishScript = { name, fishScriptPath, runtimeInputs ? [ ], text ? "" }: mkShellApp {
           inherit name;
-          runtimeInputs = runtimeInputs ++ (with pkgs; [ fish jq cachix ]);
+          runtimeInputs = runtimeInputs ++ [ pkgs.fish pkgs.jq ];
           text =
             let CURRENT_SYSTEM = "CURRENT_SYSTEM"; in
             ''
@@ -265,9 +265,23 @@
             '';
         };
 
+        cachix-wrapped = pkgs.symlinkJoin {
+          name = "cachix-wrapped";
+          paths = [ cachix.packages.${system}.cachix ];
+          buildInputs = [ pkgs.makeBinaryWrapper ];
+          postBuild = ''
+            wrapProgram $out/bin/cachix
+          '';
+        };
+
         # a helper function for pushing to cachix
         pushXToCachix = inp@{ name, fishScriptPath, runtimeInputs ? [ ], text ? "" }:
-          runFishScript (inp // { name = "push-${name}-to-cachix"; });
+          runFishScript (
+            inp // {
+              name = "push-${name}-to-cachix";
+              runtimeInputs = runtimeInputs ++ [ cachix-wrapped ];
+            }
+          );
 
         # push full closures (build and runtime dependencies) of all flake's packages to cachix
         # expected env variables:
@@ -425,6 +439,7 @@
                   pushInputsToCachix
                   pushAllToCachix
                 ]
+                [ cachix-wrapped ]
               ]
               ;
             in
@@ -435,6 +450,7 @@
             }
           )
           {
+            fish = {};
             checkScripts = { buildInputs = [ pkgs.gawk ]; };
             anotherShell = { name = "just-another-devshell"; };
           };

@@ -400,6 +400,22 @@
         "url": "https://hackage.haskell.org/package/brittany-0.13.1.2/brittany-0.13.1.2.tar.gz"
       }
     },
+    "cachix": {
+      "locked": {
+        "lastModified": 1664455073,
+        "narHash": "sha256-SMPL29UE/ffoHEYhUkq0NZ9T/AtXaM2HlwGBYazAJzs=",
+        "owner": "cachix",
+        "repo": "cachix",
+        "rev": "4c9397689598a3f2ea6123ddc556a105fe7b4c9c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cachix",
+        "repo": "cachix",
+        "rev": "4c9397689598a3f2ea6123ddc556a105fe7b4c9c",
+        "type": "github"
+      }
+    },
     "constraints-extras": {
       "flake": false,
       "locked": {
@@ -3312,6 +3328,7 @@
     },
     "my-codium": {
       "inputs": {
+        "cachix": "cachix",
         "easy-purescript-nix": [
           "my-codium",
           "source-flake",
@@ -3351,7 +3368,7 @@
       },
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-0yHMo6E5z1zNAzMDxW3QcnwvVu1oXqhFdcOCp1IAeDU=",
+        "narHash": "sha256-VZDEHaK2FDY1lRllZqqBVRYpkYgBDAfkuD757qowqfY=",
         "path": "../codium",
         "type": "path"
       },

@@ -540,6 +540,38 @@
         "url": "https://hackage.haskell.org/package/brittany-0.13.1.2/brittany-0.13.1.2.tar.gz"
       }
     },
+    "cachix": {
+      "locked": {
+        "lastModified": 1664455073,
+        "narHash": "sha256-SMPL29UE/ffoHEYhUkq0NZ9T/AtXaM2HlwGBYazAJzs=",
+        "owner": "cachix",
+        "repo": "cachix",
+        "rev": "4c9397689598a3f2ea6123ddc556a105fe7b4c9c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cachix",
+        "repo": "cachix",
+        "rev": "4c9397689598a3f2ea6123ddc556a105fe7b4c9c",
+        "type": "github"
+      }
+    },
+    "cachix_2": {
+      "locked": {
+        "lastModified": 1664455073,
+        "narHash": "sha256-SMPL29UE/ffoHEYhUkq0NZ9T/AtXaM2HlwGBYazAJzs=",
+        "owner": "cachix",
+        "repo": "cachix",
+        "rev": "4c9397689598a3f2ea6123ddc556a105fe7b4c9c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cachix",
+        "repo": "cachix",
+        "rev": "4c9397689598a3f2ea6123ddc556a105fe7b4c9c",
+        "type": "github"
+      }
+    },
     "constraints-extras": {
       "flake": false,
       "locked": {
@@ -4435,6 +4467,7 @@
     },
     "my-codium": {
       "inputs": {
+        "cachix": "cachix",
         "easy-purescript-nix": [
           "my-codium",
           "source-flake",
@@ -4474,7 +4507,7 @@
       },
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-0yHMo6E5z1zNAzMDxW3QcnwvVu1oXqhFdcOCp1IAeDU=",
+        "narHash": "sha256-VZDEHaK2FDY1lRllZqqBVRYpkYgBDAfkuD757qowqfY=",
         "path": "./codium",
         "type": "path"
       },
@@ -4485,6 +4518,7 @@
     },
     "my-codium_2": {
       "inputs": {
+        "cachix": "cachix_2",
         "easy-purescript-nix": [
           "my-inputs",
           "my-codium",
@@ -4531,7 +4565,7 @@
       },
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-0yHMo6E5z1zNAzMDxW3QcnwvVu1oXqhFdcOCp1IAeDU=",
+        "narHash": "sha256-VZDEHaK2FDY1lRllZqqBVRYpkYgBDAfkuD757qowqfY=",
         "path": "../codium",
         "type": "path"
       },
@@ -4627,7 +4661,7 @@
       },
       "locked": {
         "lastModified": 1,
-        "narHash": "sha256-DxI13r468hrWSN9Vm0z/hNlUcglt3Q98IhcoEg5swNw=",
+        "narHash": "sha256-BP6ppXDT0sgPMqHZ23B1faiAKLiX0d1l/CAUqz2CCBc=",
         "path": "./inputs",
         "type": "path"
       },
