@@ -1,10 +1,11 @@
 {
   inputs = {
-    # my-inputs.url = path:./inputs;
-    my-inputs.url = github:br4ch1st0chr0n3/flakes?dir=inputs;
+    my-inputs.url = path:./inputs;
+    # my-inputs.url = github:br4ch1st0chr0n3/flakes?dir=inputs;
     flake-utils.follows = "my-inputs/flake-utils";
     nixpkgs.follows = "my-inputs/nixpkgs";
-    my-codium.url = github:br4ch1st0chr0n3/flakes?dir=codium;
+    my-codium.url = path:./codium;
+    # my-codium.url = github:br4ch1st0chr0n3/flakes?dir=codium;
   };
   outputs =
     { self
@@ -22,6 +23,8 @@
           mkCodium
           mkDevShellsWithDefault
           mkFlakesUtils
+          mkShellApp
+          flakesToggleRelativePaths
           ;
         pkgs = nixpkgs.legacyPackages.${system};
         flakesUtils = (mkFlakesUtils [ "source-flake" "codium" "json2md" "inputs" "." ]);
@@ -29,11 +32,26 @@
           extensions = { inherit (extensions) nix misc github; };
           runtimeDependencies = toList { inherit (shellTools) nix; };
         };
+
+        toggleRelativePaths_ =
+          let
+            sourceFlake = "source-flake";
+            myCodium = "my-codium";
+            json2md = "json2md";
+            myInputs = "my-inputs";
+            toggleConfig = [
+              { "codium" = [ sourceFlake ]; }
+              { "json2md" = [ sourceFlake ]; }
+              { "inputs" = [ sourceFlake myCodium json2md ]; }
+              { "." = [ myInputs myCodium ]; }
+            ];
+          in
+          flakesToggleRelativePaths toggleConfig flakesUtils.flakesUpdate;
       in
       {
         devShells = mkDevShellsWithDefault
           {
-            buildInputs = [ codium (builtins.attrValues flakesUtils) ];
+            buildInputs = [ codium (builtins.attrValues flakesUtils) toggleRelativePaths_ ];
           }
           {
             enter = { };

@@ -1,7 +1,7 @@
 {
   inputs = {
-    # source-flake.url = path:../source-flake;
-    source-flake.url = github:br4ch1st0chr0n3/flakes?dir=source-flake;
+    source-flake.url = path:../source-flake;
+    # source-flake.url = github:br4ch1st0chr0n3/flakes?dir=source-flake;
     nixpkgs.follows = "source-flake/nixpkgs";
     flake-utils.follows = "source-flake/flake-utils";
     gitignore.follows = "source-flake/gitignore";
@@ -317,16 +317,19 @@
         runInEachDir = args@{ dirs, command, name, runtimeInputs ? [ ] }: mkShellApp {
           name = "${name}-in-each-dir";
           inherit runtimeInputs;
-          text = ''
-            INITIAL_PWD=$(echo $(pwd))
+          text = 
+            let INITIAL_PWD = "INITIAL_PWD";
+            in
+          ''
+            ${INITIAL_PWD}=$PWD
 
           '' +
           builtins.concatStringsSep "\n"
             (builtins.map
               (dir: ''
-                printf "\n\n[ %s ]\n\n" "$INITIAL_PWD/${dir}"
+                printf "\n\n[ %s ]\n\n" "${"$" + INITIAL_PWD}/${dir}"
 
-                cd $INITIAL_PWD/${dir}
+                cd ${"$" + INITIAL_PWD}/${dir}
             
                 ${command}
 
@@ -380,14 +383,14 @@
         # update flakes in specified directories relative to PWD
         flakesUpdate = dirs: runInEachDir {
           inherit dirs;
-          name = "flake-update";
+          name = "flakes-update";
           command = "nix flake update";
         };
 
         # push to cachix all about flakes in specified directories relative to PWD
         flakesPushToCachix = dirs: runInEachDir {
           inherit dirs;
-          name = "flake-push-to-cachix";
+          name = "flakes-push-to-cachix";
           command = "${pushAllToCachix.name}";
           runtimeInputs = [ pushAllToCachix ];
         };
@@ -399,25 +402,13 @@
             flakesPushToCachix_ = flakesPushToCachix dirs;
           in
           mkShellApp {
-            name = "flake-update-and-push-to-cachix";
+            name = "flakes-update-and-push-to-cachix";
             runtimeInputs = [ flakesUpdate_ flakesPushToCachix_ ];
             text = ''
               ${flakesUpdate_.name}
               ${flakesPushToCachix_.name}
             '';
           };
-
-        # update and push flakes to cachix in specified directories relative to PWD
-        flakesUpdateAndPushToGithub = dirs: runInEachDir {
-          name = "commit-and-push-to-github";
-          command = ''
-            nix flake update
-            git add .
-            git commit -m "dummy"
-            sleep 1
-          '';
-          inherit dirs;
-        };
 
         # format all .nix files with the formatter specified in the flake in the PWD
         flakesFormat = mkShellApp {
@@ -433,7 +424,64 @@
           flakesPushToCachix = flakesPushToCachix dirs;
           flakesUpdateAndPushToCachix = flakesUpdateAndPushToCachix dirs;
           flakesFormat = flakesFormat;
-          flakesUpdateAndPushToGithub = flakesUpdateAndPushToGithub dirs;
+        };
+
+        # if a flake inputs have a .url = path:something and a commented (!) .url = github:something
+        # after toggling, .url = github:something will be uncommented
+        # while .url = path:something will be commented
+        # flake inputs will be updated
+        flakesToggleRelativePaths = toggleConfig: flakesUpdate_: mkShellApp {
+          name = "flakes-toggle-relative-paths";
+          runtimeInputs = [ pkgs.gawk flakesUpdate_ ];
+          text =
+            let
+              INITIAL_PWD = "INITIAL_PWD";
+              flakeNix = "flake.nix";
+              toggler = dir: name: ''
+                cd ${"$" + INITIAL_PWD}/${dir}
+
+                printf "\n[ toggling in %s ]\n" "${"$" + INITIAL_PWD}/${dir}"
+                
+                cat ${flakeNix} | \
+                  awk '
+                  {
+                    if ($1 == "#" && $2 == "${name}.url") {
+                      $1=""; print "  ", $0; {next}
+                    }
+                  }
+                  {
+                    if ($1 == "${name}.url") {
+                      print "    #", $1, $2, $3; {next}
+                    }
+                  } 
+                  {print}' > ${flakeNix}.toggled &&
+                  mv ${flakeNix}.toggled ${flakeNix}
+              '';
+              inherit (pkgs.lib.strings) concatMapStringsSep concatStrings;
+              inherit (pkgs.lib.attrsets) mapAttrsToList;
+            in
+            ''
+              ${INITIAL_PWD}=$PWD
+              
+            '' +
+            (concatMapStringsSep "\n"
+              (
+                configEntry: concatStrings
+                  (
+                    mapAttrsToList (
+                      dir: entries: concatMapStringsSep "\n" (entry: toggler dir entry) entries
+                    ) configEntry
+                  )
+              )
+              toggleConfig
+            )
+            +
+            ''
+              cd ${"$" + INITIAL_PWD}
+
+              ${flakesUpdate_.name}
+            ''
+          ;
         };
 
         # Stuff for tests
@@ -501,6 +549,7 @@
             # functions
             flakesFormat
             flakesPushToCachix
+            flakesToggleRelativePaths
             flakesUpdate
             flakesUpdateAndPushToCachix
             justStaticExecutables
