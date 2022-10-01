@@ -426,22 +426,25 @@
 
         writeSettings = writeSettingsJson settingsNix;
 
+
+        allTools = pkgs.lib.lists.flatten [
+          json2nix
+          pushAllToCachix
+          pushDevShellsToCachix
+          pushInputsToCachix
+          pushPackagesToCachix
+          cachix-wrapped
+          (builtins.attrValues packages)
+          (toList shellTools)
+          tools902
+          codium
+          cachix-wrapped
+        ];
+
         devShells = mkDevShellsWithDefault
           (
             let
-              buildInputs = pkgs.lib.lists.flatten [
-                (toList shellTools)
-                tools902
-                [ codium ]
-                [
-                  pushDevShellsToCachix
-                  pushPackagesToCachix
-                  pushInputsToCachix
-                  pushAllToCachix
-                ]
-                [ cachix-wrapped ]
-              ]
-              ;
+              buildInputs = allTools;
             in
             {
               inherit buildInputs;
@@ -460,6 +463,7 @@
           inherit json2nix;
           inherit pushDevShellsToCachix;
         };
+
       in
       {
         # use just these tools
