@@ -52,11 +52,33 @@
             pkgs.pre-commit
           ];
         };
+
+        pushToGithub = mkShellApp {
+          name = "push-to-github";
+          runtimeInputs = [ pkgs.git toggleRelativePaths_ flakesUtils.flakesUpdate ];
+          text = ''
+            # switch to path:github
+            ${toggleRelativePaths_.name}
+            git add .
+            git commit -m "switch to path:github"
+            git push
+
+            # update flakes with gh inputs
+            ${flakesUtils.flakesUpdate.name}
+
+            git add .
+            git commit -m "switch to path:github"
+            git push
+
+            # switch to path:./
+            ${toggleRelativePaths_.name}
+          '';
+        };
       in
       {
         devShells = mkDevShellsWithDefault
           {
-            buildInputs = [ codium (builtins.attrValues flakesUtils) toggleRelativePaths_ ];
+            buildInputs = [ codium (builtins.attrValues flakesUtils) toggleRelativePaths_ pushToGithub ];
           }
           {
             enter = { };
