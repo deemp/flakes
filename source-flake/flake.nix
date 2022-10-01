@@ -40,3 +40,4 @@
     formatter = nixpkgs.legacyPackages.${system}.nixpkgs-fmt;
   });
 }
+
