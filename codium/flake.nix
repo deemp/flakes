@@ -491,7 +491,7 @@
           name = "push-to-github";
           runtimeInputs = [ pkgs.git toggleRelativePaths_ flakesUpdate_ ];
           text = ''
-            # ${toggleRelativePaths_.name}
+            # commit changes with relative paths
             git add .
             git commit -m "push current changes: $COMMIT_MESSAGE"
             git push
@@ -499,6 +499,7 @@
             # update flakes to use current changes from gh
             ${flakesUpdate_.name}
 
+            ${toggleRelativePaths_.name}
             # push updated flakes
             git add .
             git commit -m "use current changes: $COMMIT_MESSAGE"
