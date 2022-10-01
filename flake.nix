@@ -4,7 +4,7 @@
     my-inputs.url = github:br4ch1st0chr0n3/flakes?dir=inputs;
     flake-utils.follows = "my-inputs/flake-utils";
     nixpkgs.follows = "my-inputs/nixpkgs";
-    my-codium.follows = "my-inputs/my-codium";
+    my-codium.url = github:br4ch1st0chr0n3/flakes?dir=codium;
   };
   outputs =
     { self
@@ -24,13 +24,8 @@
           mkFlakesUtils
           ;
         pkgs = nixpkgs.legacyPackages.${system};
-        inherit (mkFlakesUtils [ "source-flake" "codium" "json2md" "inputs" "." ])
-          flakesUpdate
-          flakesPushToCachix
-          flakesUpdateAndPushToCachix
-          flakesFormat
-          ;
-        codium = mkCodium { 
+        flakesUtils = (mkFlakesUtils [ "source-flake" "codium" "json2md" "inputs" "." ]);
+        codium = mkCodium {
           extensions = { inherit (extensions) nix misc github; };
           runtimeDependencies = toList { inherit (shellTools) nix; };
         };
@@ -38,11 +33,11 @@
       {
         devShells = mkDevShellsWithDefault
           {
-            buildInputs = [ codium flakesUpdateAndPushToCachix flakesUpdate flakesPushToCachix flakesFormat ];
+            buildInputs = [ codium (builtins.attrValues flakesUtils) ];
           }
           {
             enter = { };
           };
-        packages.default = flakesPushToCachix;
+        packages.default = flakesUtils.flakesPushToCachix;
       }) // { inherit (my-inputs) formatter; };
 }
