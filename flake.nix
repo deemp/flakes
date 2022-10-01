@@ -37,11 +37,12 @@
             myCodium = "my-codium";
             json2md = "json2md";
             myInputs = "my-inputs";
+            env2json = "env2json";
             toggleConfig = [
               { "codium" = [ sourceFlake ]; }
               { "json2md" = [ sourceFlake ]; }
               { "env2json" = [ sourceFlake ]; }
-              { "inputs" = [ sourceFlake myCodium json2md ]; }
+              { "inputs" = [ sourceFlake myCodium json2md env2json]; }
               { "." = [ myInputs myCodium ]; }
             ];
           in

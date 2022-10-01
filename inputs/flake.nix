@@ -16,8 +16,8 @@
     my-codium.url = github:br4ch1st0chr0n3/flakes?dir=codium;
     # json2md.url = path:../json2md;
     json2md.url = github:br4ch1st0chr0n3/flakes?dir=json2md;
-    env2json.url = path:../env2json;
-    # env2json.url = github:br4ch1st0chr0n3/flakes?dir=env2json;
+    # env2json.url = path:../env2json;
+    env2json.url = github:br4ch1st0chr0n3/flakes?dir=env2json;
   };
   outputs = { source-flake, ... }: { inherit (source-flake) formatter; };
 }
