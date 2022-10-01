@@ -498,7 +498,7 @@
             # toggle path:gh as if they containt current changes
             ${toggleRelativePaths_.name}
             git add .
-            git commit -m "push current changes: $COMMIT_MESSAGE"
+            git commit -m "push current changes: $1"
             git push
 
             # update flakes to actually use current changes from gh
@@ -506,7 +506,7 @@
 
             # push updated flakes
             git add .
-            git commit -m "use current changes: $COMMIT_MESSAGE"
+            git commit -m "use current changes: $1"
             git push
 
             # switch back to relative paths for local use
