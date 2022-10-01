@@ -32,7 +32,9 @@ jobs:
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
 
       - name: Push flakes to cachix
-        run: CACHIX_CACHE=${{ secrets.CACHIX_CACHE }} nix run
+        env: 
+          CACHIX_CACHE: ${{ secrets.CACHIX_CACHE }}
+        run: nix run
       
       - name: Format .nix files
         run: nix fmt **/*.nix
