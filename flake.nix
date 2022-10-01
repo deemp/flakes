@@ -42,6 +42,6 @@
           {
             enter = { };
           };
-        packages.default = flakesUpdateAndPushToCachix;
+        packages.default = flakesPushToCachix;
       }) // { inherit (my-inputs) formatter; };
 }
