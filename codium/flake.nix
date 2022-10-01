@@ -1,7 +1,7 @@
 {
   inputs = {
-    # source-flake.url = path:../source-flake;
-    source-flake.url = github:br4ch1st0chr0n3/flakes?dir=source-flake;
+    source-flake.url = path:../source-flake;
+    # source-flake.url = github:br4ch1st0chr0n3/flakes?dir=source-flake;
     nixpkgs.follows = "source-flake/nixpkgs";
     flake-utils.follows = "source-flake/flake-utils";
     gitignore.follows = "source-flake/gitignore";
@@ -491,10 +491,9 @@
           name = "push-to-github";
           runtimeInputs = [ pkgs.git toggleRelativePaths_ flakesUpdate_ ];
           text = ''
-            # push current changes
-            ${toggleRelativePaths_.name}
+            # ${toggleRelativePaths_.name}
             git add .
-            git commit -m "switch to path:github"
+            git commit -m "push current changes: $COMMIT_MESSAGE"
             git push
 
             # update flakes to use current changes from gh
@@ -502,7 +501,7 @@
 
             # push updated flakes
             git add .
-            git commit -m "switch to path:github"
+            git commit -m "use current changes: $COMMIT_MESSAGE"
             git push
 
             # switch back to relative paths for local use
