@@ -33,7 +33,7 @@ jobs:
 
       - name: Push flake inputs
         run: | 
-            echo $(nix flake archive --json)
+            nix flake archive --json --impure
             # nix flake archive --json \
             #   | jq -r '.path,(.inputs|to_entries[].value.path)' \
             #   | nix run github:cachix/cachix/6ef447dd8c25eebdc1475728bea000b5165306d8 -- push ${{ secrets.CACHIX_CACHE }}
