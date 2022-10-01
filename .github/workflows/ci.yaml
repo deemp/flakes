@@ -27,8 +27,6 @@ jobs:
         with:
           name: ${{ secrets.CACHIX_CACHE }}
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
-      # - name: Use cache
-      #   run: cachix use ${{ secrets.CACHIX_CACHE }}
       - name: Push flakes to cachix
         run: CACHIX_CACHE=${{ secrets.CACHIX_CACHE }} nix run
       # - name: Format .nix files
