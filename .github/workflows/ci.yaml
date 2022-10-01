@@ -34,7 +34,7 @@ jobs:
         run: |
             nix flake archive --json \
               | jq -r '.path,(.inputs|to_entries[].value.path)' \
-              | nix run github:cachix/cachix push mycache
+              | nix run github:cachix/cachix/6ef447dd8c25eebdc1475728bea000b5165306d8 push mycache
       # - name: Push flakes to cachix
       #   run: CACHIX_CACHE=${{ secrets.CACHIX_CACHE }} nix run
       
