@@ -266,7 +266,7 @@
             
               ${text}
 
-              fish ${fishScriptPath}
+              fish ${fishScriptPath} $1
             '';
         };
 
@@ -291,7 +291,6 @@
 
         # push full closures (build and runtime dependencies) of all flake's packages to cachix
         # expected env variables:
-        # CACHIX_CACHE - cachix cache name
         # [PATHS_FOR_PACKAGES] - (optional) temporary file where to store the build output paths
         pushPackagesToCachix = pushXToCachix { name = "packages"; fishScriptPath = ./scripts/cache-packages.fish; };
 
