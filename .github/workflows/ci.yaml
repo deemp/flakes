@@ -34,32 +34,9 @@ jobs:
         run: |
             nix flake archive --json \
               | jq -r '.path,(.inputs|to_entries[].value.path)' \
-              | nix run github:cachix/cachix/6ef447dd8c25eebdc1475728bea000b5165306d8 push mycache
+              | nix run github:cachix/cachix/6ef447dd8c25eebdc1475728bea000b5165306d8 -- push ${{ secrets.CACHIX_CACHE }}
       # - name: Push flakes to cachix
       #   run: CACHIX_CACHE=${{ secrets.CACHIX_CACHE }} nix run
       
       # - name: Format .nix files
       #   run: nix fmt **/*.nix
-
-# It'd be nice to support these platforms:
-# x86_64-darwin
-# aarch64-darwin
-# aarch64-linux
-# i686-linux
-# x86_64-linux
-
-# GitHub only supports these:
-# https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
-# x86_64-linux
-# x86_64-darwin
-
-# environment variables
-# https://docs.github.com/en/actions/learn-github-actions/environment-variables
-# you can get runner.arch == ARM if you use a self-hosted runner
-# https://docs.github.com/en/actions/learn-github-actions/contexts#example-contents-of-the-runner-context
-
-# about GITHUB_TOKEN
-# https://docs.github.com/en/actions/security-guides/automatic-token-authentication#about-the-github_token-secret
-
-# push flakes to cachix
-# https://docs.cachix.org/pushing#flakes
