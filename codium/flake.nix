@@ -379,13 +379,15 @@
 
         # update flakes in specified directories relative to PWD
         flakesUpdate = dirs: runInEachDir {
-          inherit dirs; name = "flake-update";
+          inherit dirs;
+          name = "flake-update";
           command = "nix flake update";
         };
 
         # push to cachix all about flakes in specified directories relative to PWD
         flakesPushToCachix = dirs: runInEachDir {
-          inherit dirs; name = "flake-push-to-cachix";
+          inherit dirs;
+          name = "flake-push-to-cachix";
           command = "${pushAllToCachix.name}";
           runtimeInputs = [ pushAllToCachix ];
         };
@@ -397,13 +399,24 @@
             flakesPushToCachix_ = flakesPushToCachix dirs;
           in
           mkShellApp {
-            name = "flake-update-and-push";
+            name = "flake-update-and-push-to-cachix";
             runtimeInputs = [ flakesUpdate_ flakesPushToCachix_ ];
             text = ''
               ${flakesUpdate_.name}
               ${flakesPushToCachix_.name}
             '';
           };
+
+        # update and push flakes to cachix in specified directories relative to PWD
+        flakesUpdateAndPushToGithub = dirs: runInEachDir {
+          name = "commit-and-push-to-github";
+          command = ''
+            nix flake update
+            git commit -m "dummy"
+            sleep 1
+          '';
+          inherit dirs;
+        };
 
         # format all .nix files with the formatter specified in the flake in the PWD
         flakesFormat = mkShellApp {
@@ -419,6 +432,7 @@
           flakesPushToCachix = flakesPushToCachix dirs;
           flakesUpdateAndPushToCachix = flakesUpdateAndPushToCachix dirs;
           flakesFormat = flakesFormat;
+          flakesUpdateAndPushToGithub = flakesUpdateAndPushToGithub dirs;
         };
 
         # Stuff for tests
