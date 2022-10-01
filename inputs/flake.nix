@@ -11,8 +11,10 @@
     haskell-language-server.follows = "source-flake/haskell-language-server";
     flake-compat.follows = "source-flake/flake-compat";
     poetry2nix.follows = "source-flake/poetry2nix";
-    my-codium.url = path:../codium;
-    json2md.url = path:../json2md;
+    # my-codium.url = path:../codium;
+    my-codium.url = github:br4ch1st0chr0n3/flakes?dir=codium;
+    # json2md.url = path:../json2md;
+    json2md.url = github:br4ch1st0chr0n3/flakes?dir=json2md;
   };
   outputs = { source-flake, ... }: { inherit (source-flake) formatter; };
 }
