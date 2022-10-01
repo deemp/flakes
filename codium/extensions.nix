@@ -42,6 +42,7 @@ in
   docker = {
     inherit (my-extensions.ms-vscode-remote) remote-containers;
     inherit (open-vsx.ms-azuretools) vscode-docker;
+    inherit (open-vsx.exiasr) hadolint;
   };
   python = {
     inherit (open-vsx.donjayamanne) python-extension-pack;

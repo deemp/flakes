@@ -50,8 +50,9 @@
         codium = mkCodium {
           extensions = { inherit (extensions) nix misc github; };
           runtimeDependencies = [
-            (toList { inherit (shellTools) nix; })
+            (toList { inherit (shellTools) nix docker; })
             toggleRelativePaths_
+            (builtins.attrValues flakesUtils)
             pkgs.pre-commit
             pushToGithub_
           ];

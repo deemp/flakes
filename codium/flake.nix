@@ -92,6 +92,10 @@
             # Haskell-language-server
             inherit (pkgs) haskell-language-server;
           };
+
+          docker = {
+            inherit (pkgs.haskellPackages) hadolint;
+          };
         };
 
         # Wrap Stack to work with our Nix integration.
