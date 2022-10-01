@@ -412,6 +412,7 @@
           name = "commit-and-push-to-github";
           command = ''
             nix flake update
+            git add .
             git commit -m "dummy"
             sleep 1
           '';
