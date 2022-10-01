@@ -28,7 +28,8 @@
           pushToGithub
           ;
         pkgs = nixpkgs.legacyPackages.${system};
-        flakesUtils = (mkFlakesUtils [ "source-flake" "codium" "json2md" "inputs" "." ]);
+
+        flakesUtils = (mkFlakesUtils [ "source-flake" "codium" "env2json" "json2md" "inputs" "." ]);
 
         toggleRelativePaths_ =
           let
@@ -39,6 +40,7 @@
             toggleConfig = [
               { "codium" = [ sourceFlake ]; }
               { "json2md" = [ sourceFlake ]; }
+              { "env2json" = [ sourceFlake ]; }
               { "inputs" = [ sourceFlake myCodium json2md ]; }
               { "." = [ myInputs myCodium ]; }
             ];
@@ -53,7 +55,6 @@
             (toList { inherit (shellTools) nix docker; })
             toggleRelativePaths_
             (builtins.attrValues flakesUtils)
-            pkgs.pre-commit
             pushToGithub_
           ];
         };

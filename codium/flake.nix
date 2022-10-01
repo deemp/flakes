@@ -536,16 +536,9 @@
         ];
 
         devShells = mkDevShellsWithDefault
-          (
-            let
-              buildInputs = allTools;
-            in
-            {
-              inherit buildInputs;
-              # shellHook = "stack --version";
-              # LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
-            }
-          )
+          {
+            buildInputs = allTools;
+          }
           {
             fish = { };
             checkScripts = { buildInputs = [ pkgs.gawk ]; };

@@ -132,22 +132,6 @@
         "url": "https://hackage.haskell.org/package/brittany-0.13.1.2/brittany-0.13.1.2.tar.gz"
       }
     },
-    "cachix": {
-      "locked": {
-        "lastModified": 1664455073,
-        "narHash": "sha256-SMPL29UE/ffoHEYhUkq0NZ9T/AtXaM2HlwGBYazAJzs=",
-        "owner": "cachix",
-        "repo": "cachix",
-        "rev": "4c9397689598a3f2ea6123ddc556a105fe7b4c9c",
-        "type": "github"
-      },
-      "original": {
-        "owner": "cachix",
-        "repo": "cachix",
-        "rev": "4c9397689598a3f2ea6123ddc556a105fe7b4c9c",
-        "type": "github"
-      }
-    },
     "constraints-extras": {
       "flake": false,
       "locked": {
@@ -1547,36 +1531,15 @@
     },
     "root": {
       "inputs": {
-        "cachix": "cachix",
-        "easy-purescript-nix": [
-          "source-flake",
-          "easy-purescript-nix"
-        ],
         "flake-utils": [
           "source-flake",
           "flake-utils"
-        ],
-        "gitignore": [
-          "source-flake",
-          "gitignore"
-        ],
-        "haskell-language-server": [
-          "source-flake",
-          "haskell-language-server"
-        ],
-        "nix-vscode-marketplace": [
-          "source-flake",
-          "nix-vscode-marketplace"
         ],
         "nixpkgs": [
           "source-flake",
           "nixpkgs"
         ],
-        "source-flake": "source-flake",
-        "vscodium-extensions": [
-          "source-flake",
-          "vscodium-extensions"
-        ]
+        "source-flake": "source-flake"
       }
     },
     "rust-analyzer-src": {
