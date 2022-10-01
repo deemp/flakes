@@ -266,12 +266,21 @@
             '';
         };
 
-        cachix-wrapped = pkgs.symlinkJoin {
+        # cachix-wrapped = let cachix_ = cachix.packages.${system}.cachix; in
+        #   pkgs.stdenv.mkDerivation {
+        #     name = "cachix-wrapped";
+        #     buildInputs = [ cachix_ ];
+        #     src = cachix_.src;
+        #     postInstall = ''
+        #       cp ${cachix_}/bin/cachix $out/bin/cachix-wrapped
+        #     '';
+        #   };
+
+        cachix-wrapped = let cachix_ = cachix.packages.${system}.cachix; in pkgs.symlinkJoin {
           name = "cachix-wrapped";
-          paths = [ cachix.packages.${system}.cachix ];
-          buildInputs = [ pkgs.makeBinaryWrapper ];
+          paths = [ cachix_ ];
           postBuild = ''
-            wrapProgram $out/bin/cachix
+            cp $out/bin/cachix $out/bin/cachix-wrapped
           '';
         };
 
@@ -451,7 +460,7 @@
             }
           )
           {
-            fish = {};
+            fish = { };
             checkScripts = { buildInputs = [ pkgs.gawk ]; };
             anotherShell = { name = "just-another-devshell"; };
           };

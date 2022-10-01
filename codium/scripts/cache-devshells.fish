@@ -8,7 +8,7 @@ if test -n "$t";
     # save profiles for these devshells
     printf "%s\n" $t | xargs -I {} nix develop .#{} --profile $PROFILES_FOR_DEVSHELLS/{}
     # push profiles for these devshells
-    printf "%s\n" $t | xargs -I {} cachix push $CACHIX_CACHE $PROFILES_FOR_DEVSHELLS/{};
+    printf "%s\n" $t | xargs -I {} cachix-wrapped push $CACHIX_CACHE $PROFILES_FOR_DEVSHELLS/{};
 end
 
 # remove the temporary dir
