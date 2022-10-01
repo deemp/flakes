@@ -4952,11 +4952,11 @@
       },
       "locked": {
         "dir": "source-flake",
-        "lastModified": 1664630484,
-        "narHash": "sha256-KpLR2v/z2CoJOrG4DKNStB8S8nf2NZabbKRQWyK0HGI=",
+        "lastModified": 1664631702,
+        "narHash": "sha256-Xi7ISMm7eB0lum9C/ZieO13NUfXMCFw57yefaueFQZM=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "b2e866680d0688daeff778f5300a3dcdfd5f7ea8",
+        "rev": "c720ef5be59b934d164d069840fb5ed2c436203a",
         "type": "github"
       },
       "original": {
