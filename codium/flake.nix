@@ -503,6 +503,9 @@
             # update flakes to actually use current changes from gh
             ${flakesUpdate_.name}
 
+            # double check
+            ${flakesUpdate_.name}
+
             # push updated flakes
             git add .
             git commit -m "use current changes: $1"
