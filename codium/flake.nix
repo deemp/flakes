@@ -266,7 +266,7 @@
             
               ${text}
 
-              fish ${fishScriptPath} $1
+              fish ${fishScriptPath}
             '';
         };
 

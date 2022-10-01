@@ -1,5 +1,3 @@
-CACHIX_CACHE=$1
-
 # set temp directory for outputs for packages
 set -q PATHS_FOR_PACKAGES || set PATHS_FOR_PACKAGES __paths_for_packages
 set t $( nix flake show --json | jq -r --arg cur_sys "$CURRENT_SYSTEM" '.packages[$cur_sys]|(try keys[] catch "")' )
