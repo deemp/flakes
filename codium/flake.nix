@@ -578,6 +578,7 @@
             flakesUpdateAndPushToCachix
             justStaticExecutables
             mergeValues
+            mkBin
             mkCodium
             mkDevShells
             mkDevShellsWithDefault
