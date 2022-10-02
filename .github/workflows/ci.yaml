@@ -30,7 +30,14 @@ jobs:
         with:
           name: ${{ secrets.CACHIX_CACHE }}
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
-
+      - name: archive flakes
+        run: |
+          (cd source-flake && nix flake archive)
+          (cd codium && nix flake archive)
+          (cd env2json && nix flake archive)
+          (cd json2md && nix flake archive)
+          (cd inputs && nix flake archive)
+          nix flake archive
       - name: Push flakes to cachix
         env: 
           CACHIX_CACHE: ${{ secrets.CACHIX_CACHE }}
