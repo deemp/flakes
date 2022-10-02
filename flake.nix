@@ -31,7 +31,7 @@
         flakesUtils = (mkFlakesUtils [ "source-flake" "codium" "env2json" "json2md" "inputs" "." ]);
 
         # TODO
-        toggleRelativePaths_ =`
+        toggleRelativePaths_ =
           let
             myCodium = "my-codium";
             json2md = "json2md";
