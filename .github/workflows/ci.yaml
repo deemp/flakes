@@ -12,8 +12,8 @@ env:
   action: |
     git pull --rebase --autostash
     nix run .#{0}
-    git add --all */*.{1}
-    git commit -m "action: {2}"
+    git add --all
+    git commit -m "action: {1}"
     git push
 
 jobs:
@@ -39,17 +39,17 @@ jobs:
       - name: Update locks
         env:
           command: updateLocks
-          target_extension: lock
+          # target_extension: lock
           msg: update locks
         if: ${{ matrix.os == 'ubuntu-20.04' }}
-        run: ${{ format(env.action, env.command, env.target_extension, env.msg) }}
-      - name: Format files
-        env:
-          command: format
-          target_extension: nix
-          msg: format Nix files
-        if: ${{ matrix.os == 'ubuntu-20.04' }}
-        run: ${{ format(env.action, env.command, env.target_extension, env.msg) }}
+        run: ${{ format(env.action, env.command, env.msg) }}
+      # - name: Format files
+      #   env:
+      #     command: format
+      #     target_extension: nix
+      #     msg: format Nix files
+      #   if: ${{ matrix.os == 'ubuntu-20.04' }}
+      #   run: ${{ format(env.action, env.command, env.target_extension, env.msg) }}
       - uses: cachix/cachix-action@v10
         with:
           name: ${{ secrets.CACHIX_CACHE }}
