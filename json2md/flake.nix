@@ -22,7 +22,7 @@
             {
               subsystemInfo.nodejs = 16;
             }
-          ];  
+          ];
         }
     ) // { inherit (source-flake) formatter; }
   ;

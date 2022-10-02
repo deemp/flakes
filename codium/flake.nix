@@ -389,7 +389,7 @@
           command = "nix flake update";
         };
 
-        mkBin = drv@{name, ...}: "${drv}/bin/${name}";
+        mkBin = drv@{ name, ... }: "${drv}/bin/${name}";
 
         # push to cachix all about flakes in specified directories relative to PWD
         flakesPushToCachix = dirs: runInEachDir {

@@ -24,6 +24,13 @@ jobs:
             substituters = https://cache.nixos.org/ https://nix-community.cachix.org https://hydra.iohk.io https://haskell-language-server.cachix.org https://br4ch1st0chr0n3.cachix.org
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= haskell-language-server.cachix.org-1:juFfHrwkOxqIOZShtC4YC1uT1bBcq2RSvC7OMKx0Nz8= br4ch1st0chr0n3.cachix.org-1:o1FA93L5vL4LWi+jk2ECFk1L1rDlMoTH21R1FHtSKaU=
           install_url: https://releases.nixos.org/nix/nix-2.11.1/install
+      
+      - name: Format code
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: '--all .'
+          author_name: nixpkgs-fmt
+          message: "formatted"
 
       # TODO enable when learn how to make Nix not complain about relative paths
       - uses: cachix/cachix-action@v10
@@ -34,8 +41,9 @@ jobs:
         run: |
           for i in "source-flake" "codium" "env2json" "json2md" "inputs" "." 
           do 
-            (cd $i && nix flake archive --json)
+            (cd $i && nix flake archive)
           done
+
       - name: Push flakes to cachix
         env: 
           CACHIX_CACHE: ${{ secrets.CACHIX_CACHE }}
@@ -43,3 +51,4 @@ jobs:
       
       - name: Format .nix files
         run: nix fmt **/*.nix
+          
