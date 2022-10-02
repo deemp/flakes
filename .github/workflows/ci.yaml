@@ -31,6 +31,8 @@ jobs:
           add: '--all .'
           author_name: lock-updater
           message: "locks updated"
+      - uses: actions/checkout@v3
+      - name: 
       - name: Format files
         run: nix run .#format
       - uses: EndBug/add-and-commit@v9
@@ -48,7 +50,3 @@ jobs:
         env: 
           CACHIX_CACHE: ${{ secrets.CACHIX_CACHE }}
         run: nix run .#pushToCachix
-      
-      - name: Format .nix files
-        run: nix fmt **/*.nix
-          
