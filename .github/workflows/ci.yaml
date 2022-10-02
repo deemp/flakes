@@ -41,14 +41,14 @@ jobs:
           command: updateLocks
           target_extension: lock
           msg: update locks
-        if: ${{ matrix.os == 'macos-12' }}
+        if: ${{ matrix.os == 'ubuntu-20.04' }}
         run: ${{ format(env.action, env.command, env.target_extension, env.msg) }}
       - name: Format files
         env:
           command: format
           target_extension: nix
           msg: format Nix files
-        if: ${{ matrix.os == 'macos-12' }}
+        if: ${{ matrix.os == 'ubuntu-20.04' }}
         run: ${{ format(env.action, env.command, env.target_extension, env.msg) }}
       - uses: cachix/cachix-action@v10
         with:
