@@ -32,7 +32,6 @@ jobs:
           author_name: lock-updater
           message: "locks updated"
       - uses: actions/checkout@v3
-      - name: 
       - name: Format files
         run: nix run .#format
       - uses: EndBug/add-and-commit@v9
