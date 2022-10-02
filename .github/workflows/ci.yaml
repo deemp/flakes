@@ -31,7 +31,8 @@ jobs:
           add: '--all .'
           author_name: lock-updater
           message: "locks updated"
-      - uses: actions/checkout@v3
+      - name: Pull repo
+        run: git pull
       - name: Format files
         run: nix run .#format
       - uses: EndBug/add-and-commit@v9
@@ -39,7 +40,8 @@ jobs:
           add: '--all .'
           author_name: flake-formatter
           message: "formatted"
-
+      - name: Pull repo
+        run: git pull
       - uses: cachix/cachix-action@v10
         with:
           name: ${{ secrets.CACHIX_CACHE }}
