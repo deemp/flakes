@@ -12,7 +12,7 @@ env:
   action: |
     git pull --rebase --autostash
     nix run .#{0}
-    git add */*.{1}
+    git add */*.{1} -A
     git commit -m "action: {2}"
     git push
 
