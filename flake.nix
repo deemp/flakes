@@ -1,7 +1,6 @@
 {
   inputs = {
-    my-inputs.url = path:./inputs;
-    # my-inputs.url = github:br4ch1st0chr0n3/flakes?dir=inputs;
+    my-inputs.url = github:br4ch1st0chr0n3/flakes?dir=inputs;
     flake-utils.follows = "my-inputs/flake-utils";
     nixpkgs.follows = "my-inputs/nixpkgs";
     my-codium.url = path:./codium;
@@ -31,18 +30,15 @@
 
         flakesUtils = (mkFlakesUtils [ "source-flake" "codium" "env2json" "json2md" "inputs" "." ]);
 
-        toggleRelativePaths_ =
+        # TODO
+        toggleRelativePaths_ =`
           let
-            sourceFlake = "source-flake";
             myCodium = "my-codium";
             json2md = "json2md";
             myInputs = "my-inputs";
             env2json = "env2json";
             toggleConfig = [
-              { "codium" = [ sourceFlake ]; }
-              { "json2md" = [ sourceFlake ]; }
-              { "env2json" = [ sourceFlake ]; }
-              { "inputs" = [ sourceFlake myCodium json2md env2json]; }
+              { "inputs" = [ myCodium json2md env2json ]; }
               { "." = [ myInputs myCodium ]; }
             ];
           in
