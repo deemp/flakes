@@ -31,24 +31,21 @@
 
         flakesUtils = (mkFlakesUtils [ "source-flake" "codium" "env2json" "json2md" "inputs" "." ]);
 
-        # toggleRelativePaths_ =
-        #   let
-        #     myCodium = "my-codium";
-        #     myInputs = "my-inputs";
-        #     toggleConfig = [
-        #       { "." = [ myInputs myCodium ]; }
-        #     ];
-        #   in
-        #   flakesToggleRelativePaths toggleConfig flakesUtils.flakesUpdate;
-
-        # pushToGithub_ = pushToGithub toggleRelativePaths_ flakesUtils.flakesUpdate;
+        toggleRelativePaths_ =
+          let
+            myCodium = "my-codium";
+            myInputs = "my-inputs";
+            toggleConfig = [
+              { "." = [ myInputs myCodium ]; }
+            ];
+          in
+          flakesToggleRelativePaths toggleConfig flakesUtils.flakesUpdate;
 
         codium = mkCodium {
           extensions = { inherit (extensions) nix misc github; };
           runtimeDependencies = [
             (toList { inherit (shellTools) nix docker; })
-            # pushToGithub_
-            # toggleRelativePaths_
+            toggleRelativePaths_
             (builtins.attrValues flakesUtils)
           ];
         };
@@ -60,8 +57,7 @@
             buildInputs = [
               codium
               (builtins.attrValues flakesUtils)
-              # toggleRelativePaths_
-              # pushToGithub_
+              toggleRelativePaths_
             ];
           }
           {

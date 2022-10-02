@@ -488,6 +488,7 @@
           ;
         };
 
+        # TODO deprecate
         pushToGithub = toggleRelativePaths_: flakesUpdate_: mkShellApp {
           name = "push-to-github";
           runtimeInputs = [ pkgs.git ];
