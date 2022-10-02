@@ -1,7 +1,7 @@
 {
   inputs = {
-    # source-flake.url = path:../source-flake;
-    source-flake.url = github:br4ch1st0chr0n3/flakes?dir=source-flake;
+    source-flake.url = path:../source-flake;
+    # source-flake.url = github:br4ch1st0chr0n3/flakes?dir=source-flake;
     nixpkgs.follows = "source-flake/nixpkgs";
     flake-utils.follows = "source-flake/flake-utils";
     gitignore.follows = "source-flake/gitignore";
@@ -309,11 +309,10 @@
         # Push inputs and outputs (packages and devShells) of a flake to cachix
         pushAllToCachix = mkShellApp {
           name = "push-all-to-cachix";
-          runtimeInputs = [ pushPackagesToCachix pushDevShellsToCachix pushInputsToCachix ];
           text = ''
-            ${pushInputsToCachix.name} &&
-            ${pushDevShellsToCachix.name} &&
-            ${pushPackagesToCachix.name}
+            ${mkBin pushInputsToCachix}
+            ${mkBin pushDevShellsToCachix}
+            ${mkBin pushPackagesToCachix}
           '';
         };
 
@@ -391,12 +390,13 @@
           command = "nix flake update";
         };
 
+        mkBin = drv@{name, ...}: "${drv}/bin/${name}";
+
         # push to cachix all about flakes in specified directories relative to PWD
         flakesPushToCachix = dirs: runInEachDir {
           inherit dirs;
           name = "flakes-push-to-cachix";
-          command = "${pushAllToCachix.name}";
-          runtimeInputs = [ pushAllToCachix ];
+          command = "${mkBin pushAllToCachix}";
         };
 
         # update and push flakes to cachix in specified directories relative to PWD
@@ -407,10 +407,9 @@
           in
           mkShellApp {
             name = "flakes-update-and-push-to-cachix";
-            runtimeInputs = [ flakesUpdate_ flakesPushToCachix_ ];
             text = ''
-              ${flakesUpdate_.name}
-              ${flakesPushToCachix_.name}
+              ${mkBin flakesUpdate_}
+              ${mkBin flakesPushToCachix_}
             '';
           };
 
@@ -436,7 +435,7 @@
         # flake inputs will be updated
         flakesToggleRelativePaths = toggleConfig: flakesUpdate_: mkShellApp {
           name = "flakes-toggle-relative-paths";
-          runtimeInputs = [ pkgs.gawk flakesUpdate_ ];
+          runtimeInputs = [ pkgs.gawk ];
           text =
             let
               INITIAL_PWD = "INITIAL_PWD";
@@ -485,26 +484,26 @@
             ''
               cd ${"$" + INITIAL_PWD}
 
-              ${flakesUpdate_.name}
+              ${mkBin flakesUpdate_}
             ''
           ;
         };
 
         pushToGithub = toggleRelativePaths_: flakesUpdate_: mkShellApp {
           name = "push-to-github";
-          runtimeInputs = [ pkgs.git toggleRelativePaths_ flakesUpdate_ ];
+          runtimeInputs = [ pkgs.git ];
           text = ''
             # toggle path:gh as if they containt current changes
-            ${toggleRelativePaths_.name}
+            ${mkBin toggleRelativePaths_}
             git add .
             git commit -m "push current changes: $1"
             git push
 
             # update flakes to actually use current changes from gh
-            ${flakesUpdate_.name}
+            ${mkBin flakesUpdate_}
 
             # double check
-            ${flakesUpdate_.name}
+            ${mkBin flakesUpdate_}
 
             # push updated flakes
             git add .
@@ -512,7 +511,7 @@
             git push
 
             # switch back to relative paths for local use
-            ${toggleRelativePaths_.name}
+            ${mkBin toggleRelativePaths_}
           '';
         };
 

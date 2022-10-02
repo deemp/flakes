@@ -1,3 +1,5 @@
+nix flake archive
+
 # Set default location of a temp dir to save devshell profiles to
 set -q PROFILES_FOR_DEVSHELLS || set PROFILES_FOR_DEVSHELLS __profiles_for_devshells
 mkdir -p $PROFILES_FOR_DEVSHELLS

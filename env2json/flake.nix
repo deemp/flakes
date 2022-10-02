@@ -1,7 +1,7 @@
 {
   inputs = {
-    # source-flake.url = path:../source-flake;
-    source-flake.url = github:br4ch1st0chr0n3/flakes?dir=source-flake;
+    source-flake.url = path:../source-flake;
+    # source-flake.url = github:br4ch1st0chr0n3/flakes?dir=source-flake;
     nixpkgs.follows = "source-flake/nixpkgs";
     flake-utils.follows = "source-flake/flake-utils";
   };
