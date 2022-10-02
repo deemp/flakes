@@ -12,7 +12,6 @@ env:
   action: |
     git pull --rebase --autostash
     nix run .#{0}
-    git add --all
     git commit -m -a "action: {1}"
     git push
 
