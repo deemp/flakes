@@ -32,9 +32,9 @@ jobs:
           authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
       - name: archive flakes
         run: |
-          for i in . source-flake codium env2json json2md inputs
-          do
-            (cd i && nix flake archive)
+          for i in "." "source-flake" "codium" "env2json" "json2md" "inputs"
+          do 
+            (cd $i && nix flake archive --json)
           done
       - name: Push flakes to cachix
         env: 
