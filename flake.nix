@@ -67,6 +67,7 @@
           pushToCachix = flakesUtils.flakesPushToCachix;
           updateLocks = flakesUtils.flakesUpdate;
           format = flakesUtils.flakesFormat;
+          default = codium;
         };
       }) // { inherit (my-inputs) formatter; };
 }

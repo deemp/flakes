@@ -55,4 +55,7 @@ in
     inherit (my-extensions.visualstudioexptteam) vscodeintellicode;
   };
   toml = { inherit (open-vsx.tamasfe) even-better-toml; };
+  fish = {
+    inherit (open-vsx.bmalehorn) vscode-fish;
+  };
 }

@@ -547,7 +547,7 @@
           };
 
         packages = {
-          default = mkShellApp { name = "codium-start"; runtimeInputs = [ codium ]; text = "codium ."; };
+          default = codium;
           inherit json2nix;
           inherit pushDevShellsToCachix;
         };
