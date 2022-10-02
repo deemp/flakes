@@ -414,7 +414,7 @@
 
         # format all .nix files with the formatter specified in the flake in the PWD
         flakesFormat = mkShellApp {
-          name = "flake-format";
+          name = "flakes-format";
           text = ''
             nix fmt **/*.nix
           '';

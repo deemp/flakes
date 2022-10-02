@@ -31,25 +31,25 @@
 
         flakesUtils = (mkFlakesUtils [ "source-flake" "codium" "env2json" "json2md" "inputs" "." ]);
 
-        toggleRelativePaths_ =
-          let
-            myCodium = "my-codium";
-            myInputs = "my-inputs";
-            toggleConfig = [
-              { "." = [ myInputs myCodium ]; }
-            ];
-          in
-          flakesToggleRelativePaths toggleConfig flakesUtils.flakesUpdate;
+        # toggleRelativePaths_ =
+        #   let
+        #     myCodium = "my-codium";
+        #     myInputs = "my-inputs";
+        #     toggleConfig = [
+        #       { "." = [ myInputs myCodium ]; }
+        #     ];
+        #   in
+        #   flakesToggleRelativePaths toggleConfig flakesUtils.flakesUpdate;
 
-        pushToGithub_ = pushToGithub toggleRelativePaths_ flakesUtils.flakesUpdate;
+        # pushToGithub_ = pushToGithub toggleRelativePaths_ flakesUtils.flakesUpdate;
 
         codium = mkCodium {
           extensions = { inherit (extensions) nix misc github; };
           runtimeDependencies = [
             (toList { inherit (shellTools) nix docker; })
-            toggleRelativePaths_
+            # pushToGithub_
+            # toggleRelativePaths_
             (builtins.attrValues flakesUtils)
-            pushToGithub_
           ];
         };
 
@@ -57,11 +57,20 @@
       {
         devShells = mkDevShellsWithDefault
           {
-            buildInputs = [ codium (builtins.attrValues flakesUtils) toggleRelativePaths_ pushToGithub_ ];
+            buildInputs = [
+              codium
+              (builtins.attrValues flakesUtils)
+              # toggleRelativePaths_
+              # pushToGithub_
+            ];
           }
           {
             enter = { };
           };
-        packages.default = flakesUtils.flakesPushToCachix;
+        packages = {
+          pushToCachix = flakesUtils.flakesPushToCachix;
+          updateLocks = flakesUtils.flakesUpdate;
+          format = flakesUtils.flakesFormat;
+        };
       }) // { inherit (my-inputs) formatter; };
 }
