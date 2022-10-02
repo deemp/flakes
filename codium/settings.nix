@@ -85,7 +85,10 @@
     };
   };
 
-  git = { "git.autofetch" = true; };
+  git = {
+    "git.autofetch" = true;
+    "git.autofetchPeriod" = 5;
+  };
 
   nix-ide = {
     "nix.serverPath" = "rnix-lsp";
