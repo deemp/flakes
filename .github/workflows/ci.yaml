@@ -12,7 +12,7 @@ env:
   action: |
     git pull --rebase --autostash
     nix run .#{0}
-    git commit -m -a "action: {1}"
+    git commit -a -m "action: {1}"
     git push
 
 jobs:
