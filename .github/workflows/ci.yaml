@@ -1,4 +1,4 @@
-name: "Caching"
+name: "CI"
 
 on:
   schedule:
@@ -12,13 +12,12 @@ env:
   action: |
     git pull --rebase --autostash
     nix run .#{0}
-    git pull --rebase --autostash
-    git add **/*.{1}
+    git add */*.{1}
     git commit -m "action: {2}"
     git push
 
 jobs:
-  caching:
+  ci:
     name: Build on ${{ matrix.os }}
     strategy:
       matrix:
@@ -42,12 +41,14 @@ jobs:
           command: updateLocks
           target_extension: lock
           msg: update locks
+        if: ${{ matrix.os == 'macos-12' }}
         run: ${{ format(env.action, env.command, env.target_extension, env.msg) }}
       - name: Format files
         env:
           command: format
           target_extension: nix
           msg: format Nix files
+        if: ${{ matrix.os == 'macos-12' }}
         run: ${{ format(env.action, env.command, env.target_extension, env.msg) }}
       - uses: cachix/cachix-action@v10
         with:
