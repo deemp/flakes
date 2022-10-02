@@ -41,13 +41,17 @@ jobs:
           msg: update locks
         if: ${{ matrix.os == 'ubuntu-20.04' }}
         run: ${{ format(env.action, env.command, env.msg) }}
-      - name: Format files
-        env:
-          command: format
-          target_extension: nix
-          msg: format Nix files
-        if: ${{ matrix.os == 'ubuntu-20.04' }}
-        run: ${{ format(env.action, env.command, env.msg) }}
+      # - name: Sleep for 5 seconds
+      #   uses: whatnick/wait-action@master
+      #   with:
+      #     time: '5s'
+      # - name: Format files
+      #   env:
+      #     command: format
+      #     target_extension: nix
+      #     msg: format Nix files
+      #   if: ${{ matrix.os == 'ubuntu-20.04' }}
+      #   run: ${{ format(env.action, env.command, env.msg) }}
       - uses: cachix/cachix-action@v10
         with:
           name: ${{ secrets.CACHIX_CACHE }}
