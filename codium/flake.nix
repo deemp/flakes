@@ -389,13 +389,25 @@
           command = "nix flake update";
         };
 
+        # assuming that a `name` of a program coincides with its main executable's name
         mkBin = drv@{ name, ... }: "${drv}/bin/${name}";
-
+        
         # push to cachix all about flakes in specified directories relative to PWD
         flakesPushToCachix = dirs: runInEachDir {
           inherit dirs;
           name = "flakes-push-to-cachix";
           command = "${mkBin pushAllToCachix}";
+        };
+
+        # dump a devshell by running a dummy command in it
+        dumpDevShells = runFishScript { name = "dump-devshells"; fishScriptPath = ./scripts/dump-devshells.fish; };
+
+        # dump devshells in given directories
+        # can be combined with updating flake locks
+        flakesDumpDevshells = dirs: runInEachDir {
+          inherit dirs;
+          name = "flakes-dump-devshells";
+          command = "${mkBin dumpDevShells}";
         };
 
         # update and push flakes to cachix in specified directories relative to PWD
@@ -425,6 +437,7 @@
           flakesUpdate = flakesUpdate dirs;
           flakesPushToCachix = flakesPushToCachix dirs;
           flakesUpdateAndPushToCachix = flakesUpdateAndPushToCachix dirs;
+          flakesDumpDevshells = flakesDumpDevshells dirs;
           flakesFormat = flakesFormat;
         };
 
@@ -571,6 +584,7 @@
             cachix-wrapped
 
             # functions
+            flakesDumpDevshells
             flakesFormat
             flakesPushToCachix
             flakesToggleRelativePaths
@@ -586,6 +600,7 @@
             mkShellApp
             mkShellApps
             pushToGithub
+            runFishScript
             runInEachDir
             toList
             toolsGHC

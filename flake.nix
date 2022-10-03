@@ -1,7 +1,7 @@
 {
   inputs = {
-    # my-inputs.url = path:./inputs;
-    my-inputs.url = github:br4ch1st0chr0n3/flakes?dir=inputs;
+    my-inputs.url = path:./inputs;
+    # my-inputs.url = github:br4ch1st0chr0n3/flakes?dir=inputs;
     flake-utils.follows = "my-inputs/flake-utils";
     nixpkgs.follows = "my-inputs/nixpkgs";
     # my-codium.url = path:./codium;
@@ -42,14 +42,13 @@
           flakesToggleRelativePaths toggleConfig flakesUtils.flakesUpdate;
 
         codium = mkCodium {
-          extensions = { inherit (extensions) nix misc github; };
+          extensions = { inherit (extensions) nix misc github fish; };
           runtimeDependencies = [
             (toList { inherit (shellTools) nix docker; })
             toggleRelativePaths_
             (builtins.attrValues flakesUtils)
           ];
         };
-
       in
       {
         devShells = mkDevShellsWithDefault
