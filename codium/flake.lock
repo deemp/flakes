@@ -1628,11 +1628,11 @@
       },
       "locked": {
         "dir": "source-flake",
-        "lastModified": 1664810350,
-        "narHash": "sha256-XqLAjOjqrZYN4dUR61Pl9IknKf7qf3i1lG+B20uajXs=",
+        "lastModified": 1664815975,
+        "narHash": "sha256-whjidOb+p7WqsR2HGKMVq4wqXFrs9mwNc9gFDL6bk/M=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "217b6245e05293538db307038349e9a8a28b16f9",
+        "rev": "ff788a699b7dae9b35efb72a4f23c397671616fa",
         "type": "github"
       },
       "original": {
