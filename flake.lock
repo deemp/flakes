@@ -5812,14 +5812,19 @@
         ]
       },
       "locked": {
-        "lastModified": 1,
-        "narHash": "sha256-q78x3ehTXkNfphV04d0w7B379+g+JGSxSR74T7M6zVs=",
-        "path": "./inputs",
-        "type": "path"
+        "dir": "inputs",
+        "lastModified": 1664755638,
+        "narHash": "sha256-i/uyFO25IhO10ka/3wmZbA6TbjvRI/NbtCWM57onxSk=",
+        "owner": "br4ch1st0chr0n3",
+        "repo": "flakes",
+        "rev": "33e8fa39a4ce3e2532619070a02858951e1aabfd",
+        "type": "github"
       },
       "original": {
-        "path": "./inputs",
-        "type": "path"
+        "dir": "inputs",
+        "owner": "br4ch1st0chr0n3",
+        "repo": "flakes",
+        "type": "github"
       }
     },
     "my-inputs_3": {
