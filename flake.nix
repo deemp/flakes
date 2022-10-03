@@ -25,7 +25,6 @@
           mkFlakesUtils
           mkShellApp
           flakesToggleRelativePaths
-          pushToGithub
           ;
         pkgs = nixpkgs.legacyPackages.${system};
 

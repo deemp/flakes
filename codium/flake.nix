@@ -501,33 +501,6 @@
           ;
         };
 
-        # TODO deprecate
-        pushToGithub = toggleRelativePaths_: flakesUpdate_: mkShellApp {
-          name = "push-to-github";
-          runtimeInputs = [ pkgs.git ];
-          text = ''
-            # toggle path:gh as if they containt current changes
-            ${mkBin toggleRelativePaths_}
-            git add .
-            git commit -m "push current changes: $1"
-            git push
-
-            # update flakes to actually use current changes from gh
-            ${mkBin flakesUpdate_}
-
-            # double check
-            ${mkBin flakesUpdate_}
-
-            # push updated flakes
-            git add .
-            git commit -m "use current changes: $1"
-            git push
-
-            # switch back to relative paths for local use
-            ${mkBin toggleRelativePaths_}
-          '';
-        };
-
         # Stuff for tests
 
         tools902 = builtins.attrValues { inherit (toolsGHC "902") hls stack; };
@@ -554,7 +527,7 @@
             buildInputs = allTools;
           }
           {
-            fish = { };
+            fish = { name = "fish"; };
             checkScripts = { buildInputs = [ pkgs.gawk ]; };
             anotherShell = { name = "just-another-devshell"; };
           };
@@ -599,7 +572,6 @@
             mkFlakesUtils
             mkShellApp
             mkShellApps
-            pushToGithub
             runFishScript
             runInEachDir
             toList
