@@ -1595,11 +1595,11 @@
       },
       "locked": {
         "dir": "source-flake",
-        "lastModified": 1664762191,
-        "narHash": "sha256-O17zqDKBOWKeaTNip+d7sL72d39pAEq0/XNgWfPB2uA=",
+        "lastModified": 1664784512,
+        "narHash": "sha256-Jz9JvHkmczkWm8BbrPwoiTeGQcNJ1sm/FGGEAyegXZI=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "4790ac9350fce513024b99f4cfffb061a9a09b9f",
+        "rev": "287ca40992d7688ec8520a7459954960a215b40a",
         "type": "github"
       },
       "original": {
