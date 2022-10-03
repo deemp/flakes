@@ -16,3 +16,4 @@ Nix flakes for tools that I use
 1. Wait a couple of minutes for a GH action to complete updating `flake.lock`-s and for git fetcher to fetch the latest changes. You may check the action's progress in the `GitHub Actions` extension
 
 1. `git rebase` to get your changes from GH
+
