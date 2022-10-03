@@ -329,7 +329,7 @@
             builtins.concatStringsSep "\n"
               (builtins.map
                 (dir: ''
-                  printf "\n\n[ ${name} in %s ]\n\n" "${"$" + INITIAL_PWD}/${dir}"
+                  printf "\n\n[ ${name} : %s/flake.nix ]\n\n" "${"$" + INITIAL_PWD}/${dir}"
 
                   cd ${"$" + INITIAL_PWD}/${dir}
             

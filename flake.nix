@@ -4,8 +4,8 @@
     my-inputs.url = github:br4ch1st0chr0n3/flakes?dir=inputs;
     flake-utils.follows = "my-inputs/flake-utils";
     nixpkgs.follows = "my-inputs/nixpkgs";
-    # my-codium.url = path:./codium;
-    my-codium.url = github:br4ch1st0chr0n3/flakes?dir=codium;
+    my-codium.url = path:./codium;
+    # my-codium.url = github:br4ch1st0chr0n3/flakes?dir=codium;
   };
   outputs =
     { self
@@ -34,9 +34,8 @@
         toggleRelativePaths_ =
           let
             myCodium = "my-codium";
-            myInputs = "my-inputs";
             toggleConfig = [
-              { "." = [ myInputs myCodium ]; }
+              { "." = [ myCodium ]; }
             ];
           in
           flakesToggleRelativePaths toggleConfig flakesUtils.flakesUpdate;
