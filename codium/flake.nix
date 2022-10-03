@@ -316,7 +316,7 @@
         };
 
         # run a command in each given dir relative to pwd
-        runInEachDir = args@{ dirs, command, name, runtimeInputs ? [ ] }: mkShellApp {
+        runInEachDir = args@{ dirs, command, name, preMessage ? "", postMessage ? "", runtimeInputs ? [ ] }: mkShellApp {
           name = "${name}-in-each-dir";
           inherit runtimeInputs;
           text =
@@ -324,6 +324,7 @@
             in
             ''
               ${INITIAL_PWD}=$PWD
+              printf "%s" '${preMessage}'
 
             '' +
             builtins.concatStringsSep "\n"
@@ -336,7 +337,12 @@
                   ${command}
 
                 '')
-                dirs);
+                dirs) +
+            ''
+
+              printf "%s" '${postMessage}'
+            ''
+          ;
         };
 
         # make shell apps
@@ -391,23 +397,12 @@
 
         # assuming that a `name` of a program coincides with its main executable's name
         mkBin = drv@{ name, ... }: "${drv}/bin/${name}";
-        
+
         # push to cachix all about flakes in specified directories relative to PWD
         flakesPushToCachix = dirs: runInEachDir {
           inherit dirs;
           name = "flakes-push-to-cachix";
           command = "${mkBin pushAllToCachix}";
-        };
-
-        # dump a devshell by running a dummy command in it
-        dumpDevShells = runFishScript { name = "dump-devshells"; fishScriptPath = ./scripts/dump-devshells.fish; };
-
-        # dump devshells in given directories
-        # can be combined with updating flake locks
-        flakesDumpDevshells = dirs: runInEachDir {
-          inherit dirs;
-          name = "flakes-dump-devshells";
-          command = "${mkBin dumpDevShells}";
         };
 
         # update and push flakes to cachix in specified directories relative to PWD
@@ -424,6 +419,36 @@
             '';
           };
 
+        # dump a devshell by running a dummy command in it
+        dumpDevShells = runFishScript { name = "dump-devshells"; fishScriptPath = ./scripts/dump-devshells.fish; };
+
+        # dump devshells in given directories
+        # can be combined with updating flake locks
+        flakesDumpDevshells = dirs: runInEachDir {
+          inherit dirs;
+          preMessage = "started dumping devshells\n";
+          postMessage = "finished dumping devshells\n";
+          name = "flakes-dump-devshells";
+          command = ''
+            ${mkBin dumpDevShells}
+          '';
+        };
+
+        # watch nix files existing at the moment
+        flakesWatchDumpDevshells = dirs: mkShellApp {
+          name = "flakes-watch-dump-devshells";
+          text = ''
+            inotifywait -qmr -e close_write ./ | \
+            while read dir action file; do
+              if [[ $file =~ .*nix$ ]]; then
+                ${mkBin (flakesUpdate dirs)}
+                ${mkBin (flakesDumpDevshells dirs)}
+              fi
+            done
+          '';
+          runtimeInputs = [ pkgs.inotify-tools ];
+        };
+
         # format all .nix files with the formatter specified in the flake in the PWD
         flakesFormat = mkShellApp {
           name = "flakes-format";
@@ -438,6 +463,7 @@
           flakesPushToCachix = flakesPushToCachix dirs;
           flakesUpdateAndPushToCachix = flakesUpdateAndPushToCachix dirs;
           flakesDumpDevshells = flakesDumpDevshells dirs;
+          flakesWatchDumpDevshells = flakesWatchDumpDevshells dirs;
           flakesFormat = flakesFormat;
         };
 
@@ -557,12 +583,14 @@
             cachix-wrapped
 
             # functions
+            dumpDevShells
             flakesDumpDevshells
             flakesFormat
             flakesPushToCachix
             flakesToggleRelativePaths
             flakesUpdate
             flakesUpdateAndPushToCachix
+            flakesWatchDumpDevshells
             justStaticExecutables
             mergeValues
             mkBin
