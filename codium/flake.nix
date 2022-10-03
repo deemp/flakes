@@ -164,7 +164,7 @@
               printf "%s" ${
                 pkgs.lib.escapeShellArg dataJson
               } | python -m json.tool > ${path}
-              printf "\n[ok %s]\n" "${name_}"
+              printf "${framed "ok %s"}" "${name_}"
             '';
           };
 
@@ -330,7 +330,7 @@
             builtins.concatStringsSep "\n"
               (builtins.map
                 (dir: ''
-                  printf "\n\n[ ${name} : %s/flake.nix ]\n\n" "${"$" + INITIAL_PWD}/${dir}"
+                  printf "${framed "${name} : %s/flake.nix"}" "${"$" + INITIAL_PWD}/${dir}"
 
                   cd ${"$" + INITIAL_PWD}/${dir}
             
@@ -422,12 +422,15 @@
         # dump a devshell by running a dummy command in it
         dumpDevShells = runFishScript { name = "dump-devshells"; fishScriptPath = ./scripts/dump-devshells.fish; };
 
+        # frame a text with square brackets and newlines
+        framed = txt: ''\n\n[ ${txt} ]\n\n'';
+
         # dump devshells in given directories
         # can be combined with updating flake locks
         flakesDumpDevshells = dirs: runInEachDir {
           inherit dirs;
-          preMessage = "started dumping devshells\n";
-          postMessage = "finished dumping devshells\n";
+          preMessage = framed "started dumping devshells";
+          postMessage = framed "finished dumping devshells";
           name = "flakes-dump-devshells";
           command = ''
             ${mkBin dumpDevShells}
@@ -438,17 +441,19 @@
         flakesWatchDumpDevshells = dirs: mkShellApp {
           name = "flakes-watch-dump-devshells";
           text = ''
+            printf "${framed "watcher set"}"
             inotifywait -qmr -e close_write ./ | \
             while read dir action file; do
               if [[ $file =~ .*nix$ ]]; then
+                set +e
                 ${mkBin (flakesUpdate dirs)}
                 ${mkBin (flakesDumpDevshells dirs)}
+                set -e
               fi
             done
           '';
           runtimeInputs = [ pkgs.inotify-tools ];
         };
-
         # format all .nix files with the formatter specified in the flake in the PWD
         flakesFormat = mkShellApp {
           name = "flakes-format";
