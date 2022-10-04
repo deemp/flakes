@@ -716,6 +716,7 @@
             flakesUpdate
             flakesUpdateAndPushToCachix
             flakesWatchDumpDevshells
+            framed
             justStaticExecutables
             mergeValues
             mkBin
