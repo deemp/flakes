@@ -382,7 +382,7 @@
               relative to `CWD` in directories:
 
                 ```sh
-                ${printStringsLn "\n" dirs}
+                ${printStringsLn dirs}
                 ```
             '';
           });
