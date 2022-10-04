@@ -182,9 +182,6 @@
         writeTasksJson = tasks:
           withLongDescription (writeJson "tasks" "./.vscode/tasks.json" tasks) "write `.vscode/tasks.json`";
 
-        # convert json to nix
-        # no need to provide the full path to a file if it's in the cwd
-        # json2nix .vscode/settings.json my-settings.nix
         json2nix = mkShellApp {
           name = "json2nix";
           runtimeInputs = [ pkgs.nixpkgs-fmt ];
@@ -195,7 +192,11 @@
             sed -i -E "s/(\[|\{)/\1\n/g" $nix_path
             nixpkgs-fmt $nix_path
           '';
-          longDescription = "convert a `.json` into `.nix` at runtime";
+          longDescription = ''
+            convert a `.json` into `.nix` at runtime
+            no need to provide the full path to a file if it's in the `CWD`
+            json2nix .vscode/settings.json my-settings.nix
+          '';
         };
 
         # codium with all extensions enabled
@@ -350,7 +351,7 @@
               let INITIAL_PWD = "INITIAL_PWD";
               in
               ''
-                ${INITIAL_PWD}=$CWD
+                ${INITIAL_PWD}=$PWD
                 printf "%s" '${preMessage}'
 
               '' +
@@ -547,7 +548,7 @@
             nix fmt **/*.nix
           '';
           longDescription = ''
-            Format `.nix` files in `PWD` and its subdirectories using the formatter set in a current flake
+            Format `.nix` files in `PWD` and its subdirectories using the formatter set in the `CWD` flake
           '';
         };
 
@@ -595,7 +596,7 @@
                 '';
               in
               ''
-                ${INITIAL_PWD}=$CWD
+                ${INITIAL_PWD}=$PWD
               
               '' +
               (concatMapStringsSep "\n"
