@@ -429,8 +429,6 @@
         # can be combined with updating flake locks
         flakesDumpDevshells = dirs: runInEachDir {
           inherit dirs;
-          preMessage = framed "started dumping devshells";
-          postMessage = framed "finished dumping devshells";
           name = "flakes-dump-devshells";
           command = ''
             ${mkBin dumpDevShells}
@@ -446,8 +444,10 @@
             while read dir action file; do
               if [[ $file =~ .*nix$ ]]; then
                 set +e
+                printf "${framed "started dumping devshells"}"
                 ${mkBin (flakesUpdate dirs)}
                 ${mkBin (flakesDumpDevshells dirs)}
+                printf "${framed "finished dumping devshells"}"
                 set -e
               fi
             done
