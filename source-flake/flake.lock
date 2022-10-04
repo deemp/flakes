@@ -1628,11 +1628,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1664449566,
-        "narHash": "sha256-zBR6iyRRih+N8y67dKr3pYFX2HalPEq5CefJqquqQ1U=",
+        "lastModified": 1664845034,
+        "narHash": "sha256-ft9eMNEoHOUqDdA/uQnSie7tGNCk1KmAozH0fXt6CAg=",
         "owner": "br4ch1st0chr0n3",
         "repo": "vscodium-extensions",
-        "rev": "a809cf87340ab7af78b1dbcc3c0d41fb7964aa93",
+        "rev": "068b02bd2538fb8115db56ab1927ae1614aae8a7",
         "type": "github"
       },
       "original": {
