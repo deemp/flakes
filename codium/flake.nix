@@ -141,14 +141,19 @@
           };
 
         # ignore shellcheck when writing a shell application
-        mkShellApp = args@{ name, text, runtimeInputs ? [ ] }:
-          pkgs.writeShellApplication (args // {
-            runtimeInputs = pkgs.lib.lists.flatten (args.runtimeInputs or [ ]);
-            checkPhase = "";
-          });
+        mkShellApp = args@{ name, text, runtimeInputs ? [ ], longDescription ? "" }:
+          pkgs.lib.attrsets.recursiveUpdate
+            (pkgs.writeShellApplication ({ inherit name text; } // {
+              runtimeInputs = pkgs.lib.lists.flatten (args.runtimeInputs or [ ]);
+              checkPhase = "";
+            }))
+            { meta = { inherit longDescription; }; };
+
+        withAttrs = drv: attrSet: pkgs.lib.attrsets.recursiveUpdate drv attrSet;
+        withMeta = drv: meta: withAttrs drv { inherit meta; };
+        withLongDescription = drv: longDescription: withAttrs drv { meta = { inherit longDescription; }; };
 
         # String -> String -> Set -> IO ()
-        # make a shell app called `name` which writes `data` (a Nix expression) as json into `path`
         writeJson = name: path: dataNix:
           let
             dataJson = builtins.toJSON dataNix;
@@ -166,14 +171,16 @@
               } | python -m json.tool > ${path}
               printf "${framed "ok %s"}" "${name_}"
             '';
+            longDescription = ''write a given `Nix` expression as `JSON` into `path`'';
           };
 
         # write .vscode/settings.json
         writeSettingsJson = settings:
-          writeJson "settings" "./.vscode/settings.json" (mergeValues settings);
+          withLongDescription (writeJson "settings" "./.vscode/settings.json" (mergeValues settings)) "write `.vscode/settings.json`";
 
         # write .vscode/tasks.json
-        writeTasksJson = tasks: writeJson "tasks" "./.vscode/tasks.json" tasks;
+        writeTasksJson = tasks:
+          withLongDescription (writeJson "tasks" "./.vscode/tasks.json" tasks) "write `.vscode/tasks.json`";
 
         # convert json to nix
         # no need to provide the full path to a file if it's in the cwd
@@ -188,6 +195,7 @@
             sed -i -E "s/(\[|\{)/\1\n/g" $nix_path
             nixpkgs-fmt $nix_path
           '';
+          longDescription = "convert a `.json` into `.nix` at runtime";
         };
 
         # codium with all extensions enabled
@@ -267,6 +275,9 @@
 
               fish ${fishScriptPath}
             '';
+          longDescription = ''
+            run a `fish` [script](${fishScriptPath})
+          '';
         };
 
         # to not interfere with the GH Action's cachix
@@ -279,71 +290,101 @@
             '';
           };
 
-        # a helper function for pushing to cachix
         pushXToCachix = inp@{ name, fishScriptPath, runtimeInputs ? [ ], text ? "" }:
-          runFishScript (
-            inp // {
-              name = "push-${name}-to-cachix";
-              runtimeInputs = runtimeInputs ++ [ cachix-wrapped ];
-            }
-          );
+          withLongDescription
+            (runFishScript
+              (
+                inp // {
+                  name = "push-${name}-to-cachix";
+                  runtimeInputs = runtimeInputs ++ [ cachix-wrapped ];
+                }
+              )
+            ) ''a helper function for pushing to cachix'';
 
-        # push full closures (build and runtime dependencies) of all flake's packages to cachix
-        # expected env variables:
-        # [PATHS_FOR_PACKAGES] - (optional) temporary file where to store the build output paths
-        pushPackagesToCachix = pushXToCachix { name = "packages"; fishScriptPath = ./scripts/cache-packages.fish; };
-
-        # push full closures (build and runtime dependencies) of all flake's devshells to cachix
-        # expected env variables:
-        # CACHIX_CACHE - cachix cache name
-        # [PROFILES_FOR_DEVSHELLS] - (optional) temporary dir where to store the dev profiles
-        pushDevShellsToCachix = pushXToCachix { name = "devshells"; fishScriptPath = ./scripts/cache-devshells.fish; };
-
-        # push all flake inputs to cachi
-        # expected env variables:
-        # CACHIX_CACHE - cachix cache name
-        # [PROFILES_FOR_DEVSHELLS] - (optional) temporary dir where to store the dev profiles
-        pushInputsToCachix = pushXToCachix { name = "flake-inputs"; fishScriptPath = ./scripts/cache-inputs.fish; };
-
-        # Push inputs and outputs (packages and devShells) of a flake to cachix
-        pushAllToCachix = mkShellApp {
-          name = "push-all-to-cachix";
-          text = ''
-            ${mkBin pushInputsToCachix}
-            ${mkBin pushDevShellsToCachix}
-            ${mkBin pushPackagesToCachix}
+        pushPackagesToCachix = withLongDescription
+          (pushXToCachix { name = "packages"; fishScriptPath = ./scripts/cache-packages.fish; })
+          ''
+            push full closures (build and runtime dependencies) of all flake's packages to `cachix`
+            expected env variables:
+            `[PATHS_FOR_PACKAGES]` - (optional) temporary file where to store the build output paths
           '';
-        };
 
-        # run a command in each given dir relative to pwd
-        runInEachDir = args@{ dirs, command, name, preMessage ? "", postMessage ? "", runtimeInputs ? [ ] }: mkShellApp {
-          name = "${name}-in-each-dir";
-          inherit runtimeInputs;
-          text =
-            let INITIAL_PWD = "INITIAL_PWD";
-            in
+        pushDevShellsToCachix =
+          withLongDescription
+            (pushXToCachix { name = "devshells"; fishScriptPath = ./scripts/cache-devshells.fish; })
             ''
-              ${INITIAL_PWD}=$PWD
-              printf "%s" '${preMessage}'
+              push full closures (build and runtime dependencies) of all flake's devshells to `cachix`
+              expected env variables:
+              `CACHIX_CACHE` - cachix cache name
+              `[PROFILES_FOR_DEVSHELLS]` - (optional) temporary dir where to store the dev profiles
+            ''
+        ;
 
-            '' +
-            builtins.concatStringsSep "\n"
-              (builtins.map
-                (dir: ''
-                  printf "${framed "${name} : %s/flake.nix"}" "${"$" + INITIAL_PWD}/${dir}"
+        pushInputsToCachix = withLongDescription
+          (pushXToCachix { name = "flake-inputs"; fishScriptPath = ./scripts/cache-inputs.fish; })
+          ''
+            push all flake inputs to `cachix`
+            expected env variables:
+            `CACHIX_CACHE` - cachix cache name
+          ''
+        ;
 
-                  cd ${"$" + INITIAL_PWD}/${dir}
+        pushAllToCachix =
+          (mkShellApp {
+            name = "push-all-to-cachix";
+            text = ''
+              ${mkBin pushInputsToCachix}
+              ${mkBin pushDevShellsToCachix}
+              ${mkBin pushPackagesToCachix}
+            '';
+            longDescription = ''
+              Push inputs and outputs (packages and devShells) of a flake to `cachix`
+            '';
+          });
+
+        runInEachDir = args@{ dirs, command, name, preMessage ? "", postMessage ? "", runtimeInputs ? [ ], longDescription ? "" }:
+          (mkShellApp {
+            name = "${name}-in-each-dir";
+            inherit runtimeInputs;
+            text =
+              let INITIAL_PWD = "INITIAL_PWD";
+              in
+              ''
+                ${INITIAL_PWD}=$CWD
+                printf "%s" '${preMessage}'
+
+              '' +
+              builtins.concatStringsSep "\n"
+                (builtins.map
+                  (dir: ''
+                    printf "${framed "${name} : %s/flake.nix"}" "${"$" + INITIAL_PWD}/${dir}"
+
+                    cd ${"$" + INITIAL_PWD}/${dir}
             
-                  ${command}
+                    ${command}
 
-                '')
-                dirs) +
-            ''
+                  '')
+                  dirs) +
+              ''
 
               printf "%s" '${postMessage}'
-            ''
-          ;
-        };
+            '';
+            longDescription = ''
+              ${longDescription}
+
+              Run the command
+            
+                ```sh
+                ${command}
+                ```
+            
+              relative to `CWD` in directories:
+
+                ```sh
+                ${printStringsLn "\n" dirs}
+                ```
+            '';
+          });
 
         # make shell apps
         # arg should be a set of sets of inputs
@@ -351,32 +392,57 @@
 
         # create devshells
         # notice the dependency on fish
-        mkDevShells = shells@{ ... }: { fish }:
+        mkDevShellsWithFish = shells@{ ... }: { fish }:
           builtins.mapAttrs
             (shellName: shellAttrs:
-              pkgs.mkShell (shellAttrs // {
-                inherit shellName;
-                buildInputs = (shellAttrs.buildInputs or [ ]) ++ [ fish ];
-                # We need to exit the shell in which fish runs
-                # Otherwise, after a user exits fish, she will return to a default shell
-                shellHook = ''
-                  ${fishHook {
-                    inherit shellName fish;
-                    hook = shellAttrs.shellHook or "";
-                  }}
-                  exit
-                '';
-              }))
+              let buildInputs = pkgs.lib.lists.flatten ((shellAttrs.buildInputs or [ ]));
+                inherit (pkgs.lib.strings) concatStringsSep concatMapStringsSep;
+              in
+              withLongDescription
+                (pkgs.mkShell (shellAttrs // {
+                  inherit shellName;
+                  buildInputs = buildInputs ++ [ fish ];
+                  # We need to exit the shell in which fish runs
+                  # Otherwise, after a user exits fish, she will return to a default shell
+                  shellHook = ''
+                    ${fishHook {
+                      inherit shellName fish;
+                      hook = shellAttrs.shellHook or "";
+                    }}
+                    exit
+                  '';
+                }))
+                ''
+                  A devshell `${shellName}` with `fish`
+
+                  The entries from `/bin`-s of other `buildInputs` are:
+                  ${
+                    concatMapStringsSep "\n"
+                      (x: "- " + 
+                        (concatMapStringsSep ", " (s: "`${s}`") (
+                          builtins.attrNames  (
+                            pkgs.lib.attrsets.filterAttrs
+                              (name: value: value == "regular")
+                              (builtins.readDir "${x}/bin")
+                          )
+                        )
+                      ))
+                    buildInputs
+                  }
+                ''
+            )
             shells;
 
         # make shells
-        # The default shell will have the ${name} command available
+        # The default devshell should be the system's shell
+        # If start another shell in a shell hook, direnv will loop infinitely
+        # FIXME somehow
         # This command will run a shell app constructed from ${runtimeInputs} and ${text} and start a fish shell
         mkDevShellsWithDefault =
           defaultShellAttrs@{ buildInputs ? [ ], shellHook ? "", ... }:
           shells@{ ... }:
           let
-            shells_ = mkDevShells shells { inherit (pkgs) fish; };
+            shells_ = mkDevShellsWithFish shells { inherit (pkgs) fish; };
             default = pkgs.mkShell (defaultShellAttrs // {
               name = "default";
               buildInputs = buildInputs;
@@ -388,24 +454,27 @@
           in
           devShells_;
 
-        # update flakes in specified directories relative to PWD
-        flakesUpdate = dirs: runInEachDir {
-          inherit dirs;
-          name = "flakes-update";
-          command = "nix flake update";
-        };
+        flakesUpdate = dirs:
+          runInEachDir
+            {
+              inherit dirs;
+              name = "flakes-update";
+              command = "nix flake update";
+              longDescription = ''Update `flake.lock`-s'';
+            };
 
         # assuming that a `name` of a program coincides with its main executable's name
         mkBin = drv@{ name, ... }: "${drv}/bin/${name}";
 
-        # push to cachix all about flakes in specified directories relative to PWD
+        # push to cachix all about flakes in specified directories relative to CWD
         flakesPushToCachix = dirs: runInEachDir {
           inherit dirs;
           name = "flakes-push-to-cachix";
           command = "${mkBin pushAllToCachix}";
+          longDescription = ''Push flakes' inputs and outputs to `cachix`'';
         };
 
-        # update and push flakes to cachix in specified directories relative to PWD
+        # update and push flakes to cachix in specified directories relative to CWD
         flakesUpdateAndPushToCachix = dirs:
           let
             flakesUpdate_ = flakesUpdate dirs;
@@ -416,6 +485,15 @@
             text = ''
               ${mkBin flakesUpdate_}
               ${mkBin flakesPushToCachix_}
+            '';
+            longDescription = ''
+              Update and push flakes to cachix in specified directories relative to `CWD`.
+              The directories are:
+              
+                ```
+                ${printStringsLn dirs}
+                ```
+
             '';
           };
 
@@ -433,6 +511,7 @@
           command = ''
             ${mkBin dumpDevShells}
           '';
+          longDescription = ''Evaluate devshells to dump them'';
         };
 
         # watch nix files existing at the moment
@@ -453,12 +532,22 @@
             done
           '';
           runtimeInputs = [ pkgs.inotify-tools ];
+          longDescription = ''
+            Start a watcher that will update locks and dump (evaluate) devshells in the following directories relative to `CWD`:
+
+                ```sh
+                ${printStringsLn dirs}
+                ```
+          '';
         };
-        # format all .nix files with the formatter specified in the flake in the PWD
+        # format all .nix files with the formatter specified in the flake in the CWD
         flakesFormat = mkShellApp {
           name = "flakes-format";
           text = ''
             nix fmt **/*.nix
+          '';
+          longDescription = ''
+            Format `.nix` files in `PWD` and its subdirectories using the formatter set in a current flake
           '';
         };
 
@@ -472,66 +561,91 @@
           flakesFormat = flakesFormat;
         };
 
-        # if a flake inputs have a .url = path:something and a commented (!) .url = github:something
-        # after toggling, .url = github:something will be uncommented
-        # while .url = path:something will be commented
-        # flake inputs will be updated
-        flakesToggleRelativePaths = toggleConfig: flakesUpdate_: mkShellApp {
-          name = "flakes-toggle-relative-paths";
-          runtimeInputs = [ pkgs.gawk ];
-          text =
-            let
-              INITIAL_PWD = "INITIAL_PWD";
-              flakeNix = "flake.nix";
-              toggler = dir: name: ''
-                cd ${"$" + INITIAL_PWD}/${dir}
+        flakesToggleRelativePaths = toggleConfig: flakesUpdate_: mkShellApp (
+          let
+            flakeNix = "flake.nix";
+            inherit (pkgs.lib.strings) concatMapStringsSep concatStrings concatStringsSep;
+            inherit (pkgs.lib.attrsets) mapAttrsToList;
+          in
+          {
+            name = "flakes-toggle-relative-paths";
+            runtimeInputs = [ pkgs.gawk ];
+            text =
+              let
+                INITIAL_PWD = "INITIAL_PWD";
+                toggler = dir: name: ''
+                  cd ${"$" + INITIAL_PWD}/${dir}
 
-                printf "\n[ toggle-relative-path in %s ]\n" "${"$" + INITIAL_PWD}/${dir}"
+                  printf "\n[ toggle-relative-path in %s ]\n" "${"$" + INITIAL_PWD}/${dir}"
                 
-                cat ${flakeNix} | \
-                  awk '
-                  {
-                    if ($1 == "#" && $2 == "${name}.url") {
-                      $1=""; print "  ", $0; {next}
+                  cat ${flakeNix} | \
+                    awk '
+                    {
+                      if ($1 == "#" && $2 == "${name}.url") {
+                        $1=""; print "  ", $0; {next}
+                      }
                     }
-                  }
-                  {
-                    if ($1 == "${name}.url") {
-                      print "    #", $1, $2, $3; {next}
-                    }
-                  } 
-                  {print}' > ${flakeNix}.toggled &&
-                  mv ${flakeNix}.toggled ${flakeNix}
-              '';
-              inherit (pkgs.lib.strings) concatMapStringsSep concatStrings;
-              inherit (pkgs.lib.attrsets) mapAttrsToList;
-            in
-            ''
-              ${INITIAL_PWD}=$PWD
+                    {
+                      if ($1 == "${name}.url") {
+                        print "    #", $1, $2, $3; {next}
+                      }
+                    } 
+                    {print}' > ${flakeNix}.toggled &&
+                    mv ${flakeNix}.toggled ${flakeNix}
+                '';
+              in
+              ''
+                ${INITIAL_PWD}=$CWD
               
-            '' +
-            (concatMapStringsSep "\n"
-              (
-                configEntry: concatStrings
-                  (
-                    mapAttrsToList
-                      (
-                        dir: entries: concatMapStringsSep "\n" (entry: toggler dir entry) entries
-                      )
-                      configEntry
-                  )
+              '' +
+              (concatMapStringsSep "\n"
+                (
+                  configEntry: concatStrings
+                    (
+                      mapAttrsToList
+                        (
+                          dir: entries: concatMapStringsSep "\n" (entry: toggler dir entry) entries
+                        )
+                        configEntry
+                    )
+                )
+                toggleConfig
               )
-              toggleConfig
-            )
-            +
-            ''
-              cd ${"$" + INITIAL_PWD}
+              +
+              ''
+                cd ${"$" + INITIAL_PWD}
 
-              ${mkBin flakesUpdate_}
-            ''
-          ;
-        };
+                ${mkBin flakesUpdate_}
+              ''
+            ;
+            longDescription = ''
+              Traverse the flakes in given directories relative to `CWD` and toggle comments at the set entries, 
+              switching relative paths to the absolute ones. Next, update the `flake.lock`-s.
+            
+              The set entries are:
+            
+                ```sh
+                  ${
+                  concatMapStringsSep "\n"
+                  (
+                    configEntry: concatStrings
+                      (
+                        mapAttrsToList
+                          (
+                            dir: entries: "at ${dir}/${flakeNix} : ${concatStringsSep ", " entries}"
+                          )
+                          configEntry
+                      )
+                  )
+                  toggleConfig
+                }
+                ```
+            '';
+          }
+        );
 
+        # print strings separated by a newline character
+        printStringsLn = dirs: pkgs.lib.strings.concatStringsSep "\n" dirs;
         # Stuff for tests
 
         tools902 = builtins.attrValues { inherit (toolsGHC "902") hls stack; };
@@ -551,6 +665,7 @@
           tools902
           codium
           cachix-wrapped
+          writeSettings
         ];
 
         devShells = mkDevShellsWithDefault
@@ -567,6 +682,7 @@
           default = codium;
           inherit json2nix;
           inherit pushDevShellsToCachix;
+          inherit writeSettings;
         };
 
       in
@@ -588,6 +704,9 @@
             cachix-wrapped
 
             # functions
+            withAttrs
+            withMeta
+            withLongDescription
             dumpDevShells
             flakesDumpDevshells
             flakesFormat
@@ -600,7 +719,7 @@
             mergeValues
             mkBin
             mkCodium
-            mkDevShells
+            mkDevShellsWithFish
             mkDevShellsWithDefault
             mkFlakesUtils
             mkShellApp

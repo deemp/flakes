@@ -60,7 +60,7 @@
             ];
           }
           {
-            enter = { };
+            enter = { buildInputs = [ pkgs.gawk ]; };
           };
         packages = {
           pushToCachix = flakesUtils.flakesPushToCachix;
@@ -83,8 +83,8 @@
       hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
       br4ch1st0chr0n3.cachix.org-1:o1FA93L5vL4LWi+jk2ECFk1L1rDlMoTH21R1FHtSKaU=
     ];
-  #   warn-dirty = false;
-  #   show-trace = true;
-  #   max-job = true;
+    #   warn-dirty = false;
+    #   show-trace = true;
+    #   max-job = true;
   };
 }
