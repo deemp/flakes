@@ -1,19 +1,20 @@
 {
   inputs = {
-    # my-inputs.url = path:./inputs;
-    my-inputs.url = github:br4ch1st0chr0n3/flakes?dir=inputs;
-    flake-utils.follows = "my-inputs/flake-utils";
-    nixpkgs.follows = "my-inputs/nixpkgs";
-    # my-codium.url = path:./codium;
+    nixpkgs_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs;
+    flake-utils_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils;    
+    nixpkgs.follows = "nixpkgs_/nixpkgs";
+    flake-utils.follows = "flake-utils_/flake-utils";
+    
+    my-formatter.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/formatter;
     my-codium.url = github:br4ch1st0chr0n3/flakes?dir=codium;
-
+    # my-codium.url = path:./codium;
   };
   outputs =
     { self
-    , my-inputs
+    , nixpkgs
     , flake-utils
     , my-codium
-    , nixpkgs
+    , my-formatter
     }: flake-utils.lib.eachDefaultSystem
       (system:
       let
@@ -68,7 +69,7 @@
           format = flakesUtils.flakesFormat;
           default = codium;
         };
-      }) // { inherit (my-inputs) formatter; };
+      }) // { inherit (my-formatter) formatter; };
 
   nixConfig = {
     extra-trusted-substituters = [
@@ -83,8 +84,5 @@
       hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
       br4ch1st0chr0n3.cachix.org-1:o1FA93L5vL4LWi+jk2ECFk1L1rDlMoTH21R1FHtSKaU=
     ];
-    #   warn-dirty = false;
-    #   show-trace = true;
-    #   max-job = true;
   };
 }

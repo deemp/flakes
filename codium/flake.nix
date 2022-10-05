@@ -1,18 +1,25 @@
 {
   inputs = {
-    source-flake.url = github:br4ch1st0chr0n3/flakes?dir=source-flake;
-    nixpkgs.follows = "source-flake/nixpkgs";
-    flake-utils.follows = "source-flake/flake-utils";
-    gitignore.follows = "source-flake/gitignore";
-    easy-purescript-nix.follows = "source-flake/easy-purescript-nix";
-    haskell-language-server.follows = "source-flake/haskell-language-server";
-    nix-vscode-marketplace.follows = "source-flake/nix-vscode-marketplace";
-    vscodium-extensions.follows = "source-flake/vscodium-extensions";
-    cachix.url = "github:cachix/cachix/4c9397689598a3f2ea6123ddc556a105fe7b4c9c";
+    nixpkgs_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs;
+    flake-utils_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils;
+    gitignore_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/gitignore;
+    easy-purescript-nix_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/easy-purescript-nix;
+    haskell-language-server_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/haskell-language-server;
+    nix-vscode-marketplace_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/nix-vscode-marketplace;
+    vscodium-extensions_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/vscodium-extensions;
+    cachix_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/cachix;
+
+    nixpkgs.follows = "nixpkgs_/nixpkgs";
+    flake-utils.follows = "flake-utils_/flake-utils";
+    gitignore.follows = "gitignore_/gitignore";
+    easy-purescript-nix.follows = "easy-purescript-nix_/easy-purescript-nix";
+    haskell-language-server.follows = "haskell-language-server_/haskell-language-server";
+    nix-vscode-marketplace.follows = "nix-vscode-marketplace_/nix-vscode-marketplace";
+    vscodium-extensions.follows = "vscodium-extensions_/vscodium-extensions";
+    cachix.follows = "cachix_/cachix";
   };
   outputs =
     { self
-    , source-flake
     , flake-utils
     , nixpkgs
     , nix-vscode-marketplace
@@ -21,6 +28,7 @@
     , gitignore
     , haskell-language-server
     , cachix
+    , ...
     }:
     flake-utils.lib.eachDefaultSystem
       (system:
@@ -739,7 +747,7 @@
         };
         inherit devShells;
         inherit packages;
-      }) // { inherit (source-flake) formatter; };
+      });
 
   nixConfig = {
     extra-substituters = [
