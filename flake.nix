@@ -22,11 +22,12 @@
     }: flake-utils.lib.eachDefaultSystem
       (system:
       let
-        inherit (my-codium.toolSets.${system})
+        inherit (my-codium.configs.${system})
           extensions;
+        inherit (my-codium.functions.${system})
+          mkCodium;
         inherit (drv-tools.functions.${system})
           toList
-          mkCodium
           mkDevShellsWithDefault
           mkShellApp;
         inherit (flake-tools.functions.${system})
@@ -64,6 +65,7 @@
             buildInputs = [
               (builtins.attrValues flakesUtils)
               toggleRelativePaths_
+              codium
             ];
           }
           {
