@@ -6,6 +6,6 @@
     flake-utils.follows = "flake-utils_/flake-utils";
   };
   outputs = { nixpkgs, flake-utils, self, ... }: flake-utils.lib.eachDefaultSystem (system: {
-    formatter.system = nixpkgs.legacyPackages.${system}.nixpkgs-fmt;
+    formatter = nixpkgs.legacyPackages.${system}.nixpkgs-fmt;
   });
 }
