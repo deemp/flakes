@@ -1,5 +1,5 @@
 # A set of VSCodium extensions
-{ system, nix-vscode-marketplace, vscodium-extensions, }:
+{ system, nix-vscode-marketplace, vscodium-extensions}:
 let
   inherit (nix-vscode-marketplace.packages.${system}) vscode open-vsx;
   my-extensions = vscodium-extensions.packages.${system}.vscode;
