@@ -87,7 +87,7 @@
         # stuff for testing
 
         # codium with all extensions enabled
-        codium = [ (mkCodium { inherit extensions; }) ];
+        codium = mkCodium { inherit extensions; };
 
         writeSettings = writeSettingsJson settingsNix;
 
@@ -103,6 +103,10 @@
         };
         configs = {
           inherit extensions settingsNix;
+        };
+        # tests
+        packages = {
+          test.codium = codium;
         };
         devShells = mkDevShellsWithDefault
           {

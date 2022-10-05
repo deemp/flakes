@@ -31,7 +31,7 @@ in
   markdown = {
     inherit (my-extensions.bierner)
       github-markdown-preview markdown-emoji markdown-checkbox
-      markdown-yaml-preamble markdown-footnotes;
+      markdown-yaml-preamble markdown-footnotes markdown-preview-github-styles;
     inherit (open-vsx.davidanson) vscode-markdownlint;
     inherit (open-vsx.yzhang) markdown-all-in-one;
   };
