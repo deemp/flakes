@@ -1,11 +1,12 @@
 {
   inputs = {
     nixpkgs_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs;
-    flake-utils_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils;    
+    flake-utils_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils;
+    flake-tools.url = github:br4ch1st0chr0n3/flakes?dir=flake-tools;
+    drv-tools.url = github:br4ch1st0chr0n3/flakes?dir=drv-tools;
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils.follows = "flake-utils_/flake-utils";
-    
-    my-formatter.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/formatter;
+    formatter.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/formatter;
     my-codium.url = github:br4ch1st0chr0n3/flakes?dir=codium;
     # my-codium.url = path:./codium;
   };
@@ -13,20 +14,24 @@
     { self
     , nixpkgs
     , flake-utils
+    , flake-tools
+    , drv-tools
     , my-codium
-    , my-formatter
+    , formatter
+    , ...
     }: flake-utils.lib.eachDefaultSystem
       (system:
       let
-        inherit (my-codium.tools.${system})
-          extensions
+        inherit (my-codium.toolSets.${system})
+          extensions;
+        inherit (drv-tools.functions.${system})
           toList
-          shellTools
           mkCodium
           mkDevShellsWithDefault
-          mkFlakesUtils
-          mkShellApp
+          mkShellApp;
+        inherit (flake-tools.functions.${system})
           flakesToggleRelativePaths
+          mkFlakesUtils
           ;
         pkgs = nixpkgs.legacyPackages.${system};
 
@@ -44,7 +49,8 @@
         codium = mkCodium {
           extensions = { inherit (extensions) nix misc github fish; };
           runtimeDependencies = [
-            (toList { inherit (shellTools) nix docker; })
+            pkgs.docker
+            pkgs.rnix-lsp
             toggleRelativePaths_
             (builtins.attrValues flakesUtils)
             pkgs.inotify-tools
@@ -69,7 +75,8 @@
           format = flakesUtils.flakesFormat;
           default = codium;
         };
-      }) // { inherit (my-formatter) formatter; };
+        inherit (formatter) formatter;
+      });
 
   nixConfig = {
     extra-trusted-substituters = [
