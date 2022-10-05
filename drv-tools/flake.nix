@@ -5,7 +5,7 @@
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils.follows = "flake-utils_/flake-utils";
   };
-  
+
   outputs = { self, nixpkgs, flake-utils, ... }: flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
@@ -70,7 +70,7 @@
             withLongDescription
               (pkgs.mkShell (shellAttrs // {
                 inherit shellName;
-                buildInputs = buildInputs ++ [ fish ];
+                buildInputs = buildInputs ++ [ fish desc ];
                 # We need to exit the shell in which fish runs
                 # Otherwise, after a user exits fish, she will return to a default shell
                 shellHook = ''
@@ -114,7 +114,7 @@
           shells_ = mkDevShellsWithFish shells { inherit (pkgs) fish; };
           default = pkgs.mkShell (defaultShellAttrs // {
             name = "default";
-            buildInputs = buildInputs;
+            buildInputs = buildInputs ++ [ desc ];
             shellHook = ''
               ${shellHook}
             '';
@@ -123,6 +123,13 @@
         in
         devShells_;
 
+      readXs = dir: type: builtins.attrNames (
+        pkgs.lib.attrsets.filterAttrs (name_: type_: type_ == type) (builtins.readDir dir)
+      );
+
+      readFiles = dir: readXs dir "regular";
+      readDirectories = dir: readXs dir "directory";
+      readSymlinks = dir: readXs dir "symlink";
 
       # assuming that a `name` of a program coincides with its main executable's name
       mkBin = drv@{ name, ... }: "${drv}/bin/${name}";
@@ -231,11 +238,27 @@
           framed
           framedBrackets
           printStringsLn
+          readXs
+          readFiles
+          readDirectories
+          readSymlinks
           mkShellApp
           withAttrs
           withMeta
           withLongDescription
           writeJson;
+      };
+
+      # tests 
+      devShells = mkDevShellsWithDefault
+        {
+          buildInputs = [ pkgs.tree ];
+        }
+        {
+          fish = { };
+        };
+      tests = {
+        t = readFiles ./.;
       };
     });
 }
