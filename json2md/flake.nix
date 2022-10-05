@@ -1,16 +1,18 @@
 {
   inputs = {
-    source-flake.url = github:br4ch1st0chr0n3/flakes?dir=source-flake;
-    flake-utils.follows = "source-flake/flake-utils";
-    gitignore.follows = "source-flake/gitignore";
-    dream2nix.follows = "source-flake/dream2nix";
+    flake-utils_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils;
+    gitignore_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/gitignore;
+    dream2nix_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/dream2nix;
+    flake-utils.follows = "flake-utils_/flake-utils";
+    gitignore.follows = "gitignore_/gitignore";
+    dream2nix.follows = "dream2nix_/dream2nix";
   };
   outputs =
     { self
-    , source-flake
     , flake-utils
     , gitignore
     , dream2nix
+    , ...
     }:
     (
       dream2nix.lib.makeFlakeOutputs
@@ -24,6 +26,6 @@
             }
           ];
         }
-    ) // { inherit (source-flake) formatter; }
+    )
   ;
 }
