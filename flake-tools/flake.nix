@@ -22,6 +22,7 @@
         mkBin
         framedBrackets
         printStringsLn
+        mkDevShellsWithDefault
         ;
       pushXToCachix = inp@{ name, fishScriptPath, runtimeInputs ? [ ], text ? "" }:
         withLongDescription
@@ -98,7 +99,7 @@
                   ${command}
 
                 '')
-                dirs) +
+                (pkgs.lib.lists.flatten dirs)) +
             ''
 
               printf "%s" '${postMessage}'
@@ -325,5 +326,12 @@
           mkFlakesUtils
           flakesToggleRelativePaths;
       };
+
+
+      devShells = mkDevShellsWithDefault
+        {
+          buildInputs = [ (builtins.attrValues (mkFlakesUtils [ "." ])) ];
+        }
+        { };
     });
 }
