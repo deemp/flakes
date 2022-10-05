@@ -21,11 +21,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1664917308,
-        "narHash": "sha256-oRkiiksyyeWdG+1FKVsnF/6H2lSw+xnnqb9puARsNxw=",
+        "lastModified": 1664965364,
+        "narHash": "sha256-E2QeFwAG02lBFdHXVMsLAm1KNHvnGAHvwkD3LJUYGME=",
         "owner": "br4ch1st0chr0n3",
         "repo": "vscodium-extensions",
-        "rev": "f9662f1ecc8d24b9a745770b88f5d7a9786c4d75",
+        "rev": "f3edc1caa9d6416544188430111c4499c6c533c4",
         "type": "github"
       },
       "original": {
@@ -41,11 +41,11 @@
       },
       "locked": {
         "dir": "source-flake/nixpkgs",
-        "lastModified": 1664928730,
-        "narHash": "sha256-/pwGhDoXUbbsHUvLw78h8xh/8Kw5S6eyyvJMMkcPBA0=",
+        "lastModified": 1664934441,
+        "narHash": "sha256-5w8+oPG2Cmi/ev26UiW6l9Fl9/l1ec/rYI+mzDUa8SA=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "53f0d2aa4858a733a78ad9d71b2ad206940a4598",
+        "rev": "34fde72da437ad3449665d8b4c014b65d76d4970",
         "type": "github"
       },
       "original": {
