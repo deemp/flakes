@@ -101,6 +101,7 @@
       },
       "original": {
         "owner": "br4ch1st0chr0n3",
+        "ref": "master",
         "repo": "vscodium-extensions",
         "type": "github"
       }

@@ -29,6 +29,7 @@
         inherit (drv-tools.functions.${system})
           toList
           mkDevShellsWithDefault
+          readDirectories
           mkShellApp;
         inherit (flake-tools.functions.${system})
           flakesToggleRelativePaths
@@ -36,7 +37,14 @@
           ;
         pkgs = nixpkgs.legacyPackages.${system};
 
-        flakesUtils = (mkFlakesUtils [ "source-flake" "codium" "env2json" "json2md" "inputs" "." ]);
+        flakesUtils = (mkFlakesUtils (
+          let f = dir: (builtins.map (x: "${dir}/${x}") (readDirectories ./${dir})); in
+          [
+            (f "source-flake")
+            (f "language-tools")
+            [ "drv-tools" "flake-tools" "env2json" "codium" "json2md" "." ]
+          ]
+        ));
 
         toggleRelativePaths_ =
           let
