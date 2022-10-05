@@ -2,20 +2,20 @@
   inputs = {
     nixpkgs_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs;
     flake-utils_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils;
-    drv-tools_.url = github:br4ch1st0chr0n3/flakes?dir=drv-tools;
+    drv-tools.url = github:br4ch1st0chr0n3/flakes?dir=drv-tools;
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils.follows = "flake-utils_/flake-utils";
   };
   outputs =
     { self
     , nixpkgs
-    , drv-tools_
+    , drv-tools
     , flake-utils
     , ...
     }: flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-      inherit (drv-tools_.functions.${system})
+      inherit (drv-tools.functions.${system})
         withLongDescription
         runFishScript
         mkShellApp
@@ -23,7 +23,6 @@
         framedBrackets
         printStringsLn
         ;
-      inherit (drv-tools.${system});
       pushXToCachix = inp@{ name, fishScriptPath, runtimeInputs ? [ ], text ? "" }:
         withLongDescription
           (runFishScript

@@ -1,15 +1,15 @@
 {
   "nodes": {
-    "drv-tools_": {
+    "drv-tools": {
       "inputs": {
         "flake-utils": [
-          "drv-tools_",
+          "drv-tools",
           "flake-utils_",
           "flake-utils"
         ],
         "flake-utils_": "flake-utils_",
         "nixpkgs": [
-          "drv-tools_",
+          "drv-tools",
           "nixpkgs_",
           "nixpkgs"
         ],
@@ -17,11 +17,11 @@
       },
       "locked": {
         "dir": "drv-tools",
-        "lastModified": 1664981111,
-        "narHash": "sha256-qyXVhllD97sxiRj4+g8PpZInw8Yfip1fEVPE8uZ+8eM=",
+        "lastModified": 1664982422,
+        "narHash": "sha256-1wBr4ciYr+VDWR9MDHO23/1Bb9XrLqIY9sBeO5DtkGw=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "f86ecc9d6ad1645fa457b728501360e8df8b03fe",
+        "rev": "4403c1775dbddbb0c53424041d3f21f5f97c1b32",
         "type": "github"
       },
       "original": {
@@ -87,11 +87,11 @@
       },
       "locked": {
         "dir": "source-flake/flake-utils",
-        "lastModified": 1664981111,
-        "narHash": "sha256-qyXVhllD97sxiRj4+g8PpZInw8Yfip1fEVPE8uZ+8eM=",
+        "lastModified": 1664982422,
+        "narHash": "sha256-1wBr4ciYr+VDWR9MDHO23/1Bb9XrLqIY9sBeO5DtkGw=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "f86ecc9d6ad1645fa457b728501360e8df8b03fe",
+        "rev": "4403c1775dbddbb0c53424041d3f21f5f97c1b32",
         "type": "github"
       },
       "original": {
@@ -159,11 +159,11 @@
       },
       "locked": {
         "dir": "source-flake/nixpkgs",
-        "lastModified": 1664981111,
-        "narHash": "sha256-qyXVhllD97sxiRj4+g8PpZInw8Yfip1fEVPE8uZ+8eM=",
+        "lastModified": 1664982422,
+        "narHash": "sha256-1wBr4ciYr+VDWR9MDHO23/1Bb9XrLqIY9sBeO5DtkGw=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "f86ecc9d6ad1645fa457b728501360e8df8b03fe",
+        "rev": "4403c1775dbddbb0c53424041d3f21f5f97c1b32",
         "type": "github"
       },
       "original": {
@@ -175,7 +175,7 @@
     },
     "root": {
       "inputs": {
-        "drv-tools_": "drv-tools_",
+        "drv-tools": "drv-tools",
         "flake-utils": [
           "flake-utils_",
           "flake-utils"
