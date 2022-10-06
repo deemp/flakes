@@ -148,12 +148,13 @@
 
       # ignore shellcheck when writing a shell application
       mkShellApp = args@{ name, text, runtimeInputs ? [ ], longDescription ? "", description ? "" }:
-        pkgs.lib.attrsets.recursiveUpdate
-          (pkgs.writeShellApplication ({ inherit name text; } // {
-            runtimeInputs = pkgs.lib.lists.flatten (args.runtimeInputs or [ ]);
-            checkPhase = "";
-          }))
-          { meta = { inherit longDescription description; }; };
+        (pkgs.lib.meta.addMetaAttrs
+          { inherit longDescription description; }
+          (
+            pkgs.writeShellApplication ({ inherit name text; } // {
+              runtimeInputs = pkgs.lib.lists.flatten (args.runtimeInputs or [ ]);
+              checkPhase = "";
+            })));
 
       withAttrs = drv: attrSet: pkgs.lib.attrsets.recursiveUpdate drv attrSet;
       withMeta = drv: meta: withAttrs drv { inherit meta; };
@@ -203,19 +204,31 @@
         '';
       };
 
-      desc = mkShellApp {
-        name = "desc";
-        text = ''
-          description=$(nix eval --raw "$1.meta.longDescription")
+      # TODO override mkShellApp to install the longDescription into a $out/share directory
+      # and read the description from there
+      desc = mkShellApp (
+        let command = ''nix eval --raw "$1.meta.longDescription"''; in
+        {
+          name = "desc";
+          text =
+            ''
+              description=$(${command})
 
-          printf "\n\n$description\n\n" | glow -
-        '';
-        runtimeInputs = [ pkgs.glow ];
-        longDescription = ''
-          Show the description of a derivation (`meta.longDescription` or `meta.description`) as [glow](https://github.com/charmbracelet/glow) - rendered Markdown.
+              printf "\n\n$description\n\n" | glow -
+            '';
+          runtimeInputs = [ pkgs.glow ];
+          longDescription = ''
+            Show the description of a derivation (`meta.longDescription` or `meta.description`) as [glow](https://github.com/charmbracelet/glow) - rendered Markdown.
 
-          Runs `nix eval --raw "$1.meta.longDescription"` with your argument as `$1`
-        '';
+            Runs `${command}` with your argument as `$1`
+          '';
+        }
+      );
+
+      drv = pkgs.stdenv.mkDerivation {
+        name = "hello";
+        phases = [ "installPhase" ];
+        installPhase = "echo '$Hello World!' > $out";
       };
     in
     {
@@ -252,7 +265,7 @@
       # tests 
       devShells = mkDevShellsWithDefault
         {
-          buildInputs = [ pkgs.tree ];
+          buildInputs = [ pkgs.tree json2nix desc ];
         }
         {
           fish = { };
