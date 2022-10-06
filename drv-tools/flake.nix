@@ -123,6 +123,7 @@
         in
         devShells_;
 
+      # read something in a directory using the builtin function
       readXs = dir: type: builtins.attrNames (
         pkgs.lib.attrsets.filterAttrs (name_: type_: type_ == type) (builtins.readDir dir)
       );
@@ -218,48 +219,48 @@
             '';
           runtimeInputs = [ pkgs.glow ];
           longDescription = ''
-            Show the description of a derivation (`meta.longDescription` or `meta.description`) as [glow](https://github.com/charmbracelet/glow) - rendered Markdown.
+            Show the description of a derivation (`meta.longDescription` or `meta.description`) as 
+            [glow](https://github.com/charmbracelet/glow) - rendered Markdown.
 
             Runs `${command}` with your argument as `$1`
           '';
         }
       );
 
-      drv = pkgs.stdenv.mkDerivation {
-        name = "hello";
-        phases = [ "installPhase" ];
-        installPhase = "echo '$Hello World!' > $out";
-      };
+      applyN = op: cnt: res: (if cnt > 0 then applyN op (cnt - 1) (op res) else res);
     in
     {
       packages = {
         inherit
+          desc
           json2nix
-          desc;
+          ;
       };
       functions = {
         inherit
-          mergeValues
-          toList
-          mkShellApps
+          applyN
           fishHook
-          runFishScript
-          mkDevShellsWithFish
-          mkDevShellsWithDefault
-          mkBin
-          mkBinName
           framed
           framedBrackets
-          printStringsLn
-          readXs
-          readFiles
-          readDirectories
-          readSymlinks
+          mergeValues
+          mkBin
+          mkBinName
+          mkDevShellsWithDefault
+          mkDevShellsWithFish
           mkShellApp
+          mkShellApps
+          printStringsLn
+          readDirectories
+          readFiles
+          readSymlinks
+          readXs
+          runFishScript
+          toList
           withAttrs
-          withMeta
           withLongDescription
-          writeJson;
+          withMeta
+          writeJson
+          ;
       };
 
       # tests 
