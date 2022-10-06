@@ -227,7 +227,9 @@
         }
       );
 
-      applyN = op: cnt: res: (if cnt > 0 then applyN op (cnt - 1) (op res) else res);
+      # apply an `op` `cnt` times to the initial value `ini` to get `res`
+      # initially, `res` = `ini`
+      applyN = cnt: op: res: (if cnt > 0 then applyN (cnt - 1) op (op res) else res);
     in
     {
       packages = {
