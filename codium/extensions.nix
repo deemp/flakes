@@ -1,5 +1,5 @@
 # A set of VSCodium extensions
-{ system, nix-vscode-marketplace, vscodium-extensions}:
+{ system, nix-vscode-marketplace, vscodium-extensions }:
 let
   inherit (nix-vscode-marketplace.packages.${system}) vscode open-vsx;
   my-extensions = vscodium-extensions.packages.${system}.vscode;
@@ -9,6 +9,9 @@ in
     inherit (open-vsx.haskell) haskell;
     inherit (open-vsx.justusadam) language-haskell;
     inherit (my-extensions.visortelle) haskell-spotlight;
+    inherit (open-vsx.redhat) vscode-yaml;
+  };
+  yaml = {
     inherit (open-vsx.redhat) vscode-yaml;
   };
   purescript = {
