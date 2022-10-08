@@ -38,9 +38,10 @@
     in
     {
       snippets = {
-        inherit
-          activateVenv
-          createVenvs;
+        inherit activateVenv;
+      };
+      functions = {
+        inherit createVenvs;
       };
     }
     );
