@@ -227,6 +227,42 @@
         }
       );
 
+      runInEachDir = args@{ dirs, command, name, preMessage ? "", message ? "", postMessage ? "", runtimeInputs ? [ ], longDescription ? "" }:
+        (mkShellApp {
+          name = "${name}-in-each-dir";
+          inherit runtimeInputs;
+          text =
+            let INITIAL_CWD = "INITIAL_CWD";
+            in
+            ''
+              ${INITIAL_CWD}=$PWD
+              printf "%s" '${preMessage}'
+
+            '' +
+            builtins.concatStringsSep "\n"
+              (builtins.map
+                (dir: ''
+                  printf "${framedBrackets "${if message == "" then name else message} : %s"}" "${"$" + INITIAL_CWD}/${dir}"
+
+                  cd ${"$" + INITIAL_CWD}/${dir}
+            
+                  ${command}
+                '')
+                (pkgs.lib.lists.flatten dirs)) +
+            ''
+              printf "%s" '${postMessage}'
+            '';
+          longDescription = ''
+            ${longDescription}
+            
+            The directories relative to $PWD are:
+
+              ```sh
+              ${printStringsLn dirs}
+              ```
+          '';
+        });
+
       # apply an `op` `cnt` times to the initial value `ini` to get `res`
       # initially, `res` = `ini`
       applyN = cnt: op: res: (if cnt > 0 then applyN (cnt - 1) op (op res) else res);
@@ -257,6 +293,7 @@
           readSymlinks
           readXs
           runFishScript
+          runInEachDir
           toList
           withAttrs
           withLongDescription
