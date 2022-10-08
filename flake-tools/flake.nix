@@ -23,6 +23,7 @@
         framedBrackets
         printStringsLn
         mkDevShellsWithDefault
+        runInEachDir
         ;
       pushXToCachix = inp@{ name, fishScriptPath, runtimeInputs ? [ ], text ? "" }:
         withLongDescription
@@ -76,50 +77,6 @@
           '';
         });
 
-
-      runInEachDir = args@{ dirs, command, name, preMessage ? "", postMessage ? "", runtimeInputs ? [ ], longDescription ? "" }:
-        (mkShellApp {
-          name = "${name}-in-each-dir";
-          inherit runtimeInputs;
-          text =
-            let INITIAL_PWD = "INITIAL_PWD";
-            in
-            ''
-              ${INITIAL_PWD}=$PWD
-              printf "%s" '${preMessage}'
-
-            '' +
-            builtins.concatStringsSep "\n"
-              (builtins.map
-                (dir: ''
-                  printf "${framedBrackets "${name} : %s/flake.nix"}" "${"$" + INITIAL_PWD}/${dir}"
-
-                  cd ${"$" + INITIAL_PWD}/${dir}
-            
-                  ${command}
-
-                '')
-                (pkgs.lib.lists.flatten dirs)) +
-            ''
-
-              printf "%s" '${postMessage}'
-            '';
-          longDescription = ''
-            ${longDescription}
-
-            Run the command
-            
-              ```sh
-              ${command}
-              ```
-            
-            relative to `CWD` in directories:
-
-              ```sh
-              ${printStringsLn dirs}
-              ```
-          '';
-        });
 
       flakesUpdate = dirs:
         runInEachDir
@@ -315,7 +272,6 @@
           pushDevShellsToCachix
           pushInputsToCachix
           pushAllToCachix
-          runInEachDir
           flakesUpdate
           flakesPushToCachix
           flakesUpdateAndPushToCachix
