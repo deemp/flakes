@@ -10,6 +10,7 @@
     { self
     , nixpkgs
     , flake-utils
+    , drv-tools
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
