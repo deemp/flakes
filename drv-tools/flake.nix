@@ -163,9 +163,9 @@
 
 
       # String -> String -> Set -> IO ()
-      writeJson = name: path: dataNix:
+      writeJSON = name: path: dataNix:
         let
-          dataJson = builtins.toJSON dataNix;
+          dataJSON = builtins.toJSON dataNix;
           name_ = "write-${name}-json";
           dir = builtins.dirOf path;
           file = builtins.baseNameOf path;
@@ -176,7 +176,7 @@
           text = ''
             mkdir -p ${dir}
             printf "%s" ${
-              pkgs.lib.escapeShellArg dataJson
+              pkgs.lib.escapeShellArg dataJSON
             } | python -m json.tool > ${path}
             printf "${framedBrackets "ok %s"}" "${name_}"
           '';
@@ -298,7 +298,7 @@
           withAttrs
           withLongDescription
           withMeta
-          writeJson
+          writeJSON
           ;
       };
 

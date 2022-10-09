@@ -27,7 +27,7 @@
 
         inherit (drv-tools.functions.${system})
           withLongDescription
-          writeJson
+          writeJSON
           toList
           mergeValues
           mkDevShellsWithDefault
@@ -77,19 +77,19 @@
         ;
 
         # write .vscode/settings.json
-        writeSettingsJson = settings:
-          withLongDescription (writeJson "settings" "./.vscode/settings.json" (mergeValues settings)) "write `.vscode/settings.json`";
+        writeSettingsJSON = settings:
+          withLongDescription (writeJSON "settings" "./.vscode/settings.json" (mergeValues settings)) "write `.vscode/settings.json`";
 
         # write .vscode/tasks.json
-        writeTasksJson = tasks:
-          withLongDescription (writeJson "tasks" "./.vscode/tasks.json" tasks) "write `.vscode/tasks.json`";
+        writeTasksJSON = tasks:
+          withLongDescription (writeJSON "tasks" "./.vscode/tasks.json" tasks) "write `.vscode/tasks.json`";
 
         # stuff for testing
 
         # codium with all extensions enabled
         codium = mkCodium { inherit extensions; };
 
-        writeSettings = writeSettingsJson settingsNix;
+        writeSettings = writeSettingsJSON settingsNix;
 
       in
       {
@@ -97,8 +97,8 @@
         functions = {
           inherit
             mkCodium
-            writeSettingsJson
-            writeTasksJson
+            writeSettingsJSON
+            writeTasksJSON
             ;
         };
         configs = {
