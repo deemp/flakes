@@ -16,4 +16,8 @@ Nix flakes for tools that I use
 1. Wait a couple of minutes for a GH action to complete updating `flake.lock`-s and for `git` to fetch the latest changes
    - Check the action's progress in the `GitHub Actions` extension
 
-1. `git pull -f` to get your changes from GH
+1. `git rebase` to get your changes from GH
+
+## Substituters and keys
+
+There are `extra-trusted-public-keys`, `extra-trusted-public-keys` in [flake.nix](./flake.nix). If a substituter like `cachix` fails, comment out the lines containing its address
