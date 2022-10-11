@@ -57,7 +57,12 @@ in
     inherit (open-vsx.kevinrose) vsc-python-indent;
     inherit (my-extensions.visualstudioexptteam) vscodeintellicode;
   };
-  toml = { inherit (open-vsx.tamasfe) even-better-toml; };
+  toml = {
+    inherit (open-vsx.tamasfe) even-better-toml;
+  };
+  terraform = {
+    inherit (open-vsx.hashicorp) terraform;
+  };
   fish = {
     inherit (open-vsx.bmalehorn) vscode-fish;
   };
