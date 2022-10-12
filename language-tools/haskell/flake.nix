@@ -64,25 +64,13 @@
       inherit (pkgs.haskell.lib) justStaticExecutables;
 
       # build an executable without local dependencies (notice empty args)
-      staticExecutable = ghcVersion: name: path:
+      staticExecutableGHC = ghcVersion: name: path:
         let
           inherit (pkgs.haskell.packages."ghc${ghcVersion}") callCabal2nix;
           inherit (gitignore.lib) gitignoreSource;
         in
         justStaticExecutables
           (callCabal2nix name (gitignoreSource path) { });
-
-
-
-      # tools for a specific GHC version
-      toolsGHC = ghcVersion: {
-        hls = hls ghcVersion;
-        # see what you need to pass to your shell for GHC
-        # https://docs.haskellstack.org/en/stable/nix_integration/#supporting-both-nix-and-non-nix-developers
-        stackGHC = stackGHC ghcVersion;
-        callCabal = callCabalGHC ghcVersion;
-        staticExecutable = staticExecutable ghcVersion;
-      };
 
       # stack and ghc of a specific version
       # they should come together so that stack doesn't use the system ghc
@@ -93,7 +81,17 @@
 
       # see the possible values for ghcVersion here
       # https://haskell4nix.readthedocs.io/nixpkgs-users-guide.html#how-to-install-haskell-language-server
-      hls = ghcVersion: pkgs.haskell-language-server.override { supportedGhcVersions = [ ghcVersion ]; };
+      hlsGHC = ghcVersion: pkgs.haskell-language-server.override { supportedGhcVersions = [ ghcVersion ]; };
+
+      # tools for a specific GHC version
+      toolsGHC = ghcVersion: {
+        hls = hlsGHC ghcVersion;
+        # see what you need to pass to your shell for GHC
+        # https://docs.haskellstack.org/en/stable/nix_integration/#supporting-both-nix-and-non-nix-developers
+        stack = stackGHC ghcVersion;
+        callCabal = callCabalGHC ghcVersion;
+        staticExecutable = staticExecutableGHC ghcVersion;
+      };
     in
     {
       packages = {
@@ -104,10 +102,6 @@
       };
       functions = {
         inherit
-          callCabalGHC
-          hls
-          stackGHC
-          staticExecutable
           toolsGHC
           ;
       };
