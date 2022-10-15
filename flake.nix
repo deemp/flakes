@@ -42,7 +42,7 @@
           [
             (f "source-flake")
             (f "language-tools")
-            [ "drv-tools" "flake-tools" "hcl" "env2json" "codium" "json2md" "." ]
+            [ "drv-tools" "flake-tools" "hcl-terraform" "env2json" "codium" "json2md" "." ]
           ]
         ));
 
