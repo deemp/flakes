@@ -1,4 +1,4 @@
-{ pkgs, system ? builtins.currentSystem}:
+{ pkgs, system ? builtins.currentSystem }:
 let
   inherit (import ./hcl.nix { inherit pkgs; })
     optional_ optional object list b a _lib map_
@@ -37,6 +37,8 @@ let
     a = { type = object { a = number; }; };
     b = { type = optional string "b"; };
     buckets = { type = docsType; };
+    c = { type = optional (optional_ (object { c = optional string ""; })) { }; };
+    d = { type = optional_ string; };
   };
 
   docsTfvarsTF = mkVariableValues docsVariablesTF {

@@ -75,6 +75,7 @@ let
   filterOutNonTypes = args@{ ... }: with builtins;
     filterAttrs (name: val: !(elem (typeOf val) [ "lambda" "null" ])) args;
 
+  # BTW, each variable should have a type
   mkVariables = attrs@{ ... }:
     (mapAttrs (name: value: value // { __toString = toStringBody; }) attrs
     ) // {
@@ -96,7 +97,7 @@ let
   ]
     id;
 
-  isTypeHCL = type: arg: isAttrs arg && arg.__type == type;
+  isTypeHCL = type: arg: assert isString type; isAttrs arg && arg.__type == type;
   isOptionalHCL = isTypeHCL HCL.optional;
   isListHCL = isTypeHCL HCL.list;
   isObjectHCL = isTypeHCL HCL.object;
@@ -105,7 +106,7 @@ let
   isBoolHCL = isTypeHCL HCL.bool;
   isPrimitiveHCL = arg: isAttrs arg && elem arg.__type [ HCL.string HCL.number HCL.bool ];
 
-  checkArgType = arg: type:
+  checkArgType = arg: type: assert isString type;
     (isAttrs arg && type == HCL.object) ||
     (isList arg && type == HCL.list) ||
     ((isInt arg || isFloat arg) && type == HCL.number) ||
@@ -114,18 +115,17 @@ let
   ;
 
   # check that an argument is of a given type
-  assertValueOfType = arg: type:
+  assertValueOfType = type: arg: assert isString type;
     assert assertMsg (checkArgType arg type) ''type mismatch: expected HCL ${type}, got Nix ${typeOf arg}'';
     true;
 
   # check against multiple types
-  isOfAnyTypeFrom = arg: types:
-    assert isList types;
+  isOfAnyTypeFrom = arg: types: assert isList types;
     foldl' (m: type: m || checkArgType arg type) false types;
 
   # new set if attribute is present else an empty set
   # String -> Set -> Set -> Set
-  ifHasAttr = attr: attrs@{ ... }: expr:
+  ifHasAttr = attr: attrs@{ ... }: expr: assert isString attr;
     if hasAttr attr attrs then expr else { };
 
   # map a function to a list of sets and then merge them
@@ -133,7 +133,7 @@ let
   map_ = list: f: foldl' (x: y: recursiveUpdate x y) { } (map f list);
 
   # can be converted into an actual value
-  hasOptionalDefault_ = arg:
+  hasOptionalDefault_ = arg@{ ... }:
     if isOptionalHCL arg then arg.__args.default != null || hasOptionalDefault arg.__args.type
     else if isObjectHCL arg then foldl' (m: val: m || hasOptionalDefault val) false (attrValues arg.__attrs)
     # TODO add more checks
@@ -144,7 +144,7 @@ let
   # if someone accesses this list, one should get a list of objects [{a = "a"}]
   # What should be its length?
   # we'll leave only things that can be turned to values, not lists
-  hasOptionalDefault = arg:
+  hasOptionalDefault = arg@{ ... }:
     hasOptionalDefault_ arg ||
     (isListHCL arg && hasOptionalDefault arg.__arg);
 
@@ -177,7 +177,7 @@ let
   # use variable as a template to supplement the value
   mapToValue_ = variable@{ ... }: value:
     let type_ = variable.__type; in
-    if type_ == HCL.object && assertValueOfType value type_ then
+    if type_ == HCL.object && assertValueOfType type_ value then
       let
         withDefaultValues = filterAttrs (_: val: hasOptionalDefault val) (variable.__attrs);
         withDefaultValues_ = filterAttrs (_: val: hasOptionalDefault_ val) withDefaultValues;
@@ -193,7 +193,7 @@ let
       # we want to add the missing attributes to a value
       defaultValues // mappedValues
 
-    else if type_ == HCL.list && assertValueOfType value type_ then
+    else if type_ == HCL.list && assertValueOfType type_ value then
       map (val: mapToValue_ variable.__arg val) value
     # we can discard the default since we already have a value
     # no need to check value type since it can't directly represent an optional
@@ -205,22 +205,48 @@ let
   # TODO make accessors for variables, not values
   # sometimes, values may be missing
 
+  mkDefaultTypeValue = type_@{ ... }:
+    if isObjectHCL type_ then { }
+    else if isOptionalHCL type_
+    then
+      (
+        if type_.__args.default != null then type_.__args.default
+        else mkDefaultTypeValue type_.__args.type
+      )
+    else if isListHCL type_ then [ ]
+    else if isStringHCL type_ then ""
+    else if isNumberHCL type_ then 1
+    else if isBoolHCL type_ then false
+    # for number, bool, string
+    # TODO hope it will be filtered out
+    else throw "got type ${type_.__type}. Unbelievable!";
+
+  mkDefaultVariableValue = variable@{ ... }:
+    if hasAttr KW.default variable then variable.default
+    else mkDefaultTypeValue variable.type;
+
   # Take a Set of variables and a Set of values
   # use variables as templates to supplement these values
   # attrs -> variables is injective
-  mkVariableValues = variables: attrs@{ ... }:
-    let val_ = (mapAttrs
-      (name: val: mkToString
-        # FIXME
-        (mapToValue variables."${name}" val)
-        # val
-      )
-      attrs) // {
-      __toString = self: toStringBody_ "\n\n" false (
-        filterAttrs (name: val: name != KW.__) self
-      );
-    };
-    in val_ // { __ = mkAccessors { var = val_; }; };
+  mkVariableValues = variables@{ ... }: attrs@{ ... }:
+    let
+      # need to set the default values for missing values
+      # so that we have accessors for all variables
+      attrs_ = (mapAttrs (name: val: mkDefaultVariableValue val) variables) // attrs;
+      # attrs_ = (mapAttrs (name: val: null) variables) // attrs;
+      val_ = (mapAttrs
+        (name: val: mkToString
+          # FIXME
+          (mapToValue variables."${name}" val)
+          # val
+        )
+        attrs_) // {
+        __toString = self: toStringBody_ "\n\n" false (
+          filterAttrs (name: val: name != KW.__) self
+        );
+      };
+    in
+    val_ // { __ = mkAccessors { var = val_; }; };
 
   # Representation
   qq = x: ''"${x}"'';
@@ -256,7 +282,10 @@ let
   # string representation of a body of an argument
   # we assume that it doesn't contain any blocks
   toStringBody = toStringBody_ "\n" true;
+
+  # String -> Bool -> Set -> String
   toStringBody_ = nl: needBraces: attrs@{ ... }:
+    assert isString nl && isBool needBraces;
     # use the string representation that this value has
     if hasAttr KW.__hasToString attrs then attrs.__toString { }
     else
@@ -288,8 +317,6 @@ let
   # make lists toString-able
   mkToStringList = attrs: assert isList attrs; map (val: mkToString val) attrs;
 
-  # mkAccessorsType = variableType@{...}: ;
-
   # add special attributes to object values so that
   # we can get a chain "a.b.c" when toString a.b.c
   mkAccessors = attrs@{ ... }: mkAccessors_ attrs "";
@@ -312,7 +339,7 @@ let
       (filterOutNonTypes attrs)
     ) // (
       let
-        __functor = self: path_: mkAccessors_ { } "${path}.${path_}";
+        __functor = self: path_: assert isString path_; mkAccessors_ { } "${path}.${path_}";
         __toString = self: path;
         __isArgument = null;
         # a special attribute that allows for custom toString representations
@@ -387,6 +414,7 @@ let
     "__toString"
     "__hasToString"
     "variable"
+    "default"
   ]
     id;
 
