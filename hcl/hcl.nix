@@ -133,7 +133,7 @@ let
   map_ = list: f: foldl' (x: y: recursiveUpdate x y) { } (map f list);
 
   # can be converted into an actual value
-  hasOptionalDefault_ = arg@{ ... }:
+  hasOptionalDefault_ = arg:
     if isOptionalHCL arg then arg.__args.default != null || hasOptionalDefault arg.__args.type
     else if isObjectHCL arg then foldl' (m: val: m || hasOptionalDefault val) false (attrValues arg.__attrs)
     # TODO add more checks
@@ -144,7 +144,7 @@ let
   # if someone accesses this list, one should get a list of objects [{a = "a"}]
   # What should be its length?
   # we'll leave only things that can be turned to values, not lists
-  hasOptionalDefault = arg@{ ... }:
+  hasOptionalDefault = arg:
     hasOptionalDefault_ arg ||
     (isListHCL arg && hasOptionalDefault arg.__arg);
 
