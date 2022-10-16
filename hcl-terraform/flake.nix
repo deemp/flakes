@@ -10,28 +10,15 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        hcl = (import ./hcl.nix { inherit pkgs system drv-tools; });
+        hcl = import ./hcl.nix;
         tfTools = import ./tf-tools.nix { inherit pkgs system drv-tools; };
-        tests = (import ./tests.nix { inherit pkgs system; });
-
-        inherit (drv-tools.functions.${system}) mkShellApp mkBin;
-        writeDocsTFs = with tests; tfTools.writeTFs "." [
-          { hclExpr = docsMainTF; tfPath = "docs.main"; }
-          { hclExpr = docsVariablesTF; tfPath = "docs.variable"; }
-          { hclExpr = docsTfvarsTF; tfPath = "docs.tfvars"; }
-        ];
-        writeDockerTFs = with tests; tfTools.writeTFs "." [
-          { hclExpr = mainTF; tfPath = "main"; }
-          { hclExpr = variablesTF; tfPath = "variable"; }
-          { hclExpr = tfvarsTF; tfPath = "tfvars"; }
-        ];
+        tests = (import ./tests.nix { inherit pkgs system drv-tools; });
       in
       {
         functions = tfTools;
         inherit hcl;
-        tests = {
-          inherit writeDocsTFs writeDockerTFs;
-        };
+        packages = {
+        } // tests;
       }
     );
 }

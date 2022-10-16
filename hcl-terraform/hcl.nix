@@ -11,7 +11,7 @@ let
   inherit (builtins)
     mapAttrs elem isAttrs isList isString isFloat
     isBool isInt hasAttr head map typeOf foldl'
-    attrValues isNull throw;
+    attrValues isNull throw filter;
 
   # TODO handle 'any'
   inherit (genAttrs [ "string" "bool" "number" "any" ] (
@@ -59,25 +59,51 @@ let
   a = attrs@{ ... }: attrs // { __isArgument = null; };
 
   # Standard library
-  _lib = {
-    abspath = arg: assert isString arg; {
-      __toString = self: "abspath(${qq arg})";
-      __isArgument = null;
-      __hasToString = null;
-    };
-  } // mkAccessors {
+  functions = {
+    numeric = [ "abs" "ceil" "floor" "log" "max" "min" "parseint" "pow" "signum" ];
+    string = [ "chomp" "endswith" "format" "formatlist" "indent" "join" "lower" "regex" "regexall" "replace" "split" "startswith" "strrev" "substr" "title" "trim" "trimprefix" "trimsuffix" "trimspace" "upper" ];
+    collection = [ "alltrue" "anytrue" "chunklist" "coalesce" "coalescelist" "compact" "concat" "contains" "distinct" "element" "flatten" "index" "keys" "length" "list" "lookup" "map" "matchkeys" "merge" "one" "range" "reverse" "setintersection" "setproduct" "setsubtract" "setunion" "slice" "sort" "sum" "transpose" "values" "zipmap" ];
+    encoding = [ "base64decode" "base64encode" "base64gzip" "csvdecode" "jsondecode" "jsonencode" "textdecodebase64" "textencodebase64" "urlencode" "yamldecode" "yamlencode" ];
+    filesystem = [ "abspath" "dirname" "pathexpand" "basename" "file" "fileexists" "fileset" "filebase64" "templatefile" ];
+    dateAndTime = [ "formatdate" "timeadd" "timecmp" "timestamp" ];
+    hashAndCrypto = [ "base64sha256" "base64sha512" "bcrypt" "filebase64sha256" "filebase64sha512" "filemd5" "filesha1" "filesha256" "filesha512" "md5" "rsadecrypt" "sha1" "sha256" "sha512" "uuid" "uuidv5" ];
+    ipNetwork = [ "cidrhost" "cidrnetmask" "cidrsubnet" "cidrsubnets" ];
+    typeConversion = [ "can" "nonsensitive" "sensitive" "tobool" "tolist" "tomap" "tonumber" "toset" "tostring" "try" "type" ];
+  };
+  _lib = (mkLibFunctions functions)
+    // mkAccessors {
     path.root = "";
   };
 
+
+  mkLibFunction = name:
+    args: assert isList args; {
+      __toString = self: "${name}(${(concatMapStringsSep ", " (x: toStringPrimitive (mkToString x)) args)})";
+      __isArgument = null;
+      __hasToString = null;
+    };
+  mkLibFunctionsFromList = functionNames: assert isList functionNames; genAttrs functionNames mkLibFunction;
+  mkLibFunctions = functions_@{ ... }: mkLibFunctionsFromList (flatten (attrValues functions_));
   # Operations
 
   # these aren't types that belong to HCL's typesystem
   filterOutNonTypes = args@{ ... }: with builtins;
-    filterAttrs (name: val: !(elem (typeOf val) [ "lambda" "null" ])) args;
+    filterAttrs (name: val: !(elem (typeOf val) [ Nix.lambda Nix.null ])) args;
 
   # BTW, each variable should have a type
   mkVariables = attrs@{ ... }:
-    (mapAttrs (name: value: value // { __toString = toStringBody; }) attrs
+    (mapAttrs
+      (name: value: value // {
+        # TODO use toStringBody for type
+        __toString = self: braces (
+          concatStringsSep "\n" (filter (x: x != "") [
+            (if hasAttr HCL.type self then (toStringBody_ "" false { inherit (self) type; }) else "")
+            (toStringBlockBody_ false (filterAttrs (name: _: name != HCL.type) self))
+          ])
+        )
+        ;
+      })
+      attrs
     ) // {
       __toString = self: concatStringsSep "\n" (
         mapAttrsToList (name: value: ''${KW.variable} ${qq name} ${value}'') (filterOutNonTypes self)
@@ -94,6 +120,7 @@ let
     "number"
     "bool"
     "object"
+    "type"
   ]
     id;
 
@@ -130,7 +157,10 @@ let
 
   # map a function to a list of sets and then merge them
   # [Set] -> (Any -> Any) -> Set
-  map_ = list: f: foldl' (x: y: recursiveUpdate x y) { } (map f list);
+  mapMerge = list: f: foldl' (x: y: recursiveUpdate x y) { } (map f list);
+
+  # if a set's attribute values are all sets, merge these values recursively
+  mergeValues = set@{ ... }: foldl' recursiveUpdate { } (attrValues set);
 
   # can be converted into an actual value
   hasOptionalDefault_ = arg:
@@ -256,16 +286,17 @@ let
     ''
       <<-EOT
       ${arg}
-      EOT
-    '';
+      EOT'';
 
   brackets = x: "[${if x == "" then "" else "\n${x}\n"}]";
   braces = x: "{${if x == "" then "" else "\n${x}\n"}}";
 
+  Nix = genAttrs [ "true" "false" "int" "float" "set" "lambda" "null" ] id;
+
   # toString any primitive value
   toStringPrimitive = arg:
     with builtins;
-    if isBool arg then (if arg then "true" else "false")
+    if isBool arg then (if arg then Nix.true else Nix.false)
     else if isString arg then
       (if elem "\n" (stringToCharacters arg) then eot else qq) arg
     # TODO what if a list of objects?
@@ -274,7 +305,9 @@ let
         concatMapStringsSep ",\n" toStringPrimitive arg
       );
     }
-    else if elem (typeOf arg) [ "int" "float" "set" ] then "${toString arg}"
+    # else if isAttrs arg then "${mkToStringBody arg}"
+    # else if isAttrs arg then toStringBody arg
+    else if elem (typeOf arg) [ Nix.int Nix.float Nix.set ] then "${toString arg}"
     # "path", "lambda", "null"
     else if isNull arg then ""
     else throw "bad type: ${typeOf arg}";
@@ -348,33 +381,38 @@ let
       { inherit __functor __toString __hasToString __isArgument; }
     );
 
+  toStringBlockBody = toStringBlockBody_ true;
+
   # toString a block body
   # assume arguments are values and contain no blocks
-  toStringBlockBody = attrs@{ ... }: braces (
-    concatStringsSep "\n" (
-      # we want a list of representations of body attributes and blocks
-      flatten (
-        mapAttrsToList
-          (name: val:
-            if isAttrs val then
-              (
-                # a new block starts so the new block type won't be a label
-                if hasAttr KW.__isArgument val then
-                  [ ("${name} = ${toStringBody (mkToStringBody val)}") ]
-                # if a new block starts, there go not labels, but block types
-                else
-                  let isLabel = !hasAttr KW.__isBlock val; in
-                  map
-                    (x: "${name} ${x}")
-                    (toStringBlock val isLabel)
-              )
-            else [ ''${name} = ${toStringPrimitive val}'' ]
-          )
-          (filterOutNonTypes attrs)
+  toStringBlockBody_ = needBraces: attrs@{ ... }:
+    assert isBool needBraces;
+    (if needBraces then braces else id) (
+      concatStringsSep "\n" (
+        # we want a list of representations of body attributes and blocks
+        flatten (
+          mapAttrsToList
+            (name: val:
+              if isAttrs val then
+                (
+                  # a new block starts so the new block type won't be a label
+                  if hasAttr KW.__isArgument val then
+                    [ ("${name} = ${toStringBody (mkToStringBody val)}") ]
+                  # if a new block starts, there go not labels, but block types
+                  else
+                    let isLabel = !hasAttr KW.__isBlock val; in
+                    map
+                      (x: "${name} ${x}")
+                      (toStringBlock val isLabel)
+                )
+              else [ ''${name} = ${toStringPrimitive val}'' ]
+            )
+            (filterOutNonTypes attrs)
+        )
       )
     )
-  )
   ;
+
 
   # return a list of representations 
   # of blocks (a "b" "c" { ... })
@@ -464,8 +502,10 @@ let
 in
 {
   inherit
-    optional_ optional object list b a _lib map_
+    optional_ optional object list b a _lib mapMerge
     mkVariables mkVariableValues mkBlocks mkBlocks_ bb qq;
   # just names
   inherit string number bool any;
+  # functions for custom library
+  inherit mkAccessors;
 }
