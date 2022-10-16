@@ -9,20 +9,23 @@
   outputs = { self, nixpkgs, flake-utils, ... }: flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-
-      # if a set's attribute values are all sets, merge these values
+      inherit (pkgs.lib.attrsets) recursiveUpdate;
+      inherit (builtins) foldl' attrValues mapAttrs attrNames readDir map;
+      # if a set's attribute values are all sets, merge these values recursively
+      # Note that the precedence order is undefined, so it's better to 
+      # have unique values at each set level
       # Examples:
       # mergeValues {a = {b = 1;}; c = {d = 2;};} => {b = 1; d = 2;}
       mergeValues = set@{ ... }:
-        builtins.foldl' pkgs.lib.mergeAttrs { } (builtins.attrValues set);
+        foldl' recursiveUpdate { } (attrValues set);
 
       # a convenience function that flattens a set with set attribute values
       # toList {a = {b = 1;}; c = {d = 2;};} => [1 2]
-      toList = x: builtins.attrValues (mergeValues x);
+      toList = x: attrValues (mergeValues x);
 
       # make shell apps
       # arg should be a set of sets of inputs
-      mkShellApps = appsInputs@{ ... }: builtins.mapAttrs (name: value: mkShellApp (value // { inherit name; })) appsInputs;
+      mkShellApps = appsInputs@{ ... }: mapAttrs (name: value: mkShellApp (value // { inherit name; })) appsInputs;
 
 
       # has a runtime dependency on fish!
@@ -62,7 +65,7 @@
       # create devshells
       # notice the dependency on fish
       mkDevShellsWithFish = shells@{ ... }: { fish }:
-        builtins.mapAttrs
+        mapAttrs
           (shellName: shellAttrs:
             let buildInputs = pkgs.lib.lists.flatten ((shellAttrs.buildInputs or [ ]));
               inherit (pkgs.lib.strings) concatStringsSep concatMapStringsSep;
@@ -89,10 +92,10 @@
                   concatMapStringsSep "\n"
                     (x: "- " + 
                       (concatMapStringsSep ", " (s: "`${s}`") (
-                        builtins.attrNames  (
+                        attrNames  (
                           pkgs.lib.attrsets.filterAttrs
                             (name: value: value == "regular")
-                            (builtins.readDir "${x}/bin")
+                            (readDir "${x}/bin")
                         )
                       )
                     ))
@@ -105,8 +108,7 @@
       # make shells
       # The default devshell should be the system's shell
       # If start another shell in a shell hook, direnv will loop infinitely
-      # FIXME somehow
-      # This command will run a shell app constructed from ${runtimeInputs} and ${text} and start a fish shell
+      # Other shells will start a `fish` shell
       mkDevShellsWithDefault =
         defaultShellAttrs@{ buildInputs ? [ ], shellHook ? "", ... }:
         shells@{ ... }:
@@ -124,8 +126,8 @@
         devShells_;
 
       # read something in a directory using the builtin function
-      readXs = dir: type: builtins.attrNames (
-        pkgs.lib.attrsets.filterAttrs (name_: type_: type_ == type) (builtins.readDir dir)
+      readXs = dir: type: attrNames (
+        pkgs.lib.attrsets.filterAttrs (name_: type_: type_ == type) (readDir dir)
       );
 
       readFiles = dir: readXs dir "regular";
@@ -240,7 +242,7 @@
 
             '' +
             builtins.concatStringsSep "\n"
-              (builtins.map
+              (map
                 (dir: ''
                   printf "${framedBrackets "${if message == "" then name else message} : %s"}" "${"$" + INITIAL_CWD}/${dir}"
 
