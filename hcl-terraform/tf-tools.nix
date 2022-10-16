@@ -1,6 +1,6 @@
 { pkgs, system, drv-tools }:
 let
-  inherit (drv-tools.functions.${system}) mkShellApp;
+  inherit (drv-tools.functions.${system}) mkShellApp framedBrackets concatStringsNewline;
   inherit (pkgs.lib.strings) escapeShellArg concatMapStringsSep concatStringsSep;
   inherit (builtins) isList;
 
@@ -20,9 +20,10 @@ let
     assert isList dirsToFormat;
     mkShellApp {
       name = "write-tfs";
-      text = concatStringsSep "\n"
+      text = concatStringsNewline
         [
           (concatMapStringsSep "\n" ({ hclExpr, tfPath }: "printf ${escapeShellArg "${hclExpr}"} > ${tfPath}.tf") data)
+          (''printf '${framedBrackets "formatted files"}' '')
           (concatMapStringsSep "\n" (dir: "terraform fmt ${dir}") dirsToFormat)
         ];
       longDescription = ''
