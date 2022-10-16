@@ -21,7 +21,7 @@
         mkShellApp
         mkBin
         framedBrackets
-        printStringsLn
+        concatStringsNewline
         mkDevShellsWithDefault
         runInEachDir
         ;
@@ -113,7 +113,7 @@
             The directories are:
               
               ```
-              ${printStringsLn dirs}
+              ${concatStringsNewline dirs}
               ```
 
           '';
@@ -155,7 +155,7 @@
           Start a watcher that will update locks and dump (evaluate) devshells in the following directories relative to `CWD`:
 
               ```sh
-              ${printStringsLn dirs}
+              ${concatStringsNewline dirs}
               ```
         '';
       };
