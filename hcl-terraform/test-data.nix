@@ -102,7 +102,9 @@ let
     };
   };
 
-  # Should add stuff so that we don't refer to non-existing attributes
+  # should place expr A before expr B:
+  # if B depends on A (uses its accessors)
+  # if we want A to be rendered before B
   mainTF = with _lib;
     mkBlocks_ (tfvarsTF.__)
       (

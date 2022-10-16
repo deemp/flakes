@@ -18,6 +18,208 @@ Running the tests will write into `.tf` files the expressions generated from [te
 nix run .#writeTests
 ```
 
+Input:
+
+```nix
+  appPurescript = "app_purescript";
+  appPython = "app_python";
+  apps = [ appPurescript appPython ];
+  _mod = x: { try = "try_${x}"; path = "path_${x}"; };
+
+  variablesTF = mkVariables (genAttrs apps (app: {
+    type = object {
+      DIR = optional string "/app";
+      DOCKER_PORT = optional number 80;
+      HOST = optional string "0.0.0.0";
+      NAME = optional string "renamed_${app}";
+      HOST_PORT = number;
+    };
+  }));
+
+  tfvarsTF = mkVariableValues variablesTF {
+    "${appPython}" = {
+      HOST_PORT = 8002;
+    };
+    "${appPurescript}" = {
+      HOST_PORT = 8003;
+    };
+  };
+  
+  # should place expr A before expr B:
+  # if B depends on A (uses its accessors)
+  # if we want A to be rendered before B
+  mainTF = with _lib;
+    mkBlocks_ (tfvarsTF.__)
+      (
+        {
+          terraform = b {
+            required_providers = a {
+              docker = a {
+                source = "kreuzwerker/docker";
+                version = "~> 2.22.0";
+              };
+            };
+          };
+        }
+        // mapMerge apps (app:
+          let app_ = _mod app; in
+          {
+            resource.docker_image =
+              {
+                "${app_.try}" = b {
+                  name = "dademd/${app}:latest";
+                  keep_locally = false;
+                };
+              };
+            locals = b {
+              "${app_.path}" = abspath [ "${bb path.root}/../../${app}" ];
+            };
+          }
+        )
+      )
+      (__: with __; mapMerge apps
+        (
+          app:
+          let app_ = _mod app; in
+          {
+            resource.docker_container."${app_.try}" = b {
+              image = docker_image."${app_.try}" "image_id";
+              name = "${app_.try}";
+              restart = "always";
+              volumes = a {
+                container_path = var."${app}".DIR;
+                host_path = local."${app_.path}";
+                read_only = false;
+              };
+              ports = a {
+                internal = var."${app}".DOCKER_PORT;
+                external = var."${app}".HOST_PORT;
+              };
+              env = [ "HOST=${bb var."${app}".HOST}" "PORT=${bb var."${app}".DOCKER_PORT}" ];
+              host = b {
+                host = "localhost";
+                ip = var."${app}".HOST;
+              };
+            };
+          }
+        )
+      );
+```
+
+Output:
+
+`tfvars.tf`:
+
+```nix
+app_purescript = {
+  DIR         = "/app"
+  DOCKER_PORT = 80
+  HOST        = "0.0.0.0"
+  HOST_PORT   = 8003
+  NAME        = "renamed_app_purescript"
+}
+
+app_python = {
+  DIR         = "/app"
+  DOCKER_PORT = 80
+  HOST        = "0.0.0.0"
+  HOST_PORT   = 8002
+  NAME        = "renamed_app_python"
+}
+```
+
+`variable.tf`:
+
+```nix
+variable "app_purescript" {
+  type = object({
+    DIR         = optional(string, "/app")
+    DOCKER_PORT = optional(number, 80)
+    HOST        = optional(string, "0.0.0.0")
+    HOST_PORT   = number
+    NAME        = optional(string, "renamed_app_purescript")
+  })
+}
+variable "app_python" {
+  type = object({
+    DIR         = optional(string, "/app")
+    DOCKER_PORT = optional(number, 80)
+    HOST        = optional(string, "0.0.0.0")
+    HOST_PORT   = number
+    NAME        = optional(string, "renamed_app_python")
+  })
+}
+```
+
+`main.tf`:
+
+```nix
+locals {
+  path_app_purescript = abspath("${path.root}/../../app_purescript")
+  path_app_python     = abspath("${path.root}/../../app_python")
+}
+resource "docker_image" "try_app_purescript" {
+  keep_locally = false
+  name         = "dademd/app_purescript:latest"
+}
+resource "docker_image" "try_app_python" {
+  keep_locally = false
+  name         = "dademd/app_python:latest"
+}
+terraform {
+  required_providers = {
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "~> 2.22.0"
+    }
+  }
+}
+resource "docker_container" "try_app_purescript" {
+  env = [
+    "HOST=${var.app_purescript.HOST}",
+    "PORT=${var.app_purescript.DOCKER_PORT}"
+  ]
+  host {
+    host = "localhost"
+    ip   = var.app_purescript.HOST
+  }
+  image = docker_image.try_app_purescript.image_id
+  name  = "try_app_purescript"
+  ports = {
+    external = var.app_purescript.HOST_PORT
+    internal = var.app_purescript.DOCKER_PORT
+  }
+  restart = "always"
+  volumes = {
+    container_path = var.app_purescript.DIR
+    host_path      = local.path_app_purescript
+    read_only      = false
+  }
+}
+resource "docker_container" "try_app_python" {
+  env = [
+    "HOST=${var.app_python.HOST}",
+    "PORT=${var.app_python.DOCKER_PORT}"
+  ]
+  host {
+    host = "localhost"
+    ip   = var.app_python.HOST
+  }
+  image = docker_image.try_app_python.image_id
+  name  = "try_app_python"
+  ports = {
+    external = var.app_python.HOST_PORT
+    internal = var.app_python.DOCKER_PORT
+  }
+  restart = "always"
+  volumes = {
+    container_path = var.app_python.DIR
+    host_path      = local.path_app_python
+    read_only      = false
+  }
+}
+```
+
 ## Limitations
 
 There are some HCL constructs that aren't yet supported. To name a few:
