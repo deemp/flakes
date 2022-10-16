@@ -285,6 +285,7 @@
           fishHook
           framed_
           framedBrackets
+          framedBrackets_
           framedNewlines
           mergeValues
           mkBin
