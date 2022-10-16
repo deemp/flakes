@@ -11,6 +11,7 @@
       pkgs = nixpkgs.legacyPackages.${system};
       inherit (pkgs.lib.attrsets) recursiveUpdate;
       inherit (builtins) foldl' attrValues mapAttrs attrNames readDir map;
+      inherit (pkgs.lib.strings) concatStringsSep;
       # if a set's attribute values are all sets, merge these values recursively
       # Note that the precedence order is undefined, so it's better to 
       # have unique values at each set level
@@ -141,13 +142,15 @@
       mkBinName = drv@{ name, ... }: name_: "${drv}/bin/${name_}";
 
       # frame a text with newlines
-      framed = txt: ''\n\n${txt}\n\n'';
+      framedNewlines = framed_ "\n\n" "\n\n";
+      framed_ = pref: suff: txt: ''${pref}${txt}${suff}'';
 
       # frame a text with square brackets and newlines
-      framedBrackets = txt: ''\n\n[ ${txt} ]\n\n'';
+      framedBrackets = framedBrackets_ "\n\n" "\n\n";
+      framedBrackets_ = pref: suff: framed_ "${pref}[ " " ]${suff}";
 
-      # print strings separated by a newline character
-      printStringsLn = dirs: pkgs.lib.strings.concatStringsSep "\n" dirs;
+      # concat strings separated by a newline character
+      concatStringsNewline = dirs: concatStringsSep "\n" dirs;
 
       # ignore shellcheck when writing a shell application
       mkShellApp = args@{ name, text, runtimeInputs ? [ ], longDescription ? "", description ? "" }:
@@ -260,7 +263,7 @@
             The directories relative to $PWD are:
 
               ```sh
-              ${printStringsLn dirs}
+              ${concatStringsNewline dirs}
               ```
           '';
         });
@@ -289,7 +292,7 @@
           mkDevShellsWithFish
           mkShellApp
           mkShellApps
-          printStringsLn
+          concatStringsNewline
           readDirectories
           readFiles
           readSymlinks
