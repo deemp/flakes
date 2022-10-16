@@ -283,8 +283,9 @@
         inherit
           applyN
           fishHook
-          framed
+          framed_
           framedBrackets
+          framedNewlines
           mergeValues
           mkBin
           mkBinName
