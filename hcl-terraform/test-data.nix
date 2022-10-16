@@ -103,7 +103,7 @@ let
   };
 
   # Should add stuff so that we don't refer to non-existing attributes
-  mainTF =
+  mainTF = with _lib;
     mkBlocks_ (tfvarsTF.__)
       (
         {
@@ -127,33 +127,33 @@ let
                 };
               };
             locals = b {
-              "${app_.path}" = _lib.abspath [ "${bb _lib.path.root}/../../${app}" ];
+              "${app_.path}" = abspath [ "${bb path.root}/../../${app}" ];
             };
           }
         )
       )
-      (__: mapMerge apps
+      (__: with __; mapMerge apps
         (
           app:
           let app_ = _mod app; in
           {
             resource.docker_container."${app_.try}" = b {
-              image = __.docker_image."${app_.try}" "image_id";
+              image = docker_image."${app_.try}" "image_id";
               name = "${app_.try}";
               restart = "always";
               volumes = a {
-                container_path = __.var."${app}".DIR;
-                host_path = __.local."${app_.path}";
+                container_path = var."${app}".DIR;
+                host_path = local."${app_.path}";
                 read_only = false;
               };
               ports = a {
-                internal = __.var."${app}".DOCKER_PORT;
-                external = __.var."${app}".HOST_PORT;
+                internal = var."${app}".DOCKER_PORT;
+                external = var."${app}".HOST_PORT;
               };
-              env = [ "HOST=${bb __.var."${app}".HOST}" "PORT=${bb __.var."${app}".DOCKER_PORT}" ];
+              env = [ "HOST=${bb var."${app}".HOST}" "PORT=${bb var."${app}".DOCKER_PORT}" ];
               host = b {
                 host = "localhost";
-                ip = __.var."${app}".HOST;
+                ip = var."${app}".HOST;
               };
             };
           }
