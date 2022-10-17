@@ -83,7 +83,7 @@ Next, we need the values. We can supply just the necessary data, namely `HOST_PO
   };
 ```
 
-These values will be mapped over the supplied set of variables to produce a more complete set of values in `tfvars.tf`:
+These values will be mapped over the supplied set of variables to produce a more complete set of values in `terraform.tfvars`:
 
 ```nix
 app_purescript = {
