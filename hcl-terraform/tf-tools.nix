@@ -23,15 +23,20 @@ let
   writeFiles = writeFiles_ "";
   writeFiles_ = extension: data:
     assert isList data;
-    let dirs = unique (map ({ filePath, ... }: dirOf filePath) data); in
+    let
+      dirs = unique (map ({ filePath, ... }: dirOf filePath) data);
+      f = concatMapStringsSep "\n";
+    in
     mkShellApp {
       name = "hcl-write-files";
       text = concatStringsNewline
         [
-          (concatMapStringsSep "\n" (dir: "mkdir -p '${dir}'") dirs)
-          (concatMapStringsSep "\n" ({ expr, filePath }: "printf ${escapeShellArg "${expr}"} > ${filePath}${extension}") data)
-          (''printf '${framedBrackets "formatted files"}' '')
-          (concatMapStringsSep "\n" (dir: "terraform fmt ${dir}") dirs)
+          (f (dir: "mkdir -p '${dir}'") dirs)
+          (f ({ expr, filePath }: "printf ${escapeShellArg "${expr}"} > '${filePath}${extension}'") data)
+          ("printf '${framedBrackets "written files"}'")
+          (f ({ filePath, ... }: "printf ${escapeShellArg "${filePath}\n"}") data)
+          ("printf '${framedBrackets "formatted files"}'")
+          (f (dir: "terraform fmt ${dir}") dirs)
         ];
       longDescription = ''
         Write `HCL` expressions into corresponding `$FILE_PATH${extension}`-s
