@@ -33,7 +33,7 @@ There are 2 apps: `app_purescript` and `app_python`. They are servers written in
   _mod = x: { _ = "${toString x}"; try = "try_${x}"; path = "path_${x}"; renamed = "renamed_${x}"; };
 
   # we can apply a modifier _mod to consistently use the forms of `app`
-  variablesTF = mkVariables (modifyMapMerge apps _mod (app:
+  dockerVariables = mkVariables (modifyMapMerge apps _mod (app:
     {
       "${app._}" = {
         type = object {
@@ -73,7 +73,7 @@ variable "app_python" {
 Next, we need the values. We can supply just the necessary data, namely `HOST_PORT`-s. The expressions will be:
 
 ```nix
-  tfvarsTF = mkVariableValues variablesTF {
+  dockerTfvars = mkVariableValues dockerVariables {
     "${appPython}" = {
       HOST_PORT = 8002;
     };
@@ -115,14 +115,14 @@ There is a couple of rules. One should place a block `A` before the block `B` if
 
 1. `A` should be rendered before `B`
 
-   - Notice that in the corresponding Terraform code, the `terraform` block is placed before locals and `resource.docker_image`. 
+   - Notice that in the corresponding Terraform code, the `terraform` block is placed before locals and `resource.docker_image`.
    - On the other hand, as `resource.docker_image` and `locals` are given in the same set, `locals` precedes the `resource` blocks as it is lexicographically smaller and `Nix` doesn't keep the order of elements in a set.
 
 Still, we use the same template to declare the `docker_image` and both `locals`. These `locals` assume that `main.tf` is at `./terraform/docker/main.tf`. So, the whole expression is:
 
 ```nix
-  mainTF = with _lib;
-    mkBlocks_ tfvarsTF.__
+  dockerMain = with _lib;
+    mkBlocks_ dockerTfvars.__
       {
         terraform = b {
           required_providers = b {
@@ -250,6 +250,8 @@ Overall, using this DSL saved us from writing quite repetitive code in HCL.
 There are some HCL constructs that aren't yet supported. To name a few:
 
 - [Conditional expressions](https://developer.hashicorp.com/terraform/language/expressions/conditionals)
-  - require making conditional accessors or merging accessors for objects in both options
+  - They require making conditional accessors or merging accessors for objects in both options
 - Possibly, some [built-in](https://developer.hashicorp.com/terraform/language/functions) functions
   - For now, they're all constructed using simple language constructs. It's highly likely (and I haven't yet checked) that some of them use more advanced constructs
+- Output variables
+  - Need a function that will extract them from blocks

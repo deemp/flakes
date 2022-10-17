@@ -8,16 +8,20 @@ let
   testData = (import ./test-data.nix { inherit pkgs system; });
 
   tests = {
-    testWriteDocsTFs = with testData; writeFiles [
-      { expr = docsMainTF; filePath = "docs/main.tf"; }
-      { expr = docsVariablesTF; filePath = "docs/variables.tf"; }
-      { expr = docsTfvarsTF; filePath = "docs/terraform.tfvars"; }
+    write-docs = with testData; writeFiles [
+      { expr = docsMain; filePath = "docs/main.tf"; }
+      { expr = docsVariables; filePath = "docs/variables.tf"; }
+      { expr = docsTfvars; filePath = "docs/terraform.tfvars"; }
     ];
 
-    testWriteDockerTFs = with testData; writeFiles [
-      { expr = mainTF; filePath = "docker/main.tf"; }
-      { expr = variablesTF; filePath = "docker/variables.tf"; }
-      { expr = tfvarsTF; filePath = "docker/terraform.tfvars"; }
+    write-docker = with testData; writeFiles [
+      { expr = dockerMain; filePath = "docker/main.tf"; }
+      { expr = dockerVariables; filePath = "docker/variables.tf"; }
+      { expr = dockerTfvars; filePath = "docker/terraform.tfvars"; }
+    ];
+
+    write-yandex-cloud = with testData; writeFiles [
+      { expr = ycMain; filePath = "yc/main.tf"; }
     ];
   };
 
