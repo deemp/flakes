@@ -2,7 +2,7 @@
 
 Writing in Terraform [configuration syntax](https://www.terraform.io/language/syntax/configuration) often violates the [DRY](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself) principle due to lack of named types.
 
-This repo contains a `Nix` [eDSL](https://wiki.haskell.org/Embedded_domain_specific_language) which can be translated into HCL, a language that [Terraform](https://www.terraform.io/) uses. In other words, you may use the power of Nix to generate understandable HCL expressions without having to use the built-in Terraform [functions](https://stackoverflow.com/a/69134570).
+This repo contains a `Nix` [eDSL](https://wiki.haskell.org/Embedded_domain_specific_language) which can be translated into HCL, a language that [Terraform](https://www.terraform.io/) uses. In other words, we can use the power of Nix to generate understandable HCL expressions without having to use the built-in Terraform [functions](https://stackoverflow.com/a/69134570).
 
 ## Contents
 
@@ -253,3 +253,5 @@ There are some HCL constructs that aren't yet supported. To name a few:
   - For now, they're all constructed using simple language constructs. It's highly likely (and I haven't yet checked) that some of them use more advanced constructs
 - Output variables
   - Need a function that will extract them from blocks
+- Indices and [splat expressions](https://www.terraform.io/language/expressions/references#references-to-resource-attributes)
+- `for` expressions
