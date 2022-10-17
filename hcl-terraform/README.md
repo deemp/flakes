@@ -20,9 +20,9 @@ nix run .#writeTests
 
 ### Sample test
 
-This is a part of [test expressions](test-data.nix).
+This is a part of [test expressions](test-data.nix). It is based on the following case.
 
-Input:
+There are 2 apps: `app_purescript` and `app_python`. They are servers written in corresponding languages, and these servers show the current time in a browser. Their Docker containers were pushed to Docker Hub. On a host, these apps are in the directories `./app_purescript` and `./app_python`. In Docker containers, each app's code is placed into `/app` directory. There is some data that is needed to run the apps. This data is described in `variablesTF`. Notable fields are: `DOCKER_PORT` - internal port inside a Docker container, `HOST` - the address of a host on which to run the container, `NAME` - a new name for a container, `PORT` - the external port. It is worth to mention that all fields of the object in `type` are the same for both apps, except for the `HOST_PORT`. Also, the names of their variables differ. We can use `Nix` functions to use the same template inside `variablesTF` to declare the variables for both apps:
 
 ```nix
   appPurescript = "app_purescript";
@@ -45,7 +45,34 @@ Input:
         };
       };
     }));
+```
 
+When producing HCL, we'll get such code in `variables.tf`:
+
+```nix
+variable "app_purescript" {
+  type = object({
+    DIR         = optional(string, "/app")
+    DOCKER_PORT = optional(number, 80)
+    HOST        = optional(string, "0.0.0.0")
+    HOST_PORT   = number
+    NAME        = optional(string, "renamed_app_purescript")
+  })
+}
+variable "app_python" {
+  type = object({
+    DIR         = optional(string, "/app")
+    DOCKER_PORT = optional(number, 80)
+    HOST        = optional(string, "0.0.0.0")
+    HOST_PORT   = number
+    NAME        = optional(string, "renamed_app_python")
+  })
+}
+```
+
+Next, we need the values. We can supply just the necessary data, namely `HOST_PORT`-s. The expressions will be:
+
+```nix
   tfvarsTF = mkVariableValues variablesTF {
     "${appPython}" = {
       HOST_PORT = 8002;
@@ -54,10 +81,46 @@ Input:
       HOST_PORT = 8003;
     };
   };
+```
 
-  # should place expr A before and separately from expr B:
-  # if B depends on A (uses its accessors)
-  # if we want A to be rendered before B
+These values will be mapped over the supplied set of variables to produce a more complete set of values in `tfvars.tf`:
+
+```nix
+app_purescript = {
+  DIR         = "/app"
+  DOCKER_PORT = 80
+  HOST        = "0.0.0.0"
+  HOST_PORT   = 8003
+  NAME        = "renamed_app_purescript"
+}
+
+app_python = {
+  DIR         = "/app"
+  DOCKER_PORT = 80
+  HOST        = "0.0.0.0"
+  HOST_PORT   = 8002
+  NAME        = "renamed_app_python"
+}
+```
+
+Furthermore, we will be able to use the accessors like `var.app_python.HOST_PORT` to get the same expression (`var.app_python.HOST_PORT`) in Terraform code.
+
+Finally, we compose the main file.
+
+There is a couple of rules. One should place a block `A` before the block `B` if:
+
+1. `B` depends on `A`, e.g. uses its accessor
+
+   - Here, `resource.docker_container.${app.try}` accesses `var.${app._}.DIR;`. Hence, this `var` should be supplied by previos expressions.
+
+1. `A` should be rendered before `B`
+
+   - Notice that in the corresponding Terraform code, the `terraform` block is placed before locals and `resource.docker_image`. 
+   - On the other hand, as `resource.docker_image` and `locals` are given in the same set, `locals` precedes the `resource` blocks as it is lexicographically smaller and `Nix` doesn't keep the order of elements in a set.
+
+Still, we use the same template to declare the `docker_image` and both `locals`. These `locals` assume that `main.tf` is at `./terraform/docker/main.tf`. So, the whole expression is:
+
+```nix
   mainTF = with _lib;
     mkBlocks_ tfvarsTF.__
       {
@@ -109,52 +172,9 @@ Input:
       ));
 ```
 
-Output:
+In fact, we can supply the missing accessors via a sequence of strings, as in `image = docker_image.${app.try} "image_id";`. This is useful when a block was declared by a provider, and we don't want to rewrite it in Nix.
 
-`tfvars.tf`:
-
-```nix
-app_purescript = {
-  DIR         = "/app"
-  DOCKER_PORT = 80
-  HOST        = "0.0.0.0"
-  HOST_PORT   = 8003
-  NAME        = "renamed_app_purescript"
-}
-
-app_python = {
-  DIR         = "/app"
-  DOCKER_PORT = 80
-  HOST        = "0.0.0.0"
-  HOST_PORT   = 8002
-  NAME        = "renamed_app_python"
-}
-```
-
-`variable.tf`:
-
-```nix
-variable "app_purescript" {
-  type = object({
-    DIR         = optional(string, "/app")
-    DOCKER_PORT = optional(number, 80)
-    HOST        = optional(string, "0.0.0.0")
-    HOST_PORT   = number
-    NAME        = optional(string, "renamed_app_purescript")
-  })
-}
-variable "app_python" {
-  type = object({
-    DIR         = optional(string, "/app")
-    DOCKER_PORT = optional(number, 80)
-    HOST        = optional(string, "0.0.0.0")
-    HOST_PORT   = number
-    NAME        = optional(string, "renamed_app_python")
-  })
-}
-```
-
-`main.tf`:
+The corresponding `main.tf`:
 
 ```nix
 terraform {
@@ -222,6 +242,8 @@ resource "docker_container" "try_app_python" {
   }
 }
 ```
+
+Overall, using this DSL saved us from writing quite repetitive code in HCL.
 
 ## Limitations
 
