@@ -1,39 +1,43 @@
 { pkgs, system, drv-tools }:
 let
   inherit (drv-tools.functions.${system}) mkShellApp framedBrackets concatStringsNewline;
-  inherit (pkgs.lib.strings) escapeShellArg concatMapStringsSep concatStringsSep;
-  inherit (builtins) isList;
+  inherit (pkgs.lib.strings) escapeShellArg concatMapStringsSep;
+  inherit (pkgs.lib.lists) unique;
+  inherit (builtins) isList dirOf map;
 
-  writeTF = hclExpr: tfPath: mkShellApp {
-    name = "write-tf";
+  writeTF = writeFile ".tf";
+  writeFile = extension: hclExpr: filePath: mkShellApp {
+    name = "hcl-write-file";
     text = ''
-      printf ${escapeShellArg "${hclExpr}"} > ${tfPath}.tf
-      terraform fmt ${tfPath}.tf
+      printf ${escapeShellArg "${hclExpr}"} > ${filePath}${extension}
+      terraform fmt ${filePath}${extension}
     '';
     runtimeInputs = [ pkgs.terraform ];
     longDescription = ''
-      Write an `HCL` expression into a given `$FILE_PATH.tf` file and format it.
-      No need to supply the file extension
+      Write an `HCL` expression into `${filePath}${extension}` and format it.
     '';
   };
-  writeTFs = dirsToFormat: data:
-    assert isList dirsToFormat;
+
+  writeTfvars = writeFiles ".auto.tfvars";
+  writeTFs = writeFiles ".tf";
+  writeFiles = extension: data:
+    assert isList data;
+    let dirs = unique (map ({ filePath, ... }: dirOf filePath) data); in
     mkShellApp {
-      name = "write-tfs";
+      name = "hcl-write-files";
       text = concatStringsNewline
         [
-          (concatMapStringsSep "\n" ({ hclExpr, tfPath }: "printf ${escapeShellArg "${hclExpr}"} > ${tfPath}.tf") data)
+          (concatMapStringsSep "\n" (dir: "mkdir -p '${dir}'") dirs)
+          (concatMapStringsSep "\n" ({ hclExpr, filePath }: "printf ${escapeShellArg "${hclExpr}"} > ${filePath}${extension}") data)
           (''printf '${framedBrackets "formatted files"}' '')
-          (concatMapStringsSep "\n" (dir: "terraform fmt ${dir}") dirsToFormat)
+          (concatMapStringsSep "\n" (dir: "terraform fmt ${dir}") dirs)
         ];
       longDescription = ''
-        Write `HCL` expressions into corresponding `$FILE_PATH.tf`-s
-        and format the given directories.
-        No need to supply the file extensions
+        Write `HCL` expressions into corresponding `$FILE_PATH${extension}`-s
+        and format the parent directories of these files.
       '';
     };
-
 in
 {
-  inherit writeTF writeTFs;
+  inherit writeTF writeTFs writeTfvars writeFiles;
 }

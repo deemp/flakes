@@ -8,16 +8,16 @@ let
   testData = (import ./test-data.nix { inherit pkgs system; });
 
   tests = {
-    testWriteDocsTFs = with testData; tfTools.writeTFs [ "." ] [
-      { hclExpr = docsMainTF; tfPath = "docs.main"; }
-      { hclExpr = docsVariablesTF; tfPath = "docs.variable"; }
-      { hclExpr = docsTfvarsTF; tfPath = "docs.tfvars"; }
+    testWriteDocsTFs = with testData; tfTools.writeFiles "" [
+      { hclExpr = docsMainTF; filePath = "docs/main.tf"; }
+      { hclExpr = docsVariablesTF; filePath = "docs/variables.tf"; }
+      { hclExpr = docsTfvarsTF; filePath = "docs/terraform.tfvars"; }
     ];
 
-    testWriteDockerTFs = with testData; tfTools.writeTFs [ "." ] [
-      { hclExpr = mainTF; tfPath = "main"; }
-      { hclExpr = variablesTF; tfPath = "variable"; }
-      { hclExpr = tfvarsTF; tfPath = "tfvars"; }
+    testWriteDockerTFs = with testData; tfTools.writeFiles "" [
+      { hclExpr = mainTF; filePath = "docker/main.tf"; }
+      { hclExpr = variablesTF; filePath = "docker/variables.tf"; }
+      { hclExpr = tfvarsTF; filePath = "docker/terraform.tfvars"; }
     ];
   };
 
