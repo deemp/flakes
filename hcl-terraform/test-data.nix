@@ -10,15 +10,15 @@ let
   # inspired by Terraform docs
   docsMainTF = mkBlocks {
     terraform = b {
-      required_providers = a {
+      required_providers = b {
         docker = a {
           source = "kreuzwerker/docker";
           version = "~> 2.22.0";
         };
       };
     };
-    resource.b = b { d = b { }; };
-    lib = with _lib; a {
+    resource.type.b = b { d = b { }; };
+    resource.type.a = with _lib; b {
       t = tomap [{ a = "b"; c = "d"; }];
       s = abs [ (ceil [ (floor [ (-3.5) ]) ]) ];
     };
@@ -115,7 +115,7 @@ let
     mkBlocks_ tfvarsTF.__
       {
         terraform = b {
-          required_providers = a {
+          required_providers = b {
             docker = a {
               source = "kreuzwerker/docker";
               version = "~> 2.22.0";
@@ -142,12 +142,12 @@ let
           image = docker_image.${app.try} "image_id";
           name = app.try;
           restart = "always";
-          volumes = a {
+          volumes = b {
             container_path = var.${app._}.DIR;
             host_path = local."${app.path}";
             read_only = false;
           };
-          ports = a {
+          ports = b {
             internal = var.${app._}.DOCKER_PORT;
             external = var.${app._}.HOST_PORT;
           };

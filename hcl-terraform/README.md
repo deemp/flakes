@@ -125,7 +125,7 @@ Still, we use the same template to declare the `docker_image` and both `locals`.
     mkBlocks_ tfvarsTF.__
       {
         terraform = b {
-          required_providers = a {
+          required_providers = b {
             docker = a {
               source = "kreuzwerker/docker";
               version = "~> 2.22.0";
@@ -153,12 +153,12 @@ Still, we use the same template to declare the `docker_image` and both `locals`.
           image = docker_image.${app.try} "image_id";
           name = app.try;
           restart = "always";
-          volumes = a {
+          volumes = b {
             container_path = var.${app._}.DIR;
             host_path = local."${app.path}";
             read_only = false;
           };
-          ports = a {
+          ports = b {
             internal = var.${app._}.DOCKER_PORT;
             external = var.${app._}.HOST_PORT;
           };
