@@ -18,9 +18,10 @@ let
     '';
   };
 
-  writeTfvars = writeFiles ".auto.tfvars";
-  writeTFs = writeFiles ".tf";
-  writeFiles = extension: data:
+  writeTfvars = writeFiles_ ".auto.tfvars";
+  writeTFs = writeFiles_ ".tf";
+  writeFiles = writeFiles_ "";
+  writeFiles_ = extension: data:
     assert isList data;
     let dirs = unique (map ({ filePath, ... }: dirOf filePath) data); in
     mkShellApp {
@@ -39,5 +40,5 @@ let
     };
 in
 {
-  inherit writeTF writeTFs writeTfvars writeFiles;
+  inherit writeTF writeTFs writeTfvars writeFiles_ writeFiles;
 }

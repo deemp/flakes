@@ -3,18 +3,18 @@ let
   inherit (drv-tools.functions.${system})
     mkShellApp mkBin framedBrackets framedBrackets_ concatStringsNewline;
   inherit (pkgs.lib.attrsets) mapAttrsToList;
-  tfTools = import ./tf-tools.nix { inherit pkgs system drv-tools; };
+  inherit (import ./tf-tools.nix { inherit pkgs system drv-tools; }) writeFiles;
 
   testData = (import ./test-data.nix { inherit pkgs system; });
 
   tests = {
-    testWriteDocsTFs = with testData; tfTools.writeFiles "" [
+    testWriteDocsTFs = with testData; writeFiles [
       { hclExpr = docsMainTF; filePath = "docs/main.tf"; }
       { hclExpr = docsVariablesTF; filePath = "docs/variables.tf"; }
       { hclExpr = docsTfvarsTF; filePath = "docs/terraform.tfvars"; }
     ];
 
-    testWriteDockerTFs = with testData; tfTools.writeFiles "" [
+    testWriteDockerTFs = with testData; writeFiles [
       { hclExpr = mainTF; filePath = "docker/main.tf"; }
       { hclExpr = variablesTF; filePath = "docker/variables.tf"; }
       { hclExpr = tfvarsTF; filePath = "docker/terraform.tfvars"; }
