@@ -18,6 +18,10 @@ Running the tests will write into `.tf` files the expressions generated from [te
 nix run .#writeTests
 ```
 
+### Sample test
+
+This is a part of [test expressions](test-data.nix).
+
 Input:
 
 ```nix
