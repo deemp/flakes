@@ -155,9 +155,15 @@ let
   ifHasAttr = attr: attrs@{ ... }: expr: assert isString attr;
     if hasAttr attr attrs then expr else { };
 
-  # map a function to a list of sets and then merge them
-  # [Set] -> (Any -> Any) -> Set
-  mapMerge = list: f: foldl' (x: y: recursiveUpdate x y) { } (map f list);
+  # apply a function over a list of sets and then merge them
+  # [a] -> (a -> Set) -> Set
+  mapMerge = list: f: modifyMapMerge list id f;
+
+  # modify the argument of a function
+  # then apply the function over a list of sets
+  # then merge them
+  # [a] -> (a -> b) -> (b -> Set) -> Set
+  modifyMapMerge = list: g: f: foldl' (x: y: recursiveUpdate x y) { } (map (x: f (g x)) list);
 
   # if a set's attribute values are all sets, merge these values recursively
   mergeValues = set@{ ... }: foldl' recursiveUpdate { } (attrValues set);
@@ -502,7 +508,7 @@ let
 in
 {
   inherit
-    optional_ optional object list b a _lib mapMerge
+    optional_ optional object list b a _lib mapMerge modifyMapMerge
     mkVariables mkVariableValues mkBlocks mkBlocks_ bb qq;
   # just names
   inherit string number bool any;

@@ -24,17 +24,23 @@ Input:
   appPurescript = "app_purescript";
   appPython = "app_python";
   apps = [ appPurescript appPython ];
-  _mod = x: { try = "try_${x}"; path = "path_${x}"; };
+  
+  # x may have a custom __toString
+  _mod = x: { _ = "${toString x}"; try = "try_${x}"; path = "path_${x}"; renamed = "renamed_${x}"; };
 
-  variablesTF = mkVariables (genAttrs apps (app: {
-    type = object {
-      DIR = optional string "/app";
-      DOCKER_PORT = optional number 80;
-      HOST = optional string "0.0.0.0";
-      NAME = optional string "renamed_${app}";
-      HOST_PORT = number;
-    };
-  }));
+  # we can apply a modifier _mod to consistently use the forms of `app`
+  variablesTF = mkVariables (modifyMapMerge apps _mod (app:
+    {
+      "${app._}" = {
+        type = object {
+          DIR = optional string "/app";
+          DOCKER_PORT = optional number 80;
+          HOST = optional string "0.0.0.0";
+          NAME = optional string "${app.renamed}";
+          HOST_PORT = number;
+        };
+      };
+    }));
 
   tfvarsTF = mkVariableValues variablesTF {
     "${appPython}" = {
@@ -44,66 +50,59 @@ Input:
       HOST_PORT = 8003;
     };
   };
-  
-  # should place expr A before expr B:
+
+  # should place expr A before and separately from expr B:
   # if B depends on A (uses its accessors)
   # if we want A to be rendered before B
   mainTF = with _lib;
-    mkBlocks_ (tfvarsTF.__)
-      (
-        {
-          terraform = b {
-            required_providers = a {
-              docker = a {
-                source = "kreuzwerker/docker";
-                version = "~> 2.22.0";
-              };
+    mkBlocks_ tfvarsTF.__
+      {
+        terraform = b {
+          required_providers = a {
+            docker = a {
+              source = "kreuzwerker/docker";
+              version = "~> 2.22.0";
             };
           };
-        }
-        // mapMerge apps (app:
-          let app_ = _mod app; in
-          {
-            resource.docker_image =
-              {
-                "${app_.try}" = b {
-                  name = "dademd/${app}:latest";
-                  keep_locally = false;
-                };
-              };
-            locals = b {
-              "${app_.path}" = abspath [ "${bb path.root}/../../${app}" ];
-            };
-          }
-        )
-      )
-      (__: with __; mapMerge apps
-        (
-          app:
-          let app_ = _mod app; in
-          {
-            resource.docker_container."${app_.try}" = b {
-              image = docker_image."${app_.try}" "image_id";
-              name = "${app_.try}";
-              restart = "always";
-              volumes = a {
-                container_path = var."${app}".DIR;
-                host_path = local."${app_.path}";
-                read_only = false;
-              };
-              ports = a {
-                internal = var."${app}".DOCKER_PORT;
-                external = var."${app}".HOST_PORT;
-              };
-              env = [ "HOST=${bb var."${app}".HOST}" "PORT=${bb var."${app}".DOCKER_PORT}" ];
-              host = b {
-                host = "localhost";
-                ip = var."${app}".HOST;
-              };
-            };
-          }
-        )
-      );
+        };
+      }
+      (__: with __; modifyMapMerge apps _mod (app: {
+        resource.docker_image = {
+          "${app.try}" = b {
+            name = "dademd/${app._}:latest";
+            keep_locally = false;
+          };
+        };
+        locals = b {
+          # bb means x: "${x}"
+          "${app.path}" = abspath [ "${bb path.root}/../../${app._}" ];
+        };
+      }
+      ))
+      # this __ is to pass variables created in previous expressions into this one
+      # alternatively, here, we can write __.var."${app}".DIR;
+      (__: with __; modifyMapMerge apps _mod (app: {
+        resource.docker_container.${app.try} = b {
+          image = docker_image.${app.try} "image_id";
+          name = app.try;
+          restart = "always";
+          volumes = a {
+            container_path = var.${app._}.DIR;
+            host_path = local."${app.path}";
+            read_only = false;
+          };
+          ports = a {
+            internal = var.${app._}.DOCKER_PORT;
+            external = var.${app._}.HOST_PORT;
+          };
+          env = [ "HOST=${bb var.${app._}.HOST}" "PORT=${bb var.${app._}.DOCKER_PORT}" ];
+          host = b {
+            host = "localhost";
+            ip = var.${app._}.HOST;
+          };
+        };
+      }
+      ));
 ```
 
 Output:
@@ -154,6 +153,14 @@ variable "app_python" {
 `main.tf`:
 
 ```nix
+terraform {
+  required_providers = {
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "~> 2.22.0"
+    }
+  }
+}
 locals {
   path_app_purescript = abspath("${path.root}/../../app_purescript")
   path_app_python     = abspath("${path.root}/../../app_python")
@@ -165,14 +172,6 @@ resource "docker_image" "try_app_purescript" {
 resource "docker_image" "try_app_python" {
   keep_locally = false
   name         = "dademd/app_python:latest"
-}
-terraform {
-  required_providers = {
-    docker = {
-      source  = "kreuzwerker/docker"
-      version = "~> 2.22.0"
-    }
-  }
 }
 resource "docker_container" "try_app_purescript" {
   env = [
