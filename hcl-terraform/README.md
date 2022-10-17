@@ -144,8 +144,7 @@ Still, we use the same template to declare the `docker_image` and both `locals`.
           # bb means x: "${x}"
           "${app.path}" = abspath [ "${bb path.root}/../../${app._}" ];
         };
-      }
-      ))
+      }))
       # this __ is to pass variables created in previous expressions into this one
       # alternatively, here, we can write __.var."${app}".DIR;
       (__: with __; modifyMapMerge apps _mod (app: {
@@ -168,8 +167,7 @@ Still, we use the same template to declare the `docker_image` and both `locals`.
             ip = var.${app._}.HOST;
           };
         };
-      }
-      ));
+      }));
 ```
 
 In fact, we can supply the missing accessors via a sequence of strings, as in `image = docker_image.${app.try} "image_id";`. This is useful when a block was declared by a provider, and we don't want to rewrite it in Nix.

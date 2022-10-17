@@ -79,7 +79,7 @@ let
   # Yandex Cloud
 
   ycMain = with _lib;
-    mkBlocks
+    mkBlocks_ docsMain.__
       {
         terraform = b {
           required_providers = b {
@@ -96,12 +96,12 @@ let
         };
       })
       (__: with __; {
-        resource.yandex_vpc_network.network-1 = b{
+        resource.yandex_vpc_network.network-1 = b {
           name = "network1";
         };
       })
       (__: with __; {
-        resource.yandex_vpc_subnet.subnet-1 = b{
+        resource.yandex_vpc_subnet.subnet-1 = b {
           name = "subnet1";
           zone = "ru-central1-a";
           network_id = yandex_vpc_network.network-1 "id";

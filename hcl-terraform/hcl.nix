@@ -98,14 +98,14 @@ let
         __toString = self: braces (
           concatStringsSep "\n" (filter (x: x != "") [
             (if hasAttr HCL.type self then (toStringBody_ "" false { inherit (self) type; }) else "")
-            (toStringBlockBody_ false (filterAttrs (name: _: name != HCL.type) self))
+            (toStringBlockBody_ "\n" false (filterAttrs (name: _: name != HCL.type) self))
           ])
         )
         ;
       })
       attrs
     ) // {
-      __toString = self: concatStringsSep "\n" (
+      __toString = self: concatStringsSep "\n\n" (
         mapAttrsToList (name: value: ''${KW.variable} ${qq name} ${value}'') (filterOutNonTypes self)
       );
     };
@@ -387,14 +387,14 @@ let
       { inherit __functor __toString __hasToString __isArgument; }
     );
 
-  toStringBlockBody = toStringBlockBody_ true;
+  toStringBlockBody = toStringBlockBody_ "\n" true;
 
   # toString a block body
   # assume arguments are values and contain no blocks
-  toStringBlockBody_ = needBraces: attrs@{ ... }:
+  toStringBlockBody_ = nl: needBraces: attrs@{ ... }:
     assert isBool needBraces;
     (if needBraces then braces else id) (
-      concatStringsSep "\n" (
+      concatStringsSep nl (
         # we want a list of representations of body attributes and blocks
         flatten (
           mapAttrsToList
@@ -471,7 +471,7 @@ let
           val // {
             __toString = self:
               let infix = if hasAttr KW.__isArgument val then " = " else " "; in
-              concatStringsSep "\n" (
+              concatStringsSep "\n\n" (
                 map (str: "${name}${infix}${str}")
                   (toStringBlock val true)
               );
@@ -483,7 +483,7 @@ let
         std =
           {
             __toString = self:
-              concatStringsSep "\n" (
+              concatStringsSep "\n\n" (
                 attrValues (filterAttrs (name: _: name != KW.__) (filterOutNonTypes self))
               );
 
@@ -494,16 +494,14 @@ let
                 }
                 // (ifHasAttr KW.resource as (mkAccessors (filterOutNonTypes as.resource)))
               );
-          };
-        cont = {
           # Set -> (Set -> Set) -> Set
           __functor = self: x:
             (
-              y: y // { __toString = self_: "${self}\n${y}"; }
+              y: y // { __toString = self_: "${self}\n\n${y}"; }
             ) (mkBlocks_ self.__ (x self.__));
         };
       in
-      std // cont
+      std
     );
 in
 {
