@@ -9,15 +9,15 @@ let
 
   tests = {
     testWriteDocsTFs = with testData; writeFiles [
-      { hclExpr = docsMainTF; filePath = "docs/main.tf"; }
-      { hclExpr = docsVariablesTF; filePath = "docs/variables.tf"; }
-      { hclExpr = docsTfvarsTF; filePath = "docs/terraform.tfvars"; }
+      { expr = docsMainTF; filePath = "docs/main.tf"; }
+      { expr = docsVariablesTF; filePath = "docs/variables.tf"; }
+      { expr = docsTfvarsTF; filePath = "docs/terraform.tfvars"; }
     ];
 
     testWriteDockerTFs = with testData; writeFiles [
-      { hclExpr = mainTF; filePath = "docker/main.tf"; }
-      { hclExpr = variablesTF; filePath = "docker/variables.tf"; }
-      { hclExpr = tfvarsTF; filePath = "docker/terraform.tfvars"; }
+      { expr = mainTF; filePath = "docker/main.tf"; }
+      { expr = variablesTF; filePath = "docker/variables.tf"; }
+      { expr = tfvarsTF; filePath = "docker/terraform.tfvars"; }
     ];
   };
 
