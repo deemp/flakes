@@ -1,3 +1,5 @@
 result
 .direnv
-.env
+*.tf
+*.tfvars
+.terraform*

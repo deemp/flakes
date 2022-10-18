@@ -1,5 +1,0 @@
-# Codium flake
-
-- Has many tools for settings up `VSCodium`
-- `nix flake show` to look at the available shells
-- `nix develop` and then `enter` - to start a `fish` shell

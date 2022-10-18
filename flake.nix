@@ -6,9 +6,6 @@
     drv-tools.url = github:br4ch1st0chr0n3/flakes?dir=drv-tools;
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils.follows = "flake-utils_/flake-utils";
-    formatter.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/formatter;
-    my-codium.url = github:br4ch1st0chr0n3/flakes?dir=codium;
-    # my-codium.url = path:./codium;
   };
   outputs =
     { self
@@ -16,76 +13,24 @@
     , flake-utils
     , flake-tools
     , drv-tools
-    , my-codium
-    , formatter
     , ...
     }: flake-utils.lib.eachDefaultSystem
       (system:
       let
-        inherit (my-codium.configs.${system})
-          extensions;
-        inherit (my-codium.functions.${system})
-          mkCodium;
-        inherit (drv-tools.functions.${system})
-          toList
-          mkDevShellsWithDefault
-          readDirectories
-          mkShellApp;
-        inherit (flake-tools.functions.${system})
-          flakesToggleRelativePaths
-          mkFlakesUtils
-          ;
         pkgs = nixpkgs.legacyPackages.${system};
-
-        flakesUtils = (mkFlakesUtils (
-          let f = dir: (builtins.map (x: "${dir}/${x}") (readDirectories ./${dir})); in
-          [
-            (f "source-flake")
-            (f "language-tools")
-            [ "drv-tools" "flake-tools" "hcl-terraform" "env2json" "codium" "json2md" "." ]
-          ]
-        ));
-
-        toggleRelativePaths_ =
-          let
-            myCodium = "my-codium";
-            toggleConfig = [
-              { "." = [ myCodium ]; }
-            ];
-          in
-          flakesToggleRelativePaths toggleConfig flakesUtils.flakesUpdate;
-
-        codium = mkCodium {
-          extensions = { inherit (extensions) nix misc github fish; };
-          runtimeDependencies = [
-            pkgs.docker
-            pkgs.rnix-lsp
-            toggleRelativePaths_
-            (builtins.attrValues flakesUtils)
-            pkgs.inotify-tools
-          ];
-        };
+        inherit (flake-tools.functions.${system}) mkFlakesUtils;
+        flakesUtils = mkFlakesUtils [ "." ];
+        hcl = import ./.nix/hcl.nix;
+        tfTools = import ./.nix/tf-tools.nix { inherit pkgs system drv-tools; };
+        tests = (import ./.nix/tests.nix { inherit pkgs system drv-tools; });
       in
       {
-
-        devShells = mkDevShellsWithDefault
-          {
-            buildInputs = [
-              (builtins.attrValues flakesUtils)
-              toggleRelativePaths_
-              codium
-            ];
-          }
-          {
-            enter = { buildInputs = [ pkgs.gawk ]; };
-          };
-        packages = {
+        functions = tfTools;
+        inherit hcl;
+        packages = tests // {
           pushToCachix = flakesUtils.flakesPushToCachix;
           updateLocks = flakesUtils.flakesUpdate;
-          format = flakesUtils.flakesFormat;
-          default = codium;
         };
-        inherit (formatter) formatter;
       });
 
   nixConfig = {
