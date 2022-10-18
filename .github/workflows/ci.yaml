@@ -12,8 +12,7 @@ env:
   action: |
     git pull --rebase --autostash
     nix run .#{0}
-    git commit -a -m "action: {1}"
-    git push
+    git commit -a -m "action: {1}" && git push || echo ""
   extra_nix_config: |
     access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
     substituters = https://cache.nixos.org/ https://nix-community.cachix.org https://hydra.iohk.io https://haskell-language-server.cachix.org https://br4ch1st0chr0n3.cachix.org
