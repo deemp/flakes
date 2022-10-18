@@ -7,9 +7,11 @@
 - `nix shell` - bring package to shell
   
   ```sh
-  $ nix shell nixpkgs#poetry
-  $ poetry --version
-  Poetry version 1.1.14
+  $ nix shell nixpkgs#jq
+  $ jq --version
+  jq-1.6
+  $ which jq
+  /nix/store/5x1jpz4grhzl1psmrxj42wzmvllqgbhm-jq-1.6-bin/bin/jq
   ```
 
 ### Flakes
