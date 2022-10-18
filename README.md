@@ -28,13 +28,14 @@ This repo contains a `Nix` [eDSL](https://wiki.haskell.org/Embedded_domain_speci
 
 ## Sample test
 
-This is a part of [test expressions](test-data.nix). This case is implemented [here](https://github.com/br4ch1st0chr0n3/devops-labs/blob/80978ecd1826548904e442e5fb428f2127748be7/.nix/terraform/docker.nix#L62).
+This is a part of [test expressions](test-data.nix). This case is implemented [here](https://github.com/br4ch1st0chr0n3/devops-labs/blob/80978ecd1826548904e442e5fb428f2127748be7/.nix/terraform/docker.nix#L62). I put the snippets int `let in` blocks to improve highlighting
 
 There are 2 apps: `app_purescript` and `app_python`. Each of them has a server written in corresponding language, and these servers show the current time in a browser. Their Docker containers were pushed to Docker Hub. On a host, these apps are under the directories `./app_purescript` and `./app_python`. In Docker containers, each app's code is placed under the `/app` directory.
 
 There is some data that is needed to run the apps. This data is described in `dockerVariables`. Here, notable fields are: `DOCKER_PORT` - internal port inside a Docker container, `HOST` - the address of a host on which to run the container, `NAME` - a new name for a container, `PORT` - the external port. It is worth to mention that all fields of the object in `type` are the same for both apps, except for the `HOST_PORT`. Also, the names of their variables differ. We can use `Nix` functions to use the same template inside `dockerVariables` to declare the variables for both apps:
 
 ```nix
+let
   appPurescript = "app_purescript";
   appPython = "app_python";
   apps = [ appPurescript appPython ];
@@ -55,11 +56,12 @@ There is some data that is needed to run the apps. This data is described in `do
         };
       };
     }));
+in
 ```
 
 When producing HCL, we'll get such code in `variables.tf`:
 
-```nix
+```hcl
 variable "app_purescript" {
   type = object({
     DIR         = optional(string, "/app")
@@ -83,6 +85,7 @@ variable "app_python" {
 Next, we need the values. We can supply just the necessary data, namely `HOST_PORT`-s, and a set of variables. The mapping between the set of names in `dockerTfvars` and the set of names in `dockerVariables` should be injective. The missing values will be generated automatically according to their variables' types. Thus, if necessary, we can supply the empty set to `mkVariableValues`. In this case, the Nix expression will be:
 
 ```nix
+let
   dockerTfvars = mkVariableValues dockerVariables {
     "${appPython}" = {
       HOST_PORT = 8002;
@@ -91,11 +94,12 @@ Next, we need the values. We can supply just the necessary data, namely `HOST_PO
       HOST_PORT = 8003;
     };
   };
+in
 ```
 
 These `tfvars` will be mapped over the supplied set of `variables` to produce a set of values in `terraform.tfvars`:
 
-```nix
+```hcl
 app_purescript = {
   DIR         = "/app"
   DOCKER_PORT = 80
@@ -131,6 +135,7 @@ There is a couple of rules. We should place a block `A` before the block `B` if:
 Again, we use the same template to declare the `docker_image` and both `locals`. These `locals` assume that `main.tf` is at `./terraform/docker/main.tf`. So, the whole expression is:
 
 ```nix
+let
   dockerMain = with _lib;
     mkBlocks_ dockerTfvars.__
       {
@@ -178,13 +183,14 @@ Again, we use the same template to declare the `docker_image` and both `locals`.
           };
         };
       }));
+in
 ```
 
 In fact, we can supply the missing accessors via a sequence of strings, as in `image = docker_image.${app.try} "image_id";`. This is useful when a block was declared by a provider, and we don't want to rewrite it and supply as a Nix expression.
 
 The corresponding `main.tf`:
 
-```nix
+```hcl
 terraform {
   required_providers = {
     docker = {
