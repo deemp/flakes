@@ -306,13 +306,9 @@ There are some HCL constructs that aren't yet supported. To name a few:
 - [ ] `__functor` like in accessors to allow continuing the expressions after functions like `values(aws_instance.example)[*].id`
 - [ ] `for` [expressions and conditionals](https://www.terraform.io/language/expressions/for)
 
-## Pushing conventions
+## Contribute
 
-1. Commit and push
-
-1. Wait a couple of minutes for a GH action to complete updating `flake.lock`-s
-
-1. `git fetch` and `git rebase`
+[Pull requests](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requestsgit) and [issues](https://docs.github.com/en/issues/tracking-your-work-with-issues/about-issues) are welcome!
 
 ## Substituters and keys
 
