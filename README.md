@@ -283,16 +283,16 @@ nix run .#testDocs
 
 There are some HCL constructs that aren't yet supported. To name a few:
 
-- [Conditional expressions](https://developer.hashicorp.com/terraform/language/expressions/conditionals)
+- [ ] [Conditional expressions](https://developer.hashicorp.com/terraform/language/expressions/conditionals)
   - They require making conditional accessors or merging accessors for objects in both options
-- Possibly, some [built-in](https://developer.hashicorp.com/terraform/language/functions) functions
+- [ ] Possibly, some [built-in](https://developer.hashicorp.com/terraform/language/functions) functions
   - For now, they're all constructed using simple language constructs. It's highly likely (and I haven't yet checked) that some of them use more advanced constructs
-- Output variables
+- [ ] Output variables
   - Need a function that will extract them from blocks
-- Indices and [splat expressions](https://www.terraform.io/language/expressions/references#references-to-resource-attributes)
+- [ ] Indices and [splat expressions](https://www.terraform.io/language/expressions/references#references-to-resource-attributes)
   - can pass them as special objects inside lists to accessors, like `some_list [_ast_]` to mean `some_list[*]`
-- `__functor` like in accessors to allow continuing the expressions after functions like `values(aws_instance.example)[*].id`
-- `for` expressions
+- [ ] `__functor` like in accessors to allow continuing the expressions after functions like `values(aws_instance.example)[*].id`
+- [ ] `for` [expressions and conditionals](https://www.terraform.io/language/expressions/for)
 
 ## Pushing conventions
 
