@@ -2,11 +2,24 @@
 
 ## Nix
 
+## Shell
+
+- `nix shell` - bring package to shell
+  
+  ```sh
+  $ nix shell nixpkgs#poetry
+  $ poetry --version
+  Poetry version 1.1.14
+  ```
+
 ### Flakes
+
+1. What are flakes?
+   - see the official [wiki](https://nixos.wiki/wiki/Flakes)
 
 1. A basic flake - [hello-flake](hello-flake/flake.nix)
 
-   `outputs`: A function that, given an attribute set containing the outputs of each of the input flakes keyed by their identifier, yields the Nix values provided by this flake. Thus, in the example above, `inputs.nixpkgs` contains the result of the call to the `outputs` function of the `nixpkgs` flake.
+   > `outputs`: A function that, given an attribute set containing the outputs of each of the input flakes keyed by their identifier, yields the Nix values provided by this flake. Thus, in the example above, `inputs.nixpkgs` contains the result of the call to the `outputs` function of the `nixpkgs` flake.
 
 1. How to use a flake in another flake? Should I build it somehow?
 
@@ -30,17 +43,23 @@
 1. Flake inputs tip
    - Store your flake inputs in a repo - [example](https://github.com/br4ch1st0chr0n3/flakes/blob/c3c578c3798bea79897d774293e34a1fadb06f8b/inputs/flake.nix)
    - Use them in your projects - [example](https://github.com/br4ch1st0chr0n3/flakes/blob/c3c578c3798bea79897d774293e34a1fadb06f8b/codium/flake.nix#L3)
-   - Use `nix flake update` in dependent projects to easily update the inputs
+   - Use `nix flake update` in dependent projects to update the inputs
+
+1. What's the difference between a flake's package and a derivation?
+   - `outputs.packages.${system}` is a set with derivations as values
 
 ### Docs
 
 1. [nix-lib](https://teu5us.github.io/nix-lib.html)
+
+1. [Glossary](https://nixos.org/manual/nix/unstable/glossary.html#gloss-closure)
 
 1. It's recommended to add bookmarks for search engines in your browser, like described here [Browser](README.md#browser)
 
 1. Nix [Documentation gaps](https://nixos.wiki/wiki/Documentation_Gaps)
 
 1. Full Nix [manual](https://nixos.org/manual/nixpkgs/stable/), including helper functions
+   - dark [version](https://ryantm.github.io/nixpkgs/languages-frameworks/texlive/#sec-language-texlive)
 
 1. [Docs](https://devdocs.io/) for many functions
 
@@ -70,6 +89,9 @@
 
    so we can write `inputs.nixpkgs.follows = "nix/nixpkgs";`[]
 
+1. We can set the `nix.conf` to
+   - [show-trace](https://nixos.org/manual/nix/unstable/command-ref/conf-file.html?highlight=trace#conf-show-trace)
+
 1. How to use `nix-doc`?
 
    - Here's a [repo](https://github.com/lf-/nix-doc)
@@ -89,6 +111,14 @@
    ```sh
    nix help command
    ```
+
+1. One may write docs in Markdown
+   - I use [longDescription](https://github.com/br4ch1st0chr0n3/flakes/blob/5883de8f1eabac3a5a0069b1330b4b0f7c630b9a/drv-tools/flake.nix#L151)
+   - And [desc](https://github.com/br4ch1st0chr0n3/flakes/blob/5883de8f1eabac3a5a0069b1330b4b0f7c630b9a/drv-tools/flake.nix#L210) to show it in a terminal
+
+### Useful functions
+
+- [symlinkJoin](https://discourse.nixos.org/t/basic-flake-run-existing-python-bash-script/19886/11) + `wrapProgram` provided by `pkgs.makeBinaryWrapper`
 
 ### Other resources
 
@@ -117,13 +147,20 @@
 1. There are [phases](https://nixos.org/manual/nixpkgs/unstable/#sec-stdenv-phases)
    - They can be run via `nix develop` - [src](https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-develop.html#examples)
 
+1. Using single `inputs.my-inputs.url = path` and then inheriting inputs doesn't make `flake.lock` smaller
+
+## Nix store
+
+- One can serve local nix store via [nix-serve](https://nixos.org/manual/nix/unstable/package-management/binary-cache-substituter.html#serving-a-nix-store-via-http) - [gh](https://github.com/edolstra/nix-serve)
+  - to check if a package is in store, use [curl](https://nixos.wiki/wiki/Binary_Cache#4._Testing)
+
 ### Stable
 
 1. How to use `nix-build` with a `default.nix` that returns multiple derivations?
 
    - See `nix manual` [here](https://nixos.org/manual/nix/unstable/command-ref/nix-build.html#description)
 
-### Dev shell
+### devShells
 
 1. Pin `nixpkgs` - `nix registry pin`
    - more on that [here](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-registry-pin.html#examples)
@@ -140,7 +177,10 @@
 
 ### Making derivations and exes
 
-1. When derivations are built, they may produce executables. Locations of these executables are determined by bash scripts. If you make a derivation you can use `buildInputs` to specify the derivations you'd like to be accessible during in scripts during `phases` or in a `shellHook`
+1. Wen derivations are built, they may produce executables. Locations of these executables are determined by bash scripts. If you make a derivation you can use `buildInputs` to specify the derivations you'd like to be accessible during in scripts during `phases` or in a `shellHook`
+
+1. It's more reliable to use paths to binaries rather than specify, e.g. `buildInputs` and call programs by names
+   - This helped me when configuring tasks for VSCodium [here](https://github.com/br4ch1st0chr0n3/devops-labs/blob/b400993e18b0e1ebc515141450c51f2d6c8b3f67/.nix/commands.nix#L37)
 
 1. Wrap an exe - via [makeWrapper](https://github.com/NixOS/nixpkgs/blob/0e9e77750818f40303c72ad658b3dca299591e4f/pkgs/build-support/setup-hooks/make-wrapper.sh#L130)
 
@@ -174,6 +214,9 @@
    - `pkgs.writeShellApplication` - it allows to use `runtimeInputs` as `python` vs `${pkgs.python310}/bin/python`
       - need to [disable](https://github.com/br4ch1st0chr0n3/flakes/blob/c3c578c3798bea79897d774293e34a1fadb06f8b/codium/flake.nix#L148) shellcheck for now
 
+1. See available utilities in `coreutils` - [src](https://discourse.nixos.org/t/should-a-package-using-grep-sed-awk-coreutils-etc-list-them-as-buildinputs-and-wrap-them-all/9374/5?u=br4ch1st0chr0n3)
+   1. Provide the missing ones
+
 1. It's possible to use `nix` commands inside scripts
 
    - E.g. `nix-instantiate --eval --strict -E "import ./settings.nix"` - print contents of a nix file
@@ -197,6 +240,10 @@
 
 1. We can utilize parallel build via [max-jobs](https://wiki.archlinux.org/title/Nix#Max_jobs) (also [here](https://nixos.org/manual/nix/stable/advanced-topics/cores-vs-jobs.html#tuning-cores-and-jobs))
 
+1. A python exe via [pkgs.writers.writePython3Bin](https://github.com/NixOS/nixpkgs/search?q=writePython3Bin&type=) - [SO](https://stackoverflow.com/a/67799667)
+
+1. [cross-compilation](https://serokell.io/blog/what-is-nix#nixpkgs)
+
 ### Helper function libs
 
 1. [flake-compat](https://github.com/edolstra/flake-compat). Whenever possible, add a flake into a repo, and then use `flake-compat` to create `default.nix` and `shell.nix`
@@ -214,9 +261,12 @@
 ### Y2nix
 
 1. Here's a sample `poetry2nix` [flake](https://github.com/nix-community/poetry2nix/blob/869580c729e658ffe74d8d1d0c3cb132d33a6126/templates/app/flake.nix) - can be used for Python
-   - TODO make environment - [example](https://github.com/br4ch1st0chr0n3/devops-labs/blob/539db68da661bb9a385dbc4bb1a4bcdf6a9072b8/app_python/flake.nix#L35)
+   - [example](https://serokell.io/blog/practical-nix-flakes#python-(poetry))
+   - It might be necessary to
+     - activate an environment for any app in a project - [src](https://github.com/br4ch1st0chr0n3/devops-labs/blob/b400993e18b0e1ebc515141450c51f2d6c8b3f67/app_python/flake.nix#L37)
+     - create the envs - [src](https://github.com/br4ch1st0chr0n3/devops-labs/blob/b400993e18b0e1ebc515141450c51f2d6c8b3f67/.nix/default.nix#L128)
 
-1. There's [dream2nix](https://github.com/nix-community/dream2nix)
+1. There's [dream2nix](https://github.com/nix-community/dream2nix) for TypeScript
 
    - I [packaged](https://github.com/objectionary/try-phi/blob/beeae361822be7db7cb3bb4bb469c9c74a51cff6/front/flake.nix#L33) try-phi front end with it, following this [tutorial](https://johns.codes/blog/building-typescript-node-apps-with-nix#dream2nix)
 
@@ -246,7 +296,6 @@
    - Create a `devShells.stack-shell = {ghcVersion} : ....` by following the appropriate section of [docs](https://docs.haskellstack.org/en/stable/nix_integration/#external-c-libraries-through-a-shellnix-file) (might be just `{ghc}`)
    - Create a `stack.nix` and use there `flake-compat` with `.stack-shell`
       - [Example](https://github.com/br4ch1st0chr0n3/cachix/blob/17efcd60abe547d33bb2ccc63b561797a94e5b46/stack.nix)
-
 
 ### Installation
 
@@ -295,6 +344,8 @@
 
      1. Choose to squash the latest commits
 
+- `git rebase -Xtheirs another_branch` - to favor current branch over `another_branch` - [src](https://demisx.github.io/git/rebase/2015/07/02/git-rebase-keep-my-branch-changes.html)
+
 ## GitHub
 
 1. GitHub dislikes `nix develop` and `nix-shel`. You should run commands via `nix develop -c bash -c 'command'`
@@ -305,7 +356,7 @@
 
    - Use composite-actions-specific [syntax](https://docs.github.com/en/actions/creating-actions/metadata-syntax-for-github-actions#runs-for-composite-actions)
 
-1. Which variables are available to acomposite action?
+1. Which variables are available to a composite action?
 
    - `env`, but [not](https://stackoverflow.com/a/70111134) `secrets`
 
@@ -319,6 +370,13 @@
 
    - otherwise, fails with `error: src refspec branch-name does not match any`
 
+1. Defining objects:
+   1. for [matrix](https://docs.github.com/en/actions/learn-github-actions/expressions#example-returning-a-json-object)
+   1. for [general purpose](https://docs.github.com/en/actions/using-jobs/defining-outputs-for-jobs#example-defining-outputs-for-a-job)
+      - output value should be a [string](https://docs.github.com/en/actions/learn-github-actions/contexts#needs-context)
+      - read a config - [SO](https://stackoverflow.com/a/73639034)
+        - sample [action](https://github.com/br4ch1st0chr0n3/nix-vscode-marketplace/actions/runs/3160375278/workflow)
+
 ## Docker
 
 1. Caching [trick](https://fastapi.tiangolo.com/deployment/docker/#docker-cache) - Basically, you should copy the least volatile files like `package.json` and use them as much ASAP, and the most volatile ones like general source code as late as possible.
@@ -327,7 +385,24 @@
 
 1. [Ports](https://docs.docker.com/config/containers/container-networking/#published-ports)
 
-## Shell
+1. There's [docker-lock](https://github.com/safe-waters/docker-lock), but we'd better [buildLayeredImage](https://github.com/NixOS/nixpkgs/blob/master/pkgs/build-support/docker/examples.nix)
+
+## Direnv
+
+- run direnv in a separate process - [src](https://dev.to/allenap/some-direnv-best-practices-actually-just-one-4864)
+
+- it has a wiki - [src](https://github.com/direnv/direnv/wiki)
+
+## PureScript
+
+1. [Halogen](https://purescript-halogen.github.io/purescript-halogen/index.html)
+
+1. Tests
+
+   - [purescript-spec](https://pursuit.purescript.org/packages/purescript-spec/7.0.0)
+   - [example](https://github.com/citizennet/purescript-httpure/blob/1a2e1343cc272928a0e312bbe41791008089ee11/test/Test/HTTPure/BodySpec.purs#L37)
+
+## Shell/Bash
 
 1. Explain shell commands - [src](https://explainshell.com/explain?cmd=tar%20xzvf%20archive.tar.gz)
 
@@ -337,10 +412,50 @@
    (cd child && echo "hello")
    ```
 
+1. `bash` is a superset of `sh`. So, some commands may work differently there - [src](https://www.geeksforgeeks.org/difference-between-sh-and-bash/)
+
+1. `echo $array_name` outputs the first element of array
+   1. Need to print "${array_name[@]}"
+
+1. `set -euxo pipefail` - bash strict mode - [src](https://gist.github.com/mohanpedala/1e2ff5661761d3abd0385e8223e16425#set--o-pipefail)
+   - `fish` doesn't have such flags yet - see [issue](https://github.com/fish-shell/fish-shell/issues/510)
+
+1. `mktemp` - to create a temp file or dir - [src](https://code-maven.com/create-temporary-directory-on-linux-using-bash)
+
+1. `xargs` - construct an argument list - [src](https://www.ibm.com/docs/en/zos/2.3.0?topic=descriptions-xargs-construct-argument-list-run-command)
+
+## Text processing
+
+1. `awk` is a nice tool - [src](https://www.gnu.org/software/gawk/manual/gawk.html)
+   1. multiline [matches](https://stackoverflow.com/a/44547769)
+
+1. [jq](https://www.baeldung.com/linux/jq-command-json) - for JSON
+   - online [editor](https://jqplay.org/s/ekYvnaA-7IK)
+   - [variables](https://stackoverflow.com/a/34747439)
+   - array construction - [devdocs](https://devdocs.io/jq/index#Array/ObjectValueIterator:.[])
+
 ## VSCodium
 
 1. We can add compound tasks in VS Code - [src](https://code.visualstudio.com/docs/editor/tasks#_compound-tasks)
 
-## Questions
+1. `PAT` for GitHub should have permissions `read:user, repo, user:email, workflow` (its [checks](https://github.com/microsoft/vscode-pull-request-github/issues/3847#issue-1335886580))
 
-1. What's the difference between flake's package and a derivation?
+## Linux
+
+- One can set a [cron](https://linuxhint.com/cron_jobs_complete_beginners_tutorial/) job to run e.g., `@reboot` or `@hourly`
+
+- [direnv](https://github.com/direnv/direnv/wiki) wiki!
+
+- Ignoring errors - [man](https://www.baeldung.com/linux/bash-errors)
+
+## DevX
+
+In a project, there are `solid` parts - IDE, environment, helper scripts, tasks - this should be built to make the most convenient conditions for working on `soft` parts - the code
+
+## Yandex Cloud
+
+- [Иерархия ресурсов Yandex Cloud](https://cloud.yandex.ru/docs/resource-manager/concepts/resources-hierarchy)       
+
+## Pending Questions
+
+1. How to get size of a project in terms of its nix store paths?
