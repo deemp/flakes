@@ -14,7 +14,9 @@ This repo contains a `Nix` [eDSL](https://wiki.haskell.org/Embedded_domain_speci
 
 - [language definition](.nix/hcl.nix)
 - [sample expressions](.nix/test-data.nix) used in tests
-- [scripts](.nix/tf-tools.nix) to generate `.tf` files from the given `Nix` expressions
+- [scripts](.nix/tf-tools.nix)
+  - to generate Terraform files from the given `Nix` expressions
+  - to naively convert the existing Terraform files into `.nix` files
 
 ## Prerequisites
 
@@ -259,7 +261,7 @@ resource "docker_container" "try_app_python" {
 
 Overall, we can notice that definitely a lot of expressions have almost complete duplicates. We believe that whenever this is the case, such expressions should be generated from DRY Nix code.
 
-## Run tests
+## Tests
 
 Enter the repo
 
@@ -267,19 +269,19 @@ Enter the repo
 git clone https://github.com/br4ch1st0chr0n3/terrafix
 ```
 
-Running the tests will write into `.tf` files the expressions generated from [test-data](test-data.nix)
+Running the tests will write into Terraform files expressions generated from [test-data](test-data.nix). Also, the tests will quite naively translate these expressions back into Nix.
 
 ```sh
 nix run .#runTests
 ```
 
-To run individual tests, see the outputs of
+To run the individual tests, see the outputs of
 
 ```sh
 nix flake show
 ```
 
-And then run
+And then run, e.g:
 
 ```sh
 nix run .#testDocs

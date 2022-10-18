@@ -3,3 +3,4 @@ result
 *.tf
 *.tfvars
 .terraform*
+tf2nix

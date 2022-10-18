@@ -3,7 +3,7 @@ let
   inherit (drv-tools.functions.${system})
     mkShellApp mkBin framedBrackets framedBrackets_ concatStringsNewline;
   inherit (pkgs.lib.attrsets) mapAttrsToList;
-  inherit (import ./tf-tools.nix { inherit pkgs system drv-tools; }) writeFiles;
+  inherit (import ./tf-tools.nix { inherit pkgs system drv-tools; }) writeFiles tf2nix;
 
   testData = (import ./test-data.nix { inherit pkgs system; });
 
@@ -23,6 +23,12 @@ let
     testYandexCloud = with testData; writeFiles [
       { expr = ycMain; filePath = "yc/main.tf"; }
     ];
+
+    # have lexicographically greater names than tests writing TFs
+    # as the below tests depend on the results of the above tests
+    testDocs2Nix = tf2nix "tf2nix" [ "docs/main.tf" "docs/variables.tf" "docs/terraform.tfvars" ];
+    testDocker2Nix = tf2nix "tf2nix" [ "docker/main.tf" "docker/variables.tf" "docker/terraform.tfvars" ];
+    testYandexCloud2Nix = tf2nix "tf2nix" [ "yc/main.tf" ];
   };
 
   runTests = mkShellApp {
