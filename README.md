@@ -28,7 +28,7 @@ This repo contains a `Nix` [eDSL](https://wiki.haskell.org/Embedded_domain_speci
 
 ## Sample test
 
-This is a part of [test expressions](.nix/test-data.nix). This case is implemented [here](https://github.com/br4ch1st0chr0n3/devops-labs/blob/80978ecd1826548904e442e5fb428f2127748be7/.nix/terraform/docker.nix#L62). The below Nix snippets are in `let in` blocks to have a better syntax highlighting.
+This is one of the [test expressions](.nix/test-data.nix). It is taken from [here](https://github.com/br4ch1st0chr0n3/devops-labs/blob/80978ecd1826548904e442e5fb428f2127748be7/.nix/terraform/docker.nix). The below Nix snippets are in `let in` blocks to have a better syntax highlighting.
 
 There are 2 apps: `app_purescript` and `app_python`. Each of them has a server written in corresponding language, and these servers show the current time in a browser. Their Docker containers were pushed to Docker Hub. On a host, these apps are under the directories `./app_purescript` and `./app_python`. In Docker containers, each app's code is placed under the `/app` directory.
 
