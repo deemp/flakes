@@ -33,9 +33,9 @@ This repo contains a `Nix` [eDSL](https://wiki.haskell.org/Embedded_domain_speci
 
 ## Sample test
 
-This is one of the [test expressions](.nix/test-data.nix). It is taken from [here](https://github.com/br4ch1st0chr0n3/devops-labs/blob/80978ecd1826548904e442e5fb428f2127748be7/.nix/terraform/docker.nix). The below Nix snippets are in `let in` blocks to have a better syntax highlighting.
+This is one of the [test expressions](.nix/test-data.nix). It's taken from [here](https://github.com/br4ch1st0chr0n3/devops-labs/blob/d40ddd922b33d9639a76cd2d028d4f753a5d04a3/.nix/terraform/docker.nix#L1). The below Nix snippets are in `let in` blocks to have a better syntax highlighting.
 
-There are 2 apps: `app_purescript` and `app_python`. Each of them has a server written in corresponding language, and these servers show the current time in a browser. Their Docker containers were pushed to Docker Hub. On a host, these apps are under the directories `./app_purescript` and `./app_python`. In Docker containers, each app's code is placed under the `/app` directory.
+There are 2 apps: `app_purescript` and `app_python`. Each of them has a server written in a corresponding language, and these servers show the current time in a browser. Their Docker containers were pushed to Docker Hub. On a host, these apps are under the directories `./app_purescript` and `./app_python`. In Docker containers, each app's code is placed under the `/app` directory.
 
 There is some data that is needed to run the apps. This data is described in `dockerVariables`. Here, notable fields are: `DOCKER_PORT` - internal port inside a Docker container, `HOST` - the address of a host on which to run the container, `NAME` - a new name for a container, `PORT` - the external port. It is worth to mention that all fields of the object in `type` are the same for both apps, except for the `HOST_PORT`. Also, the names of their variables differ. We can use `Nix` functions to use the same template inside `dockerVariables` to declare the variables for both apps:
 
