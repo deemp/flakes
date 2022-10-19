@@ -306,7 +306,7 @@ There are some HCL constructs that aren't yet supported. To name a few:
 - [ ] [Conditional expressions](https://developer.hashicorp.com/terraform/language/expressions/conditionals)
 - They require making conditional accessors or merging accessors for objects in both options
 - [ ] Possibly, some [built-in](https://developer.hashicorp.com/terraform/language/functions) functions
-- For now, they're all constructed using simple language constructs. It's highly likely (and I haven't yet checked) that some of them use more advanced constructs
+- For now, they're all constructed using simple language constructs. It's highly likely that some of them use more advanced constructs (to be checked)
 - [ ] Output variables
 - Need a function that will extract them from blocks
 - [ ] Indices and [splat expressions](https://www.terraform.io/language/expressions/references#references-to-resource-attributes)
@@ -337,7 +337,7 @@ There are some HCL constructs that aren't yet supported. To name a few:
       image = config.resource.hcloud_server.myserver.image;
     ```
 
-    However, I'm not sure if in `.json` it will become an `image.object config.resource.hcloud` ... .
+    However, the author is not sure if in `.json` it won't become a string stored in `config.resource.hcloud_server.myserver.image`.
 
 1. `terrafix` can (naively) render all Terraform's standard functions. There seems to be no such functionality in `terranix`
 
