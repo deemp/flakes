@@ -13,7 +13,10 @@ This repo contains a `Nix` [eDSL](https://wiki.haskell.org/Embedded_domain_speci
 ## Repo contents
 
 - [language definition](.nix/hcl.nix)
-- [sample expressions](.nix/test-data.nix) used in tests
+  - eDSL implementation
+  - expressions for Terraform's built-in functions (see [Limitations](./README.md#limitations))
+  - anti-boilerplate functions
+- [expressions](.nix/test-data.nix) used in tests
 - [scripts](.nix/tf-tools.nix)
   - to generate Terraform files from the given `Nix` expressions
   - to naively convert the existing Terraform files into `.nix` files
@@ -297,6 +300,9 @@ The repo owner likes Nix and likes generating configs using this language.
 
 There are some HCL constructs that aren't yet supported. To name a few:
 
+- [ ] modules and output variables
+  - Modules should probably be implemented similarly to `mkBlocks`
+  - output variables - as `resources` and `variables`
 - [ ] [Conditional expressions](https://developer.hashicorp.com/terraform/language/expressions/conditionals)
   - They require making conditional accessors or merging accessors for objects in both options
 - [ ] Possibly, some [built-in](https://developer.hashicorp.com/terraform/language/functions) functions
