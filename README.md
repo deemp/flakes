@@ -301,16 +301,16 @@ The author likes Nix and likes generating configs using this language.
 There are some HCL constructs that aren't yet supported. To name a few:
 
 - [ ] modules and output variables
-  - Modules should probably be implemented similarly to `mkBlocks`
-  - output variables - as `resources` and `variables`
+- Modules should probably be implemented similarly to `mkBlocks`
+- output variables - as `resources` and `variables`
 - [ ] [Conditional expressions](https://developer.hashicorp.com/terraform/language/expressions/conditionals)
-  - They require making conditional accessors or merging accessors for objects in both options
+- They require making conditional accessors or merging accessors for objects in both options
 - [ ] Possibly, some [built-in](https://developer.hashicorp.com/terraform/language/functions) functions
-  - For now, they're all constructed using simple language constructs. It's highly likely (and I haven't yet checked) that some of them use more advanced constructs
+- For now, they're all constructed using simple language constructs. It's highly likely (and I haven't yet checked) that some of them use more advanced constructs
 - [ ] Output variables
-  - Need a function that will extract them from blocks
+- Need a function that will extract them from blocks
 - [ ] Indices and [splat expressions](https://www.terraform.io/language/expressions/references#references-to-resource-attributes)
-  - can pass them as special objects inside lists to accessors, like `some_list [_ast_]` to mean `some_list[*]`
+- can pass them as special objects inside lists to accessors, like `some_list [_ast_]` to mean `some_list[*]`
 - [ ] `__functor` like in accessors to allow continuing the expressions after functions like `values(aws_instance.example)[*].id`
 - [ ] `for` [expressions and conditionals](https://www.terraform.io/language/expressions/for)
 
@@ -320,24 +320,24 @@ There are some HCL constructs that aren't yet supported. To name a few:
 
 1. `terrafix` is an eDSL and it doesn't suggest any new infrastructure or mechanisms. It is a means to produce `Terraform` code (`.tf`, `.tfvars`) from `Nix` code. On the other hand, `terranix` suggests a [module system](https://terranix.org/documentation/modules/), which is different from the Terraform's one, [documentation generation](https://terranix.org/), and it compiles to `.json`.
 
-1. In author's opinion, for debugging, finding the mapping between `.tf` files and `.nix` files is easier than between `.json` and `.nix`. Also, one may utilize Terraform's Language Server to find the errors in the generated code. In fact, `terrafix`  looks pretty similar to HCL, so there is a highly error-prone script to convert the existing Terraform files into `.nix`. It [worked](#tests) for simple examples though.
+1. In the author's opinion, for debugging, finding the mapping between `.tf` files and `.nix` files is easier than between `.json` and `.nix`. Also, one may utilize Terraform's Language Server to find the errors in the generated code. To add, `terrafix` looks pretty similar to HCL, so there is a highly error-prone script to convert the existing Terraform files into `.nix`. It [worked](#tests) for simple examples though.
 
 1. Currently, `terrafix` has similar syntactic sugar, and, hopefully, the same compile-time safety due to `accessors`. In `terrafix`, it's possible to use an accessor generated from previous blocks + add the missing fields:
 
-```nix
-  image = config.resource.hcloud_server.myserver.image "id";
-```
+    ```nix
+      image = config.resource.hcloud_server.myserver.image "id";
+    ```
 
-This will look like `image = config.resource.hcloud_server.myserver.image.id` in the Terraform code.
-Additionally, there will be a Nix compile time error if such an accessor is missing. Please, search the word `accessor` on the [README](.#) page of `terrafix` to see more examples.
+    This will look like `image = config.resource.hcloud_server.myserver.image.id` in the Terraform code.
+    Additionally, there will be a Nix compile time error if such an accessor is missing. Please, search the word `accessor` on the [README](.#) page of `terrafix` to see more examples.
 
-In `terranix`, one [may write](https://terranix.org/documentation/terranix-vs-hcl/)
+    In `terranix`, one [may write](https://terranix.org/documentation/terranix-vs-hcl/)
 
-```nix
-  image = config.resource.hcloud_server.myserver.image;
-```
+    ```nix
+      image = config.resource.hcloud_server.myserver.image;
+    ```
 
-However, I'm not sure if in `.json` it will become an `image.object config.resource.hcloud` ... .
+    However, I'm not sure if in `.json` it will become an `image.object config.resource.hcloud` ... .
 
 1. `terrafix` can (naively) render all Terraform's standard functions. There seems to be no such functionality in `terranix`
 
