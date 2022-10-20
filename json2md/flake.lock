@@ -89,11 +89,11 @@
       },
       "locked": {
         "dir": "source-flake/dream2nix",
-        "lastModified": 1666146888,
-        "narHash": "sha256-uOEStbU6uLmIMuQtiOKs/TA9xGBG+Ubt6G0Euerk7YA=",
+        "lastModified": 1666286198,
+        "narHash": "sha256-R0GHutZeTO0H3eiBKdWJZ+zBxpPE/dmTD0v1/WPU8Ik=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "a0078d74d2b2f6a753f8a07159e95ab0f95782eb",
+        "rev": "627d2d4f1424da719da5861c0f736533962ecc51",
         "type": "github"
       },
       "original": {
@@ -163,11 +163,11 @@
       },
       "locked": {
         "dir": "source-flake/flake-utils",
-        "lastModified": 1666146888,
-        "narHash": "sha256-uOEStbU6uLmIMuQtiOKs/TA9xGBG+Ubt6G0Euerk7YA=",
+        "lastModified": 1666286198,
+        "narHash": "sha256-R0GHutZeTO0H3eiBKdWJZ+zBxpPE/dmTD0v1/WPU8Ik=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "a0078d74d2b2f6a753f8a07159e95ab0f95782eb",
+        "rev": "627d2d4f1424da719da5861c0f736533962ecc51",
         "type": "github"
       },
       "original": {
