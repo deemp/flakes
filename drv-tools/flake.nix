@@ -11,7 +11,7 @@
       pkgs = nixpkgs.legacyPackages.${system};
       inherit (pkgs.lib.attrsets) recursiveUpdate;
       inherit (builtins) foldl' attrValues mapAttrs attrNames readDir map;
-      inherit (pkgs.lib.strings) concatStringsSep;
+      inherit (pkgs.lib.strings) concatStringsSep concatMapStringsSep;
       # if a set's attribute values are all sets, merge these values recursively
       # Note that the precedence order is undefined, so it's better to 
       # have unique values at each set level
