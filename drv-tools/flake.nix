@@ -149,8 +149,11 @@
       framedBrackets = framedBrackets_ "\n\n" "\n\n";
       framedBrackets_ = pref: suff: framed_ "${pref}[ " " ]${suff}";
 
-      # concat strings separated by a newline character
-      concatStringsNewline = dirs: concatStringsSep "\n" dirs;
+      # concat strings and separate them by a newline character
+      concatStringsNewline = concatStringsSep "\n";
+
+      # concatMap strings and separate them by a newline character
+      concatMapStringsNewline = concatMapStringsSep "\n";
 
       # ignore shellcheck when writing a shell application
       mkShellApp = args@{ name, text, runtimeInputs ? [ ], longDescription ? "", description ? "" }:
@@ -294,6 +297,7 @@
           mkDevShellsWithFish
           mkShellApp
           mkShellApps
+          concatMapStringsNewline
           concatStringsNewline
           readDirectories
           readFiles
