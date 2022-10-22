@@ -8,7 +8,7 @@ Nix flakes for tools that I use
 
 ## Pushing conventions
 
-1. before a commit:
+1. Before a commit:
    - Use `flakes-toggle-in-each-dir` to switch to `path:github` if you used `path:./...`
 
 1. Commit and push
