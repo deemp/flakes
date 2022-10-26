@@ -29,7 +29,7 @@ This repo contains a `Nix` [eDSL](https://wiki.haskell.org/Embedded_domain_speci
   - [Learn Nix in Y minutes](https://learnxinyminutes.com/docs/nix/)
 
 - (Optionally) Understanding of Flakes
-  - [Flakes](https://github.com/br4ch1st0chr0n3/the-little-things/blob/7f9703e2d7f8a3cbf39344cddb7868421b4fcc6d/README.md#L17) info
+  - [Flakes](https://github.com/br4ch1st0chr0n3/the-little-things/blob/7f9703e2d7f8a3cbf39344cddb7868421b4fcc6d/README.md#flakes) info
 
 ## Sample test
 
