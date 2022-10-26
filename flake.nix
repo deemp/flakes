@@ -25,9 +25,9 @@
         tests = (import ./.nix/tests.nix { inherit pkgs system drv-tools; });
       in
       {
-        functions = tfTools;
+        functions = tfTools.functions;
         inherit hcl;
-        packages = tests // {
+        packages = tests // tfTools.packages // {
           pushToCachix = flakesUtils.flakesPushToCachix;
           updateLocks = flakesUtils.flakesUpdate;
         };

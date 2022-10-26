@@ -3,7 +3,7 @@ let
   inherit (drv-tools.functions.${system})
     mkShellApp mkBin framedBrackets framedBrackets_ concatStringsNewline;
   inherit (pkgs.lib.attrsets) mapAttrsToList;
-  inherit (import ./tf-tools.nix { inherit pkgs system drv-tools; }) writeFiles tf2nix;
+  inherit ((import ./tf-tools.nix { inherit pkgs system drv-tools; }).functions) writeFiles tf2nix;
 
   testData = (import ./test-data.nix { inherit pkgs system; });
 
@@ -31,7 +31,7 @@ let
     testYandexCloud2Nix = tf2nix "tf2nix" [ "yc/main.tf" ];
   };
 
-  runTests = mkShellApp {
+  testCases = mkShellApp {
     name = "run-tests";
     text = concatStringsNewline (
       mapAttrsToList
@@ -50,5 +50,5 @@ let
   };
 in
 {
-  inherit runTests;
+  inherit testCases;
 } // tests

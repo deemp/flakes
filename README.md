@@ -8,18 +8,18 @@ This repo contains a `Nix` [eDSL](https://wiki.haskell.org/Embedded_domain_speci
 
 - [terranix](https://github.com/terranix/terranix) - a popular tool that generates `terraform.json`
 - [nixform](https://github.com/brainrake/nixform) - another tool that generates `terraform.json` from a Nix eDSL
-- [xinomoft](https://github.com/kreisys/xinomorf) - a pretty outdated tool that generates terraform configurations
+- [xinomorf](https://github.com/kreisys/xinomorf) - a pretty outdated tool that generates terraform configurations
 
 ## Repo contents
 
 - [language definition](.nix/hcl.nix)
   - eDSL implementation
-  - expressions for Terraform's built-in functions (see [Limitations](./README.md#limitations))
+  - expressions for Terraform's built-in functions (see [Limitations](#limitations))
   - anti-boilerplate functions
 - [expressions](.nix/test-data.nix) used in tests
 - [scripts](.nix/tf-tools.nix)
   - to generate Terraform files from the given `Nix` expressions
-  - to naively convert the existing Terraform files into `.nix` files
+  - to naively convert the existing Terraform files into `.nix` files (see [Tests](#tests))
 
 ## Prerequisites
 
@@ -266,16 +266,22 @@ Overall, we can notice that definitely a lot of expressions have almost complete
 
 ## Tests
 
-Enter the repo
+1. Enter the repo
+
+  ```sh
+  git clone https://github.com/br4ch1st0chr0n3/terrafix
+  ```
+
+1. Run tests. This will also write into Terraform files expressions generated from [test-data](test-data.nix). Also, the tests will quite naively translate these expressions back into Nix under './tf2nix'
 
 ```sh
-git clone https://github.com/br4ch1st0chr0n3/terrafix
+nix run .#testCases
 ```
 
-Running the tests will write into Terraform files expressions generated from [test-data](test-data.nix). Also, the tests will quite naively translate these expressions back into Nix.
+1. Convert a `.tf` file into a `.nix` one and get the output under `./converted`:
 
 ```sh
-nix run .#runTests
+nix run .#convertTf2Nix docker/main.tf
 ```
 
 To run the individual tests, see the outputs of
@@ -284,7 +290,7 @@ To run the individual tests, see the outputs of
 nix flake show
 ```
 
-And then run, e.g:
+And then run one of them:
 
 ```sh
 nix run .#testDocs

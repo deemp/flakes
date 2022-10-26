@@ -1,6 +1,6 @@
 { pkgs, system, drv-tools }:
 let
-  inherit (drv-tools.functions.${system}) mkShellApp framedBrackets concatStringsNewline;
+  inherit (drv-tools.functions.${system}) mkShellApp framedBrackets concatStringsNewline mkBin;
   inherit (pkgs.lib.strings) escapeShellArg concatMapStringsSep;
   inherit (pkgs.lib.lists) unique;
   inherit (builtins) isList dirOf map isString;
@@ -55,35 +55,36 @@ let
     let
       dirs = unique (map (filePath: "${outDir}/${dirOf filePath}") filePaths);
       f = concatMapStringsSep "\n";
-      out = filePath: "'${outDir}/${filePath}'";
-      transform = tfPath: nixPath: assert isString tfPath && isString nixPath; ''
-        printf 'let\n' > '${nixPath}'
-        sed -r '
-          s/(\w+)\s+"/\1./g; 
-          s/(\s*)(\w+)\s*=\s*(.+)("|\w|]|})$/\1\2 = \3\4;/g; 
-          H;1h;$!d;x; s/}\n\n*\)/})/g;  
-          s/(\w)\s+=\s+\{/\1 = a {/g; 
-          s/("|^(\s*)(\w+))\s+\{/\1 = b {/g;
-          s/(\]|\)|\})\n/\1;\n/g; 
-          s/(\w+)"\s+"(\w+)/\1.\2/g; 
-          s/(\w+)"\s+=/\1 =/g;
-          s/(\n\s+\w+)\s+\{/\1 = b {/g;
-          s/(}|")\s*,/\1/g;
-          ' '${tfPath}' >> '${nixPath}'
-        printf '\nin' >> '${nixPath}'
-      '';
+      out = filePath: ''${outDir}/${filePath}'';
+      transform = tfPath: nixPath: assert isString tfPath && isString nixPath;
+        ''
+          printf 'let\n' > "${nixPath}"
+          sed -r '
+            s/(\w+)\s+"/\1./g; 
+            s/(\s*)(\w+)\s*=\s*(.+)("|\w|]|})$/\1\2 = \3\4;/g; 
+            H;1h;$!d;x; s/}\n\n*\)/})/g;  
+            s/(\w)\s+=\s+\{/\1 = a {/g; 
+            s/("|^(\s*)(\w+))\s+\{/\1 = b {/g;
+            s/(\]|\)|\})\n/\1;\n/g; 
+            s/(\w+)"\s+"(\w+)/\1.\2/g; 
+            s/(\w+)"\s+=/\1 =/g;
+            s/(\n\s+\w+)\s+\{/\1 = b {/g;
+            s/(}|")\s*,/\1/g;
+            ' "${tfPath}" >> "${nixPath}"
+          printf '\nin' >> "${nixPath}"
+        '';
     in
     mkShellApp {
       name = "tf2nix";
       text = concatStringsNewline [
-        (f (dir: "mkdir -p '${dir}'") dirs)
+        (f (dir: ''mkdir -p "${dir}"'') dirs)
         ("printf '${framedBrackets "wrote temporary files"}'")
-        (f (filePath: ''cat ${filePath} > ${out filePath} && printf '%s\n' ${out filePath}'') filePaths)
+        (f (filePath: ''cat "${filePath}" > "${out filePath}" && printf '%s\n' "${out filePath}"'') filePaths)
         ("printf '${framedBrackets "formatted files"}'")
-        (f (dir: "terraform fmt '${dir}'") dirs)
-        (f (filePath: transform (out filePath) "${out filePath}'.nix'") filePaths)
+        (f (dir: ''terraform fmt "${dir}"'') dirs)
+        (f (filePath: transform (out filePath) "${out filePath}.nix") filePaths)
         ("printf '${framedBrackets "removed temporary files"}'")
-        (f (filePath: ''rm ${out filePath} && printf "%s\n" ${out filePath}'') filePaths)
+        (f (filePath: ''rm "${out filePath}" && printf "%s\n" "${out filePath}"'') filePaths)
       ];
       runtimeInputs = [ pkgs.terraform pkgs.gnused ];
       longDescription = ''
@@ -91,7 +92,24 @@ let
         Put expressions in a file into `let in` blocks to reduce the amount of syntax errors
       '';
     };
+  # convert a given .tf file to Nix and write it under ./tmp
+  convertTf2Nix = let
+    out = "converted";
+    tf2nix_ = tf2nix out [ "$1" ];
+  in
+  mkShellApp {
+    name = "convert-tf-to-nix";
+    text = ''
+      mkdir -p "${out}/$(dirname "$1")"
+      ${mkBin tf2nix_} $1
+    '';
+  };
 in
 {
-  inherit writeTF writeTFs writeTfvars writeFiles_ writeFiles tf2nix;
+  functions = {
+    inherit writeTF writeTFs writeTfvars writeFiles_ writeFiles tf2nix;
+  };
+  packages = {
+    inherit convertTf2Nix;
+  };
 }
