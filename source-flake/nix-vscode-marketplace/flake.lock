@@ -21,11 +21,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1666815699,
-        "narHash": "sha256-Z22bdoA6lZDCYF+5p3yLdEG9aRKe24QGJymYiASej44=",
+        "lastModified": 1666891322,
+        "narHash": "sha256-ikyl+SNYilqFbDMvs6Ydvde6mKiuuQhAnAAXdxZG2Qg=",
         "owner": "br4ch1st0chr0n3",
         "repo": "vscodium-extensions",
-        "rev": "de7e6095b3e13de8d2319b5fe2b706dc298fa0ae",
+        "rev": "57e766fc1814312a8b88783917714e8e6f760cb6",
         "type": "github"
       },
       "original": {
