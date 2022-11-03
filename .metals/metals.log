@@ -1,0 +1,274 @@
+2022.11.01 00:06:04 INFO  tracing is disabled for protocol LSP, to enable tracing of incoming and outgoing JSON messages create an empty file at /home/eyjafjallajokull/Desktop/scala/.metals/lsp.trace.json or /home/eyjafjallajokull/.cache/metals/lsp.trace.json[0m
+2022.11.01 00:06:05 INFO  logging to file /home/eyjafjallajokull/Desktop/scala/.metals/metals.log[0m
+2022.11.01 00:06:05 INFO  Started: Metals version 0.11.9 in workspace '/home/eyjafjallajokull/Desktop/scala' for client Visual Studio Code 1.72.2.[0m
+2022.11.01 00:06:09 INFO  time: initialize in 3.37s[0m
+2022.11.01 00:06:12 WARN  Build server is not auto-connectable.[0m
+2022.11.01 00:06:12 WARN  no build tool detected in workspace '/home/eyjafjallajokull/Desktop/scala'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m
+2022.11.01 00:06:12 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/playground/ScalaPlayground.scala[0m
+2022.11.01 00:06:23 INFO  no build target found for /home/eyjafjallajokull/Desktop/scala/src/playground/ScalaPlayground.scala. Using presentation compiler with project's scala-library version: 3.2.0[0m
+2022.11.01 00:06:25 INFO  time: code lens generation in 10s[0m
+2022.11.01 00:06:25 INFO  time: code lens generation in 12s[0m
+2022.11.01 00:06:52 INFO  [0m
+2022.11.01 00:06:52 INFO  Template applied in /home/eyjafjallajokull/Desktop/scala/src/./hello-world[0m
+2022.11.01 00:06:52 INFO  [0m
+2022.11.01 00:06:52 INFO  time: ran 'giter8.Giter8' in 6.07s[0m
+2022.11.01 00:06:57 INFO  shutting down Metals[0m
+2022.11.01 00:07:19 INFO  tracing is disabled for protocol LSP, to enable tracing of incoming and outgoing JSON messages create an empty file at /home/eyjafjallajokull/Desktop/scala/.metals/lsp.trace.json or /home/eyjafjallajokull/.cache/metals/lsp.trace.json[0m
+2022.11.01 00:07:20 INFO  logging to file /home/eyjafjallajokull/Desktop/scala/.metals/metals.log[0m
+2022.11.01 00:07:20 INFO  Started: Metals version 0.11.9 in workspace '/home/eyjafjallajokull/Desktop/scala' for client Visual Studio Code 1.72.2.[0m
+2022.11.01 00:07:22 INFO  time: initialize in 2.11s[0m
+2022.11.01 00:07:25 WARN  Build server is not auto-connectable.[0m
+2022.11.01 00:07:25 WARN  no build tool detected in workspace '/home/eyjafjallajokull/Desktop/scala'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m
+Nov 01, 2022 12:07:25 AM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 2
+2022.11.01 00:07:25 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/hello-world/build.sbt[0m
+2022.11.01 00:07:25 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/playground/ScalaPlayground.scala[0m
+2022.11.01 00:07:30 INFO  no build target found for /home/eyjafjallajokull/Desktop/scala/src/hello-world/build.sbt. Using presentation compiler with project's scala-library version: 3.2.0[0m
+2022.11.01 00:07:30 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/hello-world/src/main/scala/Main.scala[0m
+Nov 01, 2022 12:07:30 AM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 5
+2022.11.01 00:07:32 INFO  time: code lens generation in 2s[0m
+2022.11.01 00:07:32 INFO  time: code lens generation in 2s[0m
+2022.11.01 00:07:32 INFO  time: code lens generation in 7.27s[0m
+Nov 01, 2022 12:09:04 AM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
+INFO: Unsupported notification method: $/setTrace
+2022.11.01 00:09:05 INFO  shutting down Metals[0m
+2022.11.01 00:09:12 INFO  tracing is disabled for protocol LSP, to enable tracing of incoming and outgoing JSON messages create an empty file at /home/eyjafjallajokull/Desktop/scala/.metals/lsp.trace.json or /home/eyjafjallajokull/.cache/metals/lsp.trace.json[0m
+2022.11.01 00:09:13 INFO  logging to file /home/eyjafjallajokull/Desktop/scala/.metals/metals.log[0m
+2022.11.01 00:09:13 INFO  Started: Metals version 0.11.9 in workspace '/home/eyjafjallajokull/Desktop/scala' for client Visual Studio Code 1.72.2.[0m
+2022.11.01 00:09:15 INFO  time: initialize in 2.04s[0m
+2022.11.01 00:09:18 WARN  Build server is not auto-connectable.[0m
+2022.11.01 00:09:18 WARN  no build tool detected in workspace '/home/eyjafjallajokull/Desktop/scala'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m
+2022.11.01 00:09:18 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/hello-world/src/main/scala/Main.scala[0m
+2022.11.01 00:09:18 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/playground/ScalaPlayground.scala[0m
+2022.11.01 00:09:23 INFO  no build target found for /home/eyjafjallajokull/Desktop/scala/src/hello-world/src/main/scala/Main.scala. Using presentation compiler with project's scala-library version: 3.2.0[0m
+Nov 01, 2022 12:09:24 AM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 1
+2022.11.01 00:09:26 INFO  time: code lens generation in 2.54s[0m
+2022.11.01 00:09:26 INFO  time: code lens generation in 2.52s[0m
+2022.11.01 00:09:26 INFO  time: code lens generation in 2.51s[0m
+2022.11.01 00:10:35 INFO  shutting down Metals[0m
+2022.11.01 00:10:56 INFO  tracing is disabled for protocol LSP, to enable tracing of incoming and outgoing JSON messages create an empty file at /home/eyjafjallajokull/Desktop/scala/.metals/lsp.trace.json or /home/eyjafjallajokull/.cache/metals/lsp.trace.json[0m
+2022.11.01 00:10:58 INFO  logging to file /home/eyjafjallajokull/Desktop/scala/.metals/metals.log[0m
+2022.11.01 00:10:58 INFO  Started: Metals version 0.11.9 in workspace '/home/eyjafjallajokull/Desktop/scala' for client Visual Studio Code 1.72.2.[0m
+2022.11.01 00:11:20 INFO  tracing is disabled for protocol LSP, to enable tracing of incoming and outgoing JSON messages create an empty file at /home/eyjafjallajokull/Desktop/scala/.metals/lsp.trace.json or /home/eyjafjallajokull/.cache/metals/lsp.trace.json[0m
+2022.11.01 00:11:20 INFO  tracing is disabled for protocol LSP, to enable tracing of incoming and outgoing JSON messages create an empty file at /home/eyjafjallajokull/Desktop/scala/.metals/lsp.trace.json or /home/eyjafjallajokull/.cache/metals/lsp.trace.json[0m
+2022.11.01 00:11:21 INFO  logging to file /home/eyjafjallajokull/Desktop/scala/.metals/metals.log[0m
+2022.11.01 00:11:21 INFO  Started: Metals version 0.11.9 in workspace '/home/eyjafjallajokull/Desktop/scala' for client Visual Studio Code 1.72.2.[0m
+2022.11.01 00:11:21 INFO  logging to file /home/eyjafjallajokull/Desktop/scala/.metals/metals.log[0m
+2022.11.01 00:11:21 INFO  Started: Metals version 0.11.9 in workspace '/home/eyjafjallajokull/Desktop/scala' for client Visual Studio Code 1.72.2.[0m
+2022.11.01 00:11:27 ERROR org.h2.jdbc.JdbcSQLNonTransientConnectionException: Database may be already in use: "Locked by another process: /home/eyjafjallajokull/Desktop/scala/.metals/metals.lock.db". Possible solutions: close all other connection(s); use the server mode [90020-214]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:678)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:477)
+	at org.h2.message.DbException.get(DbException.java:223)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.store.FileLock.getExceptionAlreadyInUse(FileLock.java:434)
+	at org.h2.store.FileLock.lockFile(FileLock.java:326)
+	at org.h2.store.FileLock.lock(FileLock.java:110)
+	at org.h2.engine.Database.<init>(Database.java:315)
+	at org.h2.engine.Engine.openSession(Engine.java:92)
+	at org.h2.engine.Engine.openSession(Engine.java:222)
+	at org.h2.engine.Engine.createSession(Engine.java:201)
+	at org.h2.engine.SessionRemote.connectEmbeddedOrServer(SessionRemote.java:338)
+	at org.h2.jdbc.JdbcConnection.<init>(JdbcConnection.java:122)
+	at org.h2.Driver.connect(Driver.java:59)
+	at java.sql.DriverManager.getConnection(DriverManager.java:681)
+	at java.sql.DriverManager.getConnection(DriverManager.java:229)
+	at scala.meta.internal.metals.Tables.tryUrl(Tables.scala:145)
+	at scala.meta.internal.metals.Tables.persistentConnection(Tables.scala:138)
+	at scala.meta.internal.metals.Tables.tryAutoServer(Tables.scala:81)
+	at scala.meta.internal.metals.Tables.connect(Tables.scala:48)
+	at scala.meta.internal.metals.Tables.connection(Tables.scala:74)
+	at scala.meta.internal.metals.Tables.$anonfun$fingerprints$1(Tables.scala:39)
+	at scala.meta.internal.metals.Fingerprints.load(Fingerprints.scala:52)
+	at scala.meta.internal.metals.MetalsLanguageServer.$anonfun$initialize$2(MetalsLanguageServer.scala:864)
+	at scala.concurrent.Future$.$anonfun$apply$1(Future.scala:678)
+	at scala.concurrent.impl.Promise$Transformation.run(Promise.scala:467)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.lang.Thread.run(Thread.java:833)
+[0m
+2022.11.01 00:11:28 INFO  time: initialize in 6.79s[0m
+2022.11.01 00:11:32 INFO  time: initialize in 11s[0m
+2022.11.01 00:11:36 WARN  Build server is not auto-connectable.[0m
+2022.11.01 00:11:36 WARN  no build tool detected in workspace '/home/eyjafjallajokull/Desktop/scala'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m
+2022.11.01 00:11:36 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/hello-world/src/main/scala/Main.scala[0m
+Nov 01, 2022 12:11:36 AM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 2
+Nov 01, 2022 12:11:36 AM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 3
+Nov 01, 2022 12:11:36 AM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 1
+2022.11.01 00:11:42 INFO  no build target found for /home/eyjafjallajokull/Desktop/scala/src/hello-world/src/main/scala/Main.scala. Using presentation compiler with project's scala-library version: 3.2.0[0m
+2022.11.01 00:11:42 INFO  shutting down Metals[0m
+java.util.concurrent.RejectedExecutionException: Task Future(<not completed>) rejected from java.util.concurrent.ThreadPoolExecutor@3a069d8b[Shutting down, pool size = 2, active threads = 1, queued tasks = 0, completed tasks = 120]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$AbortPolicy.rejectedExecution(ThreadPoolExecutor.java:2065)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.reject(ThreadPoolExecutor.java:833)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.execute(ThreadPoolExecutor.java:1365)
+	at scala.concurrent.impl.ExecutionContextImpl.execute(ExecutionContextImpl.scala:21)
+	at scala.concurrent.impl.Promise$Transformation.submitWithValue(Promise.scala:429)
+	at scala.concurrent.impl.Promise$DefaultPromise.submitWithValue(Promise.scala:338)
+	at scala.concurrent.impl.Promise$DefaultPromise.tryComplete0(Promise.scala:285)
+	at scala.concurrent.impl.Promise$Transformation.handleFailure(Promise.scala:444)
+	at scala.concurrent.impl.Promise$Transformation.run(Promise.scala:506)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+2022.11.01 00:11:51 INFO  tracing is disabled for protocol LSP, to enable tracing of incoming and outgoing JSON messages create an empty file at /home/eyjafjallajokull/Desktop/scala/.metals/lsp.trace.json or /home/eyjafjallajokull/.cache/metals/lsp.trace.json[0m
+2022.11.01 00:11:52 INFO  logging to file /home/eyjafjallajokull/Desktop/scala/.metals/metals.log[0m
+2022.11.01 00:11:52 INFO  Started: Metals version 0.11.9 in workspace '/home/eyjafjallajokull/Desktop/scala' for client Visual Studio Code 1.72.2.[0m
+2022.11.01 00:11:54 INFO  time: initialize in 2.06s[0m
+2022.11.01 00:11:58 WARN  Build server is not auto-connectable.[0m
+2022.11.01 00:11:58 WARN  no build tool detected in workspace '/home/eyjafjallajokull/Desktop/scala'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m
+2022.11.01 00:11:58 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/hello-world/src/main/scala/Main.scala[0m
+2022.11.01 00:12:03 INFO  no build target found for /home/eyjafjallajokull/Desktop/scala/src/hello-world/src/main/scala/Main.scala. Using presentation compiler with project's scala-library version: 3.2.0[0m
+2022.11.01 00:12:05 INFO  time: code lens generation in 7.08s[0m
+2022.11.01 00:14:42 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/hello-world/src/main/scala/Main.scala[0m
+2022.11.01 00:14:56 WARN  Build server is not auto-connectable.[0m
+2022.11.01 00:14:59 WARN  Build server is not auto-connectable.[0m
+2022.11.01 00:15:04 WARN  no build tool detected in workspace '/home/eyjafjallajokull/Desktop/scala'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m
+2022.11.01 00:15:07 WARN  no build tool detected in workspace '/home/eyjafjallajokull/Desktop/scala'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m
+2022.11.01 00:15:25 INFO  Attempting to connect to the build server...[0m
+2022.11.01 00:15:25 INFO  No build server found[0m
+2022.11.01 00:15:25 INFO  time: Connected to build server in 7ms[0m
+2022.11.01 00:15:25 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/hello-world/src/main/scala/Main.scala[0m
+2022.11.01 00:16:07 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/hello-world/src/main/scala/Main.scala[0m
+2022.11.01 00:16:12 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/hello-world/src/main/scala/Main.scala[0m
+Nov 01, 2022 12:16:14 AM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint handleCancellation
+WARNING: Unmatched cancel notification for request id 104
+2022.11.01 00:16:15 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/hello-world/src/main/scala/Main.scala[0m
+2022.11.01 00:16:19 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/hello-world/src/main/scala/Main.scala[0m
+2022.11.01 00:16:21 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/hello-world/src/main/scala/Main.scala[0m
+2022.11.01 00:16:23 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/hello-world/src/main/scala/Main.scala[0m
+Downloading https://repo1.maven.org/maven2/org/scalameta/scalafmt-core_2.13/3.5.3/scalafmt-core_2.13-3.5.3.pom
+Downloaded https://repo1.maven.org/maven2/org/scalameta/scalafmt-core_2.13/3.5.3/scalafmt-core_2.13-3.5.3.pom
+Downloading https://repo1.maven.org/maven2/org/scalameta/scalafmt-sysops_2.13/3.5.3/scalafmt-sysops_2.13-3.5.3.pom
+Downloading https://repo1.maven.org/maven2/org/scalameta/scalafmt-config_2.13/3.5.3/scalafmt-config_2.13-3.5.3.pom
+Downloading https://repo1.maven.org/maven2/org/scalameta/scalameta_2.13/4.5.5/scalameta_2.13-4.5.5.pom
+Downloaded https://repo1.maven.org/maven2/org/scalameta/scalafmt-sysops_2.13/3.5.3/scalafmt-sysops_2.13-3.5.3.pom
+Downloaded https://repo1.maven.org/maven2/org/scalameta/scalameta_2.13/4.5.5/scalameta_2.13-4.5.5.pom
+Downloaded https://repo1.maven.org/maven2/org/scalameta/scalafmt-config_2.13/3.5.3/scalafmt-config_2.13-3.5.3.pom
+Downloading https://repo1.maven.org/maven2/com/geirsson/metaconfig-core_2.13/0.10.0/metaconfig-core_2.13-0.10.0.pom
+Downloading https://repo1.maven.org/maven2/com/geirsson/metaconfig-typesafe-config_2.13/0.10.0/metaconfig-typesafe-config_2.13-0.10.0.pom
+Downloading https://repo1.maven.org/maven2/org/scalameta/parsers_2.13/4.5.5/parsers_2.13-4.5.5.pom
+Downloading https://repo1.maven.org/maven2/org/scala-lang/scalap/2.13.8/scalap-2.13.8.pom
+Downloaded https://repo1.maven.org/maven2/com/geirsson/metaconfig-typesafe-config_2.13/0.10.0/metaconfig-typesafe-config_2.13-0.10.0.pom
+Downloaded https://repo1.maven.org/maven2/com/geirsson/metaconfig-core_2.13/0.10.0/metaconfig-core_2.13-0.10.0.pom
+Downloaded https://repo1.maven.org/maven2/org/scala-lang/scalap/2.13.8/scalap-2.13.8.pom
+Downloaded https://repo1.maven.org/maven2/org/scalameta/parsers_2.13/4.5.5/parsers_2.13-4.5.5.pom
+Downloading https://repo1.maven.org/maven2/org/scala-lang/scala-compiler/2.13.8/scala-compiler-2.13.8.pom
+Downloading https://repo1.maven.org/maven2/com/typesafe/config/1.4.1/config-1.4.1.pom
+Downloading https://repo1.maven.org/maven2/org/scalameta/trees_2.13/4.5.5/trees_2.13-4.5.5.pom
+Downloading https://repo1.maven.org/maven2/org/scala-lang/modules/scala-collection-compat_2.13/2.5.0/scala-collection-compat_2.13-2.5.0.pom
+Downloading https://repo1.maven.org/maven2/com/geirsson/metaconfig-pprint_2.13/0.10.0/metaconfig-pprint_2.13-0.10.0.pom
+Downloaded https://repo1.maven.org/maven2/com/typesafe/config/1.4.1/config-1.4.1.pom
+Downloaded https://repo1.maven.org/maven2/org/scalameta/trees_2.13/4.5.5/trees_2.13-4.5.5.pom
+Downloaded https://repo1.maven.org/maven2/org/scala-lang/scala-compiler/2.13.8/scala-compiler-2.13.8.pom
+Downloaded https://repo1.maven.org/maven2/org/scala-lang/modules/scala-collection-compat_2.13/2.5.0/scala-collection-compat_2.13-2.5.0.pom
+Downloaded https://repo1.maven.org/maven2/com/geirsson/metaconfig-pprint_2.13/0.10.0/metaconfig-pprint_2.13-0.10.0.pom
+Downloading https://repo1.maven.org/maven2/org/scalameta/common_2.13/4.5.5/common_2.13-4.5.5.pom
+Downloading https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.9.0/jna-5.9.0.pom
+Downloaded https://repo1.maven.org/maven2/org/scalameta/common_2.13/4.5.5/common_2.13-4.5.5.pom
+Downloaded https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.9.0/jna-5.9.0.pom
+Downloading https://repo1.maven.org/maven2/com/lihaoyi/geny_2.13/0.6.5/geny_2.13-0.6.5.pom
+Downloading https://repo1.maven.org/maven2/com/lihaoyi/sourcecode_2.13/0.2.7/sourcecode_2.13-0.2.7.pom
+Downloaded https://repo1.maven.org/maven2/com/lihaoyi/geny_2.13/0.6.5/geny_2.13-0.6.5.pom
+Downloaded https://repo1.maven.org/maven2/com/lihaoyi/sourcecode_2.13/0.2.7/sourcecode_2.13-0.2.7.pom
+Downloading https://repo1.maven.org/maven2/org/scala-lang/scalap/2.13.8/scalap-2.13.8.jar
+Downloading https://repo1.maven.org/maven2/org/scalameta/scalafmt-config_2.13/3.5.3/scalafmt-config_2.13-3.5.3.jar
+Downloading https://repo1.maven.org/maven2/org/scala-lang/scala-reflect/2.13.8/scala-reflect-2.13.8.jar
+Downloading https://repo1.maven.org/maven2/com/geirsson/metaconfig-typesafe-config_2.13/0.10.0/metaconfig-typesafe-config_2.13-0.10.0.jar
+Downloading https://repo1.maven.org/maven2/com/lihaoyi/sourcecode_2.13/0.2.7/sourcecode_2.13-0.2.7.jar
+Downloading https://repo1.maven.org/maven2/org/scalameta/scalafmt-core_2.13/3.5.3/scalafmt-core_2.13-3.5.3.jar
+Downloaded https://repo1.maven.org/maven2/org/scalameta/scalafmt-config_2.13/3.5.3/scalafmt-config_2.13-3.5.3.jar
+Downloading https://repo1.maven.org/maven2/org/scala-lang/modules/scala-collection-compat_2.13/2.5.0/scala-collection-compat_2.13-2.5.0.jar
+Downloaded https://repo1.maven.org/maven2/org/scala-lang/modules/scala-collection-compat_2.13/2.5.0/scala-collection-compat_2.13-2.5.0.jar
+Downloading https://repo1.maven.org/maven2/org/scalameta/common_2.13/4.5.5/common_2.13-4.5.5.jar
+Downloaded https://repo1.maven.org/maven2/com/lihaoyi/sourcecode_2.13/0.2.7/sourcecode_2.13-0.2.7.jar
+Downloading https://repo1.maven.org/maven2/org/scalameta/parsers_2.13/4.5.5/parsers_2.13-4.5.5.jar
+Downloaded https://repo1.maven.org/maven2/com/geirsson/metaconfig-typesafe-config_2.13/0.10.0/metaconfig-typesafe-config_2.13-0.10.0.jar
+Downloading https://repo1.maven.org/maven2/com/typesafe/config/1.4.1/config-1.4.1.jar
+Downloaded https://repo1.maven.org/maven2/org/scala-lang/scalap/2.13.8/scalap-2.13.8.jar
+Downloading https://repo1.maven.org/maven2/com/geirsson/metaconfig-pprint_2.13/0.10.0/metaconfig-pprint_2.13-0.10.0.jar
+Downloaded https://repo1.maven.org/maven2/com/geirsson/metaconfig-pprint_2.13/0.10.0/metaconfig-pprint_2.13-0.10.0.jar
+Downloading https://repo1.maven.org/maven2/org/scalameta/scalafmt-sysops_2.13/3.5.3/scalafmt-sysops_2.13-3.5.3.jar
+Downloaded https://repo1.maven.org/maven2/com/typesafe/config/1.4.1/config-1.4.1.jar
+Downloading https://repo1.maven.org/maven2/org/scala-lang/scala-compiler/2.13.8/scala-compiler-2.13.8.jar
+Downloaded https://repo1.maven.org/maven2/org/scalameta/scalafmt-core_2.13/3.5.3/scalafmt-core_2.13-3.5.3.jar
+Downloading https://repo1.maven.org/maven2/org/scalameta/trees_2.13/4.5.5/trees_2.13-4.5.5.jar
+Downloaded https://repo1.maven.org/maven2/org/scalameta/scalafmt-sysops_2.13/3.5.3/scalafmt-sysops_2.13-3.5.3.jar
+Downloading https://repo1.maven.org/maven2/com/lihaoyi/geny_2.13/0.6.5/geny_2.13-0.6.5.jar
+Downloaded https://repo1.maven.org/maven2/com/lihaoyi/geny_2.13/0.6.5/geny_2.13-0.6.5.jar
+Downloading https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.9.0/jna-5.9.0.jar
+Downloaded https://repo1.maven.org/maven2/org/scala-lang/scala-reflect/2.13.8/scala-reflect-2.13.8.jar
+Downloading https://repo1.maven.org/maven2/org/scalameta/scalameta_2.13/4.5.5/scalameta_2.13-4.5.5.jar
+Downloaded https://repo1.maven.org/maven2/org/scalameta/common_2.13/4.5.5/common_2.13-4.5.5.jar
+Downloading https://repo1.maven.org/maven2/com/geirsson/metaconfig-core_2.13/0.10.0/metaconfig-core_2.13-0.10.0.jar
+Downloaded https://repo1.maven.org/maven2/org/scalameta/scalameta_2.13/4.5.5/scalameta_2.13-4.5.5.jar
+Downloaded https://repo1.maven.org/maven2/com/geirsson/metaconfig-core_2.13/0.10.0/metaconfig-core_2.13-0.10.0.jar
+Downloaded https://repo1.maven.org/maven2/net/java/dev/jna/jna/5.9.0/jna-5.9.0.jar
+Downloaded https://repo1.maven.org/maven2/org/scalameta/trees_2.13/4.5.5/trees_2.13-4.5.5.jar
+Downloaded https://repo1.maven.org/maven2/org/scalameta/parsers_2.13/4.5.5/parsers_2.13-4.5.5.jar
+Downloaded https://repo1.maven.org/maven2/org/scala-lang/scala-compiler/2.13.8/scala-compiler-2.13.8.jar
+2022.11.01 00:16:36 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/hello-world/src/main/scala/Main.scala[0m
+2022.11.01 00:16:41 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/hello-world/src/main/scala/Main.scala[0m
+2022.11.01 00:16:42 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/hello-world/src/main/scala/Main.scala[0m
+2022.11.01 00:16:57 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/hello-world/src/main/scala/Main.scala[0m
+2022.11.01 00:18:24 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/src/hello-world/build.sbt[0m
+2022.11.01 00:19:05 WARN  no build tool detected in workspace '/home/eyjafjallajokull/Desktop/scala'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m
+2022.11.01 00:19:07 WARN  no build tool detected in workspace '/home/eyjafjallajokull/Desktop/scala'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m
+2022.11.01 00:19:07 WARN  no build tool detected in workspace '/home/eyjafjallajokull/Desktop/scala'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m
+2022.11.01 00:19:07 WARN  no build tool detected in workspace '/home/eyjafjallajokull/Desktop/scala'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m
+2022.11.01 00:19:07 WARN  no build tool detected in workspace '/home/eyjafjallajokull/Desktop/scala'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m
+2022.11.01 00:19:20 WARN  no build tool detected in workspace '/home/eyjafjallajokull/Desktop/scala'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m
+2022.11.01 00:19:52 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/hello-world/src/main/scala/Main.scala[0m
+2022.11.01 00:19:52 WARN  no build target for: /home/eyjafjallajokull/Desktop/scala/hello-world/build.sbt[0m
+2022.11.01 00:20:44 INFO  shutting down Metals[0m
+2022.11.01 00:21:12 INFO  tracing is disabled for protocol LSP, to enable tracing of incoming and outgoing JSON messages create an empty file at /home/eyjafjallajokull/Desktop/scala/.metals/lsp.trace.json or /home/eyjafjallajokull/.cache/metals/lsp.trace.json[0m
+2022.11.01 00:21:13 INFO  logging to file /home/eyjafjallajokull/Desktop/scala/.metals/metals.log[0m
+2022.11.01 00:21:13 INFO  Started: Metals version 0.11.9 in workspace '/home/eyjafjallajokull/Desktop/scala' for client Visual Studio Code 1.72.2.[0m
+2022.11.01 00:21:15 INFO  time: initialize in 2.22s[0m
+2022.11.01 00:21:18 WARN  Build server is not auto-connectable.[0m
+2022.11.01 00:21:18 WARN  no build tool detected in workspace '/home/eyjafjallajokull/Desktop/scala'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m
+Nov 01, 2022 12:21:19 AM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
+INFO: Unsupported notification method: $/setTrace
+2022.11.01 00:21:19 INFO  shutting down Metals[0m
+2022.11.01 00:21:26 INFO  tracing is disabled for protocol LSP, to enable tracing of incoming and outgoing JSON messages create an empty file at /home/eyjafjallajokull/Desktop/scala/.metals/lsp.trace.json or /home/eyjafjallajokull/.cache/metals/lsp.trace.json[0m
+Nov 01, 2022 12:21:27 AM org.eclipse.lsp4j.jsonrpc.RemoteEndpoint fallbackResponseError
+SEVERE: Internal error: java.lang.NullPointerException: Cannot invoke "scala.meta.internal.metals.Tables.fingerprints()" because the return value of "scala.meta.internal.metals.MetalsLanguageServer.tables()" is null
+java.util.concurrent.CompletionException: java.lang.NullPointerException: Cannot invoke "scala.meta.internal.metals.Tables.fingerprints()" because the return value of "scala.meta.internal.metals.MetalsLanguageServer.tables()" is null
+	at java.base/java.util.concurrent.CompletableFuture.encodeThrowable(CompletableFuture.java:332)
+	at java.base/java.util.concurrent.CompletableFuture.completeThrowable(CompletableFuture.java:347)
+	at java.base/java.util.concurrent.CompletableFuture$UniAccept.tryFire(CompletableFuture.java:708)
+	at java.base/java.util.concurrent.CompletableFuture.postComplete(CompletableFuture.java:510)
+	at java.base/java.util.concurrent.CompletableFuture.completeExceptionally(CompletableFuture.java:2162)
+	at scala.concurrent.java8.FuturesConvertersImpl$CF.apply(FutureConvertersImpl.scala:29)
+	at scala.concurrent.java8.FuturesConvertersImpl$CF.apply(FutureConvertersImpl.scala:26)
+	at scala.concurrent.impl.Promise$Transformation.run(Promise.scala:484)
+	at scala.concurrent.ExecutionContext$parasitic$.execute(ExecutionContext.scala:222)
+	at scala.concurrent.impl.Promise$Transformation.submitWithValue(Promise.scala:429)
+	at scala.concurrent.impl.Promise$DefaultPromise.submitWithValue(Promise.scala:338)
+	at scala.concurrent.impl.Promise$DefaultPromise.tryComplete0(Promise.scala:285)
+	at scala.concurrent.impl.Promise$Transformation.run(Promise.scala:504)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+Caused by: java.lang.NullPointerException: Cannot invoke "scala.meta.internal.metals.Tables.fingerprints()" because the return value of "scala.meta.internal.metals.MetalsLanguageServer.tables()" is null
+	at scala.meta.internal.metals.MetalsLanguageServer.$anonfun$initialize$2(MetalsLanguageServer.scala:864)
+	at scala.concurrent.Future$.$anonfun$apply$1(Future.scala:678)
+	at scala.concurrent.impl.Promise$Transformation.run(Promise.scala:467)
+	... 3 more
+
+2022.11.01 00:21:46 INFO  tracing is disabled for protocol LSP, to enable tracing of incoming and outgoing JSON messages create an empty file at /home/eyjafjallajokull/Desktop/scala/.metals/lsp.trace.json or /home/eyjafjallajokull/.cache/metals/lsp.trace.json[0m
+2022.11.01 00:21:47 INFO  logging to file /home/eyjafjallajokull/Desktop/scala/.metals/metals.log[0m
+2022.11.01 00:21:47 INFO  Started: Metals version 0.11.9 in workspace '/home/eyjafjallajokull/Desktop/scala' for client Visual Studio Code 1.72.2.[0m
+2022.11.01 00:21:49 INFO  time: initialize in 2.13s[0m
+2022.11.01 00:21:52 WARN  Build server is not auto-connectable.[0m
+2022.11.01 00:21:52 WARN  no build tool detected in workspace '/home/eyjafjallajokull/Desktop/scala'. The most common cause for this problem is that the editor was opened in the wrong working directory, for example if you use sbt then the workspace directory should contain build.sbt. [0m
+2022.11.01 00:22:30 INFO  [0m
+2022.11.01 00:22:30 INFO  Template applied in /home/eyjafjallajokull/Desktop/scala/./hello-world[0m
+2022.11.01 00:22:30 INFO  [0m
+2022.11.01 00:22:30 INFO  time: ran 'giter8.Giter8' in 3.21s[0m
+Nov 01, 2022 11:51:35 AM org.eclipse.lsp4j.jsonrpc.services.GenericEndpoint notify
+INFO: Unsupported notification method: $/setTrace
+2022.11.01 11:57:05 INFO  shutting down Metals[0m
