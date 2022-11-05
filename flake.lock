@@ -269,6 +269,21 @@
         "type": "github"
       }
     },
+    "flake-utils_12": {
+      "locked": {
+        "lastModified": 1659877975,
+        "narHash": "sha256-zllb8aq3YO3h8B/U0/J1WBgAL8EX5yWf5pMj3G0NAmc=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "c0e246b9b83f637f4681389ecabcb2681b4f3af0",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
     "flake-utils_2": {
       "locked": {
         "lastModified": 1659877975,
@@ -391,7 +406,7 @@
     },
     "flake-utils__10": {
       "inputs": {
-        "flake-utils": "flake-utils_11"
+        "flake-utils": "flake-utils_12"
       },
       "locked": {
         "dir": "source-flake/flake-utils",
@@ -551,7 +566,7 @@
     },
     "flake-utils__9": {
       "inputs": {
-        "flake-utils": "flake-utils_10"
+        "flake-utils": "flake-utils_11"
       },
       "locked": {
         "dir": "source-flake/flake-utils",
@@ -684,6 +699,46 @@
         "type": "github"
       }
     },
+    "nix-vscode-marketplace_2": {
+      "inputs": {
+        "flake-utils": "flake-utils_10",
+        "nixpkgs": "nixpkgs_9"
+      },
+      "locked": {
+        "lastModified": 1665011626,
+        "narHash": "sha256-T5WLba8VzRauDU2oA4+yPlNdUpNyuBMD1Bt9nW90FTg=",
+        "owner": "br4ch1st0chr0n3",
+        "repo": "vscodium-extensions",
+        "rev": "ed7503ffc4b434f20930d637d99807b45d23b5bc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "br4ch1st0chr0n3",
+        "ref": "fix-ci",
+        "repo": "vscodium-extensions",
+        "type": "github"
+      }
+    },
+    "nix-vscode-marketplace__2": {
+      "inputs": {
+        "nix-vscode-marketplace": "nix-vscode-marketplace_2"
+      },
+      "locked": {
+        "dir": "source-flake/nix-vscode-marketplace",
+        "lastModified": 1666750842,
+        "narHash": "sha256-16QIiXFp77oYLJS5DHX65CsMh7r2jTA2D9vmSB3Ppg4=",
+        "owner": "br4ch1st0chr0n3",
+        "repo": "flakes",
+        "rev": "a5af924f83258fec31034cca27e3dc163d5a07af",
+        "type": "github"
+      },
+      "original": {
+        "dir": "source-flake/nix-vscode-marketplace",
+        "owner": "br4ch1st0chr0n3",
+        "repo": "flakes",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1663905476,
@@ -737,6 +792,22 @@
       }
     },
     "nixpkgs_11": {
+      "locked": {
+        "lastModified": 1663905476,
+        "narHash": "sha256-0CSwRKaYravh9v6qSlBpM0gNg0UhKT2lL7Yn6Zbx7UM=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e14f9fb57315f0d4abde222364f19f88c77d2b79",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e14f9fb57315f0d4abde222364f19f88c77d2b79",
+        "type": "github"
+      }
+    },
+    "nixpkgs_12": {
       "locked": {
         "lastModified": 1663905476,
         "narHash": "sha256-0CSwRKaYravh9v6qSlBpM0gNg0UhKT2lL7Yn6Zbx7UM=",
@@ -866,23 +937,23 @@
     },
     "nixpkgs_9": {
       "locked": {
-        "lastModified": 1663905476,
-        "narHash": "sha256-0CSwRKaYravh9v6qSlBpM0gNg0UhKT2lL7Yn6Zbx7UM=",
+        "lastModified": 1660464579,
+        "narHash": "sha256-kzA9rwh0wS6CwUnFHAQ7dhJCowMPfRbvixVeOKnUmjo=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "e14f9fb57315f0d4abde222364f19f88c77d2b79",
+        "rev": "b02538b16f6c5e1dbfce1033b27946e25c019b3b",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
+        "ref": "nixpkgs-unstable",
         "repo": "nixpkgs",
-        "rev": "e14f9fb57315f0d4abde222364f19f88c77d2b79",
         "type": "github"
       }
     },
     "nixpkgs__10": {
       "inputs": {
-        "nixpkgs": "nixpkgs_11"
+        "nixpkgs": "nixpkgs_12"
       },
       "locked": {
         "dir": "source-flake/nixpkgs",
@@ -1022,7 +1093,7 @@
     },
     "nixpkgs__8": {
       "inputs": {
-        "nixpkgs": "nixpkgs_9"
+        "nixpkgs": "nixpkgs_10"
       },
       "locked": {
         "dir": "source-flake/nixpkgs",
@@ -1042,7 +1113,7 @@
     },
     "nixpkgs__9": {
       "inputs": {
-        "nixpkgs": "nixpkgs_10"
+        "nixpkgs": "nixpkgs_11"
       },
       "locked": {
         "dir": "source-flake/nixpkgs",
@@ -1103,6 +1174,11 @@
         "flake-utils_": "flake-utils__4",
         "formatter": "formatter",
         "my-codium": "my-codium",
+        "nix-vscode-marketplace": [
+          "nix-vscode-marketplace_",
+          "nix-vscode-marketplace"
+        ],
+        "nix-vscode-marketplace_": "nix-vscode-marketplace__2",
         "nixpkgs": [
           "nixpkgs_",
           "nixpkgs"

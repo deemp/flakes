@@ -8,6 +8,8 @@
     flake-utils.follows = "flake-utils_/flake-utils";
     formatter.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/formatter;
     my-codium.url = github:br4ch1st0chr0n3/flakes?dir=codium;
+    nix-vscode-marketplace_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/nix-vscode-marketplace;
+    nix-vscode-marketplace.follows = "nix-vscode-marketplace_/nix-vscode-marketplace";
     python-tools.url = github:br4ch1st0chr0n3/flakes?dir=language-tools/python;
   };
   outputs =
@@ -19,6 +21,7 @@
     , my-codium
     , formatter
     , python-tools
+    , nix-vscode-marketplace
     , ...
     }: flake-utils.lib.eachDefaultSystem
       (system:
@@ -28,17 +31,18 @@
         inherit (drv-tools.functions.${system}) mkShellApp;
         inherit (python-tools.functions.${system}) createVenvs;
         inherit (python-tools.snippets.${system}) activateVenv;
+        inherit (nix-vscode-marketplace.packages.${system}) vscode open-vsx;
         pkgs = nixpkgs.legacyPackages.${system};
 
         codium = mkCodium {
-          inherit extensions;
+          extensions = extensions // { add = { inherit (vscode.mtxr) sqltools; }; };
           runtimeDependencies = [
             (
               builtins.attrValues
                 {
                   inherit (pkgs)
                     docker poetry direnv rnix-lsp
-                    nixpkgs-fmt fish;
+                    nixpkgs-fmt fish mysql;
                 }
             )
           ];

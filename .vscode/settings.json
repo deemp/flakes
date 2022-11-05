@@ -72,5 +72,6 @@
     ],
     "todo-tree.regex.regex": "((--\\s*($TAGS))|\\{-\\s($TAGS).*(\\n.*)*-})|(//|#|<!--|/\\*|^\\s*\\*)\\s*($TAGS)",
     "workbench.colorTheme": "Monokai",
-    "workbench.sideBar.location": "right"
+    "workbench.sideBar.location": "right",
+    "solidity.compileUsingRemoteVersion": "v0.8.4+commit.c7e474f2"
 }
