@@ -5,7 +5,7 @@ pragma solidity 0.8.4;
 import "./Rewards.sol";
 import "./Collection.sol";
 
-abstract contract NFTStaking is Ownable, IERC721Receiver {
+contract NFTStaking is Ownable, IERC721Receiver {
     uint256 public totalStaked;
 
     struct Stake {
@@ -45,7 +45,7 @@ abstract contract NFTStaking is Ownable, IERC721Receiver {
             // should only increment if stake
             totalStaked += 1;
             // transfer token into our collection
-            // via Collection SC
+            // via Collection SC    
             nft.transferFrom(msg.sender, address(this), tokenId);
 
             // block.timestamp is in seconds
@@ -136,17 +136,18 @@ abstract contract NFTStaking is Ownable, IERC721Receiver {
     function earningInfo(uint256[] calldata tokenIds)
         external
         view
-        returns (uint256, uint256)
+        returns (uint256[2] memory)
     {
         uint256 earned = 0;
         for (uint i = 0; i < tokenIds.length; i++) {
-            uint256 tokenId;
+            uint256 tokenId = tokenIds[i];
             Stake memory staked = vault[tokenId];
             uint256 stakedAt = staked.timestamp;
+            require (stakedAt != 0, "not staked");
             earned += reward(stakedAt);
         }
 
-        return (earned, rewardPerSecond());
+        return [earned, rewardPerSecond()];
     }
 
     // should never be used inside of transaction because of 6gas fee
