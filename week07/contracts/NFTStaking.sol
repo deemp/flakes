@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT LICENSE
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.4;
 
-import "https://github.com/net2devcrypto/n2dstaking/N2DRewards.sol";
-import "https://github.com/net2devcrypto/n2dstaking/Collection.sol";
+import "./Rewards.sol";
+import "./Collection.sol";
 
 abstract contract NFTStaking is Ownable, IERC721Receiver {
     uint256 public totalStaked;
@@ -30,7 +29,7 @@ abstract contract NFTStaking is Ownable, IERC721Receiver {
     // output of the Collection SC
     Collection nft;
     // Rewards Token SCk
-    N2DRewards token;
+    Rewards token;
 
     // get stake from token id
     mapping(uint256 => Stake) public vault;
@@ -81,14 +80,22 @@ abstract contract NFTStaking is Ownable, IERC721Receiver {
         _claim(msg.sender, tokenIds, false);
     }
 
-    uint256 mul = 1000;
+    // We can't work with doubles
+    // so, we will scale by this multiplier
+    uint256 unit = 1000;
 
-    function rewardFormula(uint48 time) internal view returns (uint256) {
-        return (mul * 1 ether * (block.timestamp - time)) / 1 days;
+    // reward by some given time
+    function reward(uint256 time) internal view returns (uint256) {
+        return (unit * 1 ether * (block.timestamp - time)) / 1 days;
     }
 
-    function mintReward(uint256 val) internal view returns (uint256) {
-        return val / mul;
+    // TODO make it depend on total amount of tokens
+    function rewardPerSecond() internal view returns (uint256) {
+        return reward(block.timestamp - 1 days);
+    }
+
+    function mintReward(uint256 earned) internal view returns (uint256) {
+        return earned / unit;
     }
 
     function _claim(
@@ -106,7 +113,7 @@ abstract contract NFTStaking is Ownable, IERC721Receiver {
             uint48 stakedAt = staked.timestamp;
 
             // reward formula
-            earned += rewardFormula(stakedAt);
+            earned += reward(stakedAt);
 
             vault[tokenId] = Stake({
                 owner: account,
@@ -114,39 +121,39 @@ abstract contract NFTStaking is Ownable, IERC721Receiver {
                 timestamp: uint48(block.timestamp)
             });
         }
-
         if (earned > 0) {
-            earned /= mul;
-            token.mint(account, earned);
+            // Here, we operate in mint units
+            token.mint(account, mintReward(earned));
         }
-
         if (_unstake) {
             _unstakeMany(account, tokenIds);
         }
-
         emit Claimed(account, earned);
     }
 
     // get staking information
-    // TODO fix
+    // FIXME
     function earningInfo(uint256[] calldata tokenIds)
         external
         view
-        returns (uint256[] memory info)
+        returns (uint256, uint256)
     {
-        uint256[] memory earned = new uint256[](tokenIds.length);
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            uint256 tokenId = tokenIds[i];
+        uint256 earned = 0;
+        for (uint i = 0; i < tokenIds.length; i++) {
+            uint256 tokenId;
             Stake memory staked = vault[tokenId];
-            earned[i] = rewardFormula(staked.timestamp);
+            uint256 stakedAt = staked.timestamp;
+            earned += reward(stakedAt);
         }
-        return earned;
+
+        return (earned, rewardPerSecond());
     }
 
+    // should never be used inside of transaction because of 6gas fee
     function balanceOf(address account) public view returns (uint256) {
         uint256 balance = 0;
         uint256 supply = nft.totalSupply();
-        for (uint256 i = 1; i <= supply; i++) {
+        for (uint i = 1; i <= supply; i++) {
             if (vault[i].owner == account) {
                 balance += 1;
             }
@@ -154,13 +161,14 @@ abstract contract NFTStaking is Ownable, IERC721Receiver {
         return balance;
     }
 
+    // should never be used inside of transaction because of gas fee
     function tokensOfOwner(address account)
         public
         view
         returns (uint256[] memory ownerTokens)
     {
         uint256 supply = nft.totalSupply();
-        uint256[] memory tmp = new uint256[](supply + 1);
+        uint256[] memory tmp = new uint256[](supply);
 
         // write tokens of an account into tmp
         uint256 index = 0;
