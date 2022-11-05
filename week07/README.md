@@ -60,6 +60,11 @@ Process:
   2. ERC20 - staking reward SC
 
 ## Contracts
+
 0x0Cea533823aCd978fd058fce11699DE098d5f124
 0x7EeAc2E627135227a483b5d7DB6Ac607A43FB03A
 0xD3F1Bb796D9789988788649102150dfd94339854
+
+## Test
+
+- may need to `npm audit fix --force` - [SO](https://stackoverflow.com/a/73027407)

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT LICENSE
 
-pragma solidity 0.8.4;
+pragma solidity ^0.8.13;
 
 import "./Rewards.sol";
 import "./Collection.sol";
