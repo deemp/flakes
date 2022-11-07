@@ -1,14 +1,14 @@
 {
   inputs = {
     nixpkgs_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs;
+    nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils;
     vscode-extensions_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/vscode-extensions;
-    vscode-extensions-selected_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/vscode-extensions-selected;
-    drv-tools.url = github:br4ch1st0chr0n3/flakes?dir=drv-tools;
-    nixpkgs.follows = "nixpkgs_/nixpkgs";
-    flake-utils.follows = "flake-utils_/flake-utils";
     vscode-extensions.follows = "vscode-extensions_/vscode-extensions";
+    vscode-extensions-selected_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/vscode-extensions-selected;
     vscode-extensions-selected.follows = "vscode-extensions-selected_/vscode-extensions-selected";
+    drv-tools.url = github:br4ch1st0chr0n3/flakes?dir=drv-tools;
+    flake-utils.follows = "flake-utils_/flake-utils";
   };
 
   outputs =
@@ -57,6 +57,7 @@
               });
             deps = pkgs.lib.lists.flatten [
               pkgs.bashInteractive
+              pkgs.nil
               runtimeDependencies
             ];
           in
