@@ -91,6 +91,7 @@
         stack = stackGHC ghcVersion;
         callCabal = callCabalGHC ghcVersion;
         staticExecutable = staticExecutableGHC ghcVersion;
+        inherit justStaticExecutables;
       };
     in
     {
