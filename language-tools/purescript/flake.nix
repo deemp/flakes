@@ -14,7 +14,7 @@
     flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-      tools = {
+      shellTools = {
         inherit (pkgs) dhall-lsp-server spago nodejs-16_x purescript;
         inherit (pkgs.nodePackages) purescript-language-server purs-tidy;
       };
