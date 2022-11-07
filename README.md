@@ -21,3 +21,11 @@ Nix flakes for tools that I use
 ## Substituters and keys
 
 There are `extra-trusted-public-keys`, `extra-trusted-public-keys` in [flake.nix](./flake.nix). If a substituter like `cachix` fails, comment out the lines containing its address
+
+## Templates
+
+- sample [codium](./codium/template/flake.nix) project:
+
+   ```sh
+   nix flake new codium-project -t github:br4ch1st0chr0n3/flakes#codium
+   ```

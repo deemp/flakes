@@ -4,8 +4,4 @@
 - `nix flake show` to look at the available shells
 - `nix develop` and then `enter` - to start a `fish` shell
 
-Use template flake:
-
-```sh
-nix flake new h --template github:br4ch1st0chr0n3/flakes?dir=codium/template
-```
+See the main [README](../README.md#templates) to learn how to use a codium template
