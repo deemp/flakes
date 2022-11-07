@@ -91,8 +91,8 @@
   };
 
   nix-ide = {
-    "nix.serverPath" = "rnix-lsp";
     "nix.enableLanguageServer" = true;
+    "nix.serverPath" = "nil";
   };
 
   python = {
