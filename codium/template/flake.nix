@@ -25,16 +25,5 @@
       in
       {
         packages.default = codium;
-      }) // {
-      templates.default = {
-        path = ./.;
-        description = "A simple codium flake";
-        welcomeText = ''
-          This flake demonstrates how one can
-          build codium with necessary extensions 
-          and binaries in $PATH
-        '';
-      };
-    };
-
+      });
 }
