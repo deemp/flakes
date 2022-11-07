@@ -2,7 +2,7 @@
   inputs = {
     nixpkgs_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs;
     flake-utils_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils;
-    vscode-extensions_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/nix-vscode-extensions;
+    vscode-extensions_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/vscode-extensions;
     vscode-extensions-selected_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/vscode-extensions-selected;
     drv-tools.url = github:br4ch1st0chr0n3/flakes?dir=drv-tools;
     nixpkgs.follows = "nixpkgs_/nixpkgs";
