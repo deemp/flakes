@@ -22,14 +22,21 @@
       (system:
       let
         inherit (my-codium.configs.${system})
-          extensions;
+          extensions
+          ;
         inherit (my-codium.functions.${system})
-          mkCodium;
+          mkCodium
+          writeSettingsJSON
+          ;
+        inherit (my-codium.configs.${system})
+          settingsNix
+          ;
         inherit (drv-tools.functions.${system})
           toList
           mkDevShellsWithDefault
           readDirectories
-          mkShellApp;
+          mkShellApp
+          ;
         inherit (flake-tools.functions.${system})
           flakesToggleRelativePaths
           mkFlakesUtils
@@ -45,34 +52,16 @@
           ]
         ));
 
-        toggleRelativePaths_ =
-          let
-            myCodium = "my-codium";
-            toggleConfig = [
-              { "." = [ myCodium ]; }
-            ];
-          in
-          flakesToggleRelativePaths toggleConfig flakesUtils.flakesUpdate;
-
         codium = mkCodium {
           extensions = { inherit (extensions) nix misc github fish; };
-          runtimeDependencies = [
-            pkgs.docker
-            pkgs.rnix-lsp
-            toggleRelativePaths_
-            (builtins.attrValues flakesUtils)
-            pkgs.inotify-tools
-          ];
         };
+        writeSettings = writeSettingsJSON settingsNix;
       in
       {
-
         devShells = mkDevShellsWithDefault
           {
             buildInputs = [
               (builtins.attrValues flakesUtils)
-              toggleRelativePaths_
-              codium
             ];
           }
           {
@@ -83,6 +72,7 @@
           updateLocks = flakesUtils.flakesUpdate;
           format = flakesUtils.flakesFormat;
           default = codium;
+          inherit writeSettings;
         };
         inherit (formatter) formatter;
       }) // {
