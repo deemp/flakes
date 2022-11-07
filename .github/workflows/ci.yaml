@@ -12,5 +12,5 @@ on:
 jobs:
   ci:
     name: CI
-    uses: br4ch1st0chr0n3/workflows/nix-ci.yaml@main
+    uses: br4ch1st0chr0n3/workflows/.github/workflows/nix-ci.yaml@main
     secrets: inherit
