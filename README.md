@@ -30,6 +30,7 @@ There are `extra-trusted-public-keys`, `extra-trusted-public-keys` in [flake.nix
 
 ```sh
 nix flake new codium-project -t github:br4ch1st0chr0n3/flakes#codium
+git add codium-project
 cd codium-project
 nix run .# .
 ```
