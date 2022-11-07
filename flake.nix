@@ -8,6 +8,7 @@
     gitignore_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/gitignore;
     gitignore.follows = "gitignore_/gitignore";
     drv-tools.url = github:br4ch1st0chr0n3/flakes?dir=drv-tools;
+    flake-tools.url = github:br4ch1st0chr0n3/flakes?dir=flake-tools;
     haskell-tools.url = github:br4ch1st0chr0n3/flakes?dir=language-tools/haskell;
   };
   outputs =
@@ -18,6 +19,7 @@
     , gitignore
     , drv-tools
     , haskell-tools
+    , flake-tools
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -31,6 +33,9 @@
       inherit (drv-tools.functions.${system})
         toList
         mkBin
+        ;
+      inherit (flake-tools.functions.${system})
+        mkFlakesUtils
         ;
       inherit (my-codium.configs.${system})
         extensions
@@ -66,12 +71,14 @@
         extensions = { inherit (extensions) nix haskell misc github; };
         runtimeDependencies = [ pkgs.nil manager ];
       };
+
+      flakesUtils = mkFlakesUtils ["."];
     in
     {
       packages = {
         default = codium;
         inherit writeSettings;
-      };
+      } // flakesUtils;
       
       devShells =
         {

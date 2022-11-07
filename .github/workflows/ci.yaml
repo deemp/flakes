@@ -1,0 +1,61 @@
+name: "Caching"
+
+on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    # https://crontab.guru/#30_5,17_*_*_*
+    - cron: "0 0 * * *"
+  pull_request:
+  push:
+  workflow_dispatch:
+
+env:
+  action: |
+    git pull --rebase --autostash
+    nix run .#{0}
+    git commit -a -m "action: {1}" && git push || echo ""
+
+  extra_nix_config: |
+    access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+    substituters = https://cache.nixos.org/ https://nix-community.cachix.org https://hydra.iohk.io https://haskell-language-server.cachix.org https://br4ch1st0chr0n3.cachix.org
+    trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= haskell-language-server.cachix.org-1:juFfHrwkOxqIOZShtC4YC1uT1bBcq2RSvC7OMKx0Nz8= br4ch1st0chr0n3.cachix.org-1:o1FA93L5vL4LWi+jk2ECFk1L1rDlMoTH21R1FHtSKaU=
+
+jobs:
+  update-locks:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v18
+        with:
+          extra_nix_config: ${{ env.extra_nix_config }}
+          install_url: https://releases.nixos.org/nix/nix-2.11.1/install
+      - name: config git
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+      - name: Update locks
+        env:
+          command: updateLocks
+          msg: update locks
+        run: ${{ format(env.action, env.command, env.msg) }}
+  ci:
+    needs: [update-locks]
+    name: Build on ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, ubuntu-22.04, macos-11, macos-12]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v18
+        with:
+          extra_nix_config: ${{ env.extra_nix_config }}
+          install_url: https://releases.nixos.org/nix/nix-2.11.1/install
+      - uses: cachix/cachix-action@v11
+        with:
+          name: ${{ secrets.CACHIX_CACHE }}
+          authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
+      - name: Push flakes to cachix
+        env:
+          CACHIX_CACHE: ${{ secrets.CACHIX_CACHE }}
+        run: nix run .#pushToCachix
