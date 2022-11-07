@@ -5,8 +5,6 @@
     flake-utils_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils;
     flake-utils.follows = "flake-utils_/flake-utils";
     my-codium.url = github:br4ch1st0chr0n3/flakes?dir=codium;
-    gitignore_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/gitignore;
-    gitignore.follows = "gitignore_/gitignore";
     drv-tools.url = github:br4ch1st0chr0n3/flakes?dir=drv-tools;
     flake-tools.url = github:br4ch1st0chr0n3/flakes?dir=flake-tools;
     haskell-tools.url = github:br4ch1st0chr0n3/flakes?dir=language-tools/haskell;
@@ -16,7 +14,6 @@
     , flake-utils
     , nixpkgs
     , my-codium
-    , gitignore
     , drv-tools
     , haskell-tools
     , flake-tools
@@ -30,6 +27,10 @@
         writeSettingsJSON
         mkCodium
         ;
+      inherit (my-codium.configs.${system})
+        extensions
+        settingsNix
+        ;
       inherit (drv-tools.functions.${system})
         toList
         mkBin
@@ -37,15 +38,13 @@
       inherit (flake-tools.functions.${system})
         mkFlakesUtils
         ;
-      inherit (my-codium.configs.${system})
-        extensions
-        settingsNix
+      inherit (haskell-tools.functions.${system})
+        toolsGHC
         ;
-      inherit (haskell-tools.functions.${system}) toolsGHC;
       inherit (toolsGHC ghcVersion) stack callCabal staticExecutable hls;
 
       manager =
-        let
+        let 
           manager_ = "manager";
           manager-exe = staticExecutable manager_ ./${manager_};
         in
@@ -69,7 +68,7 @@
 
       codium = mkCodium {
         extensions = { inherit (extensions) nix haskell misc github; };
-        runtimeDependencies = [ pkgs.nil manager ];
+        runtimeDependencies = [ pkgs.nil manager stack hls ];
       };
 
       flakesUtils = mkFlakesUtils [ "." ];
