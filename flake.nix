@@ -72,14 +72,16 @@
         runtimeDependencies = [ pkgs.nil manager ];
       };
 
-      flakesUtils = mkFlakesUtils ["."];
+      flakesUtils = mkFlakesUtils [ "." ];
     in
     {
       packages = {
         default = codium;
         inherit writeSettings;
-      } // flakesUtils;
-      
+        pushToCachix = flakesUtils.flakesPushToCachix;
+        updateLocks = flakesUtils.flakesUpdate;
+      };
+
       devShells =
         {
           default = pkgs.mkShell {
