@@ -11,4 +11,4 @@ on:
 
 jobs:
   ci:
-    uses: ./.github/workflows/reuasable.yaml
+    uses: ./.github/workflows/reusable.yaml
