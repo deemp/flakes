@@ -1,50 +1,55 @@
 {
   inputs = {
-    my-inputs.url = "github:br4ch1st0chr0n3/flakes?dir=inputs";
-    nixpkgs.follows = "my-inputs/nixpkgs";
-    flake-utils.follows = "my-inputs/flake-utils";
-    my-codium.follows = "my-inputs/my-codium";
-    flake-compat.follows = "my-inputs/flake-compat";
-    # hls.follows = "my-inputs/haskell-language-server";
-    gitignore.follows = "my-inputs/gitignore";
+    nixpkgs_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs;
+    nixpkgs.follows = "nixpkgs_/nixpkgs";
+    flake-utils_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils;
+    flake-utils.follows = "flake-utils_/flake-utils";
+    my-codium.url = github:br4ch1st0chr0n3/flakes?dir=codium;
+    gitignore_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/gitignore;
+    gitignore.follows = "gitignore_/gitignore";
+    drv-tools.url = github:br4ch1st0chr0n3/flakes?dir=drv-tools;
+    haskell-tools.url = github:br4ch1st0chr0n3/flakes?dir=language-tools/haskell;
   };
   outputs =
     { self
     , flake-utils
     , nixpkgs
     , my-codium
-    , flake-compat
-      # , hls
     , gitignore
-    , my-inputs
+    , drv-tools
+    , haskell-tools
+    , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
       ghcVersion = "902";
-      inherit (my-codium.tools.${system})
-        writeSettingsJson
-        settingsNix
-        toList
-        shellTools
-        toolsGHC
+      inherit (my-codium.functions.${system})
+        writeSettingsJSON
         mkCodium
-        extensions
         ;
-      inherit (toolsGHC ghcVersion) stack callCabal staticExecutable; # hls;
-
-      hls = pkgs.haskell-language-server;
+      inherit (drv-tools.functions.${system})
+        toList
+        mkBin
+        ;
+      inherit (my-codium.configs.${system})
+        extensions
+        settingsNix
+        ;
+      inherit (haskell-tools.functions.${system}) toolsGHC;
+      inherit (toolsGHC ghcVersion) stack callCabal staticExecutable hls;
 
       manager =
         let
-          manager-exe = staticExecutable "manager" ./manager;
+          manager_ = "manager";
+          manager-exe = staticExecutable manager_ ./${manager_};
         in
         pkgs.symlinkJoin {
-          name = "manager";
+          name = manager_;
           paths = [ manager-exe ];
           buildInputs = [ pkgs.makeWrapper ];
           postBuild = ''
-            wrapProgram $out/bin/manager \
+            wrapProgram $out/bin/${manager_} \
               --set PATH ${
                 pkgs.lib.makeBinPath [
                   pkgs.hpack
@@ -53,40 +58,30 @@
           '';
         };
 
-      writeSettings = writeSettingsJson
-        {
-          inherit (settingsNix) haskell todo-tree files editor gitlens git nix-ide workbench;
-        };
-
-      tools = (
-        toList {
-          inherit (shellTools) nix haskell;
-        }) ++ [ stack hls manager ];
-
-      codium = mkCodium {
-        inherit (extensions) nix haskell misc github;
+      writeSettings = writeSettingsJSON {
+        inherit (settingsNix) haskell todo-tree files editor gitlens git nix-ide workbench;
       };
 
-      codiumWithSettings = pkgs.mkShell {
-        buildInputs = [ writeSettings codium ];
-        shellHook = ''
-          write-settings-json
-          codium .
-        '';
+      codium = mkCodium {
+        extensions = { inherit (extensions) nix haskell misc github; };
+        runtimeDependencies = [ pkgs.nil manager ];
       };
     in
     {
+      packages = {
+        default = codium;
+        inherit writeSettings;
+      };
+      
       devShells =
         {
           default = pkgs.mkShell {
             name = "dev-tools";
-            buildInputs = tools;
+            buildInputs = [ manager ];
             shellHook = ''
               source <(manager --bash-completion-script `which manager`)
             '';
           };
-
-          codium = codiumWithSettings;
         };
 
       stack-shell = { ghcVersion }:
