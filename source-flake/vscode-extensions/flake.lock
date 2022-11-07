@@ -21,16 +21,16 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1667439723,
-        "narHash": "sha256-tQTcYjkT/9O2MohtZH72ayxIvgfNhpNV18/GxuHLS2Q=",
+        "lastModified": 1667825762,
+        "narHash": "sha256-nHeYMM47anz77ijkZBf/TRMt4jjs8oJ42QhlsMqDp+U=",
         "owner": "br4ch1st0chr0n3",
         "repo": "vscodium-extensions",
-        "rev": "af754332cd3d9388ff0d5222787f08820e9f2109",
+        "rev": "864db022071a31fa580bb846da7b34652e7f01b4",
         "type": "github"
       },
       "original": {
         "owner": "br4ch1st0chr0n3",
-        "ref": "fix-ci",
+        "ref": "master",
         "repo": "vscodium-extensions",
         "type": "github"
       }

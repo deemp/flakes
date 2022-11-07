@@ -73,36 +73,36 @@
     },
     "root": {
       "inputs": {
-        "vscodium-extensions": "vscodium-extensions"
+        "vscode-extensions-selected": "vscode-extensions-selected"
       }
     },
-    "vscodium-extensions": {
+    "vscode-extensions-selected": {
       "inputs": {
         "flake-utils": [
-          "vscodium-extensions",
+          "vscode-extensions-selected",
           "flake-utils_",
           "flake-utils"
         ],
         "flake-utils_": "flake-utils_",
         "nixpkgs": [
-          "vscodium-extensions",
+          "vscode-extensions-selected",
           "nixpkgs_",
           "nixpkgs"
         ],
         "nixpkgs_": "nixpkgs_"
       },
       "locked": {
-        "lastModified": 1667436296,
-        "narHash": "sha256-g4Y6McfZD/HhvxvI7PZ+MsFvVrLJ0RoPaJuJq1NXr3w=",
+        "lastModified": 1667501693,
+        "narHash": "sha256-0DoL3wPtGzMM7kEJ6Q+QAOv4EAVaCAfZuydVOgiN0Ow=",
         "owner": "br4ch1st0chr0n3",
-        "repo": "vscodium-extensions",
-        "rev": "eddb742006575b55f24f6d9752ae90b468777acb",
+        "repo": "nix-vscode-extensions",
+        "rev": "b927db88c79e461e1e6e8ba75e1ad3c512c4b73a",
         "type": "github"
       },
       "original": {
         "owner": "br4ch1st0chr0n3",
-        "ref": "master",
-        "repo": "vscodium-extensions",
+        "ref": "selected",
+        "repo": "nix-vscode-extensions",
         "type": "github"
       }
     }
