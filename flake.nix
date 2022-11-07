@@ -85,14 +85,14 @@
           default = codium;
         };
         inherit (formatter) formatter;
-
-        templates = {
-          codium = {
-            path = ./codium/template;
-            description = "codium with extensions and binaries";
-          };
+      }) // {
+      templates = {
+        codium = {
+          path = ./codium/template;
+          description = "codium with extensions and binaries";
         };
-      });
+      };
+    };
 
   nixConfig = {
     extra-trusted-substituters = [
