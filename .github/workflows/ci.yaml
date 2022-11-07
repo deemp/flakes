@@ -11,4 +11,6 @@ on:
 
 jobs:
   ci:
+    name: CI
     uses: ./.github/workflows/reusable.yaml
+    secrets: inherit
