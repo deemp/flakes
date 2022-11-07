@@ -1,11 +1,8 @@
 {
-    "[html]": {
-        "editor.defaultFormatter": "monosans.djlint"
-    },
-    "[markdown]": {
-        "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
-    },
     "editor.formatOnSave": true,
+    "emmet.includeLanguages": {
+        "jinja-html": "html"
+    },
     "files.associations": {
         "*.html": "html",
         "*.jinja": "jinja-html"
@@ -16,6 +13,7 @@
         "**/.spago/**": true
     },
     "git.autofetch": true,
+    "git.autofetchPeriod": 5,
     "gitlens.codeLens.authors.enabled": false,
     "gitlens.codeLens.enabled": false,
     "gitlens.codeLens.recentChange.enabled": false,
@@ -24,41 +22,18 @@
     "gitlens.hovers.currentLine.over": "line",
     "gitlens.hovers.enabled": false,
     "gitlens.statusBar.enabled": false,
-    "git.autofetchPeriod": 10,
-    "json.schemas": [
-        {
-            "fileMatch": [
-                "**/*.markdownlint.json"
-            ],
-            "url": "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json"
-        },
-        {
-            "fileMatch": [
-                "**/pyproject.toml"
-            ],
-            "url": "https://json.schemastore.org/pyproject.json"
-        }
-    ],
+    "haskell.manageHLS": "PATH",
+    "haskell.serverExecutablePath": "haskell-language-server",
     "markdown.extension.orderedList.autoRenumber": false,
-    "markdownlint.config": {},
-    "markdownlint.lintWorkspaceGlobs": [
-        "**/*.{md,mkd,mdwn,mdown,markdown,markdn,mdtxt,mdtext,workbook}",
-        "!**/bower_components",
-        "!**/node_modules",
-        "!**/vendor",
-        "!**/.*"
-    ],
     "nix.enableLanguageServer": true,
-    "nix.serverPath": "rnix-lsp",
+    "nix.serverPath": "nil",
     "purescript.formatter": "purs-tidy",
-    "purescript.outputDirectory": "./app_purescript/output/",
-    "purescript.packagePath": "./app_purescript",
-    "purescript.sourcePath": "./app_purescript/src",
-    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python3",
+    "purescript.outputDirectory": "./front/output/",
+    "purescript.packagePath": "./front",
+    "purescript.sourcePath": "./front/src",
     "python.formatting.provider": "black",
     "python.linting.mypyCategorySeverity.error": "Error",
     "python.linting.mypyEnabled": true,
-    "python.linting.pylintEnabled": true,
     "todo-tree.filtering.excludeGlobs": [
         "**/vendor/**",
         "**/node_modules/**",
@@ -71,6 +46,11 @@
         "**/*.stack-work"
     ],
     "todo-tree.regex.regex": "((--\\s*($TAGS))|\\{-\\s($TAGS).*(\\n.*)*-})|(//|#|<!--|/\\*|^\\s*\\*)\\s*($TAGS)",
+    "vscode-dhall-lsp-server.executable": "dhall-lsp-server",
     "workbench.colorTheme": "Monokai",
-    "workbench.sideBar.location": "right"
+    "workbench.sideBar.location": "right",
+    "yaml.schemas": {
+        "https://json.schemastore.org/github-action.json": "actions/**/action.yml",
+        "https://json.schemastore.org/github-workflow.json": "workflows/**/*.yml"
+    }
 }
