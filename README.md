@@ -24,8 +24,12 @@ There are `extra-trusted-public-keys`, `extra-trusted-public-keys` in [flake.nix
 
 ## Templates
 
-- sample [codium](./codium/template/flake.nix) project:
+- Sample [codium](./codium/template/flake.nix) project. Includes extensions and binaries
 
    ```sh
    nix flake new codium-project -t github:br4ch1st0chr0n3/flakes#codium
+   cd codium-project
+   nix run
    ```
+
+  - may need to reload the computer for extensions to become available
