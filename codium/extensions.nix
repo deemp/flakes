@@ -1,14 +1,14 @@
 # A set of VSCodium extensions
-{ system, nix-vscode-marketplace, vscodium-extensions }:
+{ system, vscode-extensions, vscode-extensions-selected }:
 let
-  inherit (nix-vscode-marketplace.packages.${system}) vscode open-vsx;
-  my-extensions = vscodium-extensions.packages.${system}.vscode;
+  inherit (vscode-extensions.packages.${system}) vscode open-vsx;
+  # my-extensions = vscode-extensions-selected.packages.${system}.vscode;
 in
 {
   haskell = {
     inherit (open-vsx.haskell) haskell;
     inherit (open-vsx.justusadam) language-haskell;
-    inherit (my-extensions.visortelle) haskell-spotlight;
+    inherit (vscode.visortelle) haskell-spotlight;
     inherit (open-vsx.redhat) vscode-yaml;
   };
   yaml = {
@@ -17,9 +17,9 @@ in
   purescript = {
     inherit (open-vsx.nwolverson) ide-purescript language-purescript;
     inherit (open-vsx.dhall) dhall-lang vscode-dhall-lsp-server;
-    inherit (my-extensions.br4ch1st0chr0n3) purs-keybindings;
-    inherit (my-extensions.ryuta46) multi-command;
-    inherit (my-extensions.chunsen) bracket-select;
+    inherit (vscode.br4ch1st0chr0n3) purs-keybindings;
+    inherit (vscode.ryuta46) multi-command;
+    inherit (vscode.chunsen) bracket-select;
   };
   nix = {
     inherit (open-vsx.mkhl) direnv;
@@ -32,7 +32,7 @@ in
   };
   typescript = { inherit (open-vsx.ms-vscode) vscode-typescript-next; };
   markdown = {
-    inherit (my-extensions.bierner)
+    inherit (vscode.bierner)
       github-markdown-preview markdown-emoji markdown-checkbox
       markdown-yaml-preamble markdown-footnotes markdown-preview-github-styles;
     inherit (open-vsx.davidanson) vscode-markdownlint;
@@ -43,7 +43,7 @@ in
     inherit (open-vsx.gruntfuggly) todo-tree;
   };
   docker = {
-    inherit (my-extensions.ms-vscode-remote) remote-containers;
+    inherit (vscode.ms-vscode-remote) remote-containers;
     inherit (open-vsx.ms-azuretools) vscode-docker;
     inherit (open-vsx.exiasr) hadolint;
   };
@@ -55,7 +55,7 @@ in
     inherit (vscode.monosans) djlint;
     inherit (open-vsx.batisteo) vscode-django;
     inherit (open-vsx.kevinrose) vsc-python-indent;
-    inherit (my-extensions.visualstudioexptteam) vscodeintellicode;
+    inherit (vscode.visualstudioexptteam) vscodeintellicode;
   };
   toml = {
     inherit (open-vsx.tamasfe) even-better-toml;

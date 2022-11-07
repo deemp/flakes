@@ -2,13 +2,13 @@
   inputs = {
     nixpkgs_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs;
     flake-utils_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils;
-    nix-vscode-marketplace_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/nix-vscode-marketplace;
-    vscodium-extensions_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/vscodium-extensions;
+    vscode-extensions_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/nix-vscode-extensions;
+    vscode-extensions-selected_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/vscode-extensions-selected;
     drv-tools.url = github:br4ch1st0chr0n3/flakes?dir=drv-tools;
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils.follows = "flake-utils_/flake-utils";
-    nix-vscode-marketplace.follows = "nix-vscode-marketplace_/nix-vscode-marketplace";
-    vscodium-extensions.follows = "vscodium-extensions_/vscodium-extensions";
+    vscode-extensions.follows = "nix-vscode-extensions_/nix-vscode-extensions";
+    vscode-extensions-selected.follows = "vscode-extensions-selected_/vscode-extensions-selected";
   };
 
   outputs =
@@ -16,8 +16,8 @@
     , flake-utils
     , nixpkgs
     , drv-tools
-    , nix-vscode-marketplace
-    , vscodium-extensions
+    , vscode-extensions
+    , vscode-extensions-selected
     , ...
     }:
     flake-utils.lib.eachDefaultSystem
@@ -37,8 +37,8 @@
         extensions = import ./extensions.nix {
           inherit
             system
-            nix-vscode-marketplace
-            vscodium-extensions;
+            vscode-extensions
+            vscode-extensions-selected;
         };
 
         # nixified and restructured settings.json

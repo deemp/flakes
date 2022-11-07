@@ -8,7 +8,6 @@
     flake-utils.follows = "flake-utils_/flake-utils";
     formatter.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/formatter;
     my-codium.url = github:br4ch1st0chr0n3/flakes?dir=codium;
-    # my-codium.url = path:./codium;
   };
   outputs =
     { self
