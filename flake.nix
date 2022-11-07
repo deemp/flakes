@@ -1,13 +1,13 @@
 {
   inputs = {
-    nixpkgs_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs;
+    nixpkgs_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs";
     nixpkgs.follows = "nixpkgs_/nixpkgs";
-    flake-utils_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils;
+    flake-utils_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
-    flake-tools.url = github:br4ch1st0chr0n3/flakes?dir=flake-tools;
-    drv-tools.url = github:br4ch1st0chr0n3/flakes?dir=drv-tools;
-    formatter.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/formatter;
-    my-codium.url = github:br4ch1st0chr0n3/flakes?dir=codium;
+    flake-tools.url = "github:br4ch1st0chr0n3/flakes?dir=flake-tools";
+    drv-tools.url = "github:br4ch1st0chr0n3/flakes?dir=drv-tools";
+    formatter.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/formatter";
+    my-codium.url = "github:br4ch1st0chr0n3/flakes?dir=codium";
   };
   outputs =
     { self
@@ -32,13 +32,10 @@
           settingsNix
           ;
         inherit (drv-tools.functions.${system})
-          toList
           mkDevShellsWithDefault
           readDirectories
-          mkShellApp
           ;
         inherit (flake-tools.functions.${system})
-          flakesToggleRelativePaths
           mkFlakesUtils
           ;
         pkgs = nixpkgs.legacyPackages.${system};
@@ -86,16 +83,16 @@
 
   nixConfig = {
     extra-trusted-substituters = [
-      https://haskell-language-server.cachix.org
-      https://nix-community.cachix.org
-      https://hydra.iohk.io
-      https://br4ch1st0chr0n3.cachix.org
+      "https://haskell-language-server.cachix.org"
+      "https://nix-community.cachix.org"
+      "https://hydra.iohk.io"
+      "https://br4ch1st0chr0n3.cachix.org"
     ];
     extra-trusted-public-keys = [
-      haskell-language-server.cachix.org-1:juFfHrwkOxqIOZShtC4YC1uT1bBcq2RSvC7OMKx0Nz8=
-      nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs=
-      hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ=
-      br4ch1st0chr0n3.cachix.org-1:o1FA93L5vL4LWi+jk2ECFk1L1rDlMoTH21R1FHtSKaU=
+      "haskell-language-server.cachix.org-1:juFfHrwkOxqIOZShtC4YC1uT1bBcq2RSvC7OMKx0Nz8="
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+      "br4ch1st0chr0n3.cachix.org-1:o1FA93L5vL4LWi+jk2ECFk1L1rDlMoTH21R1FHtSKaU="
     ];
   };
 }

@@ -1,7 +1,7 @@
 {
   inputs = {
-    nixpkgs_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs;
-    flake-utils_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils;
+    nixpkgs_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs";
+    flake-utils_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils";
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils.follows = "flake-utils_/flake-utils";
   };
@@ -30,7 +30,7 @@
 
 
       # has a runtime dependency on fish!
-      fishHook = value@{ hook ? "", shellName, fish, }:
+      fishHook = { hook ? "", shellName, fish, }:
         let
           # Name of a variable that accumulates shell names
           MY_SHELL_NAME = "MY_SHELL_NAME";

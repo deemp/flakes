@@ -1,9 +1,9 @@
 {
   inputs = {
-    nixpkgs_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs;
-    flake-utils_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils;
-    cachix_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/cachix;
-    drv-tools.url = github:br4ch1st0chr0n3/flakes?dir=drv-tools;
+    nixpkgs_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs";
+    flake-utils_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils";
+    cachix_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/cachix";
+    drv-tools.url = "github:br4ch1st0chr0n3/flakes?dir=drv-tools";
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils.follows = "flake-utils_/flake-utils";
     cachix.follows = "cachix_/cachix";

@@ -1,13 +1,13 @@
 {
   inputs = {
-    nixpkgs_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs;
+    nixpkgs_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs";
     nixpkgs.follows = "nixpkgs_/nixpkgs";
-    flake-utils_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils;
-    vscode-extensions_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/vscode-extensions;
+    flake-utils_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils";
+    vscode-extensions_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/vscode-extensions";
     vscode-extensions.follows = "vscode-extensions_/vscode-extensions";
-    vscode-extensions-selected_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/vscode-extensions-selected;
+    vscode-extensions-selected_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/vscode-extensions-selected";
     vscode-extensions-selected.follows = "vscode-extensions-selected_/vscode-extensions-selected";
-    drv-tools.url = github:br4ch1st0chr0n3/flakes?dir=drv-tools;
+    drv-tools.url = "github:br4ch1st0chr0n3/flakes?dir=drv-tools";
     flake-utils.follows = "flake-utils_/flake-utils";
   };
 
