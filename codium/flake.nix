@@ -7,7 +7,7 @@
     drv-tools.url = github:br4ch1st0chr0n3/flakes?dir=drv-tools;
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils.follows = "flake-utils_/flake-utils";
-    vscode-extensions.follows = "nix-vscode-extensions_/nix-vscode-extensions";
+    vscode-extensions.follows = "vscode-extensions_/vscode-extensions";
     vscode-extensions-selected.follows = "vscode-extensions-selected_/vscode-extensions-selected";
   };
 

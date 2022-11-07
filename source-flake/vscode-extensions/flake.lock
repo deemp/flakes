@@ -15,26 +15,6 @@
         "type": "github"
       }
     },
-    "nix-vscode-marketplace": {
-      "inputs": {
-        "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs"
-      },
-      "locked": {
-        "lastModified": 1667825762,
-        "narHash": "sha256-nHeYMM47anz77ijkZBf/TRMt4jjs8oJ42QhlsMqDp+U=",
-        "owner": "br4ch1st0chr0n3",
-        "repo": "vscodium-extensions",
-        "rev": "864db022071a31fa580bb846da7b34652e7f01b4",
-        "type": "github"
-      },
-      "original": {
-        "owner": "br4ch1st0chr0n3",
-        "ref": "master",
-        "repo": "vscodium-extensions",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1660464579,
@@ -53,7 +33,27 @@
     },
     "root": {
       "inputs": {
-        "nix-vscode-marketplace": "nix-vscode-marketplace"
+        "vscode-extensions": "vscode-extensions"
+      }
+    },
+    "vscode-extensions": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1667825762,
+        "narHash": "sha256-nHeYMM47anz77ijkZBf/TRMt4jjs8oJ42QhlsMqDp+U=",
+        "owner": "br4ch1st0chr0n3",
+        "repo": "nix-vscode-extensions",
+        "rev": "864db022071a31fa580bb846da7b34652e7f01b4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "br4ch1st0chr0n3",
+        "ref": "master",
+        "repo": "nix-vscode-extensions",
+        "type": "github"
       }
     }
   },
