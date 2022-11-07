@@ -20,7 +20,9 @@
       };
     in
     {
-      packages = tools;
+      toolSets = {
+        inherit shellTools;
+      };
     }
     );
 }
