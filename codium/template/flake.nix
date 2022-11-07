@@ -12,17 +12,29 @@
     , my-codium
     , flake-utils
     , ...
-    }: flake-utils.lib.eachDefaultSystem (system:
-    let
-      pkgs = nixpkgs.legacyPackages.${system};
-      inherit (my-codium.functions.${system}) mkCodium;
-      inherit (my-codium.configs.${system}) extensions settingsNix;
-      codium = mkCodium {
-        extensions = { inherit (extensions) nix misc haskell; };
-        runtimeDependencies = [ pkgs.haskell-language-server ];
+    }: flake-utils.lib.eachDefaultSystem
+      (system:
+      let
+        pkgs = nixpkgs.legacyPackages.${system};
+        inherit (my-codium.functions.${system}) mkCodium;
+        inherit (my-codium.configs.${system}) extensions settingsNix;
+        codium = mkCodium {
+          extensions = { inherit (extensions) nix misc haskell; };
+          runtimeDependencies = [ pkgs.haskell-language-server ];
+        };
+      in
+      {
+        packages.default = codium;
+      }) // {
+      templates.default = {
+        path = ./.;
+        description = "A simple codium flake";
+        welcomeText = ''
+          This flake demonstrates how one can
+          build codium with necessary extensions 
+          and binaries in $PATH
+        '';
       };
-    in
-    {
-      packages.default = codium;
-    });
+    };
+
 }
