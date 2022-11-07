@@ -106,7 +106,7 @@
         };
         # tests
         packages = {
-          testCodium = codium;
+          test.codium = codium;
         };
         devShells = mkDevShellsWithDefault
           {

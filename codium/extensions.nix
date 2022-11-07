@@ -9,10 +9,9 @@ in
     inherit (open-vsx.haskell) haskell;
     inherit (open-vsx.justusadam) language-haskell;
     inherit (vscode.visortelle) haskell-spotlight;
-    inherit (open-vsx.redhat) vscode-yaml;
   };
   yaml = {
-    inherit (open-vsx.redhat) vscode-yaml;
+    inherit (vscode.redhat) vscode-yaml;
   };
   purescript = {
     inherit (open-vsx.nwolverson) ide-purescript language-purescript;
