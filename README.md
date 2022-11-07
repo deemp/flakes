@@ -16,7 +16,7 @@
 
 ### Flakes
 
-1. What are flakes?
+1. What are flakes, how to enable them?
    - see the official [wiki](https://nixos.wiki/wiki/Flakes)
 
 1. A basic flake - [hello-flake](hello-flake/flake.nix)
