@@ -1,4 +1,4 @@
-package week1
+package part2
 
 object StringOperations extends App {
   val aString: String = "Hello, world!"

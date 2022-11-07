@@ -1,4 +1,4 @@
-package week1
+package part2
 
 object TypesAndVariables extends App {
   // val - immutable

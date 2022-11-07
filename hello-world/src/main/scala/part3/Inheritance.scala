@@ -20,7 +20,8 @@ object Inheritance extends App {
   val notification: Listener = new Listener("mousedown", null)
   notification.register(
     new Event {
-      override def trigger(eventName: String) = print(s"trigger $eventName event")
+      override def trigger(eventName: String) =
+        print(s"trigger $eventName event")
     }
   )
 }

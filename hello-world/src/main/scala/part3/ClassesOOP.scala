@@ -1,4 +1,4 @@
-package `3-OOP`
+package part3
 
 object ClassesOOP extends App {
   class Student(val id: Int, val name: String) {}

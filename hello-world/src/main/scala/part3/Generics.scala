@@ -1,4 +1,4 @@
-package `3-OOP`
+package part3
 
 object Generics extends App {
   def countSum[A: Numeric](nums: List[A]): A = nums.sum

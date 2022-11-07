@@ -1,4 +1,4 @@
-package week1
+package part2
 
 object Functions extends App {
   def aPerson(name: String, surname: String): String = {

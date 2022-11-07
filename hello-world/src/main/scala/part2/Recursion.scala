@@ -1,4 +1,4 @@
-package week1
+package part2
 
 import scala.annotation.tailrec
 

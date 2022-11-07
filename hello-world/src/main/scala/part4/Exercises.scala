@@ -1,4 +1,4 @@
-package `4-exercises`
+package part4
 
 import scala.annotation.tailrec
 import java.{util => ju}
