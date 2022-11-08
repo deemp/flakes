@@ -4,11 +4,11 @@ Nix flakes for tools that I use
 
 ## Templates
 
-### Codium
+### VSCodium
 
-[codium](./codium/template/flake.nix) includes extensions and binaries
+[VSCodium](./codium/template/flake.nix) with extensions and binaries
 
-- may need to reload the computer for extensions to become available
+- May need to reload the computer for extensions to become available
 
    ```sh
    nix flake new codium-project -t github:br4ch1st0chr0n3/flakes#codium
@@ -16,6 +16,8 @@ Nix flakes for tools that I use
    cd codium-project
    nix run .# .
    ```
+
+- Run `hello` in a VSCodium terminal
 
 ## Pushing conventions
 
