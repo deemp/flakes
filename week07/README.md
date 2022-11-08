@@ -53,17 +53,15 @@ Process:
 - ERC1155 combines multiple types of tokens and is more e fficient
 - can hardcode values
 - connect the Web IDE to a folder
-  - `remixd -s ./week07 -u http://localhost:8080 --remix-ide https://remix.ethereum.org`
+  - `remixd -s ./ -u http://localhost:8080 --remix-ide https://remix.ethereum.org`
 
 - Deployment steps
   1. ERC 721 - NFT collection SC
   2. ERC20 - staking reward SC
 
-## Contracts
+## 4
 
-0x0Cea533823aCd978fd058fce11699DE098d5f124
-0x7EeAc2E627135227a483b5d7DB6Ac607A43FB03A
-0xD3F1Bb796D9789988788649102150dfd94339854
+- need to supply other SC addresses into NFT Staking constructor - [src](https://youtu.be/TMIImre5umU?list=PLLkrq2VBYc1YAIXfxuuh1DohmPZybsELt&t=484)
 
 ## Test
 

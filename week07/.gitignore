@@ -1,6 +1,0 @@
-.deps
-contracts/artifacts
-node_modules
-build
-cache
-flatten

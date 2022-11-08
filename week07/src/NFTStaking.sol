@@ -18,6 +18,12 @@ contract NFTStaking is Ownable, IERC721Receiver {
         address owner;
     }
 
+
+    constructor(Collection _nft, Rewards _token) {
+        nft = _nft;
+        token = _token;
+    }
+
     // when nft is staked
     // there can be a particular value on the nft
     event NFTStaked(address owner, uint256 tokenId, uint256 value);
