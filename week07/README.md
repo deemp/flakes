@@ -52,8 +52,9 @@ Process:
 - ERC20 is for fungible
 - ERC1155 combines multiple types of tokens and is more e fficient
 - can hardcode values
-- connect the Web IDE to a folder
-  - `remixd -s ./ -u http://localhost:8080 --remix-ide https://remix.ethereum.org`
+- connect the to a folder:
+  - Web IDE: `remixd -s ./ -u http://localhost:8080 --remix-ide https://remix.ethereum.org`
+  - Remix Desktop `remixd -s ./ -u http://localhost:8080 --remix-ide package://6fd22d6fe5549ad4c4d8fd3ca0b7816b.mod`
 
 - Deployment steps
   1. ERC 721 - NFT collection SC
@@ -66,3 +67,17 @@ Process:
 ## Test
 
 - may need to `npm audit fix --force` - [SO](https://stackoverflow.com/a/73027407)
+
+## Sample Hardhat Project
+
+This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+
+Try running some of the following tasks:
+
+```shell
+npx hardhat help
+npx hardhat test
+REPORT_GAS=true npx hardhat test
+npx hardhat node
+npx hardhat run scripts/deploy.ts
+```

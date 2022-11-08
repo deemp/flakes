@@ -4,6 +4,8 @@ pragma solidity ^0.8.13;
 
 import "./Rewards.sol";
 import "./Collection.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
+
 
 contract NFTStaking is Ownable, IERC721Receiver {
     uint256 public totalStaked;
@@ -24,6 +26,14 @@ contract NFTStaking is Ownable, IERC721Receiver {
         token = _token;
     }
 
+    function toStringAddress(address addr) internal pure returns (string memory s){
+        return Strings.toHexString(uint160(addr), 20);
+    }
+
+    function toStringInt(uint i) internal pure returns (string memory s) {
+        return Strings.toString(i);
+    }
+
     // when nft is staked
     // there can be a particular value on the nft
     event NFTStaked(address owner, uint256 tokenId, uint256 value);
@@ -40,13 +50,23 @@ contract NFTStaking is Ownable, IERC721Receiver {
     // get stake from token id
     mapping(uint256 => Stake) public vault;
 
+    function fmt3(string memory a, string memory b, string memory c) internal pure returns (string memory){
+        return string(abi.encodePacked(a, " ", b, " ", c));
+    }
+    
+    function fmt2(string memory a, string memory b) internal pure returns (string memory){
+        return string(abi.encodePacked(a, " ", b));
+    }
+
     function stake(uint256[] calldata tokenIds) external {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             uint256 tokenId = tokenIds[i];
             // check that owner wants to stake
-            require(nft.ownerOf(tokenId) == msg.sender, "not your token");
+            require(nft.ownerOf(tokenId) == msg.sender, fmt3(
+                toStringInt(tokenId), "is not your token,", toStringAddress(msg.sender))
+            );
             // check that we don't have this token in our vault
-            require(vault[tokenId].tokenId == 0, "already staked");
+            require(vault[tokenId].tokenId == 0, fmt2(toStringInt(tokenId), "already staked"));
 
             // should only increment if stake
             totalStaked += 1;
@@ -72,7 +92,7 @@ contract NFTStaking is Ownable, IERC721Receiver {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             uint256 tokenId = tokenIds[i];
             Stake memory staked = vault[tokenId];
-            require(staked.owner == msg.sender, "not an owner");
+            require(staked.owner == msg.sender, notOwner(msg.sender, tokenId));
 
             totalStaked -= 1;
 
@@ -103,6 +123,10 @@ contract NFTStaking is Ownable, IERC721Receiver {
     function mintReward(uint256 earned) internal view returns (uint256) {
         return earned / unit;
     }
+    
+    function notOwner(address addr, uint256 tokenId) internal pure returns (string memory){
+        return fmt3(toStringAddress(addr), "is not an owner of", toStringInt(tokenId));
+    }
 
     function _claim(
         address account,
@@ -114,7 +138,7 @@ contract NFTStaking is Ownable, IERC721Receiver {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             uint256 tokenId = tokenIds[i];
             Stake memory staked = vault[tokenId];
-            require(staked.owner == account, "not an owner");
+            require(staked.owner == account, notOwner(account, tokenId));
 
             uint48 stakedAt = staked.timestamp;
 

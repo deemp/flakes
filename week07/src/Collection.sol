@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 pragma solidity ^0.8.13;
 
 contract Collection is ERC721Enumerable, Ownable {
-    using Strings for uint256;
+    using Strings for uint256;  
     string public baseURI;
     string public baseExtension = ".json";
     uint256 public maxSupply = 20;
