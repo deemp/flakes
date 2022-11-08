@@ -27,14 +27,28 @@
             inherit (extensions) nix misc;
             haskell = {
               inherit (open-vsx.haskell) haskell;
-              inherit (open-vsx.justusadam) language-haskell;
               inherit (vscode.visortelle) haskell-spotlight;
             };
           };
-          runtimeDependencies = [ pkgs.haskell-language-server ];
+          runtimeDependencies = [ pkgs.hello ];
         };
       in
       {
         packages.default = codium;
       });
+
+  nixConfig = {
+    extra-trusted-substituters = [
+      "https://haskell-language-server.cachix.org"
+      "https://nix-community.cachix.org"
+      "https://hydra.iohk.io"
+      "https://br4ch1st0chr0n3.cachix.org"
+    ];
+    extra-trusted-public-keys = [
+      "haskell-language-server.cachix.org-1:juFfHrwkOxqIOZShtC4YC1uT1bBcq2RSvC7OMKx0Nz8="
+      "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+      "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
+      "br4ch1st0chr0n3.cachix.org-1:o1FA93L5vL4LWi+jk2ECFk1L1rDlMoTH21R1FHtSKaU="
+    ];
+  };
 }
