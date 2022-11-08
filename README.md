@@ -6,7 +6,7 @@ Nix flakes for tools that I use
 
 ### VSCodium
 
-[VSCodium](./codium/template/flake.nix) with extensions and binaries
+[template](./codium/template/flake.nix) - VSCodium with extensions and binaries
 
 - May need to reload the computer for extensions to become available
 
