@@ -2,21 +2,21 @@
 
 ## Run project
 
-1. terminal:
+1. terminal 1:
 
     ```sh
-    npx hardhat run scripts/deploy.ts --network localhost
+    npx hardhat node
     ```
 
-1. terminal:
+2. terminal 2:
 
     ```sh
     remixd -s ./ -u http://localhost:8080 --remix-ide package://6fd22d6fe5549ad4c4d8fd3ca0b7816b.mod
     ```
 
-1. Set up Remix IDE - [src](https://remix-ide.readthedocs.io/en/latest/hardhat.html)
+3. Set up Remix IDE - [src](https://remix-ide.readthedocs.io/en/latest/hardhat.html)
 
-1. terminal: compile, copy contract addresses into Remix IDE
+4. terminal 3: compile, copy contract addresses into Remix IDE
    - Deploy and run -> At Address
 
     ```sh
@@ -90,6 +90,10 @@ Process:
 - need to supply other SC addresses into NFT Staking constructor - [src](https://youtu.be/TMIImre5umU?list=PLLkrq2VBYc1YAIXfxuuh1DohmPZybsELt&t=484)
 
 - use hardhat
+
+### 5
+
+- `require` reverts a transaction on false condition
 
 ### Multi-vault
 
