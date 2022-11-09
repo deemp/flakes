@@ -1,20 +1,21 @@
 import { ethers } from "hardhat";
 
 async function main() {
-  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
-  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
-  const secs = 10;
-  const unlockTime = currentTimestampInSeconds + secs;
-  // ONE_YEAR_IN_SECS;
+  const Collection = await ethers.getContractFactory("Collection")
+  const Rewards = await ethers.getContractFactory("Rewards")
+  const NFTStaking = await ethers.getContractFactory("NFTStaking")
 
-  const lockedAmount = ethers.utils.parseEther("1");
+  const collection = await Collection.deploy()
+  const rewards = await Rewards.deploy()
+  const nftStaking = await NFTStaking.deploy(collection.address, rewards.address)
 
-  const Lock = await ethers.getContractFactory("Lock");
-  const lock = await Lock.deploy(unlockTime, { value: lockedAmount });
+  await nftStaking.deployed()
 
-  await lock.deployed();
+  await rewards.addController(nftStaking.address)
 
-  console.log(`Lock with 1 ETH and unlock timestamp ${unlockTime} deployed to ${lock.address}`);
+  console.log(`Collection: ${collection.address}`)
+  console.log(`Rewards: ${rewards.address}`)
+  console.log(`NFTStaking: ${nftStaking.address}`)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
