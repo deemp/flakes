@@ -1,0 +1,40 @@
+{
+    "version": "2.0.0",
+    "presentation": {
+      "reveal": "always",
+      "panel": "new"
+    },
+    "tasks": [
+      {
+        "label": "Start hardhat node",
+        "type": "shell",
+        "command": "npx hardhat node",
+        "options": {
+          "cwd": "${workspaceFolder}"
+        }
+      },
+      {
+        "label": "Start remixd for Remix Desktop",
+        "command": "remixd -s ./ -u http://localhost:8080 --remix-ide package://6fd22d6fe5549ad4c4d8fd3ca0b7816b.mod",
+        "type": "shell",
+        "options": {
+          "cwd": "${workspaceFolder}"
+        }
+      },
+      {
+        "label": "Start",
+        "dependsOn": [
+          "Start hardhat node",
+          "Start remixd for Remix Desktop"
+        ]
+      },
+      {
+        "label": "Deploy",
+        "type": "shell",
+        "command": "npx hardhat run scripts/deploy.ts --network localhost",
+        "options": {
+          "cwd": "${workspaceFolder}"
+        }
+      }
+    ]
+  }
