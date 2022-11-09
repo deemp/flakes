@@ -66,9 +66,11 @@
         inherit (settingsNix) haskell todo-tree files editor gitlens git nix-ide workbench;
       };
 
+      tools = [ manager stack hls ];
+
       codium = mkCodium {
         extensions = { inherit (extensions) nix haskell misc github; };
-        runtimeDependencies = [ pkgs.nil manager stack hls ];
+        runtimeDependencies = [ stack hls pkgs.rnix-lsp ];
       };
 
       flakesUtils = mkFlakesUtils [ "." ];
@@ -85,7 +87,7 @@
         {
           default = pkgs.mkShell {
             name = "dev-tools";
-            buildInputs = [ manager ];
+            buildInputs = tools;
             shellHook = ''
               source <(manager --bash-completion-script `which manager`)
             '';
