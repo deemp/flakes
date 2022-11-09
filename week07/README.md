@@ -1,8 +1,33 @@
 # NFT ERC721 Staking Smart Contract (SC) With ERC20 Token Rewards
 
+## Run project
+
+1. terminal:
+
+    ```sh
+    npx hardhat run scripts/deploy.ts --network localhost
+    ```
+
+1. terminal:
+
+    ```sh
+    remixd -s ./ -u http://localhost:8080 --remix-ide package://6fd22d6fe5549ad4c4d8fd3ca0b7816b.mod
+    ```
+
+1. Set up Remix IDE - [src](https://remix-ide.readthedocs.io/en/latest/hardhat.html)
+
+1. terminal: compile, copy contract addresses into Remix IDE
+   - Deploy and run -> At Address
+
+    ```sh
+    npx hardhat run scripts/deploy.ts --network localhost
+    ```
+
+## Tutorial
+
 Based on [playlist](https://www.youtube.com/watch?v=i6pPI5phMA0&list=PLLkrq2VBYc1YAIXfxuuh1DohmPZybsELt)
 
-## 1
+### 1
 
 - ERC 721 NFT will be deposited into an NFT staking SC
   - staking means users put their NFTs into a vault and get a reward
@@ -27,7 +52,7 @@ Process:
        8. sends `Staking Rewards` destination wallet to deposit these tokens
     9.
 
-## 2
+### 2
 
 - can set time with literals like `1 weeks` - [src](https://docs.soliditylang.org/en/latest/units-and-global-variables.html#time-units)
 - block and transaction properties - [src](https://docs.soliditylang.org/en/latest/units-and-global-variables.html#block-and-transaction-properties)
@@ -46,7 +71,7 @@ Process:
     - `memory` - variable is in memory and it exists while a function is being called
     - `calldata` - special data location that contains function arguments
 
-## 3
+### 3
 
 - ERC721 is for non-fungible tokens
 - ERC20 is for fungible
@@ -60,13 +85,15 @@ Process:
   1. ERC 721 - NFT collection SC
   2. ERC20 - staking reward SC
 
-## 4
+### 4
 
 - need to supply other SC addresses into NFT Staking constructor - [src](https://youtu.be/TMIImre5umU?list=PLLkrq2VBYc1YAIXfxuuh1DohmPZybsELt&t=484)
 
-## Test
+- use hardhat
 
-- may need to `npm audit fix --force` - [SO](https://stackoverflow.com/a/73027407)
+### Multi-vault
+
+- ![multi-vault](README/Multi-vault.png)
 
 ## Sample Hardhat Project
 
@@ -81,3 +108,7 @@ REPORT_GAS=true npx hardhat test
 npx hardhat node
 npx hardhat run scripts/deploy.ts
 ```
+
+## Test
+
+- may need to `npm audit fix --force` - [SO](https://stackoverflow.com/a/73027407)
