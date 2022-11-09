@@ -4,188 +4,324 @@ pragma solidity ^0.8.13;
 
 import "./Rewards.sol";
 import "./Collection.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-
 
 contract NFTStaking is Ownable, IERC721Receiver {
-    uint256 public totalStaked;
+    struct Vault {
+        string name;
+        NFTCollection collection;
+        Rewards rewardsToken;
+        FullCollection fullCollection;
+        mapping(address => OwnerVault) ownedBy;
+    }
 
-    struct Stake {
-        // 24 - allowed number of digits in a token id
-        // this is bound by token supply
-        // tokenIds start from 1
-        uint24 tokenId;
-        // capture the staking moment to start generating the rewards
-        uint48 timestamp;
+    struct OwnerVault {
+        uint16 totalStaked;
+        // earned before last collection staking
+        uint totalReward;
+    }
+
+    struct FullCollection {
+        // last collection staking timestamp
+        uint stakedAt;
         address owner;
     }
 
+    mapping(address => OwnerVault) ownerVaultEmpty;
 
-    constructor(Collection _nft, Rewards _token) {
-        nft = _nft;
-        token = _token;
+    Vault[] public multiVault;
+
+    constructor() {
+        ownerVaultEmpty[address(0)] = OwnerVault({
+            totalStaked: 0,
+            totalReward: 0
+        });
     }
 
-    function toStringAddress(address addr) internal pure returns (string memory s){
-        return Strings.toHexString(uint160(addr), 20);
+    // struct to store a stake's token, owner, and earning values
+    struct Stake {
+        uint tokenID;
+        uint timestamp;
+        address owner;
     }
 
-    function toStringInt(uint i) internal pure returns (string memory s) {
-        return Strings.toString(i);
+    uint public totalStaked;
+    mapping(uint => mapping(uint => Stake)) public stakeMultiVault;
+    event NFTStaked(address owner, uint tokenID, uint value);
+    event NFTUnstaked(address owner, uint tokenID, uint value);
+    event Claimed(address owner, uint amount);
+
+    function addVault(
+        NFTCollection nftCollection,
+        Rewards rewardsToken,
+        string calldata name
+    ) public {
+        Vault storage newVault = multiVault.push();
+        newVault.collection = nftCollection;
+        newVault.rewardsToken = rewardsToken;
+        newVault.name = name;
+        // newVault.ownerVault[address(0)] = OwnerVault({
+        //     totalStaked: 0,
+        //     earningInfo: 0
+        // });
     }
 
-    // when nft is staked
-    // there can be a particular value on the nft
-    event NFTStaked(address owner, uint256 tokenId, uint256 value);
-    event NFTUnstaked(address owner, uint256 tokenId, uint256 value);
+    function stake(uint vaultID, uint[] calldata tokenIDs) external {
+        address account = msg.sender;
+        require(
+            account != zeroAddress,
+            "NFTStaking: stake request from the zero address"
+        );
+        for (uint i = 0; i < tokenIDs.length; i++) {
+            uint tokenID = tokenIDs[i];
+            require(
+                multiVault[vaultID].collection.ownerOf(tokenID) == account,
+                notOwner(account, tokenID)
+            );
+            require(
+                stakeMultiVault[vaultID][tokenID].tokenID == 0,
+                "already staked"
+            );
 
-    // amount of tokens issued as a reward
-    event Claimed(address owner, uint256 amount);
+            multiVault[vaultID].ownedBy[account].totalStaked += 1;
+            totalStaked += 1;
 
-    // output of the Collection SC
-    Collection nft;
-    // Rewards Token SCk
-    Rewards token;
+            multiVault[vaultID].collection.transferFrom(
+                account,
+                address(this),
+                tokenID
+            );
+            emit NFTStaked(account, tokenID, block.timestamp);
 
-    // get stake from token id
-    mapping(uint256 => Stake) public vault;
+            stakeMultiVault[vaultID][tokenID] = Stake({
+                owner: account,
+                tokenID: uint24(tokenID),
+                timestamp: uint48(block.timestamp)
+            });
+        }
+        if (
+            multiVault[vaultID].ownedBy[account].totalStaked ==
+            multiVault[vaultID].collection.maxSupply()
+        ) {
+            multiVault[vaultID].fullCollection = FullCollection({
+                owner: account,
+                stakedAt: block.timestamp
+            });
+        }
+    }
 
-    function fmt3(string memory a, string memory b, string memory c) internal pure returns (string memory){
+    string requireContract = "NFTStaking:";
+
+    modifier nonZeroAddress(address account, string memory message) {
+        require(
+            account != zeroAddress,
+            fmt3(requireContract, "zero address.", message)
+        );
+        _;
+    }
+    address zeroAddress = address(0);
+
+    modifier isValidVaultID(uint vaultID, string memory message) {
+        require(
+            vaultID > 0 && vaultID < multiVault.length,
+            fmt3(requireContract, "invalid vault ID.", message)
+        );
+        _;
+    }
+
+    function _unstakeMany(
+        address account,
+        uint vaultID,
+        uint[] calldata tokenIDs
+    )
+        internal
+        nonZeroAddress(account, "Cannot unstake tokens")
+        isValidVaultID(vaultID, "Cannot unstake tokens")
+    {
+        for (uint i = 0; i < tokenIDs.length; i++) {
+            uint tokenID = tokenIDs[i];
+            require(
+                stakeMultiVault[vaultID][tokenID].tokenID != 0,
+                fmt3("token", Strings.toString(tokenID), "is not staked")
+            );
+            Stake memory stake_ = stakeMultiVault[vaultID][tokenID];
+            require(stake_.owner == msg.sender, notOwner(msg.sender, tokenID));
+
+            multiVault[vaultID].ownedBy[account].totalStaked -= 1;
+            totalStaked -= 1;
+
+            // if an item was unstaked
+            // this is not a collection that is staked
+            multiVault[vaultID].fullCollection = FullCollection({
+                owner: zeroAddress,
+                stakedAt: 0
+            });
+
+            delete stakeMultiVault[vaultID][tokenID];
+            emit NFTUnstaked(account, tokenID, block.timestamp);
+
+            multiVault[vaultID].collection.transferFrom(
+                address(this),
+                account,
+                tokenID
+            );
+        }
+    }
+
+    function claim(uint[] calldata tokenIDs, uint vaultID) external {
+        _claim(msg.sender, vaultID, tokenIDs, false);
+    }
+
+    function claimAddressVaultTokens(
+        address account,
+        uint vaultID,
+        uint[] calldata tokenIDs
+    ) external {
+        _claim(account, vaultID, tokenIDs, false);
+    }
+
+    function unstake(uint[] calldata tokenIDs, uint vaultID) external {
+        _claim(msg.sender, vaultID, tokenIDs, true);
+    }
+
+    function notOwner(address addr, uint tokenID)
+        internal
+        pure
+        returns (string memory)
+    {
+        return
+            fmt3(
+                Strings.toHexString(addr),
+                "is not an owner of",
+                Strings.toString(tokenID)
+            );
+    }
+
+    function fmt3(
+        string memory a,
+        string memory b,
+        string memory c
+    ) internal pure returns (string memory) {
         return string(abi.encodePacked(a, " ", b, " ", c));
     }
-    
-    function fmt2(string memory a, string memory b) internal pure returns (string memory){
+
+    function fmt2(string memory a, string memory b)
+        internal
+        pure
+        returns (string memory)
+    {
         return string(abi.encodePacked(a, " ", b));
     }
 
-    function stake(uint256[] calldata tokenIds) external {
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            uint256 tokenId = tokenIds[i];
-            // check that owner wants to stake
-            require(nft.ownerOf(tokenId) == msg.sender, fmt3(
-                toStringInt(tokenId), "is not your token,", toStringAddress(msg.sender))
-            );
-            // check that we don't have this token in our vault
-            require(vault[tokenId].tokenId == 0, fmt2(toStringInt(tokenId), "already staked"));
-
-            // should only increment if stake
-            totalStaked += 1;
-            // transfer token into our collection
-            // via Collection SC    
-            nft.transferFrom(msg.sender, address(this), tokenId);
-
-            // block.timestamp is in seconds
-            emit NFTStaked(msg.sender, tokenId, block.timestamp);
-
-            // save token into our vault
-            vault[tokenId] = Stake({
-                owner: msg.sender,
-                tokenId: uint24(tokenId),
-                timestamp: uint48(block.timestamp)
-            });
-        }
+    struct RewardRate {
+        uint itemMinute;
+        uint collectionMinute;
     }
 
-    function _unstakeMany(address account, uint256[] calldata tokenIds)
+    RewardRate rewardRate =
+        RewardRate({itemMinute: 100, collectionMinute: 10000});
+
+    function _rewardItem(uint time, uint timeStaked)
         internal
+        view
+        returns (uint)
     {
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            uint256 tokenId = tokenIds[i];
-            Stake memory staked = vault[tokenId];
-            require(staked.owner == msg.sender, notOwner(msg.sender, tokenId));
-
-            totalStaked -= 1;
-
-            delete vault[tokenId];
-            emit NFTUnstaked(account, tokenId, block.timestamp);
-            nft.transferFrom(address(this), account, tokenId);
-        }
+        return
+            (rewardRate.itemMinute * 1 ether * (time - timeStaked)) / 1 minutes;
     }
 
-    function claim(uint256[] calldata tokenIds) external {
-        _claim(msg.sender, tokenIds, false);
+    function rewardItem(uint timeStaked) internal view returns (uint) {
+        return _rewardItem(block.timestamp, timeStaked);
     }
 
-    // We can't work with doubles
-    // so, we will scale by this multiplier
-    uint256 unit = 1000;
-
-    // reward by some given time
-    function reward(uint256 time) internal view returns (uint256) {
-        return (unit * 1 ether * (block.timestamp - time)) / 1 days;
+    function _rewardCollection(uint time, uint timeStaked)
+        internal
+        view
+        returns (uint)
+    {
+        return
+            (_rewardItem(time, timeStaked) / rewardRate.itemMinute) *
+            rewardRate.collectionMinute;
     }
 
-    // TODO make it depend on total amount of tokens
-    function rewardPerSecond() internal view returns (uint256) {
-        return reward(block.timestamp - 1 days);
+    function rewardCollection(uint timeStaked) internal view returns (uint) {
+        return _rewardCollection(block.timestamp, timeStaked);
     }
 
-    function mintReward(uint256 earned) internal view returns (uint256) {
-        return earned / unit;
-    }
-    
-    function notOwner(address addr, uint256 tokenId) internal pure returns (string memory){
-        return fmt3(toStringAddress(addr), "is not an owner of", toStringInt(tokenId));
-    }
+    // function rewardCollection()
 
     function _claim(
         address account,
-        uint256[] calldata tokenIds,
+        uint vaultID,
+        uint[] calldata tokenIDs,
         bool _unstake
-    ) internal {
-        uint256 earned = 0;
+    )
+        internal
+        nonZeroAddress(account, "Cannot claim")
+        isValidVaultID(vaultID, "Cannot claim")
+    {
+        uint earned = 0;
+        if (multiVault[vaultID].fullCollection.owner == account) {
+            earned += multiVault[vaultID].ownedBy[account].totalReward;
+            earned += rewardCollection(
+                multiVault[vaultID].fullCollection.stakedAt
+            );
 
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            uint256 tokenId = tokenIds[i];
-            Stake memory staked = vault[tokenId];
-            require(staked.owner == account, notOwner(account, tokenId));
+            // restart reward timer
+            multiVault[vaultID].ownedBy[account].totalReward = 0;
+            multiVault[vaultID].fullCollection.stakedAt = block.timestamp;
+        } else {
+            for (uint i = 0; i < tokenIDs.length; i++) {
+                uint tokenID = tokenIDs[i];
+                Stake memory stake_ = stakeMultiVault[vaultID][tokenID];
+                require(stake_.owner == account, notOwner(account, tokenID));
+                uint stakedAt = stake_.timestamp;
 
-            uint48 stakedAt = staked.timestamp;
+                earned += rewardItem(stakedAt);
 
-            // reward formula
-            earned += reward(stakedAt);
-
-            vault[tokenId] = Stake({
-                owner: account,
-                tokenId: uint24(tokenId),
-                timestamp: uint48(block.timestamp)
-            });
+                // restart reward timer
+                stake_.timestamp = block.timestamp;
+                stakeMultiVault[vaultID][tokenID] = stake_;
+            }
         }
         if (earned > 0) {
-            // Here, we operate in mint units
-            token.mint(account, mintReward(earned));
+            multiVault[vaultID].rewardsToken.mint(account, earned);
         }
         if (_unstake) {
-            _unstakeMany(account, tokenIds);
+            _unstakeMany(account, vaultID, tokenIDs);
         }
         emit Claimed(account, earned);
     }
 
-    // get staking information
-    // FIXME
-    function earningInfo(uint256[] calldata tokenIds)
+    function earningInfo(address account, uint vaultID)
         external
         view
-        returns (uint256[2] memory)
+        nonZeroAddress(account, "Cannot get earning info")
+        isValidVaultID(vaultID, "Cannot get earning info")
+        returns (uint[2] memory info)
     {
-        uint256 earned = 0;
-        for (uint i = 0; i < tokenIds.length; i++) {
-            uint256 tokenId = tokenIds[i];
-            Stake memory staked = vault[tokenId];
-            uint256 stakedAt = staked.timestamp;
-            require (stakedAt != 0, "not staked");
-            earned += reward(stakedAt);
-        }
-
-        return [earned, rewardPerSecond()];
+        uint tokenID;
+        uint totalScore = 0;
+        uint earned = 0;
+        Stake memory staked = stakeMultiVault[vaultID][tokenID];
+        uint stakedAt = staked.timestamp;
+        earned += (100000 ether * (block.timestamp - stakedAt)) / 1 days;
+        uint earnRatePerSecond = (totalScore * 1 ether) / 1 days;
+        earnRatePerSecond = earnRatePerSecond / 100000;
+        // earned, earnRatePerSecond
+        return [earned, earnRatePerSecond];
     }
 
-    // should never be used inside of transaction because of 6gas fee
-    function balanceOf(address account) public view returns (uint256) {
-        uint256 balance = 0;
-        uint256 supply = nft.totalSupply();
+    // should never be used inside of transaction because of gas fee
+    function balanceOf(address account, uint vaultID)
+        public
+        view
+        returns (uint)
+    {
+        uint balance = 0;
+        Vault storage vault = multiVault[vaultID];
+        uint supply = vault.collection.totalSupply();
         for (uint i = 1; i <= supply; i++) {
-            if (vault[i].owner == account) {
+            if (stakeMultiVault[vaultID][i].owner == account) {
                 balance += 1;
             }
         }
@@ -193,25 +329,24 @@ contract NFTStaking is Ownable, IERC721Receiver {
     }
 
     // should never be used inside of transaction because of gas fee
-    function tokensOfOwner(address account)
+    function tokensOfOwnerVault(address account, uint vaultID)
         public
         view
-        returns (uint256[] memory ownerTokens)
+        returns (uint[] memory ownerTokens)
     {
-        uint256 supply = nft.totalSupply();
-        uint256[] memory tmp = new uint256[](supply);
+        Vault storage vault = multiVault[vaultID];
+        uint supply = vault.collection.totalSupply();
+        uint[] memory tmp = new uint[](supply);
 
-        // write tokens of an account into tmp
-        uint256 index = 0;
-        for (uint tokenId = 1; tokenId <= supply; tokenId++) {
-            if (vault[tokenId].owner == account) {
-                tmp[index] = vault[tokenId].tokenId;
+        uint index = 0;
+        for (uint tokenID = 1; tokenID <= supply; tokenID++) {
+            if (stakeMultiVault[vaultID][tokenID].owner == account) {
+                tmp[index] = stakeMultiVault[vaultID][tokenID].tokenID;
                 index += 1;
             }
         }
 
-        // copy tokens from tmp
-        uint256[] memory tokens = new uint256[](index);
+        uint[] memory tokens = new uint[](index);
         for (uint i = 0; i < index; i++) {
             tokens[i] = tmp[i];
         }
@@ -222,10 +357,15 @@ contract NFTStaking is Ownable, IERC721Receiver {
     function onERC721Received(
         address,
         address from,
-        uint256,
+        uint,
         bytes calldata
-    ) external pure override returns (bytes4) {
-        require(from == address(0x0), "Cannot send nfts to Vault directly");
+    )
+        external
+        view
+        override
+        nonZeroAddress(from, "Cannot send nfts to Vault directly")
+        returns (bytes4)
+    {
         return IERC721Receiver.onERC721Received.selector;
     }
 }

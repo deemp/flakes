@@ -5,46 +5,48 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 
 pragma solidity ^0.8.13;
 
-contract Collection is ERC721Enumerable, Ownable {
-    using Strings for uint256;  
+contract NFTCollection is ERC721Enumerable, Ownable {
+    using Strings for uint256;
     string public baseURI;
     string public baseExtension = ".json";
-    uint256 public maxSupply = 20;
-    uint256 public maxMintAmount = 5;
+    uint256 public maxSupply = 10;
+    uint256 public maxMintAmount = 10;
     bool public paused = false;
 
-    constructor() ERC721("br4ch1st0chr0n3 NFT Collection", "br4ch") {}
+    constructor(string memory name_, string memory symbol_)
+        ERC721(name_, symbol_)
+    {}
 
     function _baseURI() internal view virtual override returns (string memory) {
         return "ipfs://QmYB5uWZqfunBq7yWnamTqoXWBAHiQoirNLmuxMzDThHhi/";
     }
 
-    function mint(address _to, uint256 _mintAmount) public payable {
+    function mint(address to_, uint256 mintAmount_) public payable {
         uint256 supply = totalSupply();
         require(!paused);
-        require(_mintAmount > 0);
-        require(_mintAmount <= maxMintAmount);
-        require(supply + _mintAmount <= maxSupply);
+        require(mintAmount_ > 0);
+        require(mintAmount_ <= maxMintAmount);
+        require(supply + mintAmount_ <= maxSupply);
 
-        for (uint256 i = 1; i <= _mintAmount; i++) {
-            _safeMint(_to, supply + i);
+        for (uint256 i = 1; i <= mintAmount_; i++) {
+            _safeMint(to_, supply + i);
         }
     }
 
-    function walletOfOwner(address _owner)
+    function walletOfOwner(address owner_)
         public
         view
         returns (uint256[] memory)
     {
-        uint256 ownerTokenCount = balanceOf(_owner);
+        uint256 ownerTokenCount = balanceOf(owner_);
         uint256[] memory tokenIds = new uint256[](ownerTokenCount);
         for (uint256 i; i < ownerTokenCount; i++) {
-            tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
+            tokenIds[i] = tokenOfOwnerByIndex(owner_, i);
         }
         return tokenIds;
     }
 
-    function tokenURI(uint256 tokenId)
+    function tokenURI(uint256 tokenID)
         public
         view
         virtual
@@ -52,7 +54,7 @@ contract Collection is ERC721Enumerable, Ownable {
         returns (string memory)
     {
         require(
-            _exists(tokenId),
+            _exists(tokenID),
             "ERC721Metadata: URI query for nonexistent token"
         );
 
@@ -62,7 +64,7 @@ contract Collection is ERC721Enumerable, Ownable {
                 ? string(
                     abi.encodePacked(
                         currentBaseURI,
-                        tokenId.toString(),
+                        tokenID.toString(),
                         baseExtension
                     )
                 )
@@ -71,23 +73,23 @@ contract Collection is ERC721Enumerable, Ownable {
 
     // only owner
 
-    function setmaxMintAmount(uint256 _newmaxMintAmount) public onlyOwner {
-        maxMintAmount = _newmaxMintAmount;
+    function setmaxMintAmount(uint256 newmaxMintAmount_) public onlyOwner {
+        maxMintAmount = newmaxMintAmount_;
     }
 
-    function setBaseURI(string memory _newBaseURI) public onlyOwner {
-        baseURI = _newBaseURI;
+    function setBaseURI(string memory newBaseURI_) public onlyOwner {
+        baseURI = newBaseURI_;
     }
 
-    function setBaseExtension(string memory _newBaseExtension)
+    function setBaseExtension(string memory newBaseExtension_)
         public
         onlyOwner
     {
-        baseExtension = _newBaseExtension;
+        baseExtension = newBaseExtension_;
     }
 
-    function pause(bool _state) public onlyOwner {
-        paused = _state;
+    function pause(bool state_) public onlyOwner {
+        paused = state_;
     }
 
     function withdraw() public payable onlyOwner {
