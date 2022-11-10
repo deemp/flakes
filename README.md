@@ -19,16 +19,16 @@ This flake contains:
 
 - Enable [flakes](https://nixos.wiki/wiki/Flakes#Permanent). Create a file if missing
 
+- Complete [direnv](https://direnv.net/docs/installation.html#from-system-packages) Installation
+
+- Log out, Log in to Linux
+
 - Enter the repo
 
   ```sh
   git clone https://github.com/br4ch1st0chr0n3/nix-managed
   cd nix-managed
   ```
-
-- Complete [direnv](https://direnv.net/docs/installation.html#from-system-packages) Installation
-
-- Log out, Log in to Linux
 
 - Allow direnv here
 
