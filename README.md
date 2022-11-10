@@ -106,6 +106,13 @@ This flake contains:
 
 - When you open the newly created file, `./Modules/B.hs`, and hover over a term, you should see Haskell Language Server load and show info.
 
+- To run an executable for `B` - look up its name in [package.yaml](./package.yaml)
+  ```sh
+  stack run B
+  ```
+
+- If you'd like, remove `manager` files and expressions from `flake.nix` and init an ordinary Haskell project via [stack new --bare](https://docs.haskellstack.org/en/stable/GUIDE/#the-stack-new-command)
+
 - If you want to update the `flake.nix` inputs, run
 
   ```console
