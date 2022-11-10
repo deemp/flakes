@@ -70,7 +70,7 @@
 
       codium = mkCodium {
         extensions = { inherit (extensions) nix haskell misc github; };
-        runtimeDependencies = [ stack hls pkgs.rnix-lsp ];
+        runtimeDependencies = [ stack hls pkgs.rnix-lsp pkgs.ghcid ];
       };
 
       flakesUtils = mkFlakesUtils [ "." ];
