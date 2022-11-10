@@ -53,7 +53,7 @@ This flake contains:
   ```
 
 - You may want to write `settings.json` for Codium. You can later configure the necessary settings in `writeSettings` ([flake.nix](flake.nix))
-  ```sh
+  ```console
   nix run .#writeSettings
   ```
 
