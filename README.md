@@ -9,6 +9,10 @@ This flake contains:
 - A hand-made tool for managing modules and file templates (`manager`)
 - `stack.nix` which provides Nix packages from [flake.nix](flake.nix) (see `stack-shell` there)
 
+## Quick start tested on
+
+- [x] Ubuntu 22.04.1 LTS
+
 ## Quick start
 
 - Install [Nix](https://nixos.org/download.html) (Single-user installation)
@@ -40,7 +44,7 @@ This flake contains:
 
 - This should load `haskell-language-server` and `stack` into shell. If no, run:
 
-  ```
+  ```console
   nix develop
   ```
 
@@ -48,11 +52,12 @@ This flake contains:
 
 - Okay, build the project to verify HLS can also build it
 
-  ```
+  ```console
   stack build
   ```
 
 - You may want to write `settings.json` for Codium. You can later configure the necessary settings in `writeSettings` ([flake.nix](flake.nix))
+
   ```console
   nix run .#writeSettings
   ```
@@ -101,10 +106,17 @@ This flake contains:
 
 - When you open the newly created file, `./Modules/B.hs`, and hover over a term, you should see Haskell Language Server load and show info.
 
+- If you want to update the `flake.nix` inputs, run
+
+  ```console
+  nix flake update
+  ```
+
 - In case of problems, try to
   - Open `Command Palette`: `Ctrl` (`Cmd`) + `Shift` + `P`
     - Restart HLS: `Command Palette` > `Restart Haskell LSP Server`
     - Reload the window: `Command Palette` > `Reload Window`
+    - Restart OS
 
 - Feel free to create an issue or contact me at [Telegram](https://daniladanko.t.me)
 
