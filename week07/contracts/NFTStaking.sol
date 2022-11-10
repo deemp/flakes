@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 
 import "./Rewards.sol";
 import "./Collection.sol";
+import "hardhat/console.sol";
 
 contract NFTStaking is Ownable, IERC721Receiver {
     struct Vault {
@@ -26,12 +27,12 @@ contract NFTStaking is Ownable, IERC721Receiver {
         address owner;
     }
 
-    mapping(address => OwnerVault) ownerVaultEmpty;
+    mapping(address => OwnerVault) initOwnerVault;
 
     Vault[] public multiVault;
 
     constructor() {
-        ownerVaultEmpty[address(0)] = OwnerVault({
+        initOwnerVault[address(0)] = OwnerVault({
             totalStaked: 0,
             totalReward: 0
         });
@@ -59,18 +60,14 @@ contract NFTStaking is Ownable, IERC721Receiver {
         newVault.collection = nftCollection;
         newVault.rewardsToken = rewardsToken;
         newVault.name = name;
-        // newVault.ownerVault[address(0)] = OwnerVault({
-        //     totalStaked: 0,
-        //     earningInfo: 0
-        // });
+        newVault.fullCollection = initFullCollection;
     }
 
-    function stake(uint vaultID, uint[] calldata tokenIDs) external {
+    function stake(uint vaultID, uint[] calldata tokenIDs)
+        external
+        nonZeroAddress(msg.sender, "Cannot stake")
+    {
         address account = msg.sender;
-        require(
-            account != zeroAddress,
-            "NFTStaking: stake request from the zero address"
-        );
         for (uint i = 0; i < tokenIDs.length; i++) {
             uint tokenID = tokenIDs[i];
             require(
@@ -84,6 +81,8 @@ contract NFTStaking is Ownable, IERC721Receiver {
 
             multiVault[vaultID].ownedBy[account].totalStaked += 1;
             totalStaked += 1;
+
+            console.log("total staked %o", totalStaked);
 
             multiVault[vaultID].collection.transferFrom(
                 account,
@@ -109,12 +108,12 @@ contract NFTStaking is Ownable, IERC721Receiver {
         }
     }
 
-    string requireContract = "NFTStaking:";
+    string currentContract = "NFTStaking:";
 
     modifier nonZeroAddress(address account, string memory message) {
         require(
             account != zeroAddress,
-            fmt3(requireContract, "zero address.", message)
+            fmt3(currentContract, "zero address.", message)
         );
         _;
     }
@@ -123,10 +122,13 @@ contract NFTStaking is Ownable, IERC721Receiver {
     modifier isValidVaultID(uint vaultID, string memory message) {
         require(
             vaultID > 0 && vaultID < multiVault.length,
-            fmt3(requireContract, "invalid vault ID.", message)
+            fmt3(currentContract, "invalid vault ID.", message)
         );
         _;
     }
+
+    FullCollection initFullCollection =
+        FullCollection({owner: zeroAddress, stakedAt: 0});
 
     function _unstakeMany(
         address account,
