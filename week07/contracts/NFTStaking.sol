@@ -84,7 +84,7 @@ contract NFTStaking is Ownable, IERC721Receiver {
 
             console.log("total staked %o", totalStaked);
 
-            multiVault[vaultID].collection.transferFrom(
+            multiVault[vaultID].collection.safeTransferFrom(
                 account,
                 address(this),
                 tokenID

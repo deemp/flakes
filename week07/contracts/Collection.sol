@@ -21,7 +21,7 @@ contract NFTCollection is ERC721Enumerable, Ownable {
         return "ipfs://QmYB5uWZqfunBq7yWnamTqoXWBAHiQoirNLmuxMzDThHhi/";
     }
 
-    function mint(address to_, uint256 mintAmount_) public payable {
+    function mint(address to_, uint256 mintAmount_) public payable onlyOwner {
         uint256 supply = totalSupply();
         require(!paused);
         require(mintAmount_ > 0);

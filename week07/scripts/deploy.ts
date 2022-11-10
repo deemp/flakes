@@ -9,25 +9,36 @@ async function main() {
   const owner = accounts[0]
   const acc1 = accounts[1]
 
-  const collection1 = await NFTCollection.connect(owner).deploy("Collection1", "C1")
-  // const collection2 = await NFTCollection.deploy("Collection2", "C2")
+  console.log(`contracts owner: ${owner.address}`)
+  console.log(`acc1: ${acc1.address}`)
 
-  // console.log(await collection1.owner())
+  const collection1 = await NFTCollection.connect(owner).deploy("Collection1", "C1")
+
   const nftStaking = await NFTStaking.connect(owner).deploy()
   const rewards1 = await Rewards.connect(owner).deploy()
   
-  // const rewards2 = await Rewards.connect(owner).deploy()
-  
-  await collection1.connect(owner).setApprovalForAll(nftStaking.address, true)
-  await rewards1.connect(owner).addController(nftStaking.address)
-  await rewards1.connect(owner).addController(owner.address)
-  
-  await nftStaking.addVault(collection1.address, rewards1.address, "vault1")
-  // await nftStaking.addVault(collection2.address, rewards2.address, "vault2")
+  console.log(`NFT Collection SC: ${collection1.address}`)
+  console.log(`Rewards SC: ${rewards1.address}`)
+  console.log(`NFT Staking SC: ${nftStaking.address}`)
 
+  await nftStaking.addVault(collection1.address, rewards1.address, "vault1")
   
-  // TODO fix Error: VM Exception while processing transaction: reverted with reason string 'ERC721: caller is not token owner or approved
+  // account allows nftstaking operate all account tokens on this collection
+  await collection1.connect(acc1).setApprovalForAll(nftStaking.address, true)
+  await rewards1.connect(owner).addController(nftStaking.address)
+
   await collection1.connect(owner).mint(acc1.address, await collection1.maxMintAmount())
+
+  await nftStaking.connect(acc1).stake(0, [1,2,3])
+  console.log(`acc1 staked token 1 on vault 0`)
+  console.log(`now, balance of acc1  is ${await nftStaking.balanceOf(acc1.address, 0)}`)
+
+
+  // await rewards1.connect(owner).addController(owner.address)
+  
+  // console.log(collection1.address)
+  // console.log((await nftStaking.multiVault(0)).collection)
+  // TODO fix Error: VM Exception while processing transaction: reverted with reason string 'ERC721: caller is not token owner or approved
   
 
   // console.log(await (await nftStaking.multiVault(0)).collection.)
@@ -36,7 +47,6 @@ async function main() {
   // await collection2.mint(acc1.address, await collection2.maxMintAmount())
   // await collection1.mint(acc2.address, 2)
   
-  // await nftStaking.connect(acc2).stake(1, [1,2,3,4,5,6,7,8,9,10])
   // await nftStaking.connect(acc1).stake(0, [1])
   // console.log(await nftStaking.connect(acc1).balanceOf(acc1.address, 1))
   // await nftStaking.connect(acc1).balanceOf(acc1.address, 1)

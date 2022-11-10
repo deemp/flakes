@@ -1,6 +1,16 @@
 # NFT ERC721 Staking Smart Contract (SC) With ERC20 Token Rewards
 
+## Disclaimer
+
+The work is unfinished
+
 ## Run project
+
+1. Install dependencies
+
+  ```sh
+  npm i
+  ```
 
 1. terminal 1:
 
@@ -8,15 +18,15 @@
     npx hardhat node
     ```
 
-2. terminal 2:
+1. terminal 2:
 
     ```sh
     remixd -s ./ -u http://localhost:8080 --remix-ide package://6fd22d6fe5549ad4c4d8fd3ca0b7816b.mod
     ```
 
-3. Set up Remix IDE - [src](https://remix-ide.readthedocs.io/en/latest/hardhat.html)
+1. Set up Remix IDE - [src](https://remix-ide.readthedocs.io/en/latest/hardhat.html)
 
-4. terminal 3: compile, copy contract addresses into Remix IDE
+1. terminal 3: compile, copy contract addresses into Remix IDE
    - Deploy and run -> At Address
 
     ```sh
