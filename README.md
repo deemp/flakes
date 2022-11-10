@@ -63,7 +63,9 @@ This flake contains:
   nix run .# .
   ```
 
-- A Codium instance with the promised tools should open.
+- A VSCodium instance should open
+
+- Open a terminal in VSCodium
 
 - Learn about `manager`'s supported commands
 
