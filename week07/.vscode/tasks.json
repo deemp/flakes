@@ -25,7 +25,7 @@
         "label": "Start",
         "dependsOn": [
           "Start hardhat node",
-          "Start remixd for Remix Desktop"
+          // "Start remixd for Remix Desktop"
         ]
       },
       {
