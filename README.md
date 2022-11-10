@@ -44,12 +44,17 @@ This flake contains:
   nix develop
   ```
 
-- This will load the shell tools and write `settings.json`. You can configure the necessary settings in `writeSettings` ([flake.nix](flake.nix))
+- This will load the shell tools
 
 - Okay, build the project to verify HLS can also build it
 
   ```
   stack build
+  ```
+
+- You may want to write `settings.json` for Codium. You can later configure the necessary settings in `writeSettings` ([flake.nix](flake.nix))
+  ```sh
+  nix run .#writeSettings
   ```
 
 - After that, run
