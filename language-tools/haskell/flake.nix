@@ -28,8 +28,6 @@
           # GHCi based bare bones IDE
           ghcid
           ;
-        # Haskell-language-server
-        inherit (pkgs) haskell-language-server;
       };
 
       stackPkgs = stack-nixpkgs.legacyPackages.${system};
