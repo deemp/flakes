@@ -31,10 +31,12 @@
         writeSettingsJSON
         mkCodium
         ;
+      devshells = my-codium.functions.${system};
       inherit (my-codium.configs.${system})
         extensions
         settingsNix
         ;
+      devshell = my-codium.devshell.${system};
       inherit (flake-tools.functions.${system})
         mkFlakesUtils
         ;
@@ -58,7 +60,7 @@
                 pkgs.lib.makeBinPath [
                   pkgs.hpack
                 ]
-              }
+                }
           '';
         };
 
@@ -66,11 +68,11 @@
         inherit (settingsNix) haskell todo-tree files editor gitlens git nix-ide workbench;
       };
 
-      tools = [ manager stack hls pkgs.ghcid ];
+      tools = [ manager stack hls pkgs.ghcid pkgs.nixpkgs-fmt writeSettings ];
 
       codium = mkCodium {
         extensions = { inherit (extensions) nix haskell misc github; };
-        runtimeDependencies = [ stack hls ];
+        runtimeDependencies = tools;
       };
 
       flakesUtils = mkFlakesUtils [ "." ];
@@ -83,15 +85,24 @@
         updateLocks = flakesUtils.flakesUpdate;
       };
 
-      devShells =
+      devShells.default = devshell.mkShell
         {
-          default = pkgs.mkShell {
-            name = "dev-tools";
-            buildInputs = tools ++ [ codium ];
-            shellHook = ''
+          packages = [ codium ] ++ tools;
+          bash = {
+            extra = ''
               source <(manager --bash-completion-script `which manager`)
             '';
           };
+          commands = [
+            {
+              name = "codium, ${writeSettings.name}";
+            }
+            {
+              name = "manager";
+              category = "tools";
+              help = "a tool for managing Haskell modules";
+            }
+          ];
         };
 
       stack-shell = { ghcVersion }:
