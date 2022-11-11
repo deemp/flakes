@@ -132,7 +132,7 @@ This flake contains:
 ## GitHub extensions
 
 - There might be problems authorizing on GitHub
-- You may try creating a classic GitHub [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with permissions: `admin:org, delete_repo, project, repo`
+- You may try creating a classic GitHub [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with permissions: `read:user, repo, user:email, workflow`
 
 ## Miscellaneous
 
