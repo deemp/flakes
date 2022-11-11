@@ -9,8 +9,7 @@
     vscode-extensions-selected_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/vscode-extensions-selected";
     vscode-extensions-selected.follows = "vscode-extensions-selected_/vscode-extensions-selected";
     drv-tools.url = "github:br4ch1st0chr0n3/flakes?dir=drv-tools";
-    my-devshell_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/devshell";
-    my-devshell.follows = "my-devshell_/devshell";
+    my-devshell.url = "github:br4ch1st0chr0n3/flakes?dir=devshell";
   };
 
   outputs =
@@ -34,8 +33,8 @@
           toList
           mergeValues
           mkBin
-          desc
           ;
+        devshell = my-devshell.devshell.${system};
 
         # A set of VSCodium extensions
         extensions = import ./extensions.nix {
@@ -96,14 +95,6 @@
         codium = mkCodium { inherit extensions; };
 
         writeSettings = writeSettingsJSON settingsNix;
-
-        devshell = ((pkgs.extend my-devshell.overlay).devshell) // {
-          mkShell = configuration: devshell.mkShell (
-            configuration // {
-              packages = [ desc ] ++ configuration.packages;
-            }
-          );
-        };
       in
       {
         inherit extensions;
@@ -126,16 +117,20 @@
           packages = [ codium writeSettings ];
           commands = [
             {
-              name = "runCodium";
+              name = "codium-here";
               category = "ide";
               help = "start VSCodium in current directory";
               command = "${mkBin codium} .";
             }
             {
-              name = "writeSettingsJSON";
+              name = "write-settings";
               category = "ide";
               help = "write settings.json for VSCodium";
               command = "${mkBin writeSettings}";
+            }
+            {
+              name = "codium";
+              category = "ide";
             }
           ];
         };
