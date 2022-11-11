@@ -43,6 +43,7 @@
       inherit (haskell-tools.functions.${system})
         toolsGHC
         ;
+      hsShellTools = haskell-tools.toolSets.${system}.shellTools;
       inherit (toolsGHC ghcVersion) stack staticExecutable hls;
 
       manager =
@@ -68,7 +69,11 @@
         inherit (settingsNix) haskell todo-tree files editor gitlens git nix-ide workbench;
       };
 
-      tools = [ manager stack hls pkgs.ghcid pkgs.nixpkgs-fmt writeSettings ];
+      tools = (builtins.attrValues hsShellTools) ++ [
+        manager
+        stack
+        writeSettings
+      ];
 
       codium = mkCodium {
         extensions = { inherit (extensions) nix haskell misc github; };
@@ -95,12 +100,12 @@
           };
           commands = [
             {
-              name = "codium, ${writeSettings.name}";
+              name = "codium, ${writeSettings.name}, ghcid";
             }
             {
               name = "manager";
               category = "tools";
-              help = "a tool for managing Haskell modules";
+              help = "a tool for managing Haskell modules and template files";
             }
           ];
         };

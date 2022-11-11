@@ -3,12 +3,13 @@ module Main (main) where
 import Control.Exception (Exception, catch)
 import Control.Exception.Base (SomeException, throwIO)
 import Control.Lens (At (at), Identity, filtered, non, over, withIndex, (^..), (^?!), _2)
+import Control.Monad (when)
 import Control.Monad.Except (MonadIO (liftIO), unless)
 import Control.Monad.Managed (runManaged)
 import Data.Aeson (Value (..))
 import Data.Aeson.KeyMap as KM (fromHashMapText)
 import Data.Aeson.Lens (AsValue (..), key, members, _String)
-import Data.ByteString.Char8 as C (cons, head, lines, null, tail, unlines)
+import Data.ByteString.Char8 as C (cons,   head, lines, null, tail, unlines)
 import Data.Char (isAlpha)
 import Data.Foldable (traverse_)
 import Data.Function ((&))
@@ -26,7 +27,7 @@ import Options.Applicative (Alternative ((<|>)), Parser, argument, command, comm
 import System.Exit (exitFailure)
 import System.FilePath (dropTrailingPathSeparator, isValid, pathSeparator, splitDirectories, (<.>), (</>))
 import System.FilePath.Posix (takeDirectory)
-import System.Process
+import System.Process (callCommand)
 
 main :: IO ()
 main = do
@@ -84,7 +85,7 @@ data Command
       }
   deriving (Show)
 
-data Target = TargetModule | TargetTemplate deriving (Show)
+data Target = TargetModule | TargetTemplate deriving (Show, Eq)
 
 data GeneralCommand = GeneralCommand
   { target :: Target,
@@ -167,7 +168,6 @@ parseTemplate =
     ( long "template"
         <> short 't'
         <> metavar "NAME"
-        <> value defaultTemplate
         <> help "A template NAME"
     )
 
@@ -180,13 +180,18 @@ makeSubCommand target =
         "add"
         addCommand
         ( ("Add a" <-> name <-> "at '" <> dir </> "NAME.hs'. It will also appear in the './package.yaml'.")
-            <-> "A NAME should be of form 'A(/A)*', like 'A' or 'A/A', where 'A' is an alphanumeric sequence."
-            <-> ("A NAME 'A/A' refers to a" <-> name <-> "at" <-> qq (dir </> "A/A.hs"))
+            <-> "A NAME should be of form 'A(/A)*', like 'A' or 'A/A', where 'A' is an alphanumeric sequence"
+            <-> "starting with an uppercase letter."
+            <-> ("A NAME 'A/A' refers to a" <-> name <-> "at" <-> qq (dir </> "A/A" <> file <> ".hs") <> ".")
+            <-> eitherTarget
+              ("You may create other modules in" <-> qq (dir </> "A/A") <-> "and import them into" <-> qq "Main.hs")
+              ""
+              target
         )
         <> f
           "rm"
           removeCommand
-          ( ("Remove a" <-> name <-> "at '" <> dir </> "NAME.hs' and its empty parent directories.")
+          ( ("Remove the" <-> dirOrTemplate <-> " '" <> dir </> "NAME" <> file <> ".hs' and its empty parent directories.")
               <-> ("This" <-> name <-> "will also be removed from './package.yaml'")
           )
         <> f
@@ -197,16 +202,16 @@ makeSubCommand target =
         <> f
           "set"
           setCommand
-          ( ("Set a " <> name <> " so that it's loaded when a 'ghci' session starts.")
+          ( ("Set the " <> name <> " '" <> dir </> "NAME" <> file <> ".hs'" <> " so that it's loaded when a 'ghci' session starts.")
               <-> ("When 'ghcid' starts, it will run this " <> name <> "'s 'main'")
           )
     )
   where
     f name' command' desc = command name' (info (helper <*> command') (fullDesc <> progDesc desc))
-    (dir, name) =
+    (dir, name, dirOrTemplate, file) =
       case target of
-        TargetModule -> (modulesDir, "module")
-        TargetTemplate -> (templatesDir, "template")
+        TargetModule -> (modulesDir, "module", "directory of", "/Main")
+        TargetTemplate -> (templatesDir, "template", "template at", "")
 
 -- | Select an option depending on the Target constructor
 eitherTarget :: p -> p -> Target -> p
@@ -241,11 +246,14 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
     tCreateDir targetDir (mapThrow EWrite Directory fileHs) (mapThrow ERemove Directory fileHs)
     tWriteFile fileHs t (mapThrow EWrite FileHs fileHs)
     readPackageYaml $ \y1 atKey nempty -> do
-      let y2 =
+      let atExeKey k v =
+            over
+              (key executables . atKey (mkExe name) . nempty . atKey k)
+              (\_ -> Just $ String (T.pack v))
+          y2 =
             y1
-              & over
-                (key executables . atKey (mkExe name) . nempty . atKey main')
-                (\_ -> Just $ String (T.pack fileHs))
+              & atExeKey main' mainHs
+              & atExeKey sourceDirs targetDir
       writePackageYaml y2
     liftIO updateCabal
     where
@@ -265,8 +273,9 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
   CommandRemove {name} -> do
     throwIfBadName name
     liftIO $ putStrLn $ "Removing" <-> qq fileHs
+    -- TODO backup dir
     tRemoveFile fileHs (mapThrow ERemove FileHs fileHs)
-    tRemoveDirWithEmptyParents targetDir (mapThrow ERemove Directory targetDir) (mapThrow EWrite Directory targetDir)
+    when (target == TargetModule) $ tRemoveDirWithEmptyParents targetDir (mapThrow ERemove Directory targetDir) (mapThrow EWrite Directory targetDir)
     readPackageYaml $ \y1 _ _ -> do
       let withoutExe x =
             Object $
@@ -286,10 +295,12 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
       txt = T.pack $ ":set -isrc\n:load" <-> mkTargetHs name
   where
     main' = "main"
+    mainHs = "Main.hs"
+    sourceDirs = "source-dirs"
     executables = "executables"
     targetTopDir = eitherTarget modulesDir templatesDir target
     targetTopDirComplementary = eitherTarget templatesDir modulesDir target
-    mkTargetHs x = targetTopDir </> x <.> "hs"
+    mkTargetHs x = targetTopDir </> eitherTarget (x </> mainHs) (x <.> "hs") target
     isOkName name = isValid name && hasNoTrailingSeparator && all (all (`elem` alphabet)) (splitDirectories name)
       where
         hasNoTrailingSeparator = dropTrailingPathSeparator name == name

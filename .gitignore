@@ -3,4 +3,5 @@
 .direnv
 __pycache__
 .mypy_cache
-.vscode/settings.json
+.vscode
+hie.yaml

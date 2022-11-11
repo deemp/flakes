@@ -84,10 +84,10 @@ This flake contains:
   manager add --help
   ```
 
-- Now, create a module:
+- Now, create a module from a template:
 
   ```sh
-  manager add B
+  manager add B -t SimpleMain
   ```
 
 - Autocomplete may work for you when pressing the `TAB` button. Remove this module
@@ -104,12 +104,14 @@ This flake contains:
   Done!
   ```
 
-- When you open the newly created file, `./Modules/B.hs`, and hover over a term, you should see Haskell Language Server load and show info.
+- When you open the newly created file, `./Modules/B/Main.hs`, and hover over a term, you should see Haskell Language Server load and show info.
 
 - To run an executable for `B` - look up its name in [package.yaml](./package.yaml)
   ```sh
   stack run B
   ```
+
+- Now, you can add other modules into `./Modules/B` and import into `./Modules/B/Main.hs`
 
 - If you'd like, remove `manager` files and expressions from `flake.nix` and init an ordinary Haskell project via [stack new --bare](https://docs.haskellstack.org/en/stable/GUIDE/#the-stack-new-command)
 

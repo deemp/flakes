@@ -22,10 +22,12 @@ import System.Directory
     doesFileExist,
     listDirectory,
     removeDirectory,
+    removeDirectoryRecursive,
     removeFile,
-    renameFile, removeDirectoryRecursive,
+    removePathForcibly,
+    renameFile,
   )
-import System.FilePath (splitDirectories, takeDirectory, (</>), takeFileName)
+import System.FilePath (splitDirectories, takeDirectory, takeFileName, (</>))
 import System.IO.Temp (createTempDirectory)
 
 newtype ExMonoid = ExMonoid [SomeException]
@@ -158,23 +160,24 @@ tCreateDir path f g = do
   ex <- liftIO $ doesDirectoryExist path
   mBracketOnError (createDirectoryIfMissing True path) f (\_ -> unless ex (removeDirectory path)) g
 
--- tRemoveDirWithEmptyParents :: MonadManaged m => FilePath -> (IO () -> IO b) -> (IO () -> IO b2) -> m b
 tRemoveDirWithEmptyParents :: MonadManaged m => FilePath -> (IO () -> IO ()) -> (IO () -> IO b2) -> m ()
 tRemoveDirWithEmptyParents path f g = do
   -- we remember if such directory exists
   let removeDirectoryIfEmpty dir = do
         isEmptyDir <- Prelude.null <$> listDirectory dir
-        when isEmptyDir (removeDirectory dir)
-      targetDirParents = take (length (splitDirectories path)) (iterate takeDirectory path)
+        when isEmptyDir (removePathForcibly dir)
+      targetDirParents =
+        let nParents = length (splitDirectories path)
+      -- take directories apart from . and target
+         in tail $ take (max 0 (nParents - 2)) (iterate takeDirectory path)
   ex <- liftIO $ doesDirectoryExist path
   when ex $
     mBracketOnError
-      (traverse_ removeDirectoryIfEmpty targetDirParents)
+      (removePathForcibly path >> traverse_ removeDirectoryIfEmpty targetDirParents)
       f
       -- restore the contents
       (\_ -> createDirectoryIfMissing True path)
       g
-
 
 do' :: String -> IO ()
 do' x = putStrLn ("do " <> x)

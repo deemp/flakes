@@ -1,18 +1,59 @@
+default-extensions:
+- DuplicateRecordFields
+- ExistentialQuantification
+- FlexibleContexts
+- InstanceSigs
+- LambdaCase
+- NamedFieldPuns
+- OverloadedStrings
+- RankNTypes
+- RecordWildCards
+- KindSignatures
+- ScopedTypeVariables
+- TypeApplications
+
 dependencies:
 - base >= 4.7 && < 5
 - text
 - managed
 - directory
 - bytestring
+- mtl
+- filepath
+- temporary
 
 executables:
   A:
-    main: ./Modules/A.hs
-  Templates.Contest:
-    main: ./Templates/Contest.hs
+    main: Main.hs
+    source-dirs: ./Modules/A
+  Templates.SimpleMain:
+    main: SimpleMain.hs
+    source-dirs: ./Templates
+  manager:
+    dependencies:
+    - nix-managed
+    - hpack
+    - mtl
+    - directory
+    - system-filepath
+    - aeson
+    - optparse-applicative
+    - filepath
+    - yaml
+    - unordered-containers
+    - lens-aeson
+    - lens
+    - vector
+    - temporary
+    - process
+    main: Main.hs
+    source-dirs: manager/app
 
 ghc-options:
 - -Wall
+
+library:
+  source-dirs: manager/src
 
 license: BSD3
 
