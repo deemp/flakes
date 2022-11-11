@@ -92,7 +92,8 @@
 
   nix-ide = {
     "nix.enableLanguageServer" = true;
-    "nix.serverPath" = "nil";
+    "nix.serverPath" = "rnix-lsp";
+    "nix.formatterPath" = "nixpkgs-fmt";
   };
 
   python = {

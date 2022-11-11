@@ -30,7 +30,6 @@
           writeJSON
           toList
           mergeValues
-          mkDevShellsWithDefault
           ;
 
         # A set of VSCodium extensions
@@ -57,7 +56,7 @@
               });
             deps = pkgs.lib.lists.flatten [
               pkgs.bashInteractive
-              pkgs.nil
+              pkgs.rnix-lsp
               pkgs.nixpkgs-fmt
               runtimeDependencies
             ];
@@ -112,13 +111,9 @@
             inherit codium writeSettings;
           };
         };
-        devShells = mkDevShellsWithDefault
-          {
-            buildInputs = [ codium ];
-          }
-          {
-            fish = { buildInputs = [ writeSettings ]; };
-          };
+        devShells.default = pkgs.mkShell {
+          buildInputs = [ codium writeSettings ];
+        };
       });
 
   nixConfig = {
