@@ -65,6 +65,12 @@
               help = "start VSCodium in current directory";
               command = "${mkBin codium} .";
             }
+            {
+              name = "writeSettings";
+              category = "ide";
+              help = "write settings.json for VSCodium";
+              command = "${mkBin writeSettings}";
+            }
           ];
         };
         devshell.test = devshell.mkShell {
