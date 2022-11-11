@@ -19,7 +19,7 @@
             devshell_ // {
               mkShell = configuration: devshell_.mkShell (
                 configuration // {
-                  packages = [ desc ] ++ configuration.packages;
+                  packages = [ desc ] ++ (pkgs.lib.lists.flatten configuration.packages);
                   commands = (
                     builtins.map
                       (c:
