@@ -27,7 +27,6 @@
       (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        devshell = (pkgs.extend my-devshell.overlay).devshell;
 
         inherit (drv-tools.functions.${system})
           withLongDescription
@@ -35,6 +34,7 @@
           toList
           mergeValues
           mkBin
+          desc
           ;
 
         # A set of VSCodium extensions
@@ -97,6 +97,13 @@
 
         writeSettings = writeSettingsJSON settingsNix;
 
+        devshell = ((pkgs.extend my-devshell.overlay).devshell) // {
+          mkShell = configuration: devshell.mkShell (
+            configuration // {
+              packages = [ desc ] ++ configuration.packages;
+            }
+          );
+        };
       in
       {
         inherit extensions;
@@ -110,8 +117,13 @@
         configs = {
           inherit extensions settingsNix;
         };
+        packages = {
+          testCodium = codium;
+          testWriteSettings = writeSettings;
+        };
         inherit devshell;
         devShells.default = devshell.mkShell {
+          packages = [ codium writeSettings ];
           commands = [
             {
               name = "runCodium";
