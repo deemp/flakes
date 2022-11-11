@@ -129,6 +129,11 @@ This flake contains:
 
 - Feel free to create an issue or contact me at [Telegram](https://daniladanko.t.me)
 
+## GitHub extensions
+
+- There might be problems authorizing on GitHub
+- You may try creating a classic GitHub [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with permissions: `admin:org, delete_repo, project, repo`
+
 ## Miscellaneous
 
 - Dealing with exceptions - [src](http://www.mega-nerd.com/erikd/Blog/CodeHacking/Haskell/what_do_you_mean.html)
