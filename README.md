@@ -38,3 +38,7 @@ Easily create a CLI to your devShells commands
 
 - devshell [repo](https://github.com/numtide/devshell)
 - devshell [tutorial](https://yuanwang.ca/posts/getting-started-with-flakes.html#numtidedevshell)
+
+## GitHub Personal Access Token
+
+- permissions: `read:user, repo, user:email, workflow`
