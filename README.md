@@ -48,7 +48,7 @@ This flake contains:
   nix develop
   ```
 
-- This will load the shell tools
+- This will load the shell tools and print a message
 
 - Okay, build the project to verify HLS can also build it
 
@@ -58,17 +58,11 @@ This flake contains:
 
 - You may want to write `settings.json` for Codium. You can later configure the necessary settings in `writeSettings` ([flake.nix](flake.nix))
 
-  ```console
-  nix run .#writeSettings
-  ```
-
-- After that, run
+- After that, open `VSCodium`
 
   ```console
-  nix run .# .
+  codium .
   ```
-
-- A VSCodium instance should open
 
 - Open a terminal in VSCodium
 
@@ -127,7 +121,7 @@ This flake contains:
     - Reload the window: `Command Palette` > `Reload Window`
     - Restart OS
 
-- Feel free to create an issue or contact me at [Telegram](https://daniladanko.t.me)
+- Feel free to create an issue or contact me on [Telegram](https://daniladanko.t.me)
 
 ## GitHub extensions
 

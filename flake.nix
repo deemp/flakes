@@ -101,7 +101,7 @@
           };
           commands = [
             {
-              name = "codium, ${writeSettings.name}, ghcid";
+              name = "codium, ${writeSettings.name}, ghcid, stack";
             }
             {
               name = "manager";
