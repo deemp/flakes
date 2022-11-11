@@ -85,6 +85,12 @@
     };
   };
 
+  "vscode.json-language-features" = {
+    "[jsonc]" = {
+      "editor.defaultFormatter" = "vscode.json-language-features";
+    };
+  };
+
   git = {
     "git.autofetch" = true;
     "git.autofetchPeriod" = 5;
