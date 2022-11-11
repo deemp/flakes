@@ -34,11 +34,13 @@
         inherit (drv-tools.functions.${system})
           mkDevShellsWithDefault
           readDirectories
+          mkBin
           ;
         inherit (flake-tools.functions.${system})
           mkFlakesUtils
           ;
         pkgs = nixpkgs.legacyPackages.${system};
+        devshell = my-codium.devshell.${system};
 
         flakesUtils = (mkFlakesUtils (
           let f = dir: (builtins.map (x: "${dir}/${x}") (readDirectories ./${dir})); in
@@ -55,15 +57,21 @@
         writeSettings = writeSettingsJSON settingsNix;
       in
       {
-        devShells = mkDevShellsWithDefault
-          {
-            buildInputs = [
-              (builtins.attrValues flakesUtils)
-            ];
-          }
-          {
-            enter = { buildInputs = [ pkgs.gawk ]; };
-          };
+        devShells.default = devshell.mkShell {
+          commands = [
+            {
+              name = "runCodium";
+              category = "ide";
+              help = "start VSCodium in current directory";
+              command = "${mkBin codium} .";
+            }
+          ];
+        };
+        devshell.test = devshell.mkShell {
+          packages = builtins.attrValues flakesUtils;
+        };
+
+
         packages = {
           pushToCachix = flakesUtils.flakesPushToCachix;
           updateLocks = flakesUtils.flakesUpdate;
