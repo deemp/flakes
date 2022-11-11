@@ -1,6 +1,7 @@
 {
   inputs = {
     nixpkgs_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs";
+    stack-nixpkgs.url = "github:NixOS/nixpkgs/aea08334318ab50a4512d0fd14edb221d5bbde2f";
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
@@ -12,6 +13,7 @@
     , nixpkgs
     , flake-utils
     , gitignore
+    , stack-nixpkgs
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -30,12 +32,13 @@
         inherit (pkgs) haskell-language-server;
       };
 
+      stackPkgs = stack-nixpkgs.legacyPackages.${system};
       # Wrap Stack to work with our Nix integration.
-      stack-wrapped = pkgs.symlinkJoin {
+      stack-wrapped = stackPkgs.symlinkJoin {
         # will be available as the usual `stack` in terminal
         name = "stack";
-        paths = [ pkgs.stack ];
-        buildInputs = [ pkgs.makeWrapper ];
+        paths = [ stackPkgs.stack ];
+        buildInputs = [ stackPkgs.makeWrapper ];
         # --system-ghc    # Use the existing GHC on PATH (will come from this Nix file)
         # --no-install-ghc  # Don't try to install GHC if no matching GHC found on PATH
         postBuild = ''
