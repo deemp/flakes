@@ -1,4 +1,7 @@
 {
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
     "editor.formatOnSave": true,
     "emmet.includeLanguages": {
         "jinja-html": "html"
