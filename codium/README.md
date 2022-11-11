@@ -5,3 +5,6 @@
 - `nix develop` and then `enter` - to start a `fish` shell
 
 See the main [README](../README.md#templates) to learn how to use a codium template
+
+- Start VSCodium - `nix run .#test.codium .`
+- Write `settings.json` - `nix run .#test.writeSettings`
