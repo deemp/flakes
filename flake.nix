@@ -49,7 +49,7 @@
       manager =
         let
           manager_ = "manager";
-          manager-exe = staticExecutable manager_ ./${manager_};
+          manager-exe = staticExecutable manager_ ./.;
         in
         pkgs.symlinkJoin {
           name = manager_;
@@ -73,6 +73,7 @@
         manager
         stack
         writeSettings
+        hls
       ];
 
       codium = mkCodium {
