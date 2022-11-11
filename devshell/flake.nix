@@ -22,9 +22,12 @@
                   commands = builtins.map
                     (c: {
                       category = "standalone executables";
-                      help = "programs listed in `packages` of this devshell";
+                      help = "listed in `packages` of this devshell";
                       command = "echo ''";
-                    } // c)
+                    } // c // {
+                      # append a space to have no name clashes with original executables
+                      name = c.name + " ";
+                    })
                     configuration.commands;
                 }
               );
@@ -36,7 +39,10 @@
             packages = [ pkgs.gawk pkgs.hello ];
             commands = [
               {
-                name = "awk, hello";
+                name = "awk";
+              }
+              {
+                name = "hello";
               }
               {
                 name = "run-hello";
