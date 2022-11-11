@@ -14,21 +14,37 @@
         let
           pkgs = nixpkgs.legacyPackages.${system};
           inherit (drv-tools.packages.${system}) desc;
+          inherit (drv-tools.functions.${system}) framedNewlines;
           devshell = let devshell_ = ((pkgs.extend my-devshell.overlay).devshell); in
             devshell_ // {
               mkShell = configuration: devshell_.mkShell (
                 configuration // {
                   packages = [ desc ] ++ configuration.packages;
-                  commands = builtins.map
-                    (c: {
-                      category = "standalone executables";
-                      help = "listed in `packages` of this devshell";
-                      command = "echo ''";
-                    } // c // {
-                      # append a space to have no name clashes with original executables
-                      name = c.name + " ";
-                    })
-                    configuration.commands;
+                  commands = (
+                    builtins.map
+                      (c:
+                        {
+                          category = "standalone executables";
+                          help = "listed in `packages` of this devshell";
+                          command = ''
+                            printf "${framedNewlines ''
+                              This is a dummy command just to let help text for this entry
+                              to be present in this devshell's message
+                              ''}"
+                          '';
+                        } // c // {
+                          # append a space to have no name clashes with original executables
+                          name = c.name + (if builtins.hasAttr "command" c then "" else " ");
+                        })
+                      configuration.commands
+                  ) ++ [
+                    {
+                      name = "exit ";
+                      category = "general commands";
+                      help = "exit this devshell";
+                      command = "exit";
+                    }
+                  ];
                 }
               );
             };
@@ -43,6 +59,9 @@
               }
               {
                 name = "hello";
+              }
+              {
+                name = "awk, hello";
               }
               {
                 name = "run-hello";
