@@ -31,3 +31,10 @@ Nix flakes for tools that I use
 ## Substituters and keys
 
 There are `extra-trusted-public-keys`, `extra-trusted-public-keys` in [flake.nix](./flake.nix). If a substituter like `cachix` fails, comment out the lines containing its address
+
+## devhshell
+
+Easily create a CLI to your devShells commands
+
+- devshell [repo](https://github.com/numtide/devshell)
+- devshell [tutorial](https://yuanwang.ca/posts/getting-started-with-flakes.html#numtidedevshell)
