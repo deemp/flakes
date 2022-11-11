@@ -47,7 +47,16 @@
           [
             (f "source-flake")
             (f "language-tools")
-            [ "drv-tools" "flake-tools" "env2json" "codium" "codium/template" "json2md" "." ]
+            [
+              "drv-tools"
+              "flake-tools"
+              "env2json"
+              "codium"
+              "codium/template"
+              "json2md"
+              "devshell"
+              "."
+            ]
           ]
         ));
 
