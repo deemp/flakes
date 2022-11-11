@@ -3,12 +3,14 @@
     nixpkgs_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs";
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils";
+    flake-utils.follows = "flake-utils_/flake-utils";
     vscode-extensions_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/vscode-extensions";
     vscode-extensions.follows = "vscode-extensions_/vscode-extensions";
     vscode-extensions-selected_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/vscode-extensions-selected";
     vscode-extensions-selected.follows = "vscode-extensions-selected_/vscode-extensions-selected";
     drv-tools.url = "github:br4ch1st0chr0n3/flakes?dir=drv-tools";
-    flake-utils.follows = "flake-utils_/flake-utils";
+    my-devshell_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/devshell";
+    my-devshell.follows = "my-devshell_/devshell";
   };
 
   outputs =
@@ -18,18 +20,21 @@
     , drv-tools
     , vscode-extensions
     , vscode-extensions-selected
+    , my-devshell
     , ...
     }:
     flake-utils.lib.eachDefaultSystem
       (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
+        devshell = (pkgs.extend my-devshell.overlay).devshell;
 
         inherit (drv-tools.functions.${system})
           withLongDescription
           writeJSON
           toList
           mergeValues
+          mkBin
           ;
 
         # A set of VSCodium extensions
@@ -105,14 +110,22 @@
         configs = {
           inherit extensions settingsNix;
         };
-        # tests
-        packages = {
-          test = {
-            inherit codium writeSettings;
-          };
-        };
-        devShells.default = pkgs.mkShell {
-          buildInputs = [ codium writeSettings ];
+        inherit devshell;
+        devShells.default = devshell.mkShell {
+          commands = [
+            {
+              name = "runCodium";
+              category = "ide";
+              help = "start VSCodium in current directory";
+              command = "${mkBin codium} .";
+            }
+            {
+              name = "writeSettingsJSON";
+              category = "ide";
+              help = "write settings.json for VSCodium";
+              command = "${mkBin writeSettings}";
+            }
+          ];
         };
       });
 

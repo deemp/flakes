@@ -5,5 +5,4 @@
 
 See the main [README](../README.md#templates) to learn how to use a codium template
 
-- Start VSCodium - `nix run .#test.codium .`
-- Write `settings.json` - `nix run .#test.writeSettings`
+Run `nix develop` and then run one of the suggested commands
