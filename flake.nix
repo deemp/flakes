@@ -67,6 +67,7 @@
       in
       {
         devShells.default = devshell.mkShell {
+          packages = builtins.attrValues flakesUtils;
           commands = [
             {
               name = "runCodium";
@@ -82,10 +83,6 @@
             }
           ];
         };
-        devshell.test = devshell.mkShell {
-          packages = builtins.attrValues flakesUtils;
-        };
-
 
         packages = {
           pushToCachix = flakesUtils.flakesPushToCachix;
