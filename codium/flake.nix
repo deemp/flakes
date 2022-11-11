@@ -58,6 +58,7 @@
             deps = pkgs.lib.lists.flatten [
               pkgs.bashInteractive
               pkgs.nil
+              pkgs.nixpkgs-fmt
               runtimeDependencies
             ];
           in
@@ -107,7 +108,9 @@
         };
         # tests
         packages = {
-          test.codium = codium;
+          test = {
+            inherit codium writeSettings;
+          };
         };
         devShells = mkDevShellsWithDefault
           {
