@@ -216,21 +216,34 @@
       # TODO override mkShellApp to install the longDescription into a $out/share directory
       # and read the description from there
       desc = mkShellApp (
-        let command = ''nix eval --raw "$1.meta.longDescription"''; in
+        let command = ''
+          nix eval --raw "$1.meta.longDescription" || \
+              nix eval --raw "$1.meta.description" || \
+                  echo "could not extract any description of this derivation"
+        ''; in
         {
           name = "desc";
           text =
             ''
               description=$(${command})
 
-              printf "\n\n$description\n\n" | glow -
+              printf "${framedNewlines "$description"}" | glow -
             '';
           runtimeInputs = [ pkgs.glow ];
           longDescription = ''
-            Show the description of a derivation (`meta.longDescription` or `meta.description`) as 
+            Usage: `desc INSTALLABLE`
+            
+            Example: `desc .#`
+
+            Show a description of a derivation as 
             [glow](https://github.com/charmbracelet/glow) - rendered Markdown.
 
-            Runs `${command}` with your argument as `$1`
+            Runs 
+              ```sh
+              ${command}
+              ``` 
+            with your argument as `$1`
+
           '';
         }
       );
