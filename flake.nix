@@ -44,7 +44,7 @@
         ;
       hsShellTools = haskell-tools.toolSets.${system}.shellTools;
       ghc92 = "92";
-      inherit (toolsGHC ghc92) stack;
+      inherit (toolsGHC ghc92) stack hls;
 
       writeSettings = writeSettingsJSON {
         inherit (settingsNix) haskell todo-tree files editor gitlens git nix-ide workbench;
@@ -54,7 +54,7 @@
         pkgs.cabal-install
         stack
         writeSettings
-        pkgs.haskell-language-server
+        hls
       ];
 
       codium = mkCodium {
