@@ -1,7 +1,0 @@
-.stack-work/
-*~
-.direnv
-__pycache__
-.mypy_cache
-.vscode
-hie.yaml
