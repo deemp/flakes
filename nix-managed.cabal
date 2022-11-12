@@ -10,38 +10,6 @@ license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
 
-library
-  exposed-modules:
-      ExMonoid
-  other-modules:
-      Paths_nix_managed
-  hs-source-dirs:
-      manager/src
-  default-extensions:
-      DuplicateRecordFields
-      ExistentialQuantification
-      FlexibleContexts
-      InstanceSigs
-      LambdaCase
-      NamedFieldPuns
-      OverloadedStrings
-      RankNTypes
-      RecordWildCards
-      KindSignatures
-      ScopedTypeVariables
-      TypeApplications
-  ghc-options: -Wall
-  build-depends:
-      base >=4.7 && <5
-    , bytestring
-    , directory
-    , filepath
-    , managed
-    , mtl
-    , temporary
-    , text
-  default-language: Haskell2010
-
 executable A
   main-is: Main.hs
   other-modules:
@@ -102,46 +70,4 @@ executable Templates.SimpleMain
     , mtl
     , temporary
     , text
-  default-language: Haskell2010
-
-executable manager
-  main-is: Main.hs
-  other-modules:
-      Paths_nix_managed
-  hs-source-dirs:
-      manager/app
-  default-extensions:
-      DuplicateRecordFields
-      ExistentialQuantification
-      FlexibleContexts
-      InstanceSigs
-      LambdaCase
-      NamedFieldPuns
-      OverloadedStrings
-      RankNTypes
-      RecordWildCards
-      KindSignatures
-      ScopedTypeVariables
-      TypeApplications
-  ghc-options: -Wall
-  build-depends:
-      aeson
-    , base >=4.7 && <5
-    , bytestring
-    , directory
-    , filepath
-    , hpack
-    , lens
-    , lens-aeson
-    , managed
-    , mtl
-    , nix-managed
-    , optparse-applicative
-    , process
-    , system-filepath
-    , temporary
-    , text
-    , unordered-containers
-    , vector
-    , yaml
   default-language: Haskell2010

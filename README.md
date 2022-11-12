@@ -101,6 +101,7 @@ This flake contains:
 - When you open the newly created file, `./Modules/B/Main.hs`, and hover over a term, you should see Haskell Language Server load and show info.
 
 - To run an executable for `B` - look up its name in [package.yaml](./package.yaml)
+
   ```sh
   stack run B
   ```
@@ -127,6 +128,10 @@ This flake contains:
 
 - There might be problems authorizing on GitHub
 - You may try creating a classic GitHub [Personal Access Token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token) with permissions: `read:user, repo, user:email, workflow`
+
+## manager
+
+Due to some reasons, we use GHC 9.0.2 for `manager`. That is why, if you'd like to tweak it, open `codium` and write `settings.json` there
 
 ## Miscellaneous
 

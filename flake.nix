@@ -26,7 +26,6 @@
     flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-      ghcVersion = "902";
       inherit (my-codium.functions.${system})
         writeSettingsJSON
         mkCodium
@@ -44,12 +43,15 @@
         toolsGHC
         ;
       hsShellTools = haskell-tools.toolSets.${system}.shellTools;
-      inherit (toolsGHC ghcVersion) stack staticExecutable hls;
+      ghc92 = "92";
+      inherit (toolsGHC ghc92) stack;
+      ghc90 = "90";
+      inherit (toolsGHC ghc90) staticExecutable;
 
       manager =
         let
           manager_ = "manager";
-          manager-exe = staticExecutable manager_ ./.;
+          manager-exe = staticExecutable manager_ ./${manager_};
         in
         pkgs.symlinkJoin {
           name = manager_;
@@ -73,7 +75,7 @@
         manager
         stack
         writeSettings
-        hls
+        pkgs.haskell-language-server
       ];
 
       codium = mkCodium {
