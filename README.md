@@ -118,6 +118,15 @@
    - I use [longDescription](https://github.com/br4ch1st0chr0n3/flakes/blob/5883de8f1eabac3a5a0069b1330b4b0f7c630b9a/drv-tools/flake.nix#L151)
    - And [desc](https://github.com/br4ch1st0chr0n3/flakes/blob/5883de8f1eabac3a5a0069b1330b4b0f7c630b9a/drv-tools/flake.nix#L210) to show it in a terminal
 
+### Troubleshooting
+
+- Sometimes, if you `wrapProgram` with `--prefix PATH`, this program's `PATH` may not contain the specified binary paths
+   1. example - [mkCodium](https://github.com/br4ch1st0chr0n3/flakes/blob/42ea51cac48ff6d17e76055c905f081fabdbf8f7/codium/flake.nix#L75) for VSCodium
+   2. get this derivation's nix store path. search for the original executable, not given by `devshell`
+   3. try to `nix store delete` it
+   4. if fail, make it not alive
+   5. `nix store repair` it
+
 ### Useful functions
 
 - [symlinkJoin](https://discourse.nixos.org/t/basic-flake-run-existing-python-bash-script/19886/11) + `wrapProgram` provided by `pkgs.makeBinaryWrapper`
