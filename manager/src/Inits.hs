@@ -1,9 +1,9 @@
 {-# LANGUAGE QuasiQuotes #-}
 
-module Yamls (initPackageYaml, initStackYaml) where
+module Inits (initPackageYaml, initStackYaml, initSimpleMain) where
 
-import Text.RawString.QQ (r)
 import Data.ByteString (ByteString)
+import Text.RawString.QQ (r)
 
 initPackageYaml :: ByteString
 initPackageYaml =
@@ -40,4 +40,12 @@ packages:
   - .
 extra-deps:
   - sockets-and-pipes-0.3
+|]
+
+initSimpleMain :: ByteString
+initSimpleMain =
+  [r|module Main where
+
+main :: IO ()
+main = print ("Hello, World!" :: String)
 |]

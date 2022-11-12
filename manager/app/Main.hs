@@ -28,7 +28,7 @@ import System.Exit (exitFailure)
 import System.FilePath (dropTrailingPathSeparator, isValid, pathSeparator, splitDirectories, (<.>), (</>))
 import System.FilePath.Posix (takeDirectory)
 import System.Process (callCommand)
-import Yamls (initPackageYaml, initStackYaml)
+import Inits (initPackageYaml, initStackYaml, initSimpleMain)
 
 main :: IO ()
 main = do
@@ -261,6 +261,8 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
     tCreateDir modulesDir (mapThrow EWrite Directory modulesDir) (mapThrow ERemove Directory modulesDir)
     liftIO $ putStrLn $ "Writing" <-> qq packageYaml
     tWriteFile packageYaml initPackageYaml (mapThrow EWrite FileHs packageYaml)
+    liftIO $ putStrLn $ "Writing" <-> qq stackYaml
+    tWriteFile stackYaml initStackYaml (mapThrow EWrite FileHs stackYaml)
     liftIO $ putStrLn $ "Writing" <-> qq stackYaml
     tWriteFile stackYaml initStackYaml (mapThrow EWrite FileHs stackYaml)
   CommandAdd {name, template} -> do

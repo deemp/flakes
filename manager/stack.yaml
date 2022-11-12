@@ -1,7 +1,4 @@
-resolver:
-  # url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/32.yaml
-  url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/32.yaml
-  # nightly-2022-11-11
+resolver: lts-19.32
 
 ghc-options:
   "$everything":

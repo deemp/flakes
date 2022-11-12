@@ -12,7 +12,7 @@ build-type:     Simple
 library
   exposed-modules:
       ExMonoid
-      Yamls
+      Inits
   other-modules:
       Paths_manager
   hs-source-dirs:

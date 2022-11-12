@@ -22,7 +22,7 @@
       pkgs = nixpkgs.legacyPackages.${system};
       hsShellTools = haskell-tools.toolSets.${system}.shellTools;
       inherit (haskell-tools.functions.${system}) toolsGHC;
-      inherit (toolsGHC "90") staticExecutable stack;
+      inherit (toolsGHC "90") staticExecutable;
       manager =
         let
           manager_ = "manager";
@@ -37,6 +37,7 @@
               --set PATH ${
                 pkgs.lib.makeBinPath [
                   hsShellTools.hpack
+                  hsShellTools.implicit-hie
                 ]
                 }
           '';
@@ -48,7 +49,7 @@
       };
 
       devShells.default = pkgs.mkShell {
-        buildInputs = [ manager stack ];
+        buildInputs = [ manager ];
         shellHook = ''
           source <(manager --bash-completion-script `which manager`)
           manager
