@@ -30,6 +30,9 @@
         writeSettingsJSON
         mkCodium
         ;
+      inherit (drv-tools.functions.${system})
+        mkBinName
+        ;
       devshells = my-codium.functions.${system};
       inherit (my-codium.configs.${system})
         extensions
@@ -43,8 +46,7 @@
         toolsGHC
         ;
       hsShellTools = haskell-tools.toolSets.${system}.shellTools;
-      ghc92 = "92";
-      inherit (toolsGHC ghc92) stack;
+      
       ghc90 = "90";
       inherit (toolsGHC ghc90) staticExecutable;
 
@@ -61,11 +63,27 @@
             wrapProgram $out/bin/${manager_} \
               --set PATH ${
                 pkgs.lib.makeBinPath [
-                  pkgs.hpack
+                  hsShellTools.hpack
                 ]
                 }
           '';
         };
+
+      # Wrap Stack to work with manager's hpack
+      stack-wrapped = pkgs.symlinkJoin {
+        # will be available as the usual `stack` in terminal
+        name = "stack";
+        paths = [ pkgs.stack ];
+        buildInputs = [ pkgs.makeWrapper ];
+        postBuild = ''
+          wrapProgram $out/bin/stack \
+            --add-flags "\
+              --system-ghc \
+              --no-install-ghc \
+              --with-hpack '${mkBinName hsShellTools.hpack "hpack"}' \
+            "
+        '';
+      };
 
       writeSettings = writeSettingsJSON {
         inherit (settingsNix) haskell todo-tree files editor gitlens git nix-ide workbench;
@@ -73,7 +91,7 @@
 
       tools = (builtins.attrValues hsShellTools) ++ [
         manager
-        stack
+        stack-wrapped
         writeSettings
         pkgs.haskell-language-server
       ];
