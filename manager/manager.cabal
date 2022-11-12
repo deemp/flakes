@@ -1,0 +1,94 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.7.
+--
+-- see: https://github.com/sol/hpack
+
+name:           manager
+version:        0.1.0.0
+license:        BSD3
+build-type:     Simple
+
+library
+  exposed-modules:
+      ExMonoid
+  other-modules:
+      Paths_manager
+  hs-source-dirs:
+      src
+  default-extensions:
+      DuplicateRecordFields
+      ExistentialQuantification
+      FlexibleContexts
+      InstanceSigs
+      LambdaCase
+      NamedFieldPuns
+      OverloadedStrings
+      RankNTypes
+      RecordWildCards
+      KindSignatures
+      ScopedTypeVariables
+      TypeApplications
+  ghc-options: -Wall
+  build-depends:
+      aeson
+    , base >=4.7 && <5
+    , bytestring
+    , directory
+    , filepath
+    , hpack
+    , lens
+    , lens-aeson
+    , managed
+    , mtl
+    , optparse-applicative
+    , process
+    , system-filepath
+    , temporary
+    , text
+    , unordered-containers
+    , vector
+    , yaml
+  default-language: Haskell2010
+
+executable manager
+  main-is: Main.hs
+  other-modules:
+      Paths_manager
+  hs-source-dirs:
+      app
+  default-extensions:
+      DuplicateRecordFields
+      ExistentialQuantification
+      FlexibleContexts
+      InstanceSigs
+      LambdaCase
+      NamedFieldPuns
+      OverloadedStrings
+      RankNTypes
+      RecordWildCards
+      KindSignatures
+      ScopedTypeVariables
+      TypeApplications
+  ghc-options: -Wall
+  build-depends:
+      aeson
+    , base >=4.7 && <5
+    , bytestring
+    , directory
+    , filepath
+    , hpack
+    , lens
+    , lens-aeson
+    , managed
+    , manager
+    , mtl
+    , optparse-applicative
+    , process
+    , system-filepath
+    , temporary
+    , text
+    , unordered-containers
+    , vector
+    , yaml
+  default-language: Haskell2010
