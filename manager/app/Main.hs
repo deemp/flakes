@@ -168,7 +168,11 @@ parseTemplate =
     ( long "template"
         <> short 't'
         <> metavar "NAME"
-        <> help "A template NAME"
+        <> help (
+          "An existing template NAME." 
+          <-> "Though the format of a template NAME is the same as for a module NAME,"
+          <-> ("a template" <-> qq "A/A" <-> "refers to" <-> qq "./Templates/A/A.hs")
+          )
     )
 
 -- Helper functions
