@@ -77,7 +77,7 @@
           packages = [ codium ] ++ tools;
           bash = {
             extra = ''
-              
+              cabal update
             '';
           };
           commands = [
@@ -86,11 +86,6 @@
             }
             {
               name = "stack, cabal";
-            }
-            {
-              name = "manager";
-              category = "tools";
-              help = "a tool for managing Haskell modules and template files";
             }
           ];
         };
