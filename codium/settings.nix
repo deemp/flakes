@@ -4,7 +4,6 @@
   # in case of ID clashes, an extension setting should have a full name
 
   haskell = {
-    "haskell.serverExecutablePath" = "haskell-language-server-wrapper";
     "haskell.manageHLS" = "PATH";
   };
 
