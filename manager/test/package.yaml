@@ -1,26 +1,11 @@
+
 default-extensions:
 - TypeApplications
 
 dependencies:
 - base >= 4.7 && < 5
-- relude
 
-executables:
-  A:
-    main: Main.hs
-    source-dirs: ./Modules/A
-  Book:
-    dependencies:
-    - directory
-    - filepath
-    main: Main.hs
-    source-dirs: ./Modules/Book
-  C:
-    main: Main.hs
-    source-dirs: ./Modules/C
-  Templates.SimpleMain:
-    main: SimpleMain.hs
-    source-dirs: ./Templates
+executables: {}
 
 ghc-options:
 - -Wall

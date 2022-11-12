@@ -1,5 +1,5 @@
  
-resolver: lts-19.32
+resolver: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/32.yaml
 
 ghc-options:
   "$everything":
@@ -7,4 +7,6 @@ ghc-options:
     -Wno-unused-top-binds
     -haddock
 packages:
-  - . 
+  - .
+extra-deps:
+  - sockets-and-pipes-0.3

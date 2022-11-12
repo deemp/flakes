@@ -70,6 +70,9 @@ managerDir = "./manager"
 defaultTemplate :: String
 defaultTemplate = "Contest"
 
+simpleMain :: String
+simpleMain = templatesDir </> "SimpleMain.hs"
+
 ghci :: FilePath
 ghci = "./.ghci"
 
@@ -263,8 +266,8 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
     tWriteFile packageYaml initPackageYaml (mapThrow EWrite FileHs packageYaml)
     liftIO $ putStrLn $ "Writing" <-> qq stackYaml
     tWriteFile stackYaml initStackYaml (mapThrow EWrite FileHs stackYaml)
-    liftIO $ putStrLn $ "Writing" <-> qq stackYaml
-    tWriteFile stackYaml initStackYaml (mapThrow EWrite FileHs stackYaml)
+    liftIO $ putStrLn $ "Writing" <-> qq simpleMain
+    tWriteFile simpleMain initSimpleMain (mapThrow EWrite FileHs simpleMain)
   CommandAdd {name, template} -> do
     throwIfBadName name
     throwIfBadName template
