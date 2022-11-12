@@ -19,9 +19,13 @@
 1. What are flakes, how to enable them?
    - see the official [wiki](https://nixos.wiki/wiki/Flakes)
 
-1. A basic flake - [hello-flake](hello-flake/flake.nix)
-
    > `outputs`: A function that, given an attribute set containing the outputs of each of the input flakes keyed by their identifier, yields the Nix values provided by this flake. Thus, in the example above, `inputs.nixpkgs` contains the result of the call to the `outputs` function of the `nixpkgs` flake.
+
+1. A flake with a derivation - [hello-flake](hello-flake/flake.nix)
+
+   ```sh
+   cd hello-flake && nix run
+   ```
 
 1. How to use a flake in another flake? Should I build it somehow?
 
@@ -49,6 +53,8 @@
 
 1. What's the difference between a flake's package and a derivation?
    - `outputs.packages.${system}` is a set with derivations as values
+
+1. Can add an additional nix config to a
 
 ### Docs
 
@@ -388,6 +394,9 @@
       - read a config - [SO](https://stackoverflow.com/a/73639034)
         - sample [action](https://github.com/br4ch1st0chr0n3/nix-vscode-marketplace/actions/runs/3160375278/workflow)
 
+1. `actions/checkout` doesn't pull the latest commit
+   2. If a previous job pushes to the repo, need to pull in a current job
+
 ## Docker
 
 1. Caching [trick](https://fastapi.tiangolo.com/deployment/docker/#docker-cache) - Basically, you should copy the least volatile files like `package.json` and use them as much ASAP, and the most volatile ones like general source code as late as possible.
@@ -445,6 +454,8 @@
    - [variables](https://stackoverflow.com/a/34747439)
    - array construction - [devdocs](https://devdocs.io/jq/index#Array/ObjectValueIterator:.[])
 
+1. [sed](https://sed.js.org/) playground - design expressions
+
 ## VSCodium
 
 1. We can add compound tasks in VS Code - [src](https://code.visualstudio.com/docs/editor/tasks#_compound-tasks)
@@ -453,19 +464,58 @@
 
 ## Linux
 
-- One can set a [cron](https://linuxhint.com/cron_jobs_complete_beginners_tutorial/) job to run e.g., `@reboot` or `@hourly`
+1. One can set a [cron](https://linuxhint.com/cron_jobs_complete_beginners_tutorial/) job to run e.g., `@reboot` or `@hourly`
 
-- [direnv](https://github.com/direnv/direnv/wiki) wiki!
+1. [direnv](https://github.com/direnv/direnv/wiki) wiki!
 
-- Ignoring errors - [man](https://www.baeldung.com/linux/bash-errors)
+1. Ignoring errors - [man](https://www.baeldung.com/linux/bash-errors)
 
 ## DevX
 
-In a project, there are `solid` parts - IDE, environment, helper scripts, tasks - this should be built to make the most convenient conditions for working on `soft` parts - the code
+1. In a project, there are `solid` parts - IDE, environment, helper scripts, tasks - this should be built to make the most convenient conditions for working on `soft` parts - the code
+
+1. Use [tmux](https://thevaluable.dev/tmux-config-mouseless/) to manage terminals
 
 ## Yandex Cloud
 
-- [Иерархия ресурсов Yandex Cloud](https://cloud.yandex.ru/docs/resource-manager/concepts/resources-hierarchy)       
+1. [Иерархия ресурсов Yandex Cloud](https://cloud.yandex.ru/docs/resource-manager/concepts/resources-hierarchy)
+
+## Virtual Machines
+
+1. For local development, need to create a VM
+
+   - e.g., [Ubuntu](https://ubuntu.com/tutorials/how-to-run-ubuntu-desktop-on-a-virtual-machine-using-virtualbox#1-overview) on VirtualBox (live-server, without GUI)
+   - need to disable Secure Boot to get VirtualBox run VMs
+
+1. Set up [port forwarding](https://dev.to/developertharun/easy-way-to-ssh-into-virtualbox-machine-any-os-just-x-steps-5d9i) in VirtualBox
+
+1. Connect to a VM via `ssh`
+   - `ssh-keygen` - generate a key
+   - `ssh-copy-id` - copy it on the target VM
+
+## Python
+
+1. f-strings variable pprint:
+
+   ```python
+   >>> print(f"{a = }")
+   a = 2
+   ```
+
+## Networks
+
+1. [OpenVPN](https://openvpn.net/community-resources/how-to/)
+
+   - IP address -
+   - DNS names -
+   - Netmask -
+   - Subnets -
+   - IP routing -
+   - Routers -
+   - Network interfaces -
+   - LAN -
+   - Gateways -
+   - Firewall rules -
 
 ## Pending Questions
 
