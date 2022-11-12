@@ -14,7 +14,10 @@ default-extensions:
 dependencies:
 - base >= 4.7 && < 5
 
-executables: {}
+executables:
+  Templates.SimpleMain:
+    main: SimpleMain.hs
+    source-dirs: ./Templates
 
 ghc-options:
 - -Wall
