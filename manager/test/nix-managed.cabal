@@ -1,0 +1,69 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.7.
+--
+-- see: https://github.com/sol/hpack
+
+name:           nix-managed
+version:        0.1.0.0
+license:        BSD3
+build-type:     Simple
+
+executable A
+  main-is: Main.hs
+  other-modules:
+      Paths_nix_managed
+  hs-source-dirs:
+      ./Modules/A
+  default-extensions:
+      TypeApplications
+  ghc-options: -Wall
+  build-depends:
+      base >=4.7 && <5
+    , relude
+  default-language: Haskell2010
+
+executable Book
+  main-is: Main.hs
+  other-modules:
+      Book
+      Paths_nix_managed
+  hs-source-dirs:
+      ./Modules/Book
+  default-extensions:
+      TypeApplications
+  ghc-options: -Wall
+  build-depends:
+      base >=4.7 && <5
+    , directory
+    , filepath
+    , relude
+  default-language: Haskell2010
+
+executable C
+  main-is: Main.hs
+  other-modules:
+      Paths_nix_managed
+  hs-source-dirs:
+      ./Modules/C
+  default-extensions:
+      TypeApplications
+  ghc-options: -Wall
+  build-depends:
+      base >=4.7 && <5
+    , relude
+  default-language: Haskell2010
+
+executable Templates.SimpleMain
+  main-is: SimpleMain.hs
+  other-modules:
+      Paths_nix_managed
+  hs-source-dirs:
+      ./Templates
+  default-extensions:
+      TypeApplications
+  ghc-options: -Wall
+  build-depends:
+      base >=4.7 && <5
+    , relude
+  default-language: Haskell2010
