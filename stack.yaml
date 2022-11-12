@@ -13,3 +13,5 @@ nix:
 
 packages:
   - .
+extra-deps:
+  - sockets-and-pipes-0.3

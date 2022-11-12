@@ -26,34 +26,17 @@ executables:
   A:
     main: Main.hs
     source-dirs: ./Modules/A
+  Book:
+    main: Main.hs
+    source-dirs: ./Modules/Book
+    dependencies:
+      - sockets-and-pipes
   Templates.SimpleMain:
     main: SimpleMain.hs
     source-dirs: ./Templates
-  manager:
-    dependencies:
-    - nix-managed
-    - hpack
-    - mtl
-    - directory
-    - system-filepath
-    - aeson
-    - optparse-applicative
-    - filepath
-    - yaml
-    - unordered-containers
-    - lens-aeson
-    - lens
-    - vector
-    - temporary
-    - process
-    main: Main.hs
-    source-dirs: manager/app
 
 ghc-options:
 - -Wall
-
-library:
-  source-dirs: manager/src
 
 license: BSD3
 
