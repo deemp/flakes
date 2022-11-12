@@ -28,6 +28,7 @@ import System.Exit (exitFailure)
 import System.FilePath (dropTrailingPathSeparator, isValid, pathSeparator, splitDirectories, (<.>), (</>))
 import System.FilePath.Posix (takeDirectory)
 import System.Process (callCommand)
+import Yamls (initPackageYaml, initStackYaml)
 
 main :: IO ()
 main = do
@@ -60,6 +61,9 @@ templatesDir = "./Templates"
 packageYaml :: String
 packageYaml = "./package.yaml"
 
+stackYaml :: String
+stackYaml = "./stack.yaml"
+
 managerDir :: FilePath
 managerDir = "./manager"
 
@@ -73,6 +77,7 @@ ghci = "./.ghci"
 
 data Command
   = CommandList
+  | CommandInit
   | CommandAdd
       { name :: String,
         template :: String
@@ -147,6 +152,9 @@ generalCommand =
   where
     f name' command' desc = command name' (info (helper <*> command') (fullDesc <> progDesc desc))
 
+initCommand :: Parser Command
+initCommand = pure CommandInit
+
 setCommand :: Parser Command
 setCommand = CommandSet <$> parseFileName
 
@@ -168,10 +176,10 @@ parseTemplate =
     ( long "template"
         <> short 't'
         <> metavar "NAME"
-        <> help (
-          "An existing template NAME." 
-          <-> "Though the format of a template NAME is the same as for a module NAME,"
-          <-> ("a template" <-> qq "A/A" <-> "refers to" <-> qq "./Templates/A/A.hs")
+        <> help
+          ( "An existing template NAME."
+              <-> "Though the format of a template NAME is the same as for a module NAME,"
+              <-> ("a template" <-> qq "A/A" <-> "refers to" <-> qq "./Templates/A/A.hs")
           )
     )
 
@@ -195,7 +203,7 @@ makeSubCommand target =
         <> f
           "rm"
           removeCommand
-          ( ("Remove the" <-> dirOrTemplate <-> " '" <> dir </> "NAME" <> file <> ".hs' and its empty parent directories.")
+          ( ("Remove the" <-> dirOrTemplate <-> qq (dir </> "NAME" <> file <> ".hs") <-> "and its empty parent directories.")
               <-> ("This" <-> name <-> "will also be removed from './package.yaml'")
           )
         <> f
@@ -206,9 +214,13 @@ makeSubCommand target =
         <> f
           "set"
           setCommand
-          ( ("Set the " <> name <> " '" <> dir </> "NAME" <> file <> ".hs'" <> " so that it's loaded when a 'ghci' session starts.")
-              <-> ("When 'ghcid' starts, it will run this " <> name <> "'s 'main'")
+          ( ("Set the" <-> name <-> qq (dir </> "NAME" <> file <> ".hs") <-> "so that it's loaded when a 'ghci' session starts.")
+              <-> ("When" <-> qq "ghcid" <-> "starts, it will run this " <> name <> "'s" <-> qq "main")
           )
+        <> f
+          "init"
+          initCommand
+          "Initialize a project. `manager` expects that `stack` is available on `PATH`"
     )
   where
     f name' command' desc = command name' (info (helper <*> command') (fullDesc <> progDesc desc))
@@ -236,11 +248,21 @@ updateCabal :: IO ()
 updateCabal = do
   putStrLn "Updating .cabal"
   callCommand "hpack"
+  callCommand "gen-hie > hie.yaml"
 
 -- | safely handle command
 -- collect into a monoid and rethrow the exceptions that occur when doing or undoing actions
 handleCommand :: GeneralCommand -> IO ()
 handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
+  CommandInit -> do
+    liftIO $ putStrLn $ "Creating" <-> qq templatesDir
+    tCreateDir templatesDir (mapThrow EWrite Directory templatesDir) (mapThrow ERemove Directory templatesDir)
+    liftIO $ putStrLn $ "Creating" <-> qq modulesDir
+    tCreateDir modulesDir (mapThrow EWrite Directory modulesDir) (mapThrow ERemove Directory modulesDir)
+    liftIO $ putStrLn $ "Writing" <-> qq packageYaml
+    tWriteFile packageYaml initPackageYaml (mapThrow EWrite FileHs packageYaml)
+    liftIO $ putStrLn $ "Writing" <-> qq stackYaml
+    tWriteFile stackYaml initStackYaml (mapThrow EWrite FileHs stackYaml)
   CommandAdd {name, template} -> do
     throwIfBadName name
     throwIfBadName template

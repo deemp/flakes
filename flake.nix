@@ -55,6 +55,8 @@
               "codium/template"
               "json2md"
               "devshell"
+              "manager/nix-utils"
+              "manager"
               "."
             ]
           ]

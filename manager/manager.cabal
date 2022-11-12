@@ -12,6 +12,7 @@ build-type:     Simple
 library
   exposed-modules:
       ExMonoid
+      Yamls
   other-modules:
       Paths_manager
   hs-source-dirs:
@@ -43,6 +44,7 @@ library
     , mtl
     , optparse-applicative
     , process
+    , raw-strings-qq
     , system-filepath
     , temporary
     , text
@@ -85,6 +87,7 @@ executable manager
     , mtl
     , optparse-applicative
     , process
+    , raw-strings-qq
     , system-filepath
     , temporary
     , text
