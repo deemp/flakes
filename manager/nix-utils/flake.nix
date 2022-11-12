@@ -42,7 +42,7 @@
         ;
       hsShellTools = haskell-tools.toolSets.${system}.shellTools;
 
-      inherit (toolsGHC "90") ghc;
+      inherit (toolsGHC "90") hls;
 
       # Wrap Stack to work with manager's hpack
       stack-wrapped = pkgs.symlinkJoin {
@@ -66,9 +66,8 @@
 
       tools = (builtins.attrValues hsShellTools) ++ [
         stack-wrapped
-        ghc
         writeSettings
-        pkgs.haskell-language-server
+        hls
       ];
 
       codium = mkCodium {
@@ -84,10 +83,9 @@
 
       devShells.default = devshell.mkShell
         {
-          packages = [ codium ] ++ tools;
+          packages = [ codium ];
           bash = {
             extra = ''
-              source <(manager --bash-completion-script `which manager`)
             '';
           };
           commands = [
@@ -96,11 +94,6 @@
             }
             {
               name = "ghc, stack";
-            }
-            {
-              name = "manager";
-              category = "tools";
-              help = "a tool for managing Haskell modules and template files";
             }
           ];
         };
