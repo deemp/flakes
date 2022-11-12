@@ -30,7 +30,7 @@ executables:
     main: Main.hs
     source-dirs: ./Modules/Book
     dependencies:
-      - sockets-and-pipes
+      - sockets-and-pipes >= 0.3
   Templates.SimpleMain:
     main: SimpleMain.hs
     source-dirs: ./Templates
