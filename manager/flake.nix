@@ -5,6 +5,10 @@
     flake-utils_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
     haskell-tools.url = "github:br4ch1st0chr0n3/flakes?dir=language-tools/haskell";
+    flake-compat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
+    };
   };
   outputs =
     { self
@@ -16,9 +20,9 @@
     flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-      inherit (haskell-tools.functions.${system}) toolsGHC;
       hsShellTools = haskell-tools.toolSets.${system}.shellTools;
-      inherit (toolsGHC "90") staticExecutable;
+      inherit (haskell-tools.functions.${system}) toolsGHC;
+      inherit (toolsGHC "90") staticExecutable stack;
       manager =
         let
           manager_ = "manager";
@@ -44,12 +48,24 @@
       };
 
       devShells.default = pkgs.mkShell {
-        buildInputs = [ manager ];
+        buildInputs = [ manager stack ];
         shellHook = ''
           source <(manager --bash-completion-script `which manager`)
           manager
         '';
       };
+
+      stack-shell = { ghcVersion }:
+
+        pkgs.haskell.lib.buildStackProject {
+          name = "nix-managed-stack-shell";
+
+          ghc = pkgs.haskell.compiler.${ghcVersion};
+
+          buildInputs = [
+            pkgs.zlib
+          ];
+        };
     });
 
   nixConfig = {

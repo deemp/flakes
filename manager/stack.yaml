@@ -9,5 +9,9 @@ ghc-options:
     -Wno-unused-top-binds
     -haddock
 
+nix:
+  enable: true
+  shell-file: ./stack.nix
+
 packages:
   - .
