@@ -87,6 +87,7 @@
         # see what you need to pass to your shell for GHC
         # https://docs.haskellstack.org/en/stable/nix_integration/#supporting-both-nix-and-non-nix-developers
         stack = stackGHC ghcVersion;
+        ghc = pkgs.haskell.compiler."ghc${ghcVersion}";
         callCabal = callCabalGHC ghcVersion;
         staticExecutable = staticExecutableGHC ghcVersion;
         inherit justStaticExecutables;
