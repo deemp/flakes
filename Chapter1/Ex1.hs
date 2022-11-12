@@ -1,4 +1,4 @@
-module Book where
+module Ex1 where
 
 import Prelude ()
 import Relude

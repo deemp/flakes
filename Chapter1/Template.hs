@@ -1,4 +1,4 @@
-module Book where
+module Template where
 
 import Prelude ()
 import Relude

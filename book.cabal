@@ -9,4 +9,10 @@ library
                         TypeApplications ScopedTypeVariables
     ghc-options: -Wall -Wno-missing-signatures -fdefer-typed-holes
     build-depends: sockets-and-pipes ^>= 0.3
-    exposed-modules: Template
+    exposed-modules: 
+        Template
+        Ex1
+        Ex2
+        Ex3
+        Chapter1
+    hs-source-dirs: Chapter1
