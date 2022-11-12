@@ -9,8 +9,8 @@ import Control.Monad.Managed (runManaged)
 import Data.Aeson (Value (..))
 import Data.Aeson.KeyMap as KM (fromHashMapText)
 import Data.Aeson.Lens (AsValue (..), key, members, _String)
-import Data.ByteString.Char8 as C (cons,   head, lines, null, tail, unlines)
-import Data.Char (isAlpha)
+import Data.ByteString.Char8 as C (cons, head, lines, null, tail, unlines)
+import Data.Char (isAlpha, isUpper)
 import Data.Foldable (traverse_)
 import Data.Function ((&))
 import Data.Functor ((<&>))
@@ -127,7 +127,7 @@ instance Show ProcessError where
   show FileError {..} = "Error" <-> show actionType <-> show fileType <-> qq filePath <-> ":" <-> message
   show NameError {name} =
     ("Error: the path or name" <-> qq name <-> "is bad.")
-      <-> "It should be of form 'A(/A)*' like 'A' or 'A/A', where 'A' is an alphanumeric sequence."
+      <-> "It should be of form 'A(/A)*' like 'A' or 'A/A', where 'A' is an alphanumeric sequence starting with an uppercase letter."
 
 instance Exception ProcessError
 
@@ -301,7 +301,13 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
     targetTopDir = eitherTarget modulesDir templatesDir target
     targetTopDirComplementary = eitherTarget templatesDir modulesDir target
     mkTargetHs x = targetTopDir </> eitherTarget (x </> mainHs) (x <.> "hs") target
-    isOkName name = isValid name && hasNoTrailingSeparator && all (all (`elem` alphabet)) (splitDirectories name)
+    isOkName name =
+      isValid name
+        && hasNoTrailingSeparator
+        && all
+          ( \x -> all (`elem` alphabet) x && isUpper (Prelude.head x)
+          )
+          (splitDirectories name)
       where
         hasNoTrailingSeparator = dropTrailingPathSeparator name == name
         alphabet = ['A' .. 'Z'] ++ ['a' .. 'z'] ++ ['0' .. '9'] ++ ['_']
