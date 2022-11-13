@@ -13,3 +13,8 @@ Build project
     ```sh
     stack build
     ```
+
+## Dependencies
+
+- [hpack](https://github.com/sol/hpack)
+- [implicit-hie](https://github.com/Avi-D-coder/implicit-hie)

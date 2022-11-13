@@ -228,7 +228,7 @@ makeSubCommand target =
         <> f
           "update"
           updateHieCommand
-          "Re-generate .cabal and hie.yaml"
+          "Re-generate .cabal and hie.yaml. Run whenever you manually add a module"
     )
   where
     f name' command' desc = command name' (info (helper <*> command') (fullDesc <> progDesc desc))
