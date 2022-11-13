@@ -1,0 +1,12 @@
+ 
+resolver: nightly-2022-11-12
+
+ghc-options:
+  "$everything":
+    -Wno-missing-signatures
+    -Wno-unused-top-binds
+    -haddock
+packages:
+  - .
+extra-deps:
+  - sockets-and-pipes-0.3

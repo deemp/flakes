@@ -1,0 +1,27 @@
+default-extensions:
+- TypeApplications
+- BlockArguments
+- QuasiQuotes
+- ScopedTypeVariables
+
+dependencies:
+- base >= 4.7 && < 5
+
+executables:
+  Chapter1:
+    dependencies:
+    - sockets-and-pipes >= 0.3
+    main: Main.hs
+    source-dirs: ./Modules/Chapter1
+  Templates.SimpleMain:
+    main: SimpleMain.hs
+    source-dirs: ./Templates
+
+ghc-options:
+- -Wall
+
+license: BSD3
+
+name: nix-managed
+
+version: 0.1.0.0
