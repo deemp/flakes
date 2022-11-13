@@ -96,9 +96,13 @@
         inherit (formatter) formatter;
       }) // {
       templates = {
-        codium = {
-          path = ./codium/template;
+        codium-generic = {
+          path = ./templates/codium/generic;
           description = "codium with extensions and binaries";
+        };
+        codium-haskell = {
+          path = ./templates/codium/haskell;
+          description = "codium with extensions and binaries for Haskell";
         };
       };
     };
