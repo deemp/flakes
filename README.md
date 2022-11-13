@@ -80,7 +80,7 @@ Set a  `packages.default = your-corrupt-derivation` in `flake.nix` and then run 
 Case: VSCodium doesn't have the provided binaries on `PATH`:
 
    1. `Check`: Open a VSCodium terminal -> `echo $PATH`
-   1. You need to repair its derivation (see [Repair a derivation](#repair-a-derivation))
+   1. You need to repair VSCodium's derivation (see [Repair a derivation](#repair-a-derivation))
    1. Assumptions: 
       - current directory is `dir`
       - there is a `dir/flake.nix`
