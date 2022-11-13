@@ -4,7 +4,7 @@ Nix flakes for tools that I use
 
 ## Prerequisites
 
-- Learn more about [flakes](https://github.com/br4ch1st0chr0n3/the-little-things#flakes)
+- Learn about [flakes](https://github.com/br4ch1st0chr0n3/the-little-things#flakes)
 - Learn how to [pin inputs](https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-flake.html#flake-references)
 
 ## Pushing conventions
@@ -43,8 +43,9 @@ VSCodium with extensions and binaries
 
    ```console
    nix flake new codium-project -t github:br4ch1st0chr0n3/flakes#codium-generic
-   git add codium-project
    cd codium-project
+   git init
+   git add .
    nix run .# .
    ```
 
@@ -56,8 +57,9 @@ VSCodium with extensions and binaries for Haskell
 
    ```console
    nix flake new haskell-project -t github:br4ch1st0chr0n3/flakes#codium-haskell
-   git add haskell-project
    cd haskell-project
+   git init
+   git add .
    nix develop
    codium .
    ```
