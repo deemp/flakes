@@ -72,10 +72,9 @@
           packages = builtins.attrValues flakesUtils;
           commands = [
             {
-              name = "runCodium";
+              name = "codium";
               category = "ide";
-              help = "start VSCodium in current directory";
-              command = "${mkBin codium} .";
+              help = "VSCodium";
             }
             {
               name = "writeSettings";
