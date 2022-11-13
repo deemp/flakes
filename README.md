@@ -2,6 +2,11 @@
 
 Nix flakes for tools that I use
 
+## Prerequisites
+
+- Learn more about [flakes](https://github.com/br4ch1st0chr0n3/the-little-things#flakes)
+- Learn how to [pin inputs](https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-flake.html#flake-references)
+
 ## Pushing conventions
 
 1. Commit and push
@@ -28,14 +33,13 @@ Easily create a CLI to your devShells commands
 
 ## Templates
 
-### VSCodium template
+### VSCodium
 
-[template](./codium/template/flake.nix) - VSCodium with extensions and binaries
+[VSCodium troubleshooting](#vscodium-troubleshooting)
 
-- learn more about [flakes](https://github.com/br4ch1st0chr0n3/the-little-things#flakes)
-- learn how to [pin packages](https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-flake.html#flake-references)
+### Generic
 
-- see [VSCodium troubleshooting](#vscodium-troubleshooting)
+VSCodium with extensions and binaries
 
    ```console
    nix flake new codium-project -t github:br4ch1st0chr0n3/flakes#codium-generic
@@ -46,37 +50,37 @@ Easily create a CLI to your devShells commands
 
 - Run `hello` in a VSCodium terminal
 
-### VSCodium for Haskell template
+### Haskell
 
-[template](./codium/template/flake.nix) - VSCodium with extensions and binaries for Haskell
-
-- see [VSCodium troubleshooting](#vscodium-troubleshooting)
+VSCodium with extensions and binaries for Haskell
 
    ```console
-   nix flake new codium-project -t github:br4ch1st0chr0n3/flakes#codium-haskell
-   git add codium-project
-   cd codium-project
+   nix flake new haskell-project -t github:br4ch1st0chr0n3/flakes#codium-haskell
+   git add haskell-project
+   cd haskell-project
    nix develop
    codium .
    ```
-
-- Run `hello` in a VSCodium terminal
 
 ## Troubleshooting
 
 ### VSCodium troubleshooting
 
-VSCodium doesn't have the provided binaries on `PATH` (VSCodium terminal -> `echo $PATH`):
+Case: VSCodium doesn't have the provided binaries on `PATH`:
 
+   1. Check: VSCodium terminal -> `echo $PATH`
    1. You need to repair its [derivation](https://nixos.org/manual/nix/unstable/language/derivations.html?highlight=derivation#derivations)
-   1. Get `CODIUM_PATH` in Nix store:
+   1. It's assumed that in your flake, `packages.default = codium;`
+   1. Get `CODIUM_PATH` - path of VSCodium in Nix store:
 
       ```console
-      nix show-derivation .# | jq ".[].outputs.out.path"
+      nix show-derivation .# | jq -r ".[].outputs.out.path"
       ```
 
    1. Copy this path
-   1. Close windows that may access this codium's executable - terminal with this project's devshell, VSCodium
+   1. Close windows and rm files that may access this codium's executable:
+      - terminal with this project's devshell
+      - VSCodium
    1. Now, check that this path is not alive in a new terminal. This command should show no files and processes:
 
       ```console
@@ -89,3 +93,5 @@ VSCodium doesn't have the provided binaries on `PATH` (VSCodium terminal -> `ech
       ```console
       nix store repair CODIUM_PATH
       ```
+
+   1. Finally, try rerunning codium
