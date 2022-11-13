@@ -78,6 +78,7 @@ ghci = "./.ghci"
 data Command
   = CommandList
   | CommandInit
+  | CommandUpdate
   | CommandAdd
       { name :: String,
         template :: String
@@ -155,6 +156,9 @@ generalCommand =
 initCommand :: Parser Command
 initCommand = pure CommandInit
 
+updateHieCommand :: Parser Command
+updateHieCommand = pure CommandUpdate
+
 setCommand :: Parser Command
 setCommand = CommandSet <$> parseFileName
 
@@ -220,7 +224,11 @@ makeSubCommand target =
         <> f
           "init"
           initCommand
-          "Initialize a project. `manager` expects that `stack` is available on `PATH`"
+          "Initialize a managed stack project"
+        <> f
+          "update"
+          updateHieCommand
+          "Re-generate .cabal and hie.yaml"
     )
   where
     f name' command' desc = command name' (info (helper <*> command') (fullDesc <> progDesc desc))
@@ -244,10 +252,11 @@ x <-> y = x <> " " <> y
 qq :: (IsString a, Semigroup a) => a -> a
 qq s = "'" <> s <> "'"
 
-updateCabal :: IO ()
-updateCabal = do
+updateCabalAndHie :: IO ()
+updateCabalAndHie = do
   putStrLn "Updating .cabal"
   callCommand "hpack"
+  putStrLn "Updating hie.yaml"
   callCommand "gen-hie > hie.yaml"
 
 -- | safely handle command
@@ -265,6 +274,8 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
     tWriteFile stackYaml initStackYaml (mapThrow EWrite FileHs stackYaml)
     liftIO $ putStrLn $ "Writing" <-> qq simpleMain
     tWriteFile simpleMain initSimpleMain (mapThrow EWrite FileHs simpleMain)
+  CommandUpdate -> do
+    liftIO updateCabalAndHie
   CommandAdd {name, template} -> do
     throwIfBadName name
     throwIfBadName template
@@ -283,7 +294,7 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
               & atExeKey main' mainHs
               & atExeKey sourceDirs targetDir
       writePackageYaml y2
-    liftIO updateCabal
+    liftIO updateCabalAndHie
     where
       fileHs = mkTargetHs name
       templateHs = templatesDir </> template <.> "hs"
@@ -324,7 +335,7 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
                 HM.fromList (x ^.. members . withIndex . filtered (\(y, _) -> y /= exe))
           y2 = y1 & over (key executables) withoutExe
       writePackageYaml y2
-    liftIO updateCabal
+    liftIO updateCabalAndHie
     where
       fileHs = mkTargetHs name
       targetDir = takeDirectory fileHs
