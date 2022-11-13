@@ -13,6 +13,7 @@ default-extensions:
 
 dependencies:
 - base >= 4.7 && < 5
+- sockets-and-pipes >= 0.3
 
 executables:
   Templates.SimpleMain:
@@ -32,7 +33,7 @@ version: 0.1.0.0
 initStackYaml :: ByteString
 initStackYaml =
   [r| 
-resolver: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/19/32.yaml
+resolver: nightly-2022-11-12
 
 ghc-options:
   "$everything":
