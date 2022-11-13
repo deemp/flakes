@@ -59,14 +59,4 @@ object ChatBot extends App {
 //   println(tests.map({case (a, b, c) => compare(a, b) == c}))
 //   println(tests.map({ case (a, b, c) => compare(a, b) == c }))
 //   println(tests.forall({ case (a, b, c) => (compare(a, b) == c): Boolean }))
-
-  import scala.util.Try
-  case class Rational(num: Int, denom: Int) {}
-  val s: String = "142/342"
-  val nums = s.split("/").map(_.trim.toInt)
-  val r = Try(nums match {
-    case Array(a, b) => new Rational(a, b)
-    case _           => throw new NumberFormatException
-  })
-  println(r)
 }
