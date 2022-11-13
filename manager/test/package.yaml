@@ -1,4 +1,3 @@
-
 default-extensions:
 - TypeApplications
 
@@ -6,6 +5,16 @@ dependencies:
 - base >= 4.7 && < 5
 
 executables:
+  A:
+    main: Main.hs
+    source-dirs: ./Modules/A
+  Book:
+    main: Main.hs
+    source-dirs: ./Modules/Book
+    dependencies:
+      - filepath
+      - directory
+      - relude
   Templates.SimpleMain:
     main: SimpleMain.hs
     source-dirs: ./Templates
