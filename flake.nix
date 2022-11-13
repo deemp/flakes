@@ -53,7 +53,6 @@
       };
 
       tools = (builtins.attrValues hsShellTools) ++ [
-        pkgs.cabal-install
         manager.packages.${system}.default
         stack
         writeSettings
@@ -70,7 +69,7 @@
     in
     {
       packages = {
-        default = codium;
+        default = hls;
         pushToCachix = flakesUtils.flakesPushToCachix;
         updateLocks = flakesUtils.flakesUpdate;
       };

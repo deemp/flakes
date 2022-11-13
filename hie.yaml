@@ -1,22 +1,22 @@
 cradle:
-  cabal:
-    - path: "./Templates/SimpleMain.hs"
+  stack:
+    - path: "././Templates/SimpleMain.hs"
       component: "nix-managed:exe:Templates.SimpleMain"
 
-    - path: "./Modules/Chapter1/Main.hs"
+    - path: "././Modules/Chapter1/Main.hs"
       component: "nix-managed:exe:Chapter1"
 
-    - path: "./Modules/Chapter1/Chapter1.hs"
+    - path: "././Modules/Chapter1/Chapter1.hs"
       component: "nix-managed:exe:Chapter1"
 
-    - path: "./Modules/Chapter1/Ex1.hs"
+    - path: "././Modules/Chapter1/Ex1.hs"
       component: "nix-managed:exe:Chapter1"
 
-    - path: "./Modules/Chapter1/Ex2.hs"
+    - path: "././Modules/Chapter1/Ex2.hs"
       component: "nix-managed:exe:Chapter1"
 
-    - path: "./Modules/Chapter1/Ex3.hs"
+    - path: "././Modules/Chapter1/Ex3.hs"
       component: "nix-managed:exe:Chapter1"
 
-    - path: "./Modules/Chapter1/Template.hs"
+    - path: "././Modules/Chapter1/Template.hs"
       component: "nix-managed:exe:Chapter1"

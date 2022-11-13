@@ -21,6 +21,7 @@ getDataDir = do
 fileResource :: FilePath -> IOMode -> ResourceT IO (ReleaseKey, Handle)
 fileResource path mode = allocate (IO.openFile path mode) IO.hClose
 
+howManyHandles :: IO ()
 howManyHandles = runResourceT @IO do
     hs <- openManyHandles
     putStrLn ("Opened " <> show (length hs) <> " handles")
