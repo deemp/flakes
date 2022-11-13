@@ -4,7 +4,8 @@
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     my-codium.url = "github:br4ch1st0chr0n3/flakes?dir=codium";
     drv-tools.url = "github:br4ch1st0chr0n3/flakes?dir=drv-tools";
-    flake-tools.url = "github:br4ch1st0chr0n3/flakes?dir=flake-tools";
+    flake-utils_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils";
+    flake-utils.follows = "flake-utils_/flake-utils";    
     haskell-tools.url = "github:br4ch1st0chr0n3/flakes?dir=language-tools/haskell";
     flake-compat = {
       url = "github:edolstra/flake-compat";
@@ -18,7 +19,6 @@
     , my-codium
     , drv-tools
     , haskell-tools
-    , flake-tools
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -41,72 +41,47 @@
         toolsGHC
         ;
       hsShellTools = haskell-tools.toolSets.${system}.shellTools;
+      inherit (toolsGHC "90") stack hls ghc;
 
-      inherit (toolsGHC "90") hls;
-
-      # Wrap Stack to work with manager's hpack
-      stack-wrapped = pkgs.symlinkJoin {
-        # will be available as the usual `stack` in terminal
-        name = "stack";
-        paths = [ pkgs.stack ];
-        buildInputs = [ pkgs.makeWrapper ];
-        postBuild = ''
-          wrapProgram $out/bin/stack \
-            --add-flags "\
-              --system-ghc \
-              --no-install-ghc \
-              --with-hpack '${mkBinName hsShellTools.hpack "hpack"}' \
-            "
-        '';
+      writeSettings = writeSettingsJSON {
+        inherit (settingsNix) haskell todo-tree files editor gitlens
+          git nix-ide workbench markdown-all-in-one;
       };
 
-      writeSettings = writeSettingsJSON ({
-        inherit (settingsNix) haskell todo-tree files editor gitlens git nix-ide workbench;
-      });
-
       tools = (builtins.attrValues hsShellTools) ++ [
-        stack-wrapped
+        stack
         writeSettings
         hls
+        ghc
+        pkgs.jq
       ];
 
       codium = mkCodium {
-        extensions = { inherit (extensions) nix haskell misc github; };
+        extensions = { inherit (extensions) nix haskell misc github markdown; };
         runtimeDependencies = tools;
       };
     in
     {
       packages = {
         default = codium;
-        inherit writeSettings;
       };
 
       devShells.default = devshell.mkShell
         {
-          packages = [ codium ];
+          packages = [ codium ] ++ tools;
           bash = {
             extra = ''
             '';
           };
           commands = [
             {
-              name = "codium, ${writeSettings.name}, ghcid";
+              name = "codium, ghcid, stack, ghc, jq";
+              help = "available in codium";
             }
             {
-              name = "ghc, stack";
+              name = "${writeSettings.name}";
+              help = "write .vscode/settings.json";
             }
-          ];
-        };
-
-      stack-shell = { ghcVersion }:
-
-        pkgs.haskell.lib.buildStackProject {
-          name = "nix-managed-stack-shell";
-
-          ghc = pkgs.haskell.compiler.${ghcVersion};
-
-          buildInputs = [
-            pkgs.zlib
           ];
         };
     });

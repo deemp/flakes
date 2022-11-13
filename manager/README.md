@@ -2,9 +2,14 @@
 
 a tool for managing Haskell modules and templates
 
-## test
+Open IDE:
 
-- uses `GHC 9.2.4`. To check VSCodium there:
     ```sh
-    codium test
+    nix develop nix-utils
+    ```
+
+Build project
+
+    ```sh
+    stack build
     ```
