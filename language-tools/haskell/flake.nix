@@ -41,7 +41,6 @@
             --add-flags "\
               --system-ghc \
               --no-install-ghc \
-              --with-hpack '${shellTools.hpack}/bin/hpack' \
             "
         '';
       };
