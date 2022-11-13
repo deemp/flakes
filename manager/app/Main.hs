@@ -257,7 +257,7 @@ updateCabalAndHie = do
   putStrLn "Updating .cabal"
   callCommand "hpack"
   putStrLn "Updating hie.yaml"
-  callCommand "gen-hie > hie.yaml"
+  callCommand "gen-hie --stack > hie.yaml"
 
 -- | safely handle command
 -- collect into a monoid and rethrow the exceptions that occur when doing or undoing actions
