@@ -47,12 +47,12 @@
           [
             (f "source-flake")
             (f "language-tools")
+            (f "templates/codium")
             [
               "drv-tools"
               "flake-tools"
               "env2json"
               "codium"
-              "codium/template"
               "json2md"
               "devshell"
               "manager/nix-utils"
