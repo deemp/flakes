@@ -2,13 +2,13 @@ module Main (main) where
 
 import Control.Exception (Exception, catch)
 import Control.Exception.Base (SomeException, throwIO)
-import Control.Lens (At (at), Identity, filtered, non, over, withIndex, (^..), (^?!), _2)
+import Control.Lens (At (at), Identity, filtered, non, over, withIndex, (^..), _2)
 import Control.Monad (when)
 import Control.Monad.Except (MonadIO (liftIO), unless)
 import Control.Monad.Managed (runManaged)
 import Data.Aeson (Value (..))
 import Data.Aeson.KeyMap as KM (fromHashMapText)
-import Data.Aeson.Lens (AsValue (..), key, members, _String)
+import Data.Aeson.Lens (AsValue (..), key, members, values, _String)
 import Data.ByteString.Char8 as C (cons, head, lines, null, tail, unlines)
 import Data.Char (isAlpha, isUpper)
 import Data.Foldable (traverse_)
@@ -23,12 +23,12 @@ import Data.Text.Encoding (encodeUtf8)
 import Data.Yaml as Y (ParseException, decodeEither', encode)
 import ExMonoid (ExMonoid (..), mBefore, tCreateDir, tReadFile, tRemoveDirWithEmptyParents, tRemoveFile, tWriteFile)
 import Filesystem.Path.CurrentOS as Path ()
-import Options.Applicative (Alternative ((<|>)), Parser, argument, command, commandGroup, customExecParser, fullDesc, header, help, helper, info, long, metavar, prefs, progDesc, short, showHelpOnError, str, strOption, subparser, value)
+import Inits (initPackageYaml, initSimpleMain, initStackYaml)
+import Options.Applicative (Alternative ((<|>)), Parser, argument, command, commandGroup, customExecParser, fullDesc, header, help, helper, info, long, metavar, prefs, progDesc, short, showHelpOnError, str, strOption, subparser)
 import System.Exit (exitFailure)
 import System.FilePath (dropTrailingPathSeparator, isValid, pathSeparator, splitDirectories, (<.>), (</>))
 import System.FilePath.Posix (takeDirectory)
 import System.Process (callCommand)
-import Inits (initPackageYaml, initStackYaml, initSimpleMain)
 
 main :: IO ()
 main = do
@@ -63,9 +63,6 @@ packageYaml = "./package.yaml"
 
 stackYaml :: String
 stackYaml = "./stack.yaml"
-
-managerDir :: FilePath
-managerDir = "./manager"
 
 defaultTemplate :: String
 defaultTemplate = "Contest"
@@ -212,7 +209,7 @@ makeSubCommand target =
         <> f
           "list"
           listCommand
-          ( "List " <> name <> "s available in './package.yaml'"
+          ( "List " <> name <> "s' executables and their 'source-dirs'. These are also available in './package.yaml'"
           )
         <> f
           "set"
@@ -293,13 +290,26 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
       targetDir = takeDirectory fileHs
   CommandList -> do
     readPackageYaml $ \y1 _ _ -> do
-      liftIO $ putStrLn "Executables:"
+      liftIO $ putStrLn "Executable ( source-dirs ):"
       let check x =
-            (\(a : b : _) -> a </> b) (splitDirectories (T.unpack x))
-              `Prelude.notElem` [managerDir, targetTopDirComplementary]
+            T.split (== '.') x
+              & Prelude.head
+              & ( \y ->
+                    if target == TargetModule
+                      then y /= "." <> T.pack templatesDir
+                      else y == T.pack templatesDir
+                )
           y2 =
-            (y1 ^.. key executables . members . filtered (\x -> check (x ^?! key main' . _String)) . withIndex)
-              <&> over _2 (\y -> y ^?! key main' . _String)
+            (y1 ^.. key executables . members . withIndex . filtered (\(k, _) -> check k))
+              <&> over
+                _2
+                ( \y ->
+                    T.intercalate
+                      ", "
+                      ( (y ^.. key sourceDirs . values . _String)
+                          <> (y ^.. key sourceDirs . _String)
+                      )
+                )
       traverse_ (\(name, path) -> liftIO $ putStrLn $ T.unpack $ name <-> "(" <-> path <-> ")") y2
   CommandRemove {name} -> do
     throwIfBadName name
@@ -330,7 +340,6 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
     sourceDirs = "source-dirs"
     executables = "executables"
     targetTopDir = eitherTarget modulesDir templatesDir target
-    targetTopDirComplementary = eitherTarget templatesDir modulesDir target
     mkTargetHs x = targetTopDir </> eitherTarget (x </> mainHs) (x <.> "hs") target
     isOkName name =
       isValid name
