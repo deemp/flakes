@@ -8,6 +8,7 @@
     drv-tools.url = "github:br4ch1st0chr0n3/flakes?dir=drv-tools";
     flake-tools.url = "github:br4ch1st0chr0n3/flakes?dir=flake-tools";
     haskell-tools.url = "github:br4ch1st0chr0n3/flakes?dir=language-tools/haskell";
+    manager.url = "github:br4ch1st0chr0n3/flakes?dir=manager";
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
@@ -21,6 +22,7 @@
     , drv-tools
     , haskell-tools
     , flake-tools
+    , manager
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -43,22 +45,24 @@
         toolsGHC
         ;
       hsShellTools = haskell-tools.toolSets.${system}.shellTools;
-      ghc92 = "92";
-      inherit (toolsGHC ghc92) stack hls;
+      inherit (toolsGHC "92") staticExecutable stack hls;
 
       writeSettings = writeSettingsJSON {
-        inherit (settingsNix) haskell todo-tree files editor gitlens git nix-ide workbench;
+        inherit (settingsNix) haskell todo-tree files editor gitlens
+          git nix-ide workbench markdown-all-in-one;
       };
 
       tools = (builtins.attrValues hsShellTools) ++ [
         pkgs.cabal-install
+        manager.packages.${system}.default
         stack
         writeSettings
         hls
+        pkgs.jq
       ];
 
       codium = mkCodium {
-        extensions = { inherit (extensions) nix haskell misc github; };
+        extensions = { inherit (extensions) nix haskell misc github markdown; };
         runtimeDependencies = tools;
       };
 
@@ -67,7 +71,6 @@
     {
       packages = {
         default = codium;
-        inherit writeSettings;
         pushToCachix = flakesUtils.flakesPushToCachix;
         updateLocks = flakesUtils.flakesUpdate;
       };
@@ -77,15 +80,22 @@
           packages = [ codium ] ++ tools;
           bash = {
             extra = ''
-              cabal update
+              source <(manager --bash-completion-script '$(which manager)')
             '';
           };
           commands = [
             {
-              name = "codium, ${writeSettings.name}, ghcid";
+              name = "codium, ghcid, stack";
+              help = "available in codium";
             }
             {
-              name = "stack, cabal";
+              name = "${writeSettings.name}";
+              help = "write .vscode/settings.json";
+            }
+            {
+              name = "manager";
+              category = "tools";
+              help = "manage Haskell modules and template files";
             }
           ];
         };
