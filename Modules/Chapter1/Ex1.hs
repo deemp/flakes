@@ -2,6 +2,13 @@ module Ex1 where
 
 import Prelude ()
 import Relude
+    ( Monad(return),
+      Bool(True),
+      IO,
+      MonadIO(liftIO),
+      Handle,
+      IOMode(WriteMode),
+      FilePath )
 
 import qualified System.Directory as Dir
 import System.FilePath ((</>))
@@ -19,6 +26,7 @@ getDataDir = do
 fileResource :: FilePath -> IOMode -> ResourceT IO (ReleaseKey, Handle)
 fileResource path mode = allocate (IO.openFile path mode) IO.hClose
 
+writeGreetingSafe :: IO ()
 writeGreetingSafe = runResourceT @IO do
     dir <- liftIO getDataDir
     (_, h) <- fileResource (dir </> "greeting.txt") WriteMode

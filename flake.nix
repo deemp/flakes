@@ -9,6 +9,7 @@
     flake-tools.url = "github:br4ch1st0chr0n3/flakes?dir=flake-tools";
     haskell-tools.url = "github:br4ch1st0chr0n3/flakes?dir=language-tools/haskell";
     manager.url = "github:br4ch1st0chr0n3/flakes?dir=manager";
+    my-devshell.url = "github:br4ch1st0chr0n3/flakes?dir=devshell";
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
@@ -23,6 +24,7 @@
     , haskell-tools
     , flake-tools
     , manager
+    , my-devshell
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -32,12 +34,11 @@
         writeSettingsJSON
         mkCodium
         ;
-      devshells = my-codium.functions.${system};
       inherit (my-codium.configs.${system})
         extensions
         settingsNix
         ;
-      devshell = my-codium.devshell.${system};
+      devshell = my-devshell.devshell.${system};
       inherit (flake-tools.functions.${system})
         mkFlakesUtils
         ;
