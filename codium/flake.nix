@@ -112,7 +112,6 @@
           testCodium = codium;
           testWriteSettings = writeSettings;
         };
-        inherit devshell;
         devShells.default = devshell.mkShell {
           packages = [ codium writeSettings ];
           commands = [

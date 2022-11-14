@@ -11,6 +11,7 @@
       url = "github:edolstra/flake-compat";
       flake = false;
     };
+    my-devshell.url = "github:br4ch1st0chr0n3/flakes?dir=devshell";
   };
   outputs =
     { self
@@ -19,6 +20,7 @@
     , my-codium
     , drv-tools
     , haskell-tools
+    , my-devshell
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -36,7 +38,7 @@
         extensions
         settingsNix
         ;
-      devshell = my-codium.devshell.${system};
+      devshell = my-devshell.devshell.${system};
       inherit (haskell-tools.functions.${system})
         toolsGHC
         ;

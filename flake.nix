@@ -8,6 +8,7 @@
     drv-tools.url = "github:br4ch1st0chr0n3/flakes?dir=drv-tools";
     formatter.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/formatter";
     my-codium.url = "github:br4ch1st0chr0n3/flakes?dir=codium";
+    my-devshell.url = "github:br4ch1st0chr0n3/flakes?dir=devshell";
   };
   outputs =
     { self
@@ -17,6 +18,7 @@
     , drv-tools
     , my-codium
     , formatter
+    , my-devshell
     , ...
     }: flake-utils.lib.eachDefaultSystem
       (system:
@@ -40,7 +42,7 @@
           mkFlakesUtils
           ;
         pkgs = nixpkgs.legacyPackages.${system};
-        devshell = my-codium.devshell.${system};
+        devshell = my-devshell.devshell.${system};
 
         flakesUtils = (mkFlakesUtils (
           let f = dir: (builtins.map (x: "${dir}/${x}") (readDirectories ./${dir})); in
@@ -69,7 +71,7 @@
       in
       {
         devShells.default = devshell.mkShell {
-          packages = builtins.attrValues flakesUtils;
+          packages = (builtins.attrValues flakesUtils) ++ [ codium ];
           commands = [
             {
               name = "codium";
