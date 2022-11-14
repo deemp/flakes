@@ -1,6 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 
-module Inits (initPackageYaml, initStackYaml, initSimpleMain) where
+module Inits (initPackageYaml, initStackYaml, initSimpleMain, initGitIgnore) where
 
 import Data.ByteString (ByteString)
 import Text.RawString.QQ (r)
@@ -53,3 +53,6 @@ initSimpleMain =
 main :: IO ()
 main = print ("Hello, World!" :: String)
 |]
+
+initGitIgnore :: ByteString
+initGitIgnore = [r|.stack-work|]

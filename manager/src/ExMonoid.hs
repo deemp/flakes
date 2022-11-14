@@ -1,5 +1,6 @@
 module ExMonoid where
 
+import Control.Applicative ((<|>))
 import Control.Exception (Exception, catch, handle)
 import Control.Exception.Base
   ( Exception (fromException),
@@ -15,6 +16,9 @@ import Control.Monad.Except
 import Control.Monad.Managed (MonadManaged, managed, runManaged)
 import qualified Data.ByteString as BS
 import Data.Foldable (traverse_)
+import Data.Maybe (fromMaybe)
+import Options.Applicative.Help (Doc, Pretty (..), vsep)
+import Options.Applicative.Help.Pretty (string)
 import System.Directory
   ( copyFile,
     createDirectoryIfMissing,
@@ -35,6 +39,21 @@ newtype ExMonoid = ExMonoid [SomeException]
 instance Show ExMonoid where
   show :: ExMonoid -> String
   show (ExMonoid s) = show s
+
+instance Pretty ExMonoid where
+  pretty :: ExMonoid -> Doc
+  pretty (ExMonoid s) = vsep $ pretty . PrettyException <$> s
+
+newtype PrettyException = PrettyException SomeException deriving (Show)
+
+instance Pretty PrettyException where
+  pretty :: PrettyException -> Doc
+  pretty (PrettyException ex) =
+    fromMaybe
+      (string $ show ex)
+      ( (pretty <$> fromException @Ex ex)
+          <|> (pretty <$> fromException @ExMonoid ex)
+      )
 
 instance Exception ExMonoid
 
@@ -168,8 +187,8 @@ tRemoveDirWithEmptyParents path f g = do
         when isEmptyDir (removePathForcibly dir)
       targetDirParents =
         let nParents = length (splitDirectories path)
-      -- take directories apart from . and target
-         in tail $ take (max 0 (nParents - 2)) (iterate takeDirectory path)
+         in -- take directories apart from . and target
+            tail $ take (max 0 (nParents - 2)) (iterate takeDirectory path)
   ex <- liftIO $ doesDirectoryExist path
   when ex $
     mBracketOnError
@@ -185,9 +204,13 @@ do' x = putStrLn ("do " <> x)
 undo' :: String -> IO ()
 undo' x = putStrLn ("undo " <> x)
 
-newtype Ex = Ex String deriving (Show)
+newtype Ex = Ex Doc deriving (Show)
 
 instance Exception Ex
+
+instance Pretty Ex where
+  pretty :: Ex -> Doc
+  pretty (Ex x) = x
 
 -- | demo collect exceptions into a monoid
 tryManaged' :: IO ()
