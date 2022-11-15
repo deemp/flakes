@@ -34,9 +34,7 @@
           settingsNix
           ;
         inherit (drv-tools.functions.${system})
-          mkDevShellsWithDefault
           readDirectories
-          mkBin
           ;
         inherit (flake-tools.functions.${system})
           mkFlakesTools
