@@ -75,7 +75,8 @@ VSCodium with extensions and binaries
 
 #### Haskell
 
-VSCodium with extensions and binaries for Haskell
+VSCodium with extensions and binaries for Haskell.
+Contains a sample Haskell project with a C library dependency
 
    ```console
    nix flake new haskell-project -t github:br4ch1st0chr0n3/flakes#codium-haskell
