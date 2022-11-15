@@ -5,13 +5,13 @@
     my-codium.url = "github:br4ch1st0chr0n3/flakes?dir=codium";
     drv-tools.url = "github:br4ch1st0chr0n3/flakes?dir=drv-tools";
     flake-utils_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils";
-    flake-utils.follows = "flake-utils_/flake-utils";    
+    flake-utils.follows = "flake-utils_/flake-utils";
     haskell-tools.url = "github:br4ch1st0chr0n3/flakes?dir=language-tools/haskell";
+    my-devshell.url = "github:br4ch1st0chr0n3/flakes?dir=devshell";
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
     };
-    my-devshell.url = "github:br4ch1st0chr0n3/flakes?dir=devshell";
   };
   outputs =
     { self
@@ -42,7 +42,7 @@
         toolsGHC
         ;
       hsShellTools = haskell-tools.toolSets.${system}.shellTools;
-      inherit (toolsGHC "90") stack hls ghc;
+      inherit (toolsGHC "92") stack hls ghc;
 
       writeSettings = writeSettingsJSON {
         inherit (settingsNix) haskell todo-tree files editor gitlens
@@ -72,7 +72,7 @@
           packages = [ codium ] ++ tools;
           bash = {
             extra = ''
-              printf "Hello!"
+              printf "Hello!\n"
             '';
           };
           commands = [
@@ -89,6 +89,19 @@
               help = "write `.vscode/settings.json`";
               category = "ide";
             }
+          ];
+        };
+
+      # Nix-provided libraries for stack
+      stack-dependencies = { ghcVersion }:
+
+        pkgs.haskell.lib.buildStackProject {
+          name = "stack-dependencies";
+
+          ghc = pkgs.haskell.compiler.${ghcVersion};
+
+          buildInputs = [
+            pkgs.lzma
           ];
         };
     });
