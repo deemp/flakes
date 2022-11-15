@@ -65,7 +65,7 @@
         ));
 
         codium = mkCodium {
-          extensions = { inherit (extensions) nix misc github fish; };
+          extensions = { inherit (extensions) nix misc github markdown; };
         };
         writeSettings = writeSettingsJSON settingsNix;
       in
