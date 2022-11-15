@@ -2,24 +2,26 @@
   inputs = {
     nixpkgs_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs";
     nixpkgs.follows = "nixpkgs_/nixpkgs";
-    drv-tools.url = "github:br4ch1st0chr0n3/flakes?dir=drv-tools";
     flake-utils_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
     my-devshell_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/devshell";
     my-devshell.follows = "my-devshell_/devshell";
   };
-  outputs = { self, nixpkgs, drv-tools, flake-utils, my-devshell, ... }:
+  outputs = { self, nixpkgs, flake-utils, my-devshell, ... }:
     flake-utils.lib.eachDefaultSystem
       (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          inherit (drv-tools.packages.${system}) desc;
-          inherit (drv-tools.functions.${system}) framedNewlines;
+          
+          # frame a text with newlines
+          framedNewlines = framed_ "\n\n" "\n\n";
+          framed_ = pref: suff: txt: ''${pref}${txt}${suff}'';
+
           devshell = let devshell_ = ((pkgs.extend my-devshell.overlay).devshell); in
             devshell_ // {
               mkShell = configuration: devshell_.mkShell (
                 configuration // {
-                  packages = [ desc ] ++ (pkgs.lib.lists.flatten configuration.packages);
+                  packages = pkgs.lib.lists.flatten configuration.packages;
                   commands = (
                     builtins.map
                       (c:
