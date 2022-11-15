@@ -53,14 +53,6 @@ git rebase
 git stash pop
 ```
 
-## devhshell
-
-Easily create a CLI to your `devShells`
-
-- original `devshell` [repo](https://github.com/numtide/devshell)
-- `devshell` [tutorial](https://yuanwang.ca/posts/getting-started-with-flakes.html#numtidedevshell)
-- `devshell` with defaults - [here](./devshell/flake.nix)
-
 ## Templates
 
 ### VSCodium
