@@ -174,13 +174,13 @@
       };
 
       # just inherit necessary functions
-      mkFlakesUtils = dirs: {
-        flakesUpdate = flakesUpdate dirs;
-        flakesPushToCachix = flakesPushToCachix dirs;
-        flakesUpdateAndPushToCachix = flakesUpdateAndPushToCachix dirs;
-        flakesDumpDevshells = flakesDumpDevshells dirs;
-        flakesWatchDumpDevshells = flakesWatchDumpDevshells dirs;
-        flakesFormat = flakesFormat;
+      mkFlakesTools = dirs: {
+        update = flakesUpdate dirs;
+        pushToCachix = flakesPushToCachix dirs;
+        updateAndPushToCachix = flakesUpdateAndPushToCachix dirs;
+        dumpDevshells = flakesDumpDevshells dirs;
+        watchDumpDevshells = flakesWatchDumpDevshells dirs;
+        format = flakesFormat;
       };
 
       flakesToggleRelativePaths = toggleConfig: flakesUpdate_: mkShellApp (
@@ -282,14 +282,14 @@
           flakesDumpDevshells
           flakesWatchDumpDevshells
           flakesFormat
-          mkFlakesUtils
+          mkFlakesTools
           flakesToggleRelativePaths;
       };
 
 
       devShells = mkDevShellsWithDefault
         {
-          buildInputs = [ (builtins.attrValues (mkFlakesUtils [ "." ])) ];
+          buildInputs = [ (builtins.attrValues (mkFlakesTools [ "." ])) ];
         }
         { };
     });

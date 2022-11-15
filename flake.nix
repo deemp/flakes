@@ -39,12 +39,12 @@
           mkBin
           ;
         inherit (flake-tools.functions.${system})
-          mkFlakesUtils
+          mkFlakesTools
           ;
         pkgs = nixpkgs.legacyPackages.${system};
         devshell = my-devshell.devshell.${system};
 
-        flakesUtils = (mkFlakesUtils (
+        flakesTools = (mkFlakesTools (
           let f = dir: (builtins.map (x: "${dir}/${x}") (readDirectories ./${dir})); in
           [
             (f "source-flake")
@@ -71,7 +71,7 @@
       in
       {
         devShells.default = devshell.mkShell {
-          packages = (builtins.attrValues flakesUtils) ++ [ codium ];
+          packages = (builtins.attrValues flakesTools) ++ [ codium ];
           commands = [
             {
               name = "codium";
@@ -87,9 +87,9 @@
         };
 
         packages = {
-          pushToCachix = flakesUtils.flakesPushToCachix;
-          updateLocks = flakesUtils.flakesUpdate;
-          format = flakesUtils.flakesFormat;
+          pushToCachix = flakesTools.pushToCachix;
+          updateLocks = flakesTools.update;
+          format = flakesTools.format;
           default = codium;
           inherit writeSettings;
         };
