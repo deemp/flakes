@@ -5,8 +5,7 @@ module Main (main) where
 
 import Control.Exception (Exception, catch)
 import Control.Exception.Base (SomeException, throwIO)
-import Control.Lens (At (at), Identity, filtered, non, over, withIndex, (.=), (^..), (^?), _2)
-import Control.Lens.Getter ((^.))
+import Control.Lens (At (at), Identity, filtered, non, over, withIndex, (^..), (^?), _2)
 import Control.Monad (when)
 import Control.Monad.Except (MonadIO (liftIO), unless)
 import Control.Monad.Managed (runManaged)
@@ -30,7 +29,7 @@ import Filesystem.Path.CurrentOS as Path ()
 import Inits (initGitIgnore, initPackageYaml, initSimpleMain, initStackYaml)
 import Options.Applicative (Alternative ((<|>)), Parser, argument, command, commandGroup, customExecParser, fullDesc, headerDoc, helper, info, metavar, prefs, progDesc, showHelpOnError, str, subparser)
 import Options.Applicative.Builder (progDescDoc)
-import Options.Applicative.Help (Doc, Pretty (pretty), bold, dot, hardline, putDoc, softline, (<+>))
+import Options.Applicative.Help (Doc, Pretty (pretty), bold, dot, hardline, putDoc, softline, (<+>), comma)
 import Options.Applicative.Help.Pretty (parens, text)
 import System.Directory (doesFileExist)
 import System.Exit (exitFailure)
@@ -179,8 +178,9 @@ instance Pretty ProcessError where
   pretty :: ProcessError -> Doc
   pretty FileError {..} = "Error" <+> pretty actionType <+> pretty fileType <+> pretty filePath <+> ":" <+> pretty message
   pretty NameError {name} =
-    ("Error: the" <+> text _NAME <+> "or" <+> text _TEMPLATE_NAME <+> bb name <+> "is bad.")
-      <+> "It should be of form 'A(/A)*' like 'A' or 'A/A', where 'A' is an alphanumeric sequence starting with an uppercase letter."
+    ("Error: the" <+> bb _NAME <+> "or" <+> bb _TEMPLATE_NAME <+> "of the form" <+> bb name <+> "is bad.")
+      <> (softline <> "It should be of form" <+> bb "A(/A)*" <+> "like" <+> bb "A" <+> "or" <+> bb "A/A" <> comma) 
+      <> (softline <> "where" <+> bb "A" <+> "is an alphanumeric sequence starting with an uppercase letter" <> dot <> hardline)
 
 instance Show ProcessError where
   show :: ProcessError -> String
@@ -264,19 +264,22 @@ makeSubCommand target =
               ("You may create other modules at" <+> bbDirPath <> softline <> "and import them into" <+> bbFullPath)
               ""
               target
-            <> dot <> hardline
+            <> dot
+            <> hardline
         )
         <> f
           "rm"
           removeCommand
           ( ("Remove the" <+> dirOrTemplate <+> bbFullPath <> softline <> "and its empty parent directories" <> dot)
-              <> (softline <> "This" <+> name <+> "will also be removed from" <+> bb packageYaml <> dot) <> hardline
+              <> (softline <> "This" <+> name <+> "will also be removed from" <+> bb packageYaml <> dot)
+              <> hardline
           )
         <> f
           "list"
           listCommand
           ( ("List " <> name <> "s'" <+> bb "executables" <+> "and their" <+> bb "source-dirs" <> dot)
-              <> (softline <> "These are also available in" <+> bb packageYaml <> dot) <> hardline
+              <> (softline <> "These are also available in" <+> bb packageYaml <> dot)
+              <> hardline
           )
         <> f
           "set"
