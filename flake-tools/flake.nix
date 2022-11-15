@@ -182,90 +182,6 @@
         watchDumpDevshells = flakesWatchDumpDevshells dirs;
         format = flakesFormat;
       };
-
-      flakesToggleRelativePaths = toggleConfig: flakesUpdate_: mkShellApp (
-        let
-          flakeNix = "flake.nix";
-          inherit (pkgs.lib.strings) concatMapStringsSep concatStrings concatStringsSep;
-          inherit (pkgs.lib.attrsets) mapAttrsToList;
-        in
-        {
-          name = "flakes-toggle-relative-paths";
-          runtimeInputs = [ pkgs.gawk ];
-          text =
-            let
-              INITIAL_PWD = "INITIAL_PWD";
-              toggler = dir: name: ''
-                cd ${"$" + INITIAL_PWD}/${dir}
-
-                printf "\n[ toggle-relative-path in %s ]\n" "${"$" + INITIAL_PWD}/${dir}"
-                
-                cat ${flakeNix} | \
-                  awk '
-                  {
-                    if ($1 == "#" && $2 == "${name}.url") {
-                      $1=""; print "  ", $0; {next}
-                    }
-                  }
-                  {
-                    if ($1 == "${name}.url") {
-                      print "    #", $1, $2, $3; {next}
-                    }
-                  } 
-                  {print}' > ${flakeNix}.toggled &&
-                  mv ${flakeNix}.toggled ${flakeNix}
-              '';
-            in
-            ''
-              ${INITIAL_PWD}=$PWD
-              
-            '' +
-            (concatMapStringsSep "\n"
-              (
-                configEntry: concatStrings
-                  (
-                    mapAttrsToList
-                      (
-                        dir: entries: concatMapStringsSep "\n" (entry: toggler dir entry) entries
-                      )
-                      configEntry
-                  )
-              )
-              toggleConfig
-            )
-            +
-            ''
-              cd ${"$" + INITIAL_PWD}
-
-              ${mkBin flakesUpdate_}
-            ''
-          ;
-          longDescription = ''
-            Traverse the flakes in given directories relative to `CWD` and toggle comments at the set entries, 
-            switching relative paths to the absolute ones. Next, update the `flake.lock`-s.
-            
-            The set entries are:
-            
-              ```sh
-                ${
-                concatMapStringsSep "\n"
-                (
-                  configEntry: concatStrings
-                    (
-                      mapAttrsToList
-                        (
-                          dir: entries: "at ${dir}/${flakeNix} : ${concatStringsSep ", " entries}"
-                        )
-                        configEntry
-                    )
-                )
-                toggleConfig
-              }
-              ```
-          '';
-        }
-      );
-
     in
     {
       functions = {
@@ -274,7 +190,6 @@
           flakesDumpDevshells
           flakesFormat
           flakesPushToCachix
-          flakesToggleRelativePaths;
           flakesUpdate
           flakesUpdateAndPushToCachix
           flakesWatchDumpDevshells
@@ -284,13 +199,12 @@
           pushInputsToCachix
           pushPackagesToCachix
           pushXToCachix
+          ;
       };
 
 
-      devShells = mkDevShellsWithDefault
-        {
-          buildInputs = [ (builtins.attrValues (mkFlakesTools [ "." ])) ];
-        }
-        { };
+      devShells.default = pkgs.mkShell {
+        buildInputs = [ (builtins.attrValues (mkFlakesTools [ "." ])) ];
+      };
     });
 }
