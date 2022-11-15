@@ -28,6 +28,12 @@
     ];
   };
 
+  "vscode.markdown-language-features" = {
+    "[markdown]" = {
+      "editor.defaultFormatter" = "DavidAnson.vscode-markdownlint";
+    };
+  };
+
   markdown-all-in-one = {
     "markdown.extension.orderedList.autoRenumber" = false;
   };
