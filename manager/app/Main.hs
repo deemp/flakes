@@ -354,6 +354,7 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
     tWriteFile simpleMain initSimpleMain (mapThrow EWrite FileHs simpleMain)
     liftIO $ putDoc' $ "Writing" <+> bb gitignore
     tWriteFile gitignore initGitIgnore (mapThrow EWrite FileHs gitignore)
+    liftIO updateHsProjectFiles
   CommandUpdate -> liftIO updateHsProjectFiles
   CommandAdd {name, template} -> do
     throwIfBadName name
