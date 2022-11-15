@@ -42,7 +42,7 @@
           packages = [ codium ];
           bash = {
             extra = ''
-              printf "Hello!"
+              printf "Hello!\n"
             '';
           };
           commands = [
