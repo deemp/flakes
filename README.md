@@ -4,33 +4,43 @@ Nix flakes for tools that I use
 
 ## Prerequisites
 
+### Nix and Nix flakes
+
 - Learn about [flakes](https://github.com/br4ch1st0chr0n3/the-little-things#flakes)
 - Learn how to [pin inputs](https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-flake.html#flake-references)
 - Study [Nix language](https://nixos.wiki/wiki/Overview_of_the_Nix_Language)
 
-## Pushing conventions
+## Conventions
 
-1. Commit and push
+### Pushing to a remote repo
 
-1. Wait a couple of minutes for a GH action to complete updating `flake.lock`-s and for `git` to fetch the latest changes
-   - Check the action's progress in the `GitHub Actions` extension
+All flakes in this repo access some other flakes in this repo via `GitHub` URLs. 
+That's why, if a change in a flake `A` here should be propagated into a flake `B`, it's necessary to update `B`'s `flake.lock`.
+One can update `B`'s `flake.lock` this way iff `A`'s changes are pushed to `GitHub`.
+Whenever there's a push to the remote `GitHub` repo, `B`'s `flake.lock` is updated.
+That's why, there's no need to commit and push `flake.lock` changes.
+After an update is completed, it's necessary to rebase the local changes onto remote changes.
+Sometimes, there are local uncommitted changes.
+These changes should be `git stash`ed before doing `git rebase`.
+After rebasing, they can be `git stash pop`ped to continue the work.
 
-1. `git rebase` to get your changes from GH
+Thus, the process is as follows:
 
-## Substituters and keys
-
-There are `extra-trusted-public-keys`, `extra-trusted-public-keys` in [flake.nix](./flake.nix). If a substituter like `cachix` fails, comment out the lines containing its address
+```sh
+git commit -m "another commit"
+git stash
+# wait some time for locks to be updated and these changes to be fetched
+git rebase
+git stash pop
+```
 
 ## devhshell
 
-Easily create a CLI to your devShells commands
+Easily create a CLI to your `devShells`
 
-- devshell [repo](https://github.com/numtide/devshell)
-- devshell [tutorial](https://yuanwang.ca/posts/getting-started-with-flakes.html#numtidedevshell)
-
-## GitHub Personal Access Token for VS Codium
-
-- permissions: `read:user, repo, user:email, workflow`
+- original `devshell` [repo](https://github.com/numtide/devshell)
+- `devshell` [tutorial](https://yuanwang.ca/posts/getting-started-with-flakes.html#numtidedevshell)
+- `devshell` with defaults - [here](./devshell/flake.nix)
 
 ## Templates
 
@@ -38,7 +48,7 @@ Easily create a CLI to your devShells commands
 
 [VSCodium troubleshooting](#vscodium-troubleshooting)
 
-### Generic
+#### Generic
 
 VSCodium with extensions and binaries
 
@@ -52,7 +62,7 @@ VSCodium with extensions and binaries
 
 - Run `hello` in a VSCodium terminal
 
-### Haskell
+#### Haskell
 
 VSCodium with extensions and binaries for Haskell
 
@@ -67,16 +77,33 @@ VSCodium with extensions and binaries for Haskell
 
 ## Troubleshooting
 
-## Repair a derivation
+### Substituters and keys
+
+There are `extra-trusted-public-keys`, `extra-trusted-public-keys` (like [here](https://github.com/br4ch1st0chr0n3/flakes/blob/7bd58c9cf9708714c29dadd615d85d22ded485ae/flake.nix#L112)). If a substituter like `cachix` fails, comment out the lines containing its address
+
+### Repair a derivation
 
 [Derivation](https://nixos.org/manual/nix/unstable/language/derivations.html?highlight=derivation#derivations)
 
-See [manual](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-store-repair.html)
+Repair a derivation - [manual](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-store-repair.html)
 
-Set a  `packages.default = your-corrupt-derivation` in `flake.nix` and then run `nix store repair .#`
-   - Learn more about [installables](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix.html?highlight=installable#installables)
+Steps:
+   1. Assumptions: 
+      - current directory contains `flake.nix`
+      - your derivation is available inside this `flake.nix` by the name `your-corrupt-derivation`
+   1. Set `packages.default = your-corrupt-derivation` in this `flake.nix`
+   1. Run `nix store repair .#`
+      - `.#` denotes an [installable](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix.html?highlight=installable#installables)
 
+<!-- don't change the heading -->
 ### VSCodium troubleshooting
+
+#### GitHub Personal Access Token (PAT) for VS Codium extensions
+
+- Create a `classic` PAT with permissions: `read:user, repo, user:email, workflow`
+- Supply it to extensions
+
+#### Missing binaries on PATH in VSCodium
 
 Case: VSCodium doesn't have the binaries provided in `runtimeDependencies` (like [here](https://github.com/br4ch1st0chr0n3/flakes/blob/7bab5d96658007f5ad0c72ec7805b5b4eb5a83dd/templates/codium/generic/flake.nix#L33)) on `PATH`:
 
@@ -97,9 +124,11 @@ Case: VSCodium doesn't have the binaries provided in `runtimeDependencies` (like
       - VSCodium itself
    1. Open a new terminal, `cd DIR`
    1. Run `nix store repair .#`
-   1. Open VSCodium: `nix run .#`
    1. Make a `Check` to verify binaries are on `PATH`
-   1. If still no, restart your OS
+   1. If still no, continue
+   1. Remove direnv profiles:
+      - `cd DIR && rm -rf .direnv`
+   1. Restart your OS
    1. `nix store gc` - collect garbage in Nix store - [man](https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-store-gc.html)
    1. Again, make a `Check`
 
