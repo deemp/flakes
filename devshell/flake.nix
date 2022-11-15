@@ -53,6 +53,11 @@
           inherit devshell;
           devShells.default = devshell.mkShell {
             packages = [ pkgs.gawk pkgs.hello ];
+            bash = {
+              extra = ''
+                printf "Hello, World!\n"
+              '';
+            };
             commands = [
               {
                 name = "awk";
@@ -66,13 +71,13 @@
               {
                 name = "run-hello";
                 category = "scripts";
-                help = "this is how to expose a group of scripts";
+                help = "commands having the same category";
                 command = "hello";
               }
               {
                 name = "run-awk-help";
                 category = "scripts";
-                help = "this is how to expose a group of scripts";
+                help = "commands having the same category";
                 command = "awk --help";
               }
             ];
