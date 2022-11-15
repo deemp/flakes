@@ -5,6 +5,8 @@
     flake-utils_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
     haskell-tools.url = "github:br4ch1st0chr0n3/flakes?dir=language-tools/haskell";
+    hpack_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/hpack";
+    hpack.follows = "hpack_/hpack";
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
@@ -14,6 +16,7 @@
     { self
     , flake-utils
     , nixpkgs
+    , hpack
     , haskell-tools
     , ...
     }:
@@ -36,8 +39,8 @@
             wrapProgram $out/bin/${manager_} \
               --set PATH ${
                 pkgs.lib.makeBinPath [
-                  hsShellTools.hpack
-                  hsShellTools.implicit-hie
+                  hpack.packages.${system}.default
+                  pkgs.haskellPackages.implicit-hie
                 ]
                 }
           '';
