@@ -270,20 +270,20 @@
     {
       functions = {
         inherit
-          pushXToCachix
-          pushPackagesToCachix
-          pushDevShellsToCachix
-          pushInputsToCachix
-          pushAllToCachix
-          flakesUpdate
-          flakesPushToCachix
-          flakesUpdateAndPushToCachix
           dumpDevShells
           flakesDumpDevshells
-          flakesWatchDumpDevshells
           flakesFormat
-          mkFlakesTools
+          flakesPushToCachix
           flakesToggleRelativePaths;
+          flakesUpdate
+          flakesUpdateAndPushToCachix
+          flakesWatchDumpDevshells
+          mkFlakesTools
+          pushAllToCachix
+          pushDevShellsToCachix
+          pushInputsToCachix
+          pushPackagesToCachix
+          pushXToCachix
       };
 
 
