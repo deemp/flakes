@@ -6,15 +6,12 @@
     flake-utils.follows = "flake-utils_/flake-utils";
     gitignore_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/gitignore";
     gitignore.follows = "gitignore_/gitignore";
-    hpack_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/hpack";
-    hpack.follows = "hpack_/hpack";
   };
   outputs =
     { self
     , nixpkgs
     , flake-utils
     , gitignore
-    , hpack
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -27,8 +24,6 @@
           # GHCi based bare bones IDE
           ghcid
           ;
-        # Convert package.yaml to *.cabal
-        hpack = hpack.packages.${system}.default;
       };
 
       # Wrap Stack to work with our Nix integration.
