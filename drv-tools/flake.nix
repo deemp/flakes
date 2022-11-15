@@ -28,23 +28,6 @@
       # arg should be a set of sets of inputs
       mkShellApps = appsInputs@{ ... }: mapAttrs (name: value: mkShellApp (value // { inherit name; })) appsInputs;
 
-
-      # has a runtime dependency on fish!
-      fishHook = { hook ? "", shellName, fish, }:
-        let
-          # Name of a variable that accumulates shell names
-          MY_SHELL_NAME = "MY_SHELL_NAME";
-        in
-        ''
-          ${hook}
-
-          ${fish.pname} -C '
-            set ${MY_SHELL_NAME} ${shellName}
-
-            source ${./scripts/devshells.fish};
-          ' -i;
-        '';
-
       runFishScript = { name, fishScriptPath, runtimeInputs ? [ ], text ? "" }: mkShellApp {
         inherit name;
         runtimeInputs = runtimeInputs ++ [ pkgs.fish pkgs.jq ];
@@ -61,70 +44,6 @@
           run a `fish` [script](${fishScriptPath})
         '';
       };
-
-
-      # create devshells
-      # notice the dependency on fish
-      mkDevShellsWithFish = shells@{ ... }: { fish }:
-        mapAttrs
-          (shellName: shellAttrs:
-            let buildInputs = pkgs.lib.lists.flatten ((shellAttrs.buildInputs or [ ]));
-              inherit (pkgs.lib.strings) concatStringsSep concatMapStringsSep;
-            in
-            withLongDescription
-              (pkgs.mkShell (shellAttrs // {
-                inherit shellName;
-                buildInputs = buildInputs ++ [ fish desc ];
-                # We need to exit the shell in which fish runs
-                # Otherwise, after a user exits fish, she will return to a default shell
-                shellHook = ''
-                  ${fishHook {
-                    inherit shellName fish;
-                    hook = shellAttrs.shellHook or "";
-                  }}
-                  exit
-                '';
-              }))
-              ''
-                A devshell `${shellName}` with `fish`
-
-                The entries from `/bin`-s of other `buildInputs` are:
-                ${
-                  concatMapStringsSep "\n"
-                    (x: "- " + 
-                      (concatMapStringsSep ", " (s: "`${s}`") (
-                        attrNames  (
-                          pkgs.lib.attrsets.filterAttrs
-                            (name: value: value == "regular")
-                            (readDir "${x}/bin")
-                        )
-                      )
-                    ))
-                  buildInputs
-                }
-              ''
-          )
-          shells;
-
-      # make shells
-      # The default devshell should be the system's shell
-      # If start another shell in a shell hook, direnv will loop infinitely
-      # Other shells will start a `fish` shell
-      mkDevShellsWithDefault =
-        defaultShellAttrs@{ buildInputs ? [ ], shellHook ? "", ... }:
-        shells@{ ... }:
-        let
-          shells_ = mkDevShellsWithFish shells { inherit (pkgs) fish; };
-          default = pkgs.mkShell (defaultShellAttrs // {
-            name = "default";
-            buildInputs = buildInputs ++ [ desc ];
-            shellHook = ''
-              ${shellHook}
-            '';
-          });
-          devShells_ = shells_ // { inherit default; };
-        in
-        devShells_;
 
       # read something in a directory using the builtin function
       readXs = dir: type: attrNames (
@@ -168,7 +87,6 @@
       withAttrs = drv: attrSet: pkgs.lib.attrsets.recursiveUpdate drv attrSet;
       withMeta = drv: meta: withAttrs drv { inherit meta; };
       withLongDescription = drv: longDescription: withAttrs drv { meta = { inherit longDescription; }; };
-
 
       # String -> String -> Set -> IO ()
       writeJSON = name: path: dataNix:
@@ -216,11 +134,13 @@
       # TODO override mkShellApp to install the longDescription into a $out/share directory
       # and read the description from there
       desc = mkShellApp (
-        let command = ''
-          nix eval --raw "$1.meta.longDescription" || \
-              nix eval --raw "$1.meta.description" || \
-                  echo "could not extract any description of this derivation"
-        ''; in
+        let
+          command = ''
+            nix eval --raw "$1.meta.longDescription" || \
+                nix eval --raw "$1.meta.description" || \
+                    echo "could not extract any description of this derivation"
+          '';
+        in
         {
           name = "desc";
           text =
@@ -298,7 +218,6 @@
       functions = {
         inherit
           applyN
-          fishHook
           framed_
           framedBrackets
           framedBrackets_
@@ -306,8 +225,6 @@
           mergeValues
           mkBin
           mkBinName
-          mkDevShellsWithDefault
-          mkDevShellsWithFish
           mkShellApp
           mkShellApps
           concatMapStringsNewline
@@ -327,13 +244,11 @@
       };
 
       # tests 
-      devShells = mkDevShellsWithDefault
-        {
-          buildInputs = [ pkgs.tree json2nix desc ];
-        }
-        {
-          fish = { };
-        };
+      devShells.default = pkgs.mkShell {
+        name = "default";
+        buildInputs = [ pkgs.tree json2nix desc pkgs.fish ];
+      };
+
       tests = {
         t = readFiles ./.;
       };
