@@ -33,7 +33,6 @@
       inherit (drv-tools.functions.${system})
         mkBinName
         ;
-      devshells = my-codium.functions.${system};
       inherit (my-codium.configs.${system})
         extensions
         settingsNix
@@ -73,16 +72,22 @@
           packages = [ codium ] ++ tools;
           bash = {
             extra = ''
+              printf "Hello!"
             '';
           };
           commands = [
             {
-              name = "codium, ghcid, stack, ghc, jq";
-              help = "available in codium";
+              name = "ghcid, stack, ghc, jq";
+            }
+            {
+              name = "codium";
+              help = "VSCodium with several tool binaries on `PATH` and a couple of extensions";
+              category = "ide";
             }
             {
               name = "${writeSettings.name}";
-              help = "write .vscode/settings.json";
+              help = "write `.vscode/settings.json`";
+              category = "ide";
             }
           ];
         };

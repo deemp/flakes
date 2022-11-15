@@ -7,6 +7,7 @@
     flake-utils.follows = "flake-utils_/flake-utils";
     vscode-extensions_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/vscode-extensions";
     vscode-extensions.follows = "vscode-extensions_/vscode-extensions";
+    my-devshell.url = "github:br4ch1st0chr0n3/flakes?dir=devshell";
   };
   outputs =
     { self
@@ -14,6 +15,7 @@
     , my-codium
     , flake-utils
     , vscode-extensions
+    , my-devshell
     , ...
     }: flake-utils.lib.eachDefaultSystem
       (system:
@@ -32,9 +34,25 @@
           };
           runtimeDependencies = [ pkgs.hello ];
         };
+        devshell = my-devshell.devshell.${system};
       in
       {
-        packages.default = codium;
+        devShells.default = devshell.mkShell
+        {
+          packages = [ codium ];
+          bash = {
+            extra = ''
+              printf "Hello!"
+            '';
+          };
+          commands = [
+            {
+              name = "codium";
+              help = "VSCodium with `hello` binary on `PATH` and a couple of extensions";
+              category = "ide";
+            }
+          ];
+        };
       });
 
   nixConfig = {
