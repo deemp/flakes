@@ -439,11 +439,11 @@
       },
       "locked": {
         "dir": "language-tools/haskell",
-        "lastModified": 1668538559,
-        "narHash": "sha256-IJv+lG6cSy8Y1R+mjIpht2/uha1IJ2CZsXy3F5bCui4=",
+        "lastModified": 1668541784,
+        "narHash": "sha256-1bmlUSY/bPdosLbhey4kXEsDfEdls9V7MWBod+TcSuc=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "0c6d1365a1b5d3c2782fa7ccf46ba9339f64e7ef",
+        "rev": "0c7e6a8ffdbaa90bb9616398dd631a349ddfdb9f",
         "type": "github"
       },
       "original": {
@@ -537,11 +537,11 @@
       },
       "locked": {
         "dir": "source-flake/hpack",
-        "lastModified": 1668538559,
-        "narHash": "sha256-IJv+lG6cSy8Y1R+mjIpht2/uha1IJ2CZsXy3F5bCui4=",
+        "lastModified": 1668541784,
+        "narHash": "sha256-1bmlUSY/bPdosLbhey4kXEsDfEdls9V7MWBod+TcSuc=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "0c6d1365a1b5d3c2782fa7ccf46ba9339f64e7ef",
+        "rev": "0c7e6a8ffdbaa90bb9616398dd631a349ddfdb9f",
         "type": "github"
       },
       "original": {
