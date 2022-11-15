@@ -33,7 +33,7 @@ Nix flakes for tools that I use
 
 ### Pushing to a remote repo
 
-All flakes in this repo access some other flakes in this repo via `GitHub` URLs. 
+All flakes in this repo access some other flakes in this repo via `GitHub` URLs.
 That's why, if a change in a flake `A` here should be propagated into a flake `B`, it's necessary to update `B`'s `flake.lock`.
 One can update `B`'s `flake.lock` this way iff `A`'s changes are pushed to `GitHub`.
 Whenever there's a push to the remote `GitHub` repo, `B`'s `flake.lock` is updated.
@@ -99,7 +99,8 @@ There are `extra-trusted-public-keys`, `extra-trusted-public-keys` (like [here](
 Repair a derivation - [manual](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-store-repair.html)
 
 Steps:
-   1. Assumptions: 
+
+   1. Assumptions:
       - current directory contains `flake.nix`
       - your derivation is available inside this `flake.nix` by the name `your-corrupt-derivation`
    1. Set `packages.default = your-corrupt-derivation` in this `flake.nix`
@@ -119,7 +120,7 @@ Steps:
 Case: VSCodium doesn't have the binaries provided in `runtimeDependencies` (like [here](https://github.com/br4ch1st0chr0n3/flakes/blob/7bab5d96658007f5ad0c72ec7805b5b4eb5a83dd/templates/codium/generic/flake.nix#L33)) on `PATH`:
 
    1. You need to repair VSCodium's derivation (see [Repair a derivation](#repair-a-derivation))
-   1. Assumptions: 
+   1. Assumptions:
       - current directory is `DIR`
       - there is a `DIR/flake.nix`
       - VSCodium is given as a derivation `codium`, like [here](https://github.com/br4ch1st0chr0n3/flakes/blob/53b2e4d8bb5fb34c50da1b45f06622bffdb9b7bf/templates/codium/generic/flake.nix#L25)
@@ -142,4 +143,3 @@ Case: VSCodium doesn't have the binaries provided in `runtimeDependencies` (like
    1. Restart your OS
    1. `nix store gc` - collect garbage in Nix store - [man](https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-store-gc.html)
    1. Again, make a `Check`
-
