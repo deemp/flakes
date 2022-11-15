@@ -53,6 +53,16 @@ git rebase
 git stash pop
 ```
 
+### Devshells
+
+If you'd like to provide dev tools for your template, store them in a separate flake under `./nix-utils`.
+
+Then, users will be able to call them like
+
+```sh
+nix develop nix-utils/
+```
+
 ## Templates
 
 ### VSCodium
