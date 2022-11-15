@@ -9,13 +9,14 @@ executables:
     main: Main.hs
     source-dirs: ./Modules/A
   Book:
+    dependencies:
+    - filepath
+    - directory
+    - relude
     main: Main.hs
     source-dirs: ./Modules/Book
-    dependencies:
-      - filepath
-      - directory
-      - relude
   Templates.SimpleMain:
+    dependencies: a
     main: SimpleMain.hs
     source-dirs: ./Templates
 

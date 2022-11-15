@@ -26,6 +26,10 @@
       hsShellTools = haskell-tools.toolSets.${system}.shellTools;
       inherit (haskell-tools.functions.${system}) toolsGHC;
       inherit (toolsGHC "90") staticExecutable;
+      managerTools = [
+        hpack.packages.${system}.default
+        pkgs.haskellPackages.implicit-hie
+      ];
       manager =
         let
           manager_ = "manager";
@@ -38,10 +42,7 @@
           postBuild = ''
             wrapProgram $out/bin/${manager_} \
               --set PATH ${
-                pkgs.lib.makeBinPath [
-                  hpack.packages.${system}.default
-                  pkgs.haskellPackages.implicit-hie
-                ]
+                pkgs.lib.makeBinPath managerTools
                 }
           '';
         };

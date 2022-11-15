@@ -5,19 +5,21 @@ module Main (main) where
 
 import Control.Exception (Exception, catch)
 import Control.Exception.Base (SomeException, throwIO)
-import Control.Lens (At (at), Identity, filtered, non, over, withIndex, (^..), _2)
+import Control.Lens (At (at), Identity, filtered, non, over, withIndex, (.=), (^..), (^?), _2)
+import Control.Lens.Getter ((^.))
 import Control.Monad (when)
 import Control.Monad.Except (MonadIO (liftIO), unless)
 import Control.Monad.Managed (runManaged)
-import Data.Aeson (Value (..))
+import Data.Aeson (Value (..), object)
 import Data.Aeson.KeyMap as KM (fromHashMapText)
-import Data.Aeson.Lens (AsValue (..), key, members, values, _String)
+import Data.Aeson.Lens (AsValue (..), key, members, values, _Object, _String)
 import Data.ByteString.Char8 as C (cons, head, lines, null, tail, unlines)
 import Data.Char (isAlpha, isUpper)
 import Data.Foldable (traverse_)
 import Data.Function ((&))
 import Data.Functor ((<&>))
 import Data.HashMap.Strict as HM (fromList)
+import Data.Maybe (fromMaybe, isJust)
 import Data.String (IsString)
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -28,7 +30,7 @@ import Filesystem.Path.CurrentOS as Path ()
 import Inits (initGitIgnore, initPackageYaml, initSimpleMain, initStackYaml)
 import Options.Applicative (Alternative ((<|>)), Parser, argument, command, commandGroup, customExecParser, fullDesc, headerDoc, helper, info, metavar, prefs, progDesc, showHelpOnError, str, subparser)
 import Options.Applicative.Builder (progDescDoc)
-import Options.Applicative.Help (Doc, Pretty (pretty), bold, dot, hardline, putDoc, softbreak, softline, (<+>), comma)
+import Options.Applicative.Help (Doc, Pretty (pretty), bold, dot, hardline, putDoc, softline, (<+>))
 import Options.Applicative.Help.Pretty (parens, text)
 import System.Directory (doesFileExist)
 import System.Exit (exitFailure)
@@ -100,13 +102,16 @@ _TEMPLATE_NAME = "TEMPLATE_NAME"
 mainHs :: FilePath
 mainHs = "Main.hs"
 
+manager :: String
+manager = "manager"
+
 header' :: Doc
 header' =
   (bb _NAME <+> "should be of form" <+> bb "A(/A)*" <+> "like" <+> bb "A" <+> "or" <+> bb "A/A")
-    <> softline <> ("where" <+> bb "A" <+> "is an alphanumeric sequence starting with an uppercase letter" <> dot)
-    <> softline <> (bb _NAME <+> "refers to a module at" <+> bb (modulesDir </> _NAME </> mainHs) <> dot)
-    <> softline <> (bb _TEMPLATE_NAME <+> "should be of the same form as" <+> bb _NAME <> dot)
-    <> softline <> (bb _TEMPLATE_NAME <+> "refers to a template at" <+> bb (templatesDir </> _TEMPLATE_NAME <.> "hs") <> dot)
+    <> (softline <> "where" <+> bb "A" <+> "is an alphanumeric sequence starting with an uppercase letter" <> dot)
+    <> (softline <> bb _NAME <+> "refers to a module at" <+> bb (modulesDir </> _NAME </> mainHs) <> dot)
+    <> (softline <> bb _TEMPLATE_NAME <+> "should be of the same form as" <+> bb _NAME <> dot)
+    <> (softline <> bb _TEMPLATE_NAME <+> "refers to a template at" <+> bb (templatesDir </> _TEMPLATE_NAME <.> "hs") <> dot)
 
 -- Types
 data Command
@@ -178,6 +183,7 @@ instance Pretty ProcessError where
       <+> "It should be of form 'A(/A)*' like 'A' or 'A/A', where 'A' is an alphanumeric sequence starting with an uppercase letter."
 
 instance Show ProcessError where
+  show :: ProcessError -> String
   show = show
 
 instance Exception ProcessError
@@ -231,6 +237,22 @@ parseTemplate = argument str (metavar _TEMPLATE_NAME)
 
 -- Helper functions
 
+val :: Value
+val = object [("executables", object [("Book", object [("deps", "vals")])])]
+
+-- f :: Value
+ff :: Value
+ff = fromMaybe (object []) (val ^? key "executables" . key "Book")
+
+-- _Object
+
+-- s = val ^? key "a"
+
+{-
+>>> f
+Object (fromList [])
+-}
+
 makeSubCommand :: Target -> Parser Command
 makeSubCommand target =
   subparser
@@ -239,21 +261,22 @@ makeSubCommand target =
         addCommand
         ( ("Add a" <+> name <+> "at" <+> bbFullPath <> dot <> softline <> "It will also appear in the" <> bb packageYaml <> dot <> softline)
             <> eitherTarget
-              ("You may create other modules at" <+> bbDirPath <> softline <> "and import them into" <+> bbFullPath <> softbreak)
+              ("You may create other modules at" <+> bbDirPath <> softline <> "and import them into" <+> bbFullPath)
               ""
               target
+            <> dot <> hardline
         )
         <> f
           "rm"
           removeCommand
           ( ("Remove the" <+> dirOrTemplate <+> bbFullPath <> softline <> "and its empty parent directories" <> dot)
-              <> (softline <> "This" <+> name <+> "will also be removed from" <> bb packageYaml <> dot)
+              <> (softline <> "This" <+> name <+> "will also be removed from" <+> bb packageYaml <> dot) <> hardline
           )
         <> f
           "list"
           listCommand
           ( ("List " <> name <> "s'" <+> bb "executables" <+> "and their" <+> bb "source-dirs" <> dot)
-              <> (softline <> "These are also available in" <+> bb packageYaml <> dot)
+              <> (softline <> "These are also available in" <+> bb packageYaml <> dot) <> hardline
           )
         <> f
           "set"
@@ -261,17 +284,20 @@ makeSubCommand target =
           ( ("Set the" <+> name <+> bbFullPath)
               <> (softline <> "so that it's loaded when a" <+> bb "ghci" <+> "session starts" <> dot)
               <> (softline <> "When" <+> bb "ghcid" <+> "starts")
-              <> (softline <> "it will run this " <> name <> "'s" <+> bb "main" <+> "function")
+              <> (softline <> "it will run this " <> name <> "'s" <+> bb "main" <+> "function" <> dot)
+              <> hardline
           )
         <> f
           "init"
           initCommand
-          ("Initialize a" <+> bb "stack" <+> "project")
+          ("Initialize a managed" <+> bb "stack" <+> "project" <> hardline)
         <> f
           "update"
           updateCommand
           ( ("Re-generate" <+> bb ".cabal" <+> "and" <+> bb "hie.yaml" <> dot)
-              <> (softline <> "Run whenever you add a module")
+              <> (softline <> "Run whenever you manyally add a module" <> dot)
+              <> (softline <> bb manager <+> "commands update these files automatically" <> dot)
+              <> hardline
           )
     )
   where
@@ -298,14 +324,11 @@ x <-> y = x <> " " <> y
 bb :: String -> Doc
 bb s = bold $ text s
 
-qqs :: String -> String
-qqs s = "'" <> s <> "'"
-
-updateCabalAndHie :: IO ()
-updateCabalAndHie = do
+updateHsProjectFiles :: IO ()
+updateHsProjectFiles = do
   putDoc' ("Updating" <+> bb ".cabal" <> hardline)
   callCommand "hpack"
-  putDoc' ("Updating hie.yaml" <> hardline)
+  putDoc' ("Updating" <+> bb "hie.yaml" <> hardline)
   callCommand "gen-hie --stack > hie.yaml"
 
 putDoc' :: Doc -> IO ()
@@ -328,26 +351,31 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
     tWriteFile simpleMain initSimpleMain (mapThrow EWrite FileHs simpleMain)
     liftIO $ putDoc' $ "Writing" <+> bb gitignore
     tWriteFile gitignore initGitIgnore (mapThrow EWrite FileHs gitignore)
-  CommandUpdate -> liftIO updateCabalAndHie
+  CommandUpdate -> liftIO updateHsProjectFiles
   CommandAdd {name, template} -> do
     throwIfBadName name
     throwIfBadName template
-    liftIO $ putDoc' $ "Reading template at" <+> bb templateHs
-    t <- tReadFile templateHs (mapThrow ERead TemplateHs templateHs)
-    liftIO $ putDoc' $ "Writing the template into" <+> bb fileHs
-    tCreateDir targetDir (mapThrow EWrite Directory fileHs) (mapThrow ERemove Directory fileHs)
-    tWriteFile fileHs t (mapThrow EWrite FileHs fileHs)
     readPackageYaml $ \y1 atKey nempty -> do
-      let atExeKey k v =
+      let templateExe = mkTemplateExe template
+          atTemplate = y1 ^? key executables . key templateExe
+      liftIO $ unless (isJust atTemplate) (throwIO $ Ex $ "No such executable" <+> bb (T.unpack templateExe) <+> "in" <+> bb packageYaml)
+      let atExe k = key executables . atKey (mkExe k) . nempty
+          atExeKey k v =
             over
               (key executables . atKey (mkExe name) . nempty . atKey k)
               (\_ -> Just $ String (T.pack v))
           y2 =
             y1
+              & over (atExe name) (\_ -> fromMaybe (object mempty) atTemplate)
               & atExeKey main' mainHs
               & atExeKey sourceDirs targetDir
       writePackageYaml y2
-    liftIO updateCabalAndHie
+    liftIO $ putDoc' $ "Reading template at" <+> bb templateHs
+    t <- tReadFile templateHs (mapThrow ERead TemplateHs templateHs)
+    liftIO $ putDoc' $ "Writing the template into" <+> bb fileHs
+    tCreateDir targetDir (mapThrow EWrite Directory fileHs) (mapThrow ERemove Directory fileHs)
+    tWriteFile fileHs t (mapThrow EWrite FileHs fileHs)
+    liftIO updateHsProjectFiles
     where
       fileHs = mkTargetHs name
       templateHs = templatesDir </> template <.> "hs"
@@ -388,7 +416,7 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
                 HM.fromList (x ^.. members . withIndex . filtered (\(y, _) -> y /= exe))
           y2 = y1 & over (key executables) withoutExe
       writePackageYaml y2
-    liftIO updateCabalAndHie
+    liftIO updateHsProjectFiles
     where
       fileHs = mkTargetHs name
       targetDir = takeDirectory fileHs
@@ -416,11 +444,9 @@ handleCommand (GeneralCommand {..}) = runManaged $ case command_ of
         hasNoTrailingSeparator = dropTrailingPathSeparator name == name
         alphabet = ['A' .. 'Z'] ++ ['a' .. 'z'] ++ ['0' .. '9'] ++ ['_']
     throwIfBadName name = mBefore (liftIO $ unless (isOkName name) (throwIO $ NameError name)) id
-
-    mkExe x =
-      T.pack $
-        eitherTarget "" "Templates." target
-          <> ((\y -> if y == pathSeparator then '.' else y) <$> x)
+    replace cond rep s = (\x -> if cond x then rep else x) <$> s
+    mkExe x = T.pack $ eitherTarget "" "Templates." target <> replace (== pathSeparator) '.' x
+    mkTemplateExe x = T.pack $ "Templates." <> replace (== pathSeparator) '.' x
     -- read a package.yaml and run the continuation ok if everything is OK
     readPackageYaml ok = do
       liftIO $ putDoc' $ "Reading" <-> bb packageYaml
