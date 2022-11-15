@@ -154,3 +154,8 @@ Case: VSCodium doesn't have the binaries provided in `runtimeDependencies` (like
    1. Restart your OS
    1. `nix store gc` - collect garbage in Nix store - [man](https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-store-gc.html)
    1. Again, make a `Check`
+
+## TODO
+
+<!-- TODO -->
+- Update flakes' inputs when this [issue](https://github.com/NixOS/nix/issues/5790#issuecomment-1315831247) is fixed
