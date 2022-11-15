@@ -2,6 +2,25 @@
 
 Nix flakes for tools that I use
 
+## Contents
+
+- [codium](./codium/flake.nix) - set up VSCodium with binaries on `PATH` and extensions
+- [devshell](./devshell/flake.nix) - Easily create a CLI to your `devShells`
+- [drv-tools](./drv-tools/flake.nix) - convenience tools for working with derivations
+- [env2json](./env2json/flake.nix) - convert `.env` to `.json`
+- [flake-tools](./flake-tools/flake.nix) - convenience tools for working with flakes and pushing them to [cachix](https://www.cachix.org/)
+- [json2md](./flake-tools/flake.nix) - convert `json2md`
+  - Can be combined with `builtins.toJSON` and used to generate `.md` docs from Nix expressions - [example](https://github.com/br4ch1st0chr0n3/devops-labs/blob/0ae9881ab58b99f114aaf21cb5cad85f2ce37e40/.nix/write-configs.nix#L26)
+- [language-tools](./flake-tools) - tools for languages that I use
+- [manager](./manager/flake.nix)
+  - quickly initialize a `Haskell` `stack` project
+  - manage modules, template files
+  - create modules from template files
+- [source-flake](./source-flake/) - pinned flakes
+  - used to have the same flake inputs in my flakes
+- [templates](./templates/) - Nix flake templates that can be used to initialize new projects
+  - see the [Templates](#templates) section
+
 ## Prerequisites
 
 ### Nix and Nix flakes
