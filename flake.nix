@@ -35,7 +35,7 @@
         ;
       devshell = my-devshell.devshell.${system};
       inherit (flake-tools.functions.${system})
-        mkFlakesUtils
+        mkFlakesTools
         ;
       inherit (haskell-tools.functions.${system})
         toolsGHC
@@ -61,13 +61,13 @@
         runtimeDependencies = tools;
       };
 
-      flakesUtils = mkFlakesUtils [ "." ];
+      flakesTools = mkFlakesTools [ "." ];
     in
     {
       packages = {
         default = hls;
-        pushToCachix = flakesUtils.flakesPushToCachix;
-        updateLocks = flakesUtils.flakesUpdate;
+        pushToCachix = flakesTools.pushToCachix;
+        updateLocks = flakesTools.update;
       };
 
       devShells.default = devshell.mkShell
