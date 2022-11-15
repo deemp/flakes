@@ -79,10 +79,9 @@
               help = "VSCodium";
             }
             {
-              name = "writeSettings";
+              name = "${writeSettings.name}";
               category = "ide";
               help = "write settings.json for VSCodium";
-              command = "${mkBin writeSettings}";
             }
           ];
         };
