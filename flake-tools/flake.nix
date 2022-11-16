@@ -29,6 +29,7 @@
         runInEachDir
         indentStrings4
         ;
+      inherit (pkgs.lib.lists) flatten;
       man = drv-tools.configs.${system}.man // {
         ENV = "# EXPECTED ENV VARIABLES";
       };
@@ -125,6 +126,7 @@
         let
           flakesUpdate_ = flakesUpdate dirs;
           flakesPushToCachix_ = flakesPushToCachix dirs;
+          dirs_ = flatten dirs;
         in
         mkShellApp {
           name = "flakes-update-and-push-to-cachix";
@@ -137,7 +139,7 @@
 
             Update and push flakes to **cachix** in specified directories relative to **CWD**.
             The directories are:
-            ${indentStrings4 dirs}
+            ${indentStrings4 dirs_}
             
             ${man.ENV}
 
@@ -164,30 +166,32 @@
       };
 
       # watch nix files existing at the moment
-      flakesWatchDumpDevshells = dirs: mkShellApp {
-        name = "flakes-watch-dump-devshells";
-        text = ''
-          printf "${framedBrackets "watcher set"}"
-          inotifywait -qmr -e close_write ./ | \
-          while read dir action file; do
-            if [[ $file =~ .*nix$ ]]; then
-              set +e
-              printf "${framedBrackets "started dumping devshells"}"
-              ${mkBin (flakesUpdate dirs)}
-              ${mkBin (flakesDumpDevshells dirs)}
-              printf "${framedBrackets "finished dumping devshells"}"
-              set -e
-            fi
-          done
-        '';
-        runtimeInputs = [ pkgs.inotify-tools ];
-        longDescription = ''
-          ${man.DESCRIPTION}
-          Start a watcher that will update locks and dump (evaluate) devshells 
-          in the following directories relative to **CWD**:
-          ${indentStrings4 dirs}
-        '';
-      };
+      flakesWatchDumpDevshells = dirs:
+        let dirs_ = flatten dirs; in
+        mkShellApp {
+          name = "flakes-watch-dump-devshells";
+          text = ''
+            printf "${framedBrackets "watcher set"}"
+            inotifywait -qmr -e close_write ./ | \
+            while read dir action file; do
+              if [[ $file =~ .*nix$ ]]; then
+                set +e
+                printf "${framedBrackets "started dumping devshells"}"
+                ${mkBin (flakesUpdate dirs)}
+                ${mkBin (flakesDumpDevshells dirs)}
+                printf "${framedBrackets "finished dumping devshells"}"
+                set -e
+              fi
+            done
+          '';
+          runtimeInputs = [ pkgs.inotify-tools ];
+          longDescription = ''
+            ${man.DESCRIPTION}
+            Start a watcher that will update locks and dump (evaluate) devshells 
+            in the following directories relative to **CWD**:
+            ${indentStrings4 dirs_}
+          '';
+        };
       # format all .nix files with the formatter specified in the flake in the CWD
       flakesFormat = mkShellApp {
         name = "flakes-format";
