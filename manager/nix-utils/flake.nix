@@ -3,10 +3,11 @@
     nixpkgs_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs";
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     my-codium.url = "github:br4ch1st0chr0n3/flakes?dir=codium";
-    drv-tools.url = "github:br4ch1st0chr0n3/flakes?dir=drv-tools";
     flake-utils_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils";
-    flake-utils.follows = "flake-utils_/flake-utils";    
+    flake-utils.follows = "flake-utils_/flake-utils";
     haskell-tools.url = "github:br4ch1st0chr0n3/flakes?dir=language-tools/haskell";
+    my-hpack_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/hpack";
+    my-hpack.follows = "my-hpack_/hpack";
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
@@ -18,9 +19,9 @@
     , flake-utils
     , nixpkgs
     , my-codium
-    , drv-tools
     , haskell-tools
     , my-devshell
+    , my-hpack
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -29,9 +30,6 @@
       inherit (my-codium.functions.${system})
         writeSettingsJSON
         mkCodium
-        ;
-      inherit (drv-tools.functions.${system})
-        mkBinName
         ;
       inherit (my-codium.configs.${system})
         extensions
@@ -42,18 +40,21 @@
         toolsGHC
         ;
       hsShellTools = haskell-tools.toolSets.${system}.shellTools;
-      inherit (toolsGHC "90") stack hls ghc;
+      inherit (toolsGHC "90") stack hls;
+      hpack = my-hpack.packages.${system}.default;
 
       writeSettings = writeSettingsJSON {
         inherit (settingsNix) haskell todo-tree files editor gitlens
           git nix-ide workbench markdown-all-in-one;
       };
 
-      tools = (builtins.attrValues hsShellTools) ++ [
+      tools = [
+        hsShellTools.implicit-hie
+        hpack
+        hsShellTools.ghcid
         stack
         writeSettings
         hls
-        ghc
         pkgs.jq
       ];
 
@@ -65,26 +66,43 @@
     {
       packages = {
         default = codium;
+        inherit stack;
+        implicit-hie = pkgs.haskellPackages.implicit-hie;
       };
 
-      devShells.default = devshell.mkShell
-        {
-          packages = [ codium ] ++ tools;
-          bash = {
-            extra = ''
-            '';
+      devShells.default =
+        devshell.mkShell
+          {
+            packages = [ codium ] ++ tools;
+            bash = {
+              extra = ''
+              '';
+            };
+            commands = [
+              {
+                name = "codium, ghcid, stack, ghc, jq";
+                help = "available in codium";
+              }
+              {
+                name = "${writeSettings.name}";
+                help = "write .vscode/settings.json";
+              }
+              {
+                name = "test-gen-hie";
+                category = "test";
+                help = "run gen-hie from a Haskell script";
+                command = ''
+                  cat <<EOT > Ex.hs
+                  module Ex where
+                  import System.Process
+                  main = putStrLn =<< readProcess "gen-hie" ["--help"] ""
+                  EOT
+                  stack runghc -- Ex
+                  rm Ex.*
+                '';
+              }
+            ];
           };
-          commands = [
-            {
-              name = "codium, ghcid, stack, ghc, jq";
-              help = "available in codium";
-            }
-            {
-              name = "${writeSettings.name}";
-              help = "write .vscode/settings.json";
-            }
-          ];
-        };
     });
 
   nixConfig = {
