@@ -37,7 +37,6 @@ library
     , bytestring
     , directory
     , filepath
-    , hpack
     , lens
     , lens-aeson
     , managed
@@ -79,7 +78,6 @@ executable manager
     , bytestring
     , directory
     , filepath
-    , hpack
     , lens
     , lens-aeson
     , managed

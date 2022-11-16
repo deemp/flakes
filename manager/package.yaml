@@ -21,7 +21,6 @@ dependencies:
   - mtl
   - filepath
   - temporary
-  - hpack
   - system-filepath
   - aeson
   - optparse-applicative

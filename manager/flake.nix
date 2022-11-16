@@ -18,58 +18,68 @@
     , haskell-tools
     , ...
     }:
-    flake-utils.lib.eachDefaultSystem (system:
-    let
-      pkgs = nixpkgs.legacyPackages.${system};
-      hsShellTools = haskell-tools.toolSets.${system}.shellTools;
-      inherit (haskell-tools.functions.${system}) toolsGHC;
-      inherit (toolsGHC "90") staticExecutable;
-      managerTools = [
-        hpack.packages.${system}.default
-        pkgs.haskellPackages.implicit-hie
-      ];
-      manager =
-        let
-          manager_ = "manager";
-          manager-exe = staticExecutable manager_ ./.;
-        in
-        pkgs.symlinkJoin {
-          name = manager_;
-          paths = [ manager-exe ];
-          buildInputs = [ pkgs.makeWrapper ];
-          postBuild = ''
-            wrapProgram $out/bin/${manager_} \
-              --set PATH ${
-                pkgs.lib.makeBinPath managerTools
-                }
+    flake-utils.lib.eachDefaultSystem
+      (system:
+      let
+        pkgs = nixpkgs.legacyPackages.${system};
+        hsShellTools = haskell-tools.toolSets.${system}.shellTools;
+        inherit (haskell-tools.functions.${system}) toolsGHC;
+        inherit (toolsGHC "90") staticExecutable;
+        managerTools = [
+          hpack.packages.${system}.default
+          pkgs.haskellPackages.implicit-hie
+        ];
+        manager =
+          let
+            manager_ = "manager";
+            manager-exe = staticExecutable manager_ ./.;
+          in
+          pkgs.symlinkJoin {
+            name = manager_;
+            paths = [ manager-exe ];
+            buildInputs = [ pkgs.makeBinaryWrapper ];
+            postBuild = ''
+              wrapProgram $out/bin/${manager_} \
+                --set PATH ${
+                  pkgs.lib.makeBinPath managerTools
+                  }
+            '';
+          };
+      in
+      {
+        packages = {
+          default = manager;
+        };
+
+        devShells.default = pkgs.mkShell {
+          buildInputs = [ manager ];
+          shellHook = ''
+            source <(manager --bash-completion-script `which manager`)
+            manager
           '';
         };
-    in
-    {
-      packages = {
-        default = manager;
-      };
 
-      devShells.default = pkgs.mkShell {
-        buildInputs = [ manager ];
-        shellHook = ''
-          source <(manager --bash-completion-script `which manager`)
-          manager
-        '';
-      };
+        stack-shell = { ghcVersion }:
 
-      stack-shell = { ghcVersion }:
+          pkgs.haskell.lib.buildStackProject {
+            name = "nix-stack-shell";
 
-        pkgs.haskell.lib.buildStackProject {
-          name = "nix-stack-shell";
+            ghc = pkgs.haskell.compiler.${ghcVersion};
 
-          ghc = pkgs.haskell.compiler.${ghcVersion};
-
-          buildInputs = [
-            pkgs.zlib
-          ];
+            buildInputs = [
+              pkgs.zlib
+            ] ++ managerTools;
+          };
+      }
+      )
+    // {
+      templates = {
+        nix-managed = {
+          path = ./template;
+          description = "codium with extensions and binaries";
         };
-    });
+      };
+    };
 
   nixConfig = {
     extra-substituters = [
