@@ -76,10 +76,10 @@
       concatMapStringsNewline = concatMapStringsSep "\n";
 
       # ignore shellcheck when writing a shell application
-      mkShellApp = args@{ name, text, runtimeInputs ? [ ], longDescription ? "", description ? "" }:
-        withMan (
+      mkShellApp = args@{ name, text, runtimeInputs ? [ ], longDescription ? "" }:
+        withMan_ (
           pkgs.lib.meta.addMetaAttrs
-            { inherit longDescription description; }
+            { inherit longDescription; }
             (
               pkgs.writeShellApplication ({ inherit name text; } // {
                 runtimeInputs = pkgs.lib.lists.flatten (args.runtimeInputs or [ ]);
@@ -103,11 +103,13 @@
       indentStrings4 = indentStrings_ 4;
       indentStrings8 = indentStrings_ 8;
       indentStrings_ = n: y: "\n" + (concatMapStringsSep "\n" (x: (applyN n (s: " " + s) "") + x) y) + "\n";
-
-      withMan = drv:
+      
+      # add a longDescription to a derivation
+      # add a man generated from longDescription
+      withMan = drv: longDescription:
         let
+          drv_ = withLongDescription drv longDescription;
           name = drv.name;
-          longDescription = drv.meta.longDescription;
           man = ''
             ---
             title: ${name}
@@ -120,7 +122,7 @@
         in
         pkgs.symlinkJoin {
           inherit name;
-          paths = [ drv ];
+          paths = [ drv_ ];
           nativeBuildInputs = [ pkgs.pandoc ];
           postBuild = ''
             mkdir -p ${manPath}
@@ -131,8 +133,8 @@
             rm $out/${name}.1.md
           '';
         };
+      withMan_ = drv: withMan drv drv.meta.longDescription;
 
-      # mkLongDescription = description: 
       # String -> String -> Set -> IO ()
       writeJSON = name: path: dataNix:
         let
