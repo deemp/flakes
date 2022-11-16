@@ -41,7 +41,8 @@
             fish ${fishScriptPath}
           '';
         longDescription = ''
-          run a `fish` [script](${fishScriptPath})
+          ${DESCRIPTION}
+          run a *fish* script at *${fishScriptPath}*
         '';
       };
 
@@ -76,18 +77,55 @@
 
       # ignore shellcheck when writing a shell application
       mkShellApp = args@{ name, text, runtimeInputs ? [ ], longDescription ? "", description ? "" }:
-        (pkgs.lib.meta.addMetaAttrs
-          { inherit longDescription description; }
-          (
-            pkgs.writeShellApplication ({ inherit name text; } // {
-              runtimeInputs = pkgs.lib.lists.flatten (args.runtimeInputs or [ ]);
-              checkPhase = "";
-            })));
+        let
+          script =
+            (pkgs.lib.meta.addMetaAttrs
+              { inherit longDescription description; }
+              (
+                pkgs.writeShellApplication ({ inherit name text; } // {
+                  runtimeInputs = pkgs.lib.lists.flatten (args.runtimeInputs or [ ]);
+                  checkPhase = "";
+                })));
+          man = ''
+            ---
+            title: ${name}
+            section: 1
+            header: User Manual
+            ---
+            ${longDescription}
+          '';
+          manPath = "$out/share/man/man1";
+        in
+        pkgs.symlinkJoin {
+          inherit name;
+          paths = [ script ];
+          nativeBuildInputs = [ pkgs.pandoc ];
+          postBuild = ''
+            mkdir -p ${manPath}
+            cat <<EOT > $out/${name}.1.md 
+            ${man}
+            EOT
+            pandoc $out/${name}.1.md -st man -o ${manPath}/${name}.1
+            rm $out/${name}.1.md
+          '';
+        };
 
       withAttrs = drv: attrSet: pkgs.lib.attrsets.recursiveUpdate drv attrSet;
       withMeta = drv: meta: withAttrs drv { inherit meta; };
       withLongDescription = drv: longDescription: withAttrs drv { meta = { inherit longDescription; }; };
 
+      # man headings
+      NAME = "# NAME";
+      DESCRIPTION = "# DESCRIPTION";
+      EXAMPLES = "# EXAMPLES";
+      NOTES = "# NOTES";
+
+      # for code blocks in man
+      indentStrings4 = indentStrings_ 4;
+      indentStrings8 = indentStrings_ 8;
+      indentStrings_ = n: y: "\n" + (concatMapStringsSep "\n" (x: (applyN n (s: " " + s) "") + x) y) + "\n";
+
+      # mkLongDescription = description: 
       # String -> String -> Set -> IO ()
       writeJSON = name: path: dataNix:
         let
@@ -106,11 +144,14 @@
             } | python -m json.tool > ${path}
             printf "${framedBrackets "ok %s"}" "${name_}"
           '';
-          longDescription = ''write a given `Nix` expression as `JSON` into `path`'';
+          longDescription = ''
+            ${NAME}
+            ${name_} - write a given `Nix` expression as `JSON` into `path`
+          '';
         };
 
       # use when need to generate settings.json etc.
-      json2nix = mkShellApp {
+      json2nix = mkShellApp rec {
         name = "json2nix";
         runtimeInputs = [ pkgs.nixpkgs-fmt ];
         text = ''
@@ -121,52 +162,16 @@
           nixpkgs-fmt $nix_path
         '';
         longDescription = ''
-          Convert a `.json` into `.nix` at runtime. No need to provide the full path to a file if it's in the `CWD`. 
-          
-          Example:
+          ${NAME}
+          **${name}** - Convert *.json* to *.nix*
 
-            ```sh
-            json2nix .vscode/settings.json my-settings.nix
-            ```
+          ${EXAMPLES}
+          **json2nix .vscode/settings.json my-settings.nix**
+          :   Convert exising settings.json into a nix file
+              ${indentStrings8 [ "a" "b"] }
+
         '';
       };
-
-      # TODO override mkShellApp to install the longDescription into a $out/share directory
-      # and read the description from there
-      desc = mkShellApp (
-        let
-          command = ''
-            nix eval --raw "$1.meta.longDescription" || \
-                nix eval --raw "$1.meta.description" || \
-                    echo "could not extract any description of this derivation"
-          '';
-        in
-        {
-          name = "desc";
-          text =
-            ''
-              description=$(${command})
-
-              printf "${framedNewlines "$description"}" | glow -
-            '';
-          runtimeInputs = [ pkgs.glow ];
-          longDescription = ''
-            Usage: `desc INSTALLABLE`
-            
-            Example: `desc .#`
-
-            Show a description of a derivation as 
-            [glow](https://github.com/charmbracelet/glow) - rendered Markdown.
-
-            Runs 
-              ```sh
-              ${command}
-              ``` 
-            with your argument as `$1`
-
-          '';
-        }
-      );
 
       runInEachDir = args@{ dirs, command, name, preMessage ? "", message ? "", postMessage ? "", runtimeInputs ? [ ], longDescription ? "" }:
         (mkShellApp {
@@ -178,7 +183,6 @@
             ''
               ${INITIAL_CWD}=$PWD
               printf "%s" '${preMessage}'
-
             '' +
             builtins.concatStringsSep "\n"
               (map
@@ -195,12 +199,11 @@
             '';
           longDescription = ''
             ${longDescription}
-            
+
+            ${NOTES}
             The directories relative to $PWD are:
 
-              ```sh
-              ${concatStringsNewline dirs}
-              ```
+            ${indentStrings4 dirs}
           '';
         });
 
@@ -211,13 +214,17 @@
     {
       packages = {
         inherit
-          desc
           json2nix
           ;
       };
       functions = {
         inherit
           applyN
+          concatMapStringsNewline
+          concatStringsNewline
+          indentStrings4
+          indentStrings8
+          indentStrings_
           framed_
           framedBrackets
           framedBrackets_
@@ -227,8 +234,6 @@
           mkBinName
           mkShellApp
           mkShellApps
-          concatMapStringsNewline
-          concatStringsNewline
           readDirectories
           readFiles
           readSymlinks
@@ -243,10 +248,14 @@
           ;
       };
 
+      configs.man = {
+        inherit NAME DESCRIPTION EXAMPLES NOTES;
+      };
+
       # tests 
       devShells.default = pkgs.mkShell {
         name = "default";
-        buildInputs = [ pkgs.tree json2nix desc pkgs.fish ];
+        buildInputs = [ pkgs.tree json2nix pkgs.fish ];
       };
 
       tests = {
