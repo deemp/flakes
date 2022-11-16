@@ -77,17 +77,16 @@
 
       # ignore shellcheck when writing a shell application
       mkShellApp = args@{ name, text, runtimeInputs ? [ ], longDescription ? "" }:
-        withMan_ (
-          pkgs.lib.meta.addMetaAttrs
-            { inherit longDescription; }
-            (
-              pkgs.writeShellApplication ({ inherit name text; } // {
-                runtimeInputs = pkgs.lib.lists.flatten (args.runtimeInputs or [ ]);
-                checkPhase = "";
-              }
-              )
+        withMan
+          (
+            pkgs.writeShellApplication ({ inherit name text; } // {
+              runtimeInputs = pkgs.lib.lists.flatten (args.runtimeInputs or [ ]);
+              checkPhase = "";
+            }
             )
-        );
+          )
+          longDescription
+      ;
 
       withAttrs = drv: attrSet: pkgs.lib.attrsets.recursiveUpdate drv attrSet;
       withMeta = drv: meta: withAttrs drv { inherit meta; };
@@ -130,7 +129,8 @@
             cat <<EOT > $out/${name}.1.md 
             ${man}
             EOT
-            chmod +rw ${manPath}
+            rm -rf ${manPath}
+            mkdir -p ${manPath}
             pandoc $out/${name}.1.md -st man -o ${manPath}/${name}.1
             rm $out/${name}.1.md
           '';
