@@ -1,12 +1,12 @@
 {
   inputs = {
     nixpkgs_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs";
-    flake-utils_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils";
-    cachix_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/cachix";
-    drv-tools.url = "github:br4ch1st0chr0n3/flakes?dir=drv-tools";
     nixpkgs.follows = "nixpkgs_/nixpkgs";
+    flake-utils_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
+    cachix_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/cachix";
     cachix.follows = "cachix_/cachix";
+    drv-tools.url = "github:br4ch1st0chr0n3/flakes?dir=drv-tools";
   };
   outputs =
     { self
@@ -27,7 +27,11 @@
         concatStringsNewline
         mkDevShellsWithDefault
         runInEachDir
+        indentStrings4
         ;
+      man = drv-tools.configs.${system}.man // {
+        ENV = "# EXPECTED ENV VARIABLES";
+      };
       pushXToCachix = inp@{ name, fishScriptPath, runtimeInputs ? [ ], text ? "" }:
         withLongDescription
           (runFishScript
@@ -42,28 +46,41 @@
       pushPackagesToCachix = withLongDescription
         (pushXToCachix { name = "packages"; fishScriptPath = ./scripts/cache-packages.fish; })
         ''
-          push full closures (build and runtime dependencies) of all flake's packages to `cachix`
-          expected env variables:
-          `[PATHS_FOR_PACKAGES]` - (optional) temporary file where to store the build output paths
+          ${man.DESCRIPTION}
+          Push full closures (build and runtime dependencies) of all flake's packages to **cachix**
+          
+          ${man.ENV}
+
+              **PATHS_FOR_PACKAGES** - (optional) temporary file where to store the build output paths
         '';
 
       pushDevShellsToCachix =
         withLongDescription
           (pushXToCachix { name = "devshells"; fishScriptPath = ./scripts/cache-devshells.fish; })
           ''
-            push full closures (build and runtime dependencies) of all flake's devshells to `cachix`
-            expected env variables:
-            `CACHIX_CACHE` - cachix cache name
-            `[PROFILES_FOR_DEVSHELLS]` - (optional) temporary dir where to store the dev profiles
+            ${man.DESCRIPTION}
+            
+            Push full closures (build and runtime dependencies) of all flake's devshells to **cachix**
+            
+            ${man.ENV}
+
+            **CACHIX_CACHE**
+            :   cachix cache name
+            
+            **PROFILES_FOR_DEVSHELLS**
+            :  (optional) temporary dir where to store the dev profiles
           ''
       ;
 
       pushInputsToCachix = withLongDescription
         (pushXToCachix { name = "flake-inputs"; fishScriptPath = ./scripts/cache-inputs.fish; })
         ''
-          push all flake inputs to `cachix`
-          expected env variables:
-          `CACHIX_CACHE` - cachix cache name
+          ${man.DESCRIPTION}
+          Push all flake inputs to **cachix**
+          
+          ${man.ENV}
+          **CACHIX_CACHE**
+          :   cachix cache name
         ''
       ;
 
@@ -76,7 +93,8 @@
             ${mkBin pushPackagesToCachix}
           '';
           longDescription = ''
-            Push inputs and outputs (packages and devShells) of a flake to `cachix`
+            ${man.DESCRIPTION}
+            Push inputs and outputs (packages and devShells) of a flake to **cachix**
           '';
         });
 
@@ -96,7 +114,10 @@
         inherit dirs;
         name = "flakes-push-to-cachix";
         command = "${mkBin pushAllToCachix}";
-        longDescription = ''Push flakes' inputs and outputs to `cachix`'';
+        longDescription = ''
+          ${man.DESCRIPTION}
+          Push flakes' inputs and outputs to **cachix**
+        '';
       };
 
       # update and push flakes to cachix in specified directories relative to CWD
@@ -112,13 +133,16 @@
             ${mkBin flakesPushToCachix_}
           '';
           longDescription = ''
-            Update and push flakes to cachix in specified directories relative to `CWD`.
-            The directories are:
-              
-              ```
-              ${concatStringsNewline dirs}
-              ```
+            ${man.DESCRIPTION}
 
+            Update and push flakes to **cachix** in specified directories relative to **CWD**.
+            The directories are:
+            ${indentStrings4 dirs}
+            
+            ${man.ENV}
+
+            **CACHIX_CACHE**
+            :   cachix cache name
           '';
         };
 
@@ -133,7 +157,10 @@
         command = ''
           ${mkBin dumpDevShells}
         '';
-        longDescription = ''Evaluate devshells to dump them'';
+        longDescription = ''
+          ${man.DESCRIPTION}
+          Evaluate devshells to dump them
+        '';
       };
 
       # watch nix files existing at the moment
@@ -155,11 +182,10 @@
         '';
         runtimeInputs = [ pkgs.inotify-tools ];
         longDescription = ''
-          Start a watcher that will update locks and dump (evaluate) devshells in the following directories relative to `CWD`:
-
-              ```sh
-              ${concatStringsNewline dirs}
-              ```
+          ${man.DESCRIPTION}
+          Start a watcher that will update locks and dump (evaluate) devshells 
+          in the following directories relative to **CWD**:
+          ${indentStrings4 dirs}
         '';
       };
       # format all .nix files with the formatter specified in the flake in the CWD
@@ -169,7 +195,9 @@
           nix fmt **/*.nix
         '';
         longDescription = ''
-          Format `.nix` files in `PWD` and its subdirectories using the formatter set in the `CWD` flake
+          ${man.DESCRIPTION}
+          Format **.nix** files in **CWD** and its subdirectories 
+          using the formatter set in the **CWD** flake
         '';
       };
 
