@@ -69,7 +69,7 @@
       in
       {
         devShells.default = devshell.mkShell {
-          packages = (builtins.attrValues flakesTools) ++ [ codium ];
+          packages = (builtins.attrValues flakesTools) ++ [ codium writeSettings ];
           commands = [
             {
               name = "codium";
@@ -88,8 +88,6 @@
           pushToCachix = flakesTools.pushToCachix;
           updateLocks = flakesTools.update;
           format = flakesTools.format;
-          default = codium;
-          inherit writeSettings;
         };
         inherit (formatter) formatter;
       }) // {
