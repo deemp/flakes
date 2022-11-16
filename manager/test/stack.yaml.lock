@@ -5,12 +5,12 @@
 
 packages:
 - completed:
-    hackage: sockets-and-pipes-0.3@sha256:c965cb605b46b2ba33e3d187f63d09418032bea53f8f96cb7b4dd574c63c5796,3209
+    hackage: acme-missiles-0.3@sha256:2ba66a092a32593880a87fb00f3213762d7bca65a687d45965778deb8694c5d1,613
     pantry-tree:
-      sha256: 1052ad48fd84c06bb758bba49eb5c88699de9ad6ab4c5f7488a703ff6a49f919
-      size: 191
+      sha256: 614bc0cca76937507ea0a5ccc17a504c997ce458d7f2f9e43b15a10c8eaeb033
+      size: 226
   original:
-    hackage: sockets-and-pipes-0.3
+    hackage: acme-missiles-0.3
 snapshots:
 - completed:
     sha256: 6d1532d40621957a25bad5195bfca7938e8a06d923c91bc52aa0f3c41181f2d4

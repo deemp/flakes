@@ -9,4 +9,4 @@ ghc-options:
 packages:
   - .
 extra-deps:
-  - sockets-and-pipes-0.3
+  - acme-missiles-0.3

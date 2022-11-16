@@ -20,15 +20,18 @@ executable A
   ghc-options: -Wall
   build-depends:
       base >=4.7 && <5
+    , directory
+    , filepath
+    , relude
   default-language: Haskell2010
 
-executable Book
+executable B
   main-is: Main.hs
   other-modules:
-      Book
+      AnotherModule
       Paths_nix_managed
   hs-source-dirs:
-      ./Modules/Book
+      ./Modules/B
   default-extensions:
       TypeApplications
   ghc-options: -Wall
@@ -49,6 +52,5 @@ executable Templates.SimpleMain
       TypeApplications
   ghc-options: -Wall
   build-depends:
-      a
-    , base >=4.7 && <5
+      base >=4.7 && <5
   default-language: Haskell2010

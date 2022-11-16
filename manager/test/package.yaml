@@ -8,15 +8,18 @@ executables:
   A:
     main: Main.hs
     source-dirs: ./Modules/A
-  Book:
+    dependencies:
+    - filepath
+    - directory
+    - relude
+  B:
     dependencies:
     - filepath
     - directory
     - relude
     main: Main.hs
-    source-dirs: ./Modules/Book
+    source-dirs: ./Modules/B
   Templates.SimpleMain:
-    dependencies: a
     main: SimpleMain.hs
     source-dirs: ./Templates
 

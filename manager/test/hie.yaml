@@ -3,11 +3,11 @@ cradle:
     - path: "././Templates/SimpleMain.hs"
       component: "nix-managed:exe:Templates.SimpleMain"
 
-    - path: "././Modules/Book/Main.hs"
-      component: "nix-managed:exe:Book"
+    - path: "././Modules/B/Main.hs"
+      component: "nix-managed:exe:B"
 
-    - path: "././Modules/Book/Book.hs"
-      component: "nix-managed:exe:Book"
+    - path: "././Modules/B/AnotherModule.hs"
+      component: "nix-managed:exe:B"
 
     - path: "././Modules/A/Main.hs"
       component: "nix-managed:exe:A"
