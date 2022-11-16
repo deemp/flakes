@@ -110,6 +110,11 @@
           toolsGHC
           ;
       };
+
+      test = {
+        inherit stack;
+      };
+
       # test stack has `hello` on PATH
       devShells.default = pkgs.mkShell {
         shellHook = ''
