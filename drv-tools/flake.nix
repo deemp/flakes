@@ -42,7 +42,7 @@
           '';
         longDescription = ''
           ${DESCRIPTION}
-          run a *fish* script at *${fishScriptPath}*
+          run a **fish** script at **${fishScriptPath}**
         '';
       };
 
@@ -77,38 +77,17 @@
 
       # ignore shellcheck when writing a shell application
       mkShellApp = args@{ name, text, runtimeInputs ? [ ], longDescription ? "", description ? "" }:
-        let
-          script =
-            (pkgs.lib.meta.addMetaAttrs
-              { inherit longDescription description; }
-              (
-                pkgs.writeShellApplication ({ inherit name text; } // {
-                  runtimeInputs = pkgs.lib.lists.flatten (args.runtimeInputs or [ ]);
-                  checkPhase = "";
-                })));
-          man = ''
-            ---
-            title: ${name}
-            section: 1
-            header: User Manual
-            ---
-            ${longDescription}
-          '';
-          manPath = "$out/share/man/man1";
-        in
-        pkgs.symlinkJoin {
-          inherit name;
-          paths = [ script ];
-          nativeBuildInputs = [ pkgs.pandoc ];
-          postBuild = ''
-            mkdir -p ${manPath}
-            cat <<EOT > $out/${name}.1.md 
-            ${man}
-            EOT
-            pandoc $out/${name}.1.md -st man -o ${manPath}/${name}.1
-            rm $out/${name}.1.md
-          '';
-        };
+        withMan (
+          pkgs.lib.meta.addMetaAttrs
+            { inherit longDescription description; }
+            (
+              pkgs.writeShellApplication ({ inherit name text; } // {
+                runtimeInputs = pkgs.lib.lists.flatten (args.runtimeInputs or [ ]);
+                checkPhase = "";
+              }
+              )
+            )
+        );
 
       withAttrs = drv: attrSet: pkgs.lib.attrsets.recursiveUpdate drv attrSet;
       withMeta = drv: meta: withAttrs drv { inherit meta; };
@@ -124,6 +103,34 @@
       indentStrings4 = indentStrings_ 4;
       indentStrings8 = indentStrings_ 8;
       indentStrings_ = n: y: "\n" + (concatMapStringsSep "\n" (x: (applyN n (s: " " + s) "") + x) y) + "\n";
+
+      withMan = drv:
+        let
+          name = drv.name;
+          longDescription = drv.meta.longDescription;
+          man = ''
+            ---
+            title: ${name}
+            section: 1
+            header: User Manual
+            ---
+            ${longDescription}
+          '';
+          manPath = "$out/share/man/man1";
+        in
+        pkgs.symlinkJoin {
+          inherit name;
+          paths = [ drv ];
+          nativeBuildInputs = [ pkgs.pandoc ];
+          postBuild = ''
+            mkdir -p ${manPath}
+            cat <<EOT > $out/${name}.1.md 
+            ${man}
+            EOT
+            pandoc $out/${name}.1.md -st man -o ${manPath}/${name}.1
+            rm $out/${name}.1.md
+          '';
+        };
 
       # mkLongDescription = description: 
       # String -> String -> Set -> IO ()
@@ -163,7 +170,7 @@
         '';
         longDescription = ''
           ${NAME}
-          **${name}** - Convert *.json* to *.nix*
+          **${name}** - Convert **.json** to **.nix**
 
           ${EXAMPLES}
           **json2nix .vscode/settings.json my-settings.nix**
@@ -222,13 +229,13 @@
           applyN
           concatMapStringsNewline
           concatStringsNewline
-          indentStrings4
-          indentStrings8
-          indentStrings_
           framed_
           framedBrackets
           framedBrackets_
           framedNewlines
+          indentStrings_
+          indentStrings4
+          indentStrings8
           mergeValues
           mkBin
           mkBinName
@@ -243,6 +250,7 @@
           toList
           withAttrs
           withLongDescription
+          withMan
           withMeta
           writeJSON
           ;
