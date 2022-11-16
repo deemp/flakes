@@ -103,7 +103,7 @@
       indentStrings4 = indentStrings_ 4;
       indentStrings8 = indentStrings_ 8;
       indentStrings_ = n: y: "\n" + (concatMapStringsSep "\n" (x: (applyN n (s: " " + s) "") + x) y) + "\n";
-      
+
       # add a longDescription to a derivation
       # add a man generated from longDescription
       withMan = drv: longDescription:
@@ -129,6 +129,7 @@
             cat <<EOT > $out/${name}.1.md 
             ${man}
             EOT
+            chmod +rw ${manPath}
             pandoc $out/${name}.1.md -st man -o ${manPath}/${name}.1
             rm $out/${name}.1.md
           '';
