@@ -174,6 +174,7 @@
       };
 
       runInEachDir = args@{ dirs, command, name, preMessage ? "", message ? "", postMessage ? "", runtimeInputs ? [ ], longDescription ? "" }:
+        let dirs_ = pkgs.lib.lists.flatten dirs; in
         (mkShellApp {
           name = "${name}-in-each-dir";
           inherit runtimeInputs;
@@ -193,7 +194,7 @@
             
                   ${command}
                 '')
-                (pkgs.lib.lists.flatten dirs)) +
+                dirs_) +
             ''
               printf "%s" '${postMessage}'
             '';
@@ -203,7 +204,7 @@
             ${NOTES}
             The directories relative to **CWD** are:
 
-            ${indentStrings4 dirs}
+            ${indentStrings4 dirs_}
           '';
         });
 
