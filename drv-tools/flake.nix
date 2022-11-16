@@ -106,6 +106,7 @@
 
       # add a longDescription to a derivation
       # add a man generated from longDescription
+      withMan_ = drv: withMan drv drv.meta.longDescription;
       withMan = drv: longDescription:
         let
           drv_ = withLongDescription drv longDescription;
@@ -134,7 +135,6 @@
             rm $out/${name}.1.md
           '';
         };
-      withMan_ = drv: withMan drv drv.meta.longDescription;
 
       # String -> String -> Set -> IO ()
       writeJSON = name: path: dataNix:
@@ -178,7 +178,6 @@
           ${EXAMPLES}
           **json2nix .vscode/settings.json my-settings.nix**
           :   Convert exising settings.json into a nix file
-              ${indentStrings8 [ "a" "b"] }
         '';
       };
 
