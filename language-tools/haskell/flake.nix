@@ -26,22 +26,33 @@
           ;
       };
 
-      # Wrap Stack to work with our Nix integration.
-      stack-wrapped = pkgs.symlinkJoin {
-        # will be available as the usual `stack` in terminal
-        name = "stack";
-        paths = [ pkgs.stack ];
-        buildInputs = [ pkgs.makeWrapper ];
-        # --system-ghc    # Use the existing GHC on PATH (will come from this Nix file)
-        # --no-install-ghc  # Don't try to install GHC if no matching GHC found on PATH
-        postBuild = ''
-          wrapProgram $out/bin/stack \
-            --add-flags "\
-              --system-ghc \
-              --no-install-ghc \
-            "
-        '';
-      };
+      # wrap Stack to work with our Nix integration
+      # let running programs use specified binaries
+      stackWithDependencies = ghcVersion: runtimeDependencies:
+        assert builtins.isString ghcVersion;
+        assert builtins.isList runtimeDependencies;
+        let
+          deps = pkgs.lib.lists.flatten [
+            pkgs.haskell.compiler."ghc${ghcVersion}"
+            runtimeDependencies
+          ];
+        in
+        pkgs.symlinkJoin {
+          # will be available as the usual `stack` in terminal
+          name = "stack";
+          paths = [ pkgs.stack ];
+          buildInputs = [ pkgs.makeBinaryWrapper ];
+          # --system-ghc    # Use the existing GHC on PATH (will come from this Nix file)
+          # --no-install-ghc  # Don't try to install GHC if no matching GHC found on PATH
+          postBuild = ''
+            wrapProgram $out/bin/stack \
+              --add-flags "\
+                --system-ghc \
+                --no-install-ghc \
+              " \
+              --prefix PATH : ${pkgs.lib.makeBinPath deps}
+          '';
+        };
 
       # a convenience function for building haskell packages
       # can be used for a project with GHC 9.0.2 as follows:
@@ -68,32 +79,28 @@
         justStaticExecutables
           (callCabal2nix name (gitignoreSource path) { });
 
-      # stack and ghc of a specific version
-      # they should come together so that stack doesn't use the system ghc
-      stackGHC = ghcVersion: [
-        stack-wrapped
-        pkgs.haskell.compiler."ghc${ghcVersion}"
-      ];
-
       # see the possible values for ghcVersion here
       # https://haskell4nix.readthedocs.io/nixpkgs-users-guide.html#how-to-install-haskell-language-server
       hlsGHC = ghcVersion: pkgs.haskell-language-server.override { supportedGhcVersions = [ ghcVersion ]; };
 
       # tools for a specific GHC version
+      # see what you need to pass to your shell for GHC
+      # https://docs.haskellstack.org/en/stable/nix_integration/#supporting-both-nix-and-non-nix-developers
       toolsGHC = ghcVersion: {
         hls = hlsGHC ghcVersion;
-        # see what you need to pass to your shell for GHC
-        # https://docs.haskellstack.org/en/stable/nix_integration/#supporting-both-nix-and-non-nix-developers
-        stack = stackGHC ghcVersion;
+        stack = stackWithDependencies ghcVersion [ ];
         ghc = pkgs.haskell.compiler."ghc${ghcVersion}";
         callCabal = callCabalGHC ghcVersion;
         staticExecutable = staticExecutableGHC ghcVersion;
         inherit justStaticExecutables;
+        stackWithDependencies = stackWithDependencies ghcVersion;
       };
+
+      stack = (toolsGHC "90").stackWithDependencies [ pkgs.hello ];
     in
     {
       packages = {
-        inherit stack-wrapped;
+        inherit stackWithDependencies;
       };
       toolSets = {
         inherit shellTools;
@@ -102,6 +109,19 @@
         inherit
           toolsGHC
           ;
+      };
+      # test stack has `hello` on PATH
+      devShells.default = pkgs.mkShell {
+        shellHook = ''
+          cat <<EOT > Ex.hs
+          module Ex where
+          import System.Process
+          main = putStrLn =<< readProcess "hello" [] ""
+          EOT
+          stack runghc -- Ex
+          rm Ex.*
+        '';
+        buildInputs = [ stack ];
       };
     }
     );
