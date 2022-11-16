@@ -12,7 +12,7 @@
       (system:
         let
           pkgs = nixpkgs.legacyPackages.${system};
-          
+
           # frame a text with newlines
           framedNewlines = framed_ "\n\n" "\n\n";
           framed_ = pref: suff: txt: ''${pref}${txt}${suff}'';
@@ -38,15 +38,22 @@
                           # append a space to have no name clashes with original executables
                           name = c.name + (if builtins.hasAttr "command" c then "" else " ");
                         })
-                      configuration.commands
-                  ) ++ [
-                    {
-                      name = "exit ";
-                      category = "general commands";
-                      help = "exit this devshell";
-                      command = "exit";
-                    }
-                  ];
+                      (
+                        configuration.commands
+                        ++ [
+                          {
+                            name = "exit";
+                            category = "general commands";
+                            help = "exit this devshell";
+                          }
+                          {
+                            name = "man";
+                            category = "general commands";
+                            help = "get more info about a command. Example: 'man man'";
+                          }
+                        ]
+                      )
+                  );
                 }
               );
             };
