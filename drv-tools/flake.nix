@@ -201,7 +201,7 @@
             ${longDescription}
 
             ${NOTES}
-            The directories relative to $PWD are:
+            The directories relative to **CWD** are:
 
             ${indentStrings4 dirs}
           '';
