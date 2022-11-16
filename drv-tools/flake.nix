@@ -145,8 +145,8 @@
             printf "${framedBrackets "ok %s"}" "${name_}"
           '';
           longDescription = ''
-            ${NAME}
-            ${name_} - write a given `Nix` expression as `JSON` into `path`
+            ${DESCRIPTION}
+            Write a given **Nix** expression as **JSON** into a **path**
           '';
         };
 
@@ -169,7 +169,6 @@
           **json2nix .vscode/settings.json my-settings.nix**
           :   Convert exising settings.json into a nix file
               ${indentStrings8 [ "a" "b"] }
-
         '';
       };
 
