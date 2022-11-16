@@ -96,7 +96,7 @@
         stackWithDependencies = stackWithDependencies ghcVersion;
       };
 
-      stack = (toolsGHC "90").stackWithDependencies [ pkgs.hello ];
+      stack = (toolsGHC "90").stackWithDependencies [ shellTools.implicit-hie ];
     in
     {
       packages = {
@@ -116,7 +116,7 @@
           cat <<EOT > Ex.hs
           module Ex where
           import System.Process
-          main = putStrLn =<< readProcess "hello" [] ""
+          main = putStrLn =<< readProcess "gen-hie" ["--help"] ""
           EOT
           stack runghc -- Ex
           rm Ex.*
