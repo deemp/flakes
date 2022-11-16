@@ -28,12 +28,14 @@
         pkgs = nixpkgs.legacyPackages.${system};
 
         inherit (drv-tools.functions.${system})
-          withLongDescription
+          withMan
           writeJSON
           toList
           mergeValues
           mkBin
+          indentStrings4
           ;
+        man = drv-tools.configs.${system}.man;
         devshell = my-devshell.devshell.${system};
 
         # A set of VSCodium extensions
@@ -65,7 +67,7 @@
               runtimeDependencies
             ];
           in
-          withLongDescription
+          withMan
             (pkgs.symlinkJoin {
               name = "codium";
               paths = [ codium ];
@@ -75,19 +77,40 @@
                   --prefix PATH : ${pkgs.lib.makeBinPath deps}
               '';
             })
-            ''
-              `VSCodium` with built-in `bashInteractive` and the given runtime dependencies. 
-              They will be available on `PATH` inside the IDE
-            ''
+              ''
+                ${man.DESCRIPTION}
+                **VSCodium** with extensions and **bashInteractive**, **rnix-lsp**, **nixpkgs-fmt**, given runtime dependencies available on **PATH**.
+
+                To verify: 
+                  
+                    Open VSCodium
+                    Open a terminal there and run
+                    printf '\$PATH'
+
+                **PATH** should contain the Nix store paths of binaries that you set as runtime dependencies
+
+                If no, try each of the following in order until the **PATH** is correct:
+                    
+                    1. Repair VSCodium derivation (https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-store-repair.html)
+                    1. Run VSCodium in a new terminal
+                    1. Restart OS and collect Nix garbage (https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-store-gc.html), then run VSCodium
+                        nix store gc
+              ''
         ;
 
         # write .vscode/settings.json
         writeSettingsJSON = settings:
-          withLongDescription (writeJSON "settings" "./.vscode/settings.json" (mergeValues settings)) "write `.vscode/settings.json`";
+          withMan (writeJSON "settings" "./.vscode/settings.json" (mergeValues settings)) ''
+            ${man.DESCRIPTION}
+            write **.vscode/settings.json**
+          '';
 
         # write .vscode/tasks.json
         writeTasksJSON = tasks:
-          withLongDescription (writeJSON "tasks" "./.vscode/tasks.json" tasks) "write `.vscode/tasks.json`";
+          withMan (writeJSON "tasks" "./.vscode/tasks.json" tasks) ''
+            ${man.DESCRIPTION}
+            write **.vscode/tasks.json**
+          '';
 
         # stuff for testing
 
@@ -116,16 +139,9 @@
           packages = [ codium writeSettings ];
           commands = [
             {
-              name = "codium-here";
-              category = "ide";
-              help = "start VSCodium in current directory";
-              command = "${mkBin codium} .";
-            }
-            {
-              name = "write-settings";
+              name = "${writeSettings.name}";
               category = "ide";
               help = "write settings.json for VSCodium";
-              command = "${mkBin writeSettings}";
             }
             {
               name = "codium";
