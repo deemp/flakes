@@ -63,6 +63,12 @@ Then, users will be able to call them like
 nix develop nix-utils/
 ```
 
+### Scripts
+
+Each script should provide `meta.longDescription` attribute written in `Markdown`.
+This will be converted via `pandoc` to produce a `man` page.
+Here's a sample [Markdown input](https://pandoc.org/demo/pandoc.1.md)
+
 ## Templates
 
 ### VSCodium
