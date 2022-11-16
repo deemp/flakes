@@ -19,7 +19,7 @@
     let
       pkgs = nixpkgs.legacyPackages.${system};
       inherit (drv-tools.functions.${system})
-        withLongDescription
+        withMan
         runFishScript
         mkShellApp
         mkBin
@@ -34,7 +34,7 @@
         ENV = "# EXPECTED ENV VARIABLES";
       };
       pushXToCachix = inp@{ name, fishScriptPath, runtimeInputs ? [ ], text ? "" }:
-        withLongDescription
+        withMan
           (runFishScript
             (
               inp // {
@@ -44,7 +44,7 @@
             )
           ) ''a helper function for pushing to cachix'';
 
-      pushPackagesToCachix = withLongDescription
+      pushPackagesToCachix = withMan
         (pushXToCachix { name = "packages"; fishScriptPath = ./scripts/cache-packages.fish; })
         ''
           ${man.DESCRIPTION}
@@ -56,7 +56,7 @@
         '';
 
       pushDevShellsToCachix =
-        withLongDescription
+        withMan
           (pushXToCachix { name = "devshells"; fishScriptPath = ./scripts/cache-devshells.fish; })
           ''
             ${man.DESCRIPTION}
@@ -73,32 +73,33 @@
           ''
       ;
 
-      pushInputsToCachix = withLongDescription
-        (pushXToCachix { name = "flake-inputs"; fishScriptPath = ./scripts/cache-inputs.fish; })
-        ''
-          ${man.DESCRIPTION}
-          Push all flake inputs to **cachix**
+      pushInputsToCachix =
+        withMan
+          (pushXToCachix { name = "flake-inputs"; fishScriptPath = ./scripts/cache-inputs.fish; })
+          ''
+            ${man.DESCRIPTION}
+            Push all flake inputs to **cachix**
           
-          ${man.ENV}
-          **CACHIX_CACHE**
-          :   cachix cache name
-        ''
+            ${man.ENV}
+            **CACHIX_CACHE**
+            :   cachix cache name
+          ''
       ;
 
       pushAllToCachix =
-        (mkShellApp {
+        withMan (mkShellApp {
           name = "push-all-to-cachix";
           text = ''
             ${mkBin pushInputsToCachix}
             ${mkBin pushDevShellsToCachix}
             ${mkBin pushPackagesToCachix}
           '';
-          longDescription = ''
+        })
+        ''
             ${man.DESCRIPTION}
             Push inputs and outputs (packages and devShells) of a flake to **cachix**
           '';
-        });
-
+        
 
       flakesUpdate = dirs:
         runInEachDir
