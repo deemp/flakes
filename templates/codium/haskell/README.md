@@ -7,10 +7,10 @@ VSCodium with extensions and executables for Haskell
 This sample Haskell project demonstrates `Stack` + `Nix` integration.
 
 It has an `lzma` dependency that itself has a `C` language dependency.
-This dependency is delivered as a derivation via Nix - see `pkgs.lzma` in `flake.nix`.
+This `C` dependency is delivered as a derivation via Nix - see `pkgs.lzma` in `flake.nix`.
 
-In this template, there's also a `pkgs.hello` derivation in `stack-shell`.
-`Lib.somefunc` calls `hello` executable.
+There's also a `pkgs.hello` derivation in `stack-shell`.
+This allows `someFunc` from `src/Lib.hs` to call the `hello` executable.
 
 ```console
 stack run
@@ -35,10 +35,20 @@ Necessary components of `Stack` + `Nix` integration:
 
 ## manager
 
-Can be useful if you'd like to write many small unrelated `Main.hs` files, maybe with a couple of imported modules.
+Can be useful if you'd like to write many small unrelated `Haskell` modules, maybe with a couple of other imported modules.
+
+### Get manager
+
+When in this repo:
 
 ```console
 nix develop
 manager
-manager init
+```
+
+From a remote repo:
+
+```console
+nix shell github:br4ch1st0chr0n3/flakes/main?dir=manager
+manager
 ```
