@@ -1,0 +1,10 @@
+cradle:
+  stack:
+    - path: "././Modules/B/Main.hs"
+      component: "nix-managed:exe:B"
+
+    - path: "././Modules/B/AnotherModule.hs"
+      component: "nix-managed:exe:B"
+
+    - path: "././Modules/A/Main.hs"
+      component: "nix-managed:exe:A"
