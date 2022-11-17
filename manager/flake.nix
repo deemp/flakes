@@ -74,9 +74,9 @@
       )
     // {
       templates = {
-        nix-managed = {
+        init = {
           path = ./template;
-          description = "codium with extensions and binaries";
+          description = ''Used by `manager` to initialize a project'';
         };
       };
     };
