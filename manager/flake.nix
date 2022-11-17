@@ -28,6 +28,7 @@
         managerTools = [
           hpack.packages.${system}.default
           pkgs.haskellPackages.implicit-hie
+          pkgs.coreutils
         ];
         manager =
           let
@@ -71,8 +72,7 @@
             ] ++ managerTools;
           };
       }
-      )
-    // {
+      ) // {
       templates = {
         init = {
           path = ./template;
