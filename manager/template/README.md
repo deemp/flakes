@@ -1,13 +1,18 @@
-# Haskell
+# Haskell project with `manager`
 
-VSCodium with extensions and executables for Haskell
-
-Run `manager`:
+`flake.nix` provides a devshell with tools and their descriptions:
 
 ```console
 nix develop
+```
+
+Learn about `manager`:
+
+```console
 manager
 ```
+
+`manager` flake - [here](https://github.com/br4ch1st0chr0n3/flakes/tree/main/manager)
 
 ## Nix + Stack
 
