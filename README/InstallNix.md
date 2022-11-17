@@ -27,9 +27,15 @@ you may see:
 
 ## direnv
 
-1. Complete [direnv](https://direnv.net/docs/installation.html#installation) Installation
+This is a tool for running scripts in `.envrc` files when you enter a directory containing such file
+
+1. Complete [direnv](https://direnv.net/docs/installation.html#installation) installation
     1. To complete the first part:
 
         ```console
         nix profile install nixpkgs#direnv
         ```
+
+When you see `direnv` errors, run the suggested command
+
+Most often, it's `direnv allow`
