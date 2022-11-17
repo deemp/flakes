@@ -94,11 +94,11 @@
       templates = {
         codium-generic = {
           path = ./templates/codium/generic;
-          description = "codium with extensions and binaries";
+          description = "VSCodium with extensions and executables";
         };
         codium-haskell = {
           path = ./templates/codium/haskell;
-          description = "codium with extensions and binaries for Haskell";
+          description = "VSCodium with extensions and executables for Haskell";
         };
       };
     };
