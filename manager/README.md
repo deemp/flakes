@@ -14,7 +14,9 @@ Still, some actions like writing the correct dependencies and language extension
 
 ## Usage
 
-Create a new project. `flake.nix` there will provide `manager` in a devshell
+1. Install `Nix` - complete all steps from [here](https://github.com/br4ch1st0chr0n3/flakes/blob/main/README/InstallNix.md)
+
+2. Create a new project. `flake.nix` there will provide `manager` in a devshell
 
 ```console
 nix shell github:br4ch1st0chr0n3/flakes/main?dir=manager
