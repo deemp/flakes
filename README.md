@@ -27,6 +27,17 @@ Nix flakes for tools that I use
 - Learn how to [pin inputs](https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-flake.html#flake-references)
 - Study [Nix language](https://nixos.wiki/wiki/Overview_of_the_Nix_Language)
 
+### Install Nix
+
+Complete all steps from [here](README/InstallNix.md)
+
+## Develop this flake
+
+```console
+nix develop
+codium .
+```
+
 ## Conventions
 
 ### Pushing to a remote repo
