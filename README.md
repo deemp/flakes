@@ -4,18 +4,16 @@ Nix flakes for tools that I use
 
 ## Contents
 
-- [codium](./codium/flake.nix) - set up VSCodium with binaries on `PATH` and extensions
-- [devshell](./devshell/flake.nix) - Easily create a CLI to your `devShells`
+- [codium](./codium/README.md) - set up VSCodium with binaries on `PATH` and extensions
+- [devshell](./devshell/README.md) - Easily create a CLI to your `devShells`
 - [drv-tools](./drv-tools/flake.nix) - convenience tools for working with derivations
-- [env2json](./env2json/flake.nix) - convert `.env` to `.json`
+- [env2json](./env2json/README.md) - convert `.env` to `.json`
 - [flake-tools](./flake-tools/flake.nix) - convenience tools for working with flakes and pushing them to [cachix](https://www.cachix.org/)
-- [json2md](./flake-tools/flake.nix) - convert `json2md`
+- [json2md](./json2md/README.md) - convert `json2md`
   - Can be combined with `builtins.toJSON` and used to generate `.md` docs from Nix expressions - [example](https://github.com/br4ch1st0chr0n3/devops-labs/blob/0ae9881ab58b99f114aaf21cb5cad85f2ce37e40/.nix/write-configs.nix#L26)
 - [language-tools](./flake-tools) - tools for languages that I use
-- [manager](./manager/flake.nix)
-  - quickly initialize a `Haskell` `stack` project
-  - manage modules, template files
-  - create modules from template files
+- [manager](./manager/README.md)
+  - automate routine actions in projects having multiple unrelated modules
 - [source-flake](./source-flake/) - pinned flakes
   - used to have the same flake inputs in my flakes
 - [templates](./templates/) - Nix flake templates that can be used to initialize new projects
@@ -69,6 +67,10 @@ Each script should provide `meta.longDescription` attribute written in `Markdown
 This will be converted via `pandoc` to produce a `man` page.
 Here's a sample [Markdown input](https://pandoc.org/demo/pandoc.1.md)
 
+### READMEs
+
+Each flake's `README` assumes that the directory of its `flake.nix` is your current working directory in a terminal
+
 ## Templates
 
 ### VSCodium
@@ -77,7 +79,7 @@ Here's a sample [Markdown input](https://pandoc.org/demo/pandoc.1.md)
 
 #### Generic
 
-VSCodium with extensions and binaries
+`VSCodium` with extensions and executables on its `PATH`
 
    ```console
    nix flake new codium-project -t github:br4ch1st0chr0n3/flakes#codium-generic
@@ -87,12 +89,12 @@ VSCodium with extensions and binaries
    nix run .# .
    ```
 
-- Run `hello` in a VSCodium terminal
+- Run `hello` in a `VSCodium` terminal
 
 #### Haskell
 
-VSCodium with extensions and binaries for Haskell.
-Contains a sample Haskell project with a C library dependency
+`VSCodium` with extensions and executables on its `PATH` for `Haskell`.
+Contains a sample `Haskell` project with a `C` library dependency
 
    ```console
    nix flake new haskell-project -t github:br4ch1st0chr0n3/flakes#codium-haskell
