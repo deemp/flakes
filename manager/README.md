@@ -17,9 +17,9 @@ Still, some actions like writing the correct dependencies and language extension
 Create a new project. `flake.nix` there will provide `manager` in a devshell
 
 ```console
+nix shell github:br4ch1st0chr0n3/flakes/main?dir=manager
 mkdir new-project
 cd new-project
-nix shell github:br4ch1st0chr0n3/flakes/main?dir=manager
 manager
 manager init
 nix develop
