@@ -89,11 +89,11 @@
 
                 **PATH** should contain the Nix store paths of binaries that you set as runtime dependencies
 
-                If no, try each of the following in order until the **PATH** is correct:
+                If no, try each of the following actions in order until the **PATH** is correct. After each action, check **PATH** in VSCodium:
                     
                     1. Repair VSCodium derivation (https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-store-repair.html)
-                    1. Run VSCodium in a new terminal
-                    1. Restart OS and collect Nix garbage (https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-store-gc.html), then run VSCodium
+                    2. Run VSCodium in a new terminal
+                    3. Restart OS and collect Nix garbage (https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-store-gc.html), then run VSCodium
                         nix store gc
               ''
         ;
