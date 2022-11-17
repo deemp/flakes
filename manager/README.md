@@ -25,6 +25,7 @@ cd new-project
 manager
 manager init
 nix develop
+codium .
 ```
 
 ## Develop this project
