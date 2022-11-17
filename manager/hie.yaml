@@ -3,21 +3,8 @@ cradle:
     - path: "./app/Main.hs"
       component: "manager:exe:manager"
 
+    - path: "./src/Draft.hs"
+      component: "manager:lib"
+
     - path: "./src/ExMonoid.hs"
       component: "manager:lib"
-
-    - path: "./src/Inits.hs"
-      component: "manager:lib"
-
-    - path: "./test/Templates/SimpleMain.hs"
-      component: "nix-managed:exe:Templates.SimpleMain"
-
-    - path: "./test/Modules/Book/Main.hs"
-      component: "nix-managed:exe:Book"
-
-    - path: "./test/Modules/Book/Book.hs"
-      component: "nix-managed:lib"
-    
-    - path: "./test/Modules/A/Main.hs"
-      component: "nix-managed:exe:A"
-    

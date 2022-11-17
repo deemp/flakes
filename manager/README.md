@@ -1,6 +1,23 @@
 # manager
 
-a tool for managing Haskell modules and templates
+Manage repetitive Haskell modules and templates
+
+Sometimes, one wants to experiment with Haskell in multiple unrelated files. When creating such files, one's tasks can be:
+
+- Make Haskell Language Server see all Haskell modules
+- Invent new names for stack's build targets
+- 
+
+## Use in a new project
+
+```console
+nix shell github:br4ch1st0chr0n3/flakes/main?dir=manager
+# see available commands
+manager
+manager init
+```
+
+## Run project
 
 Open IDE:
 

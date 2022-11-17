@@ -29,6 +29,8 @@
           hpack.packages.${system}.default
           pkgs.haskellPackages.implicit-hie
           pkgs.coreutils
+          pkgs.nix
+          pkgs.git
         ];
         manager =
           let

@@ -28,9 +28,8 @@ dependencies:
   - unordered-containers
   - lens-aeson
   - lens
-  - vector
   - process
-  - raw-strings-qq
+  - Cabal
 
 executables:
   manager:
