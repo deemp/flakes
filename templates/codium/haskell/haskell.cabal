@@ -34,6 +34,7 @@ library
   build-depends:
       base >=4.7 && <5
     , lzma
+    , process
   default-language: Haskell2010
 
 executable haskell-exe
@@ -47,6 +48,7 @@ executable haskell-exe
       base >=4.7 && <5
     , haskell
     , lzma
+    , process
   default-language: Haskell2010
 
 test-suite haskell-test
@@ -61,4 +63,5 @@ test-suite haskell-test
       base >=4.7 && <5
     , haskell
     , lzma
+    , process
   default-language: Haskell2010

@@ -2,5 +2,7 @@ module Lib
     ( someFunc
     ) where
 
+import System.Process ( callCommand )
+
 someFunc :: IO ()
-someFunc = putStrLn "someFunc"
+someFunc = callCommand "hello"

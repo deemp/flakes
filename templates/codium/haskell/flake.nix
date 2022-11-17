@@ -8,6 +8,7 @@
     flake-utils.follows = "flake-utils_/flake-utils";
     haskell-tools.url = "github:br4ch1st0chr0n3/flakes?dir=language-tools/haskell";
     my-devshell.url = "github:br4ch1st0chr0n3/flakes?dir=devshell";
+    manager.url = "github:br4ch1st0chr0n3/flakes?dir=manager";
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
@@ -21,6 +22,7 @@
     , drv-tools
     , haskell-tools
     , my-devshell
+    , manager
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -49,13 +51,16 @@
           git nix-ide workbench markdown-all-in-one;
       };
 
-      tools = (builtins.attrValues hsShellTools) ++ [
-        stack
-        writeSettings
-        hls
-        ghc
-        pkgs.jq
-      ];
+      tools =
+        [
+          hsShellTools.implicit-hie
+          hsShellTools.ghcid
+          manager.packages.${system}.default
+          stack
+          writeSettings
+          hls
+          ghc
+        ];
 
       codium = mkCodium {
         extensions = { inherit (extensions) nix haskell misc github markdown; };
@@ -80,8 +85,13 @@
               name = "ghcid, stack, ghc, jq";
             }
             {
+              name = "manager";
+              help = "manage Haskell modules and template files";
+              category = "ide";
+            }
+            {
               name = "codium";
-              help = "VSCodium with several tool binaries on `PATH` and a couple of extensions";
+              help = "VSCodium with a couple of extensions and given executables on `PATH`";
               category = "ide";
             }
             {
@@ -102,6 +112,7 @@
 
           buildInputs = [
             pkgs.lzma
+            pkgs.hello
           ];
         };
     });
