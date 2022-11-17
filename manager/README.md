@@ -5,16 +5,24 @@ Manage repetitive Haskell modules and templates
 Sometimes, one wants to experiment with Haskell in multiple unrelated files. When creating such files, one's tasks can be:
 
 - Make Haskell Language Server see all Haskell modules
-- Invent new names for stack's build targets
-- 
+- Invent new names for `stack`'s build targets
+- Configure `ghcid` to run a specific function
 
-## Use in a new project
+`manager` simplifies them.
+
+Still, some actions like writing the correct dependencies and language extensions in `package.yaml` and `stack.yaml` should be done manually.
+
+## Usage
+
+Create a new project. `flake.nix` there will provide `manager` in a devshell
 
 ```console
+mkdir new-project
+cd new-project
 nix shell github:br4ch1st0chr0n3/flakes/main?dir=manager
-# see available commands
 manager
 manager init
+nix develop
 ```
 
 ## Run project
@@ -30,12 +38,3 @@ Build project
   ```sh
   stack build
   ```
-
-## Sample projects
-
-- [nix-managed](https://github.com/br4ch1st0chr0n3/nix-managed)
-
-## Dependencies
-
-- [hpack](https://github.com/sol/hpack)
-- [implicit-hie](https://github.com/Avi-D-coder/implicit-hie)
