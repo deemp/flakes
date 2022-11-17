@@ -66,8 +66,6 @@
     {
       packages = {
         default = codium;
-        inherit stack;
-        implicit-hie = pkgs.haskellPackages.implicit-hie;
       };
 
       devShells.default =
