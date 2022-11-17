@@ -39,14 +39,14 @@ Can be useful if you'd like to write many small unrelated `Haskell` modules, may
 
 ### Get manager
 
-When in this repo:
+When having this `flake.nix` in the `CWD`:
 
 ```console
 nix develop
 manager
 ```
 
-From a remote repo:
+Take from a remote repo:
 
 ```console
 nix shell github:br4ch1st0chr0n3/flakes/main?dir=manager
