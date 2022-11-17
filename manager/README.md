@@ -25,15 +25,16 @@ manager init
 nix develop
 ```
 
-## Run project
+## Develop this project
 
 Open IDE:
 
   ```sh
   nix develop nix-utils
+  codium .
   ```
 
-Build project
+Build
 
   ```sh
   stack build
