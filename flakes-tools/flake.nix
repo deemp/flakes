@@ -34,7 +34,7 @@
       man = drv-tools.configs.${system}.man // {
         ENV = "# EXPECTED ENV VARIABLES";
         CACHIX_CACHE = ''
-          **CACHIX_CACHE**
+          `CACHIX_CACHE`
           :   cachix cache name  
         '';
       };
@@ -48,7 +48,7 @@
               }
             )
           )
-          (_: ''A helper function for pushing to **cachix**'');
+          (_: ''A helper function for pushing to `cachix`'');
 
       pushPackagesToCachix =
         withMan
@@ -61,7 +61,7 @@
           
               ${man.ENV}
 
-              **PATHS_FOR_PACKAGES**
+              `PATHS_FOR_PACKAGES`
               :   (optional) temporary file where to store the build output paths
             ''
           );
@@ -70,7 +70,7 @@
         withMan
           (withDescription
             (pushXToCachix { name = "devshells"; fishScriptPath = ./scripts/cache-devshells.fish; })
-            "Push full closures (build and runtime dependencies) of all flake's devshells to **cachix**"
+            "Push full closures (build and runtime dependencies) of all flake's devshells to `cachix`"
           )
           (x:
             ''
@@ -80,7 +80,7 @@
               ${man.ENV}
 
               
-              **PROFILES_FOR_DEVSHELLS**
+              `PROFILES_FOR_DEVSHELLS`
               :  (optional) temporary dir where to store the dev profiles
             ''
           )
@@ -89,7 +89,7 @@
       pushInputsToCachix =
         withMan
           (withDescription (pushXToCachix { name = "flake-inputs"; fishScriptPath = ./scripts/cache-inputs.fish; })
-            "Push all flake inputs to **cachix**"
+            "Push all flake inputs to `cachix`"
           )
           (x:
             ''
@@ -111,7 +111,7 @@
               ${mkBin pushDevShellsToCachix}
               ${mkBin pushPackagesToCachix}
             '';
-            description = "Push inputs and outputs (**packages** and **devShells**) of a flake to **cachix**";
+            description = "Push inputs and outputs (`packages` and `devShells`) of a flake to `cachix`";
           })
           (x:
             ''
@@ -130,13 +130,13 @@
             inherit dirs;
             name = "flakes-update";
             command = "nix flake update";
-            description = ''Update **flake.lock**s'';
+            description = ''Update `flake.lock`s'';
           };
 
 
       # push to cachix all about flakes in specified directories relative to CWD
       flakesPushToCachix = dirs:
-        let description = "Push flakes' inputs and outputs to **cachix** in given directories";
+        let description = "Push flakes' inputs and outputs to `cachix` in given directories";
         in
         runInEachDir {
           inherit dirs;
@@ -163,7 +163,7 @@
               ${mkBin flakesUpdate_}
               ${mkBin flakesPushToCachix_}
             '';
-            description = "Update and push flakes to **cachix** in specified directories relative to **CWD**.";
+            description = "Update and push flakes to `cachix` in specified directories relative to `CWD`.";
           })
           (x: ''
             ${man.DESCRIPTION}
@@ -173,7 +173,7 @@
             ${man.CACHIX_CACHE}
 
             ${man.NOTES}
-            The given directories relative to **CWD** are:
+            The given directories relative to `CWD` are:
             ${indentStrings4 dirs_}
           ''
           );
@@ -219,14 +219,14 @@
               done
             '';
             runtimeInputs = [ pkgs.inotify-tools ];
-            description = "Start a watcher that will update **flake.lock**s and evaluate devshells in given directories";
+            description = "Start a watcher that will update `flake.lock`s and evaluate devshells in given directories";
           })
           (x:
             ''
               ${man.DESCRIPTION}
               ${x.meta.description}
             
-              The given directories relative to **CWD** are:
+              The given directories relative to `CWD` are:
               ${indentStrings4 dirs_}
             ''
           );
@@ -237,11 +237,11 @@
           (mkShellApp {
             name = "flakes-format";
             text = ''nix fmt **/*.nix'';
-            description = "Format **.nix** files in **CWD** and its subdirectories";
+            description = "Format `.nix` files in `CWD` and its subdirectories";
           })
           (x: ''
             ${man.DESCRIPTION}
-            ${x.meta.description} using the formatter set in the **CWD** **flake.nix**
+            ${x.meta.description} using the formatter set in the `CWD` `flake.nix`
           ''
           );
 

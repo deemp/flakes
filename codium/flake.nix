@@ -81,22 +81,22 @@
                         --prefix PATH : ${pkgs.lib.makeBinPath deps}
                     '';
                   }
-                ) "**VSCodium** with extensions and executables on **PATH**."
+                ) "`VSCodium` with extensions and executables on `PATH`."
             )
             (x: ''
               ${man.DESCRIPTION}
               ${x.meta.description}
-              Its default runtime dependencies include **bashInteractive**, **rnix-lsp**, **nixpkgs-fmt**.
+              Its default runtime dependencies include `bashInteractive`, `rnix-lsp`, `nixpkgs-fmt`.
 
-              Verify executables are on **PATH**: 
+              Verify executables are on `PATH`: 
                   
                   Open VSCodium
                   Open a terminal there and run
                   printf '\$PATH'
 
-              **PATH** should contain the Nix store paths of binaries that you set as runtime dependencies
+              `PATH` should contain the Nix store paths of binaries that you set as runtime dependencies
 
-              If no, try each of the following actions in order until the **PATH** is correct. After each action, check **PATH** in VSCodium:
+              If no, try each of the following actions in order until the `PATH` is correct. After each action, check `PATH` in VSCodium:
                     
                   1. Repair VSCodium derivation (https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-store-repair.html)
                   2. Run VSCodium in a new terminal
@@ -108,13 +108,13 @@
         writeSettingsJSON = settings:
           withMan (writeJSON "settings" "./.vscode/settings.json" (mergeValues settings)) (x: ''
             ${man.DESCRIPTION}
-            Write **.vscode/settings.json**
+            Write `.vscode/settings.json`
           '');
 
         writeTasksJSON = tasks:
           withMan (writeJSON "tasks" "./.vscode/tasks.json" tasks) (x: ''
             ${man.DESCRIPTION}
-            Write **.vscode/tasks.json**
+            Write `.vscode/tasks.json`
           '');
 
         # stuff for testing
