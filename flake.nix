@@ -23,22 +23,11 @@
     }: flake-utils.lib.eachDefaultSystem
       (system:
       let
-        inherit (my-codium.configs.${system})
-          extensions
-          ;
-        inherit (my-codium.functions.${system})
-          mkCodium
-          writeSettingsJSON
-          ;
-        inherit (my-codium.configs.${system})
-          settingsNix
-          ;
-        inherit (drv-tools.functions.${system})
-          readDirectories
-          ;
-        inherit (flakes-tools.functions.${system})
-          mkFlakesTools
-          ;
+        inherit (my-codium.configs.${system}) extensions;
+        inherit (my-codium.functions.${system}) mkCodium writeSettingsJSON;
+        inherit (my-codium.configs.${system}) settingsNix;
+        inherit (drv-tools.functions.${system}) readDirectories;
+        inherit (flakes-tools.functions.${system}) mkFlakesTools;
         pkgs = nixpkgs.legacyPackages.${system};
         devshell = my-devshell.devshell.${system};
 

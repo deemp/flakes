@@ -28,14 +28,8 @@
         pkgs = nixpkgs.legacyPackages.${system};
 
         inherit (drv-tools.functions.${system})
-          withMan
-          writeJSON
-          toList
-          mergeValues
-          mkBin
-          indentStrings4
-          withDescription
-          ;
+          withMan writeJSON toList mergeValues
+          mkBin indentStrings4 withDescription;
         man = drv-tools.configs.${system}.man;
         devshell = my-devshell.devshell.${system};
 
