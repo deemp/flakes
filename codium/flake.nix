@@ -34,6 +34,7 @@
           mergeValues
           mkBin
           indentStrings4
+          withDescription
           ;
         man = drv-tools.configs.${system}.man;
         devshell = my-devshell.devshell.${system};
@@ -68,49 +69,53 @@
             ];
           in
           withMan
-            (pkgs.symlinkJoin {
-              name = "codium";
-              paths = [ codium ];
-              buildInputs = [ pkgs.makeBinaryWrapper ];
-              postBuild = ''
-                wrapProgram $out/bin/codium \
-                  --prefix PATH : ${pkgs.lib.makeBinPath deps}
-              '';
-            })
-              ''
-                ${man.DESCRIPTION}
-                **VSCodium** with extensions and **bashInteractive**, **rnix-lsp**, **nixpkgs-fmt**, given runtime dependencies available on **PATH**.
+            (
+              withDescription
+                (
+                  pkgs.symlinkJoin {
+                    name = "codium";
+                    paths = [ codium ];
+                    buildInputs = [ pkgs.makeBinaryWrapper ];
+                    postBuild = ''
+                      wrapProgram $out/bin/codium \
+                        --prefix PATH : ${pkgs.lib.makeBinPath deps}
+                    '';
+                  }
+                ) "**VSCodium** with extensions and executables on **PATH**."
+            )
+            (x: ''
+              ${man.DESCRIPTION}
+              ${x.meta.description}
+              Its default runtime dependencies include **bashInteractive**, **rnix-lsp**, **nixpkgs-fmt**.
 
-                To verify: 
+              Verify executables are on **PATH**: 
                   
-                    Open VSCodium
-                    Open a terminal there and run
-                    printf '\$PATH'
+                  Open VSCodium
+                  Open a terminal there and run
+                  printf '\$PATH'
 
-                **PATH** should contain the Nix store paths of binaries that you set as runtime dependencies
+              **PATH** should contain the Nix store paths of binaries that you set as runtime dependencies
 
-                If no, try each of the following actions in order until the **PATH** is correct. After each action, check **PATH** in VSCodium:
+              If no, try each of the following actions in order until the **PATH** is correct. After each action, check **PATH** in VSCodium:
                     
-                    1. Repair VSCodium derivation (https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-store-repair.html)
-                    2. Run VSCodium in a new terminal
-                    3. Restart OS and collect Nix garbage (https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-store-gc.html), then run VSCodium
-                        nix store gc
-              ''
+                  1. Repair VSCodium derivation (https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-store-repair.html)
+                  2. Run VSCodium in a new terminal
+                  3. Restart OS and collect Nix garbage (https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-store-gc.html), then run VSCodium
+                      nix store gc
+            '')
         ;
 
-        # write .vscode/settings.json
         writeSettingsJSON = settings:
-          withMan (writeJSON "settings" "./.vscode/settings.json" (mergeValues settings)) ''
+          withMan (writeJSON "settings" "./.vscode/settings.json" (mergeValues settings)) (x: ''
             ${man.DESCRIPTION}
-            write **.vscode/settings.json**
-          '';
+            Write **.vscode/settings.json**
+          '');
 
-        # write .vscode/tasks.json
         writeTasksJSON = tasks:
-          withMan (writeJSON "tasks" "./.vscode/tasks.json" tasks) ''
+          withMan (writeJSON "tasks" "./.vscode/tasks.json" tasks) (x: ''
             ${man.DESCRIPTION}
-            write **.vscode/tasks.json**
-          '';
+            Write **.vscode/tasks.json**
+          '');
 
         # stuff for testing
 
@@ -139,13 +144,14 @@
           packages = [ codium writeSettings ];
           commands = [
             {
-              name = "${writeSettings.name}";
+              name = writeSettings.name;
               category = "ide";
-              help = "write settings.json for VSCodium";
+              help = writeSettings.meta.description;
             }
             {
               name = "codium";
               category = "ide";
+              help = codium.meta.description;
             }
           ];
         };
