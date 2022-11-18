@@ -41,7 +41,7 @@
         "flake-utils": [
           "hpack_",
           "hpack",
-          "flake-tools",
+          "flakes-tools",
           "drv-tools",
           "flake-utils_",
           "flake-utils"
@@ -50,7 +50,7 @@
         "nixpkgs": [
           "hpack_",
           "hpack",
-          "flake-tools",
+          "flakes-tools",
           "drv-tools",
           "nixpkgs_",
           "nixpkgs"
@@ -105,12 +105,12 @@
         "type": "github"
       }
     },
-    "flake-tools": {
+    "flakes-tools": {
       "inputs": {
         "cachix": [
           "hpack_",
           "hpack",
-          "flake-tools",
+          "flakes-tools",
           "cachix_",
           "cachix"
         ],
@@ -119,7 +119,7 @@
         "flake-utils": [
           "hpack_",
           "hpack",
-          "flake-tools",
+          "flakes-tools",
           "flake-utils_",
           "flake-utils"
         ],
@@ -127,14 +127,14 @@
         "nixpkgs": [
           "hpack_",
           "hpack",
-          "flake-tools",
+          "flakes-tools",
           "nixpkgs_",
           "nixpkgs"
         ],
         "nixpkgs_": "nixpkgs__4"
       },
       "locked": {
-        "dir": "flake-tools",
+        "dir": "flakes-tools",
         "lastModified": 1668303068,
         "narHash": "sha256-XSyAe+sAi7PBStjH8Sz0Q5uUljC+cHv6+2RCBw073A0=",
         "owner": "br4ch1st0chr0n3",
@@ -143,7 +143,7 @@
         "type": "github"
       },
       "original": {
-        "dir": "flake-tools",
+        "dir": "flakes-tools",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
         "type": "github"
@@ -499,7 +499,7 @@
     "hpack": {
       "inputs": {
         "flake-compat": "flake-compat_2",
-        "flake-tools": "flake-tools",
+        "flakes-tools": "flakes-tools",
         "flake-utils": [
           "hpack_",
           "hpack",

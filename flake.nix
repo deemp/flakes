@@ -4,7 +4,7 @@
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
-    flake-tools.url = "github:br4ch1st0chr0n3/flakes?dir=flake-tools";
+    flakes-tools.url = "github:br4ch1st0chr0n3/flakes?dir=flakes-tools";
     drv-tools.url = "github:br4ch1st0chr0n3/flakes?dir=drv-tools";
     formatter.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/formatter";
     my-codium.url = "github:br4ch1st0chr0n3/flakes?dir=codium";
@@ -14,7 +14,7 @@
     { self
     , nixpkgs
     , flake-utils
-    , flake-tools
+    , flakes-tools
     , drv-tools
     , my-codium
     , formatter
@@ -36,7 +36,7 @@
         inherit (drv-tools.functions.${system})
           readDirectories
           ;
-        inherit (flake-tools.functions.${system})
+        inherit (flakes-tools.functions.${system})
           mkFlakesTools
           ;
         pkgs = nixpkgs.legacyPackages.${system};
@@ -50,7 +50,7 @@
             (f "templates/codium")
             [
               "drv-tools"
-              "flake-tools"
+              "flakes-tools"
               "env2json"
               "codium"
               "json2md"

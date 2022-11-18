@@ -110,14 +110,14 @@
     "drv-tools_2": {
       "inputs": {
         "flake-utils": [
-          "flake-tools",
+          "flakes-tools",
           "drv-tools",
           "flake-utils_",
           "flake-utils"
         ],
         "flake-utils_": "flake-utils__2",
         "nixpkgs": [
-          "flake-tools",
+          "flakes-tools",
           "drv-tools",
           "nixpkgs_",
           "nixpkgs"
@@ -173,39 +173,39 @@
         "type": "github"
       }
     },
-    "flake-tools": {
+    "flakes-tools": {
       "inputs": {
         "cachix": [
-          "flake-tools",
+          "flakes-tools",
           "cachix_",
           "cachix"
         ],
         "cachix_": "cachix_",
         "drv-tools": "drv-tools_2",
         "flake-utils": [
-          "flake-tools",
+          "flakes-tools",
           "flake-utils_",
           "flake-utils"
         ],
         "flake-utils_": "flake-utils__3",
         "nixpkgs": [
-          "flake-tools",
+          "flakes-tools",
           "nixpkgs_",
           "nixpkgs"
         ],
         "nixpkgs_": "nixpkgs__3"
       },
       "locked": {
-        "dir": "flake-tools",
-        "lastModified": 1668731317,
-        "narHash": "sha256-ZWXUYCloSDMsis2tW4aWm7hmr1FoBfUO3wdQVPGYa18=",
+        "dir": "flakes-tools",
+        "lastModified": 1668731250,
+        "narHash": "sha256-h9w7YzS/+KaPcv3o59jCqMefXkB1XwXUyj05ZFOoVlk=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
         "rev": "916c1e9e3a0e477c872ad7e16a1b83afd43cd994",
         "type": "github"
       },
       "original": {
-        "dir": "flake-tools",
+        "dir": "flakes-tools",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
         "type": "github"
@@ -1210,7 +1210,7 @@
     "root": {
       "inputs": {
         "drv-tools": "drv-tools",
-        "flake-tools": "flake-tools",
+        "flakes-tools": "flakes-tools",
         "flake-utils": [
           "flake-utils_",
           "flake-utils"
