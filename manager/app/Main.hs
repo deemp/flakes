@@ -333,8 +333,10 @@ makeCommand =
         "init"
         initCommand
         [ "Initialize a" <+> bb manager <+> "project",
-          "in current directory.",
-          "This action will remove all user files there"
+          "in current working directory.",
+          "Also, initialize a git repository.",
+          "This action will remove all user files",
+          "in current working directory."
         ]
       <> f
         "update"
