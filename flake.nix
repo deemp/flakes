@@ -18,8 +18,8 @@
       (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        inherit (flake-tools.functions.${system}) mkFlakesUtils;
-        flakesUtils = mkFlakesUtils [ "." ];
+        inherit (flake-tools.functions.${system}) mkFlakesTools;
+        flakesTools = mkFlakesTools [ "." ];
         hcl = import ./.nix/hcl.nix;
         tfTools = import ./.nix/tf-tools.nix { inherit pkgs system drv-tools; };
         tests = (import ./.nix/tests.nix { inherit pkgs system drv-tools; });
@@ -28,8 +28,8 @@
         functions = tfTools.functions;
         inherit hcl;
         packages = tests // tfTools.packages // {
-          pushToCachix = flakesUtils.flakesPushToCachix;
-          updateLocks = flakesUtils.flakesUpdate;
+          pushToCachix = flakesTools.pushToCachix;
+          updateLocks = flakesTools.update;
         };
       });
 

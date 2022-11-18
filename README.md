@@ -268,31 +268,31 @@ Overall, we can notice that definitely a lot of expressions have almost complete
 
 1. Enter the repo
 
-  ```sh
+  ```console
   git clone https://github.com/br4ch1st0chr0n3/terrafix
   ```
 
 1. Run tests. This will also write into Terraform files expressions generated from [test-data](test-data.nix). Also, the tests will quite naively translate these expressions back into Nix under './tf2nix'
 
-```sh
+```console
 nix run .#testCases
 ```
 
 1. Convert a `.tf` file into a `.nix` one and get the output under `./converted`:
 
-```sh
+```console
 nix run .#convertTf2Nix docker/main.tf
 ```
 
 To run the individual tests, see the outputs of
 
-```sh
+```console
 nix flake show
 ```
 
 And then run one of them:
 
-```sh
+```console
 nix run .#testDocs
 ```
 
