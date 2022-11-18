@@ -50,19 +50,21 @@
           )
           (_: ''A helper function for pushing to **cachix**'');
 
-      pushPackagesToCachix = withMan
-        (pushXToCachix { name = "packages"; fishScriptPath = ./scripts/cache-packages.fish; })
-        (
-          x:
-          ''
-            ${man.DESCRIPTION}
-            ${x.meta.description}
+      pushPackagesToCachix =
+        withMan
+          (pushXToCachix { name = "packages"; fishScriptPath = ./scripts/cache-packages.fish; })
+          (
+            x:
+            ''
+              ${man.DESCRIPTION}
+              ${x.meta.description}
           
-            ${man.ENV}
+              ${man.ENV}
 
-                **PATHS_FOR_PACKAGES** - (optional) temporary file where to store the build output paths
-          ''
-        );
+              **PATHS_FOR_PACKAGES**
+              :   (optional) temporary file where to store the build output paths
+            ''
+          );
 
       pushDevShellsToCachix =
         withMan
@@ -154,18 +156,19 @@
           flakesUpdate_ = flakesUpdate dirs;
           flakesPushToCachix_ = flakesPushToCachix dirs;
           dirs_ = flatten dirs;
-          description = "Update and push flakes to **cachix** in specified directories relative to **CWD**.";
         in
-        mkShellApp {
-          name = "flakes-update-and-push-to-cachix";
-          text = ''
-            ${mkBin flakesUpdate_}
-            ${mkBin flakesPushToCachix_}
-          '';
-          inherit description;
-          longDescription = ''
+        withMan
+          (mkShellApp {
+            name = "flakes-update-and-push-to-cachix";
+            text = ''
+              ${mkBin flakesUpdate_}
+              ${mkBin flakesPushToCachix_}
+            '';
+            description = "Update and push flakes to **cachix** in specified directories relative to **CWD**.";
+          })
+          (x: ''
             ${man.DESCRIPTION}
-            ${description}
+            ${x.meta.description}
             
             ${man.ENV}
             ${man.CACHIX_CACHE}
@@ -173,8 +176,8 @@
             ${man.NOTES}
             The given directories relative to **CWD** are:
             ${indentStrings4 dirs_}
-          '';
-        };
+          ''
+          );
 
       # dump a devshell by running a dummy command in it
       dumpDevShells = runFishScript { name = "dump-devshells"; fishScriptPath = ./scripts/dump-devshells.fish; };
@@ -230,17 +233,18 @@
           );
 
       # format all .nix files with the formatter specified in the flake in the CWD
-      flakesFormat = mkShellApp {
-        name = "flakes-format";
-        text = ''
-          nix fmt **/*.nix
-        '';
-        longDescription = ''
-          ${man.DESCRIPTION}
-          Format **.nix** files in **CWD** and its subdirectories 
-          using the formatter set in the **CWD** flake
-        '';
-      };
+      flakesFormat =
+        withMan
+          (mkShellApp {
+            name = "flakes-format";
+            text = ''nix fmt **/*.nix'';
+            description = "Format **.nix** files in **CWD** and its subdirectories";
+          })
+          (x: ''
+            ${man.DESCRIPTION}
+            ${x.meta.description} using the formatter set in the **CWD** `flake.nix`
+          ''
+          );
 
       # just inherit necessary functions
       mkFlakesTools = dirs: {
