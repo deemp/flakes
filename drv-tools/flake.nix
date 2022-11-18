@@ -174,7 +174,7 @@
             } | python -m json.tool > ${path}
             printf "${framedBrackets "ok %s"}" "${name_}"
           '';
-          description = "Write a given **Nix** expression as **JSON** into a **path**";
+          description = "Write a **Nix** expression for **${name}** as **JSON** into **${path}**";
           longDescription = ''
             ${DESCRIPTION}
             ${description}
@@ -278,6 +278,7 @@
           toList
           withAttrs
           withLongDescription
+          withDescription
           withMan
           withMeta
           writeJSON
