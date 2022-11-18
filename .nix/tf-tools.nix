@@ -16,7 +16,7 @@ let
           terraform fmt ${filePath}${extension}
         '';
         runtimeInputs = [ pkgs.terraform ];
-        description = ''Write an **HCL** expression into **${filePath}${extension}** and format it'';
+        description = ''Write an `HCL` expression into `${filePath}${extension}` and format it'';
       })
       (x: ''
         ${man.DESCRIPTION}
@@ -45,7 +45,7 @@ let
             (f (dir: "terraform fmt ${dir}") dirs)
           ];
         runtimeInputs = [ pkgs.terraform ];
-        description = "Write **HCL** expressions into corresponding **FILE_PATH${extension}**-s";
+        description = "Write `HCL` expressions into corresponding `FILE_PATH${extension}`-s";
       })
       (x:
         ''
@@ -98,14 +98,14 @@ let
             (f (filePath: ''rm "${out filePath}" && printf "%s\n" "${out filePath}"'') filePaths)
           ];
           runtimeInputs = [ pkgs.terraform pkgs.gnused ];
-          description = ''Naively convert **Terraform** files to **Nix**'';
+          description = ''Naively convert `Terraform` files to `Nix`'';
         }
       )
       (x:
         ''
           ${man.DESCRIPTION}
-          ${x.meta.description}. Write the resulting files under **${outDir}**.
-          Put expressions in a file into **let in** blocks to reduce the amount of syntax errors
+          ${x.meta.description}. Write the resulting files under `${outDir}`.
+          Put expressions in a file into `let in` blocks to reduce the amount of syntax errors
         ''
       );
   convertTf2Nix =
@@ -121,7 +121,7 @@ let
             mkdir -p "${out}/$(dirname "$1")"
             ${mkBin tf2nix_} $1
           '';
-          description = "Convert a given **.tf** file to Nix and write it under **${out}/PATH**";
+          description = "Convert a given `.tf` file to Nix and write it under `${out}/PATH`";
         }
       )
       (x: ''
@@ -129,8 +129,8 @@ let
         ${x.meta.description}
 
         ${man.EXAMPLES}
-        **${x.name} A/file.tf**
-        :   convert **file.tf** to **${out}/A/file.nix**
+        `${x.name} A/file.tf`
+        :   convert `file.tf` to `${out}/A/file.nix`
       '');
 in
 {
