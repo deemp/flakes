@@ -217,7 +217,7 @@
         , postMessage ? ""
         , runtimeInputs ? [ ]
         , description
-        , longDescription
+        , longDescription ? ""
         }:
         let
           dirs_ = flatten dirs;
