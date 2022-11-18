@@ -40,7 +40,7 @@
             ${DESCRIPTION}
             ${description}
           ''
-        }: mkShellApp rec {
+        }: mkShellApp {
           inherit name;
           runtimeInputs = runtimeInputs ++ [ pkgs.fish pkgs.jq ];
           text =
@@ -163,8 +163,9 @@
           name_ = "write-${name}-json";
           dir = dirOf path;
           file = baseNameOf path;
+          description = "Write a **Nix** expression for **${name}** as **JSON** into **${path}**";
         in
-        mkShellApp rec {
+        mkShellApp {
           name = name_;
           runtimeInputs = [ pkgs.python310 ];
           text = ''
@@ -174,7 +175,7 @@
             } | python -m json.tool > ${path}
             printf "${framedBrackets "ok %s"}" "${name_}"
           '';
-          description = "Write a **Nix** expression for **${name}** as **JSON** into **${path}**";
+          inherit description;
           longDescription = ''
             ${DESCRIPTION}
             ${description}
@@ -182,26 +183,30 @@
         };
 
       # use when need to generate settings.json etc.
-      json2nix = mkShellApp rec {
-        name = "json2nix";
-        runtimeInputs = [ pkgs.nixpkgs-fmt ];
-        text = ''
-          json_path=$1
-          nix_path=$2
-          nix eval --impure --expr "with builtins; fromJSON (readFile ./$json_path)" > $nix_path
-          sed -i -E "s/(\[|\{)/\1\n/g" $nix_path
-          nixpkgs-fmt $nix_path
-        '';
-        description = "Convert **.json** to **.nix**";
-        longDescription = ''
-          ${DESCRIPTION}
-          ${description}
+      json2nix =
+        let
+          description = "Convert **.json** to **.nix**";
+        in
+        mkShellApp {
+          name = "json2nix";
+          runtimeInputs = [ pkgs.nixpkgs-fmt ];
+          text = ''
+            json_path=$1
+            nix_path=$2
+            nix eval --impure --expr "with builtins; fromJSON (readFile ./$json_path)" > $nix_path
+            sed -i -E "s/(\[|\{)/\1\n/g" $nix_path
+            nixpkgs-fmt $nix_path
+          '';
+          inherit description;
+          longDescription = ''
+            ${DESCRIPTION}
+            ${description}
 
-          ${EXAMPLES}
-          **json2nix .vscode/settings.json my-settings.nix**
-          :   Convert exising settings.json into a nix file
-        '';
-      };
+            ${EXAMPLES}
+            **json2nix .vscode/settings.json my-settings.nix**
+            :   Convert exising settings.json into a nix file
+          '';
+        };
 
       runInEachDir =
         args@{ dirs
