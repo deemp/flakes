@@ -1,10 +1,10 @@
 # manager
 
-Manage repetitive Haskell modules and templates
+Manage repetitive `Haskell` modules and templates.
 
-Sometimes, one wants to experiment with Haskell in multiple unrelated files. When creating such files, one's tasks can be:
+Sometimes, one wants to experiment with `Haskell` in multiple unrelated files. When creating such files, one's tasks can be:
 
-- Make Haskell Language Server see all Haskell modules
+- Make `Haskell Language Server` see all `Haskell` modules
 - Invent new names for `stack`'s build targets
 - Configure `ghcid` to run a specific function
 
@@ -14,9 +14,11 @@ Still, some actions like writing the correct dependencies and language extension
 
 ## Usage
 
+Goal: initialize a new project via `manager`. Start `VSCodium` with extensions and executables for `Haskell`.
+
 1. Install `Nix` - complete all steps from [here](https://github.com/br4ch1st0chr0n3/flakes/blob/main/README/InstallNix.md)
 
-1. Create a new project. `flake.nix` there will provide `manager` in a devshell
+1. Create a new project. `flake.nix` there will provide `manager` in a devshell:
 
 ```console
 nix shell github:br4ch1st0chr0n3/flakes/main?dir=manager
