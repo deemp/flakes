@@ -100,7 +100,7 @@
                 checkPhase = "";
               })
             )
-            { meta = { inherit longDescription description; }; }
+            { inherit longDescription description; }
           )
           (_: longDescription)
       ;
