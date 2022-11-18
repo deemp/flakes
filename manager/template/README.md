@@ -63,3 +63,9 @@ Necessary components of `Stack` + `Nix` integration:
 - `stack-shell` with necessary derivations in `flake.nix`
   - the name `stack-shell` is chosen arbitrarily
   - the name should be the same as the one used in `stack.nix`
+
+## package.yaml
+
+It is translated via [hpack](https://github.com/sol/hpack) into [.cabal](https://cabal.readthedocs.io/en/3.8/cabal-package.html)
+
+Study how you can express something in `.cabal` via `package.yaml`
