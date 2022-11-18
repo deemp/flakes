@@ -32,6 +32,8 @@ codium .
 
 1. Open `README.md`
 
+1. In case of problems see [Troubleshooting](https://github.com/br4ch1st0chr0n3/flakes#troubleshooting)
+
 ## Develop this project
 
 Open IDE:
