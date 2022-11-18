@@ -120,7 +120,7 @@
       indentStrings4 = indentStrings_ 4;
       indentStrings8 = indentStrings_ 8;
       indentStrings_ = n: y: "\n" + (concatMapStringsSep "\n" (x: (applyN n (s: " " + s) "") + x) y) + "\n";
-      
+
       # add a longDescription to a derivation
       # add a man generated from longDescription
       # takes a function from a derivation with description 
@@ -153,7 +153,7 @@
             '';
           };
         in
-        withLongDescription drv_ longDescription;
+        withLongDescription (withMeta drv_ drv.meta) longDescription;
 
       # String -> String -> Set -> IO ()
       writeJSON = name: path: dataNix:
