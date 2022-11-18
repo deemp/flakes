@@ -28,10 +28,15 @@
         mkDevShellsWithDefault
         runInEachDir
         indentStrings4
+        withDescription
         ;
       inherit (pkgs.lib.lists) flatten;
       man = drv-tools.configs.${system}.man // {
         ENV = "# EXPECTED ENV VARIABLES";
+        CACHIX_CACHE = ''
+          **CACHIX_CACHE**
+          :   cachix cache name  
+        '';
       };
       pushXToCachix = inp@{ name, fishScriptPath, runtimeInputs ? [ ], text ? "" }:
         withMan
@@ -42,85 +47,106 @@
                 runtimeInputs = runtimeInputs ++ [ cachix.packages.${system}.cachix ];
               }
             )
-          ) ''a helper function for pushing to cachix'';
+          )
+          (_: ''A helper function for pushing to **cachix**'');
 
       pushPackagesToCachix = withMan
         (pushXToCachix { name = "packages"; fishScriptPath = ./scripts/cache-packages.fish; })
-        ''
-          ${man.DESCRIPTION}
-          Push full closures (build and runtime dependencies) of all flake's packages to **cachix**
+        (
+          x:
+          ''
+            ${man.DESCRIPTION}
+            ${x.meta.description}
           
-          ${man.ENV}
+            ${man.ENV}
 
-              **PATHS_FOR_PACKAGES** - (optional) temporary file where to store the build output paths
-        '';
+                **PATHS_FOR_PACKAGES** - (optional) temporary file where to store the build output paths
+          ''
+        );
 
       pushDevShellsToCachix =
         withMan
-          (pushXToCachix { name = "devshells"; fishScriptPath = ./scripts/cache-devshells.fish; })
-          ''
-            ${man.DESCRIPTION}
+          (withDescription
+            (pushXToCachix { name = "devshells"; fishScriptPath = ./scripts/cache-devshells.fish; })
+            "Push full closures (build and runtime dependencies) of all flake's devshells to **cachix**"
+          )
+          (x:
+            ''
+              ${man.DESCRIPTION}
+              ${x.meta.description}
             
-            Push full closures (build and runtime dependencies) of all flake's devshells to **cachix**
-            
-            ${man.ENV}
+              ${man.ENV}
 
-            **CACHIX_CACHE**
-            :   cachix cache name
-            
-            **PROFILES_FOR_DEVSHELLS**
-            :  (optional) temporary dir where to store the dev profiles
-          ''
+              
+              **PROFILES_FOR_DEVSHELLS**
+              :  (optional) temporary dir where to store the dev profiles
+            ''
+          )
       ;
 
       pushInputsToCachix =
         withMan
-          (pushXToCachix { name = "flake-inputs"; fishScriptPath = ./scripts/cache-inputs.fish; })
-          ''
-            ${man.DESCRIPTION}
-            Push all flake inputs to **cachix**
+          (withDescription (pushXToCachix { name = "flake-inputs"; fishScriptPath = ./scripts/cache-inputs.fish; })
+            "Push all flake inputs to **cachix**"
+          )
+          (x:
+            ''
+              ${man.DESCRIPTION}
+              ${x.meta.description}
           
-            ${man.ENV}
-            **CACHIX_CACHE**
-            :   cachix cache name
-          ''
+              ${man.ENV}
+              ${man.CACHIX_CACHE}
+            ''
+          )
       ;
 
       pushAllToCachix =
-        withMan (mkShellApp {
-          name = "push-all-to-cachix";
-          text = ''
-            ${mkBin pushInputsToCachix}
-            ${mkBin pushDevShellsToCachix}
-            ${mkBin pushPackagesToCachix}
-          '';
-        })
-        ''
-            ${man.DESCRIPTION}
-            Push inputs and outputs (packages and devShells) of a flake to **cachix**
-          '';
-        
+        withMan
+          (mkShellApp {
+            name = "push-all-to-cachix";
+            text = ''
+              ${mkBin pushInputsToCachix}
+              ${mkBin pushDevShellsToCachix}
+              ${mkBin pushPackagesToCachix}
+            '';
+            description = "Push inputs and outputs (**packages** and **devShells**) of a flake to **cachix**";
+          })
+          (x:
+            ''
+              ${man.DESCRIPTION}
+              ${x.meta.description}
+
+              ${man.ENV}
+              ${man.CACHIX_CACHE}
+            ''
+          );
+
 
       flakesUpdate = dirs:
         runInEachDir
-          {
+          rec {
             inherit dirs;
             name = "flakes-update";
             command = "nix flake update";
-            longDescription = ''Update `flake.lock`-s'';
+            description = ''Update `flake.lock`-s'';
+            longDescription = description;
           };
 
 
       # push to cachix all about flakes in specified directories relative to CWD
-      flakesPushToCachix = dirs: runInEachDir {
-        inherit dirs;
-        name = "flakes-push-to-cachix";
-        command = "${mkBin pushAllToCachix}";
-        longDescription = ''
-          ${man.DESCRIPTION}
-          Push flakes' inputs and outputs to **cachix**
-        '';
-      };
+      flakesPushToCachix = dirs:
+        let description = "Push flakes' inputs and outputs to **cachix** in given directories";
+        in
+        runInEachDir {
+          inherit dirs;
+          name = "flakes-push-to-cachix";
+          command = "${mkBin pushAllToCachix}";
+          inherit description;
+          longDescription = ''
+            ${man.ENV}
+            ${man.CACHIX_CACHE}
+          '';
+        };
 
       # update and push flakes to cachix in specified directories relative to CWD
       flakesUpdateAndPushToCachix = dirs:
@@ -128,6 +154,7 @@
           flakesUpdate_ = flakesUpdate dirs;
           flakesPushToCachix_ = flakesPushToCachix dirs;
           dirs_ = flatten dirs;
+          description = "Update and push flakes to **cachix** in specified directories relative to **CWD**.";
         in
         mkShellApp {
           name = "flakes-update-and-push-to-cachix";
@@ -135,17 +162,17 @@
             ${mkBin flakesUpdate_}
             ${mkBin flakesPushToCachix_}
           '';
+          inherit description;
           longDescription = ''
             ${man.DESCRIPTION}
-
-            Update and push flakes to **cachix** in specified directories relative to **CWD**.
-            The directories are:
-            ${indentStrings4 dirs_}
+            ${description}
             
             ${man.ENV}
+            ${man.CACHIX_CACHE}
 
-            **CACHIX_CACHE**
-            :   cachix cache name
+            ${man.NOTES}
+            The given directories relative to **CWD** are:
+            ${indentStrings4 dirs_}
           '';
         };
 
@@ -154,45 +181,54 @@
 
       # dump devshells in given directories
       # can be combined with updating flake locks
-      flakesDumpDevshells = dirs: runInEachDir {
-        inherit dirs;
-        name = "flakes-dump-devshells";
-        command = ''
-          ${mkBin dumpDevShells}
-        '';
-        longDescription = ''
-          ${man.DESCRIPTION}
-          Evaluate devshells to dump them
-        '';
-      };
+      flakesDumpDevshells = dirs:
+        let description = "Evaluate devshells to in given directories to dump them"; in
+        runInEachDir {
+          inherit dirs;
+          name = "flakes-dump-devshells";
+          command = ''
+            ${mkBin dumpDevShells}
+          '';
+          inherit description;
+          longDescription = ''
+            ${man.DESCRIPTION}
+            ${description}
+          '';
+        };
 
       # watch nix files existing at the moment
       flakesWatchDumpDevshells = dirs:
         let dirs_ = flatten dirs; in
-        mkShellApp {
-          name = "flakes-watch-dump-devshells";
-          text = ''
-            printf "${framedBrackets "watcher set"}"
-            inotifywait -qmr -e close_write ./ | \
-            while read dir action file; do
-              if [[ $file =~ .*nix$ ]]; then
-                set +e
-                printf "${framedBrackets "started dumping devshells"}"
-                ${mkBin (flakesUpdate dirs)}
-                ${mkBin (flakesDumpDevshells dirs)}
-                printf "${framedBrackets "finished dumping devshells"}"
-                set -e
-              fi
-            done
-          '';
-          runtimeInputs = [ pkgs.inotify-tools ];
-          longDescription = ''
-            ${man.DESCRIPTION}
-            Start a watcher that will update locks and dump (evaluate) devshells 
-            in the following directories relative to **CWD**:
-            ${indentStrings4 dirs_}
-          '';
-        };
+        withMan
+          (mkShellApp {
+            name = "flakes-watch-dump-devshells";
+            text = ''
+              printf "${framedBrackets "watcher set"}"
+              inotifywait -qmr -e close_write ./ | \
+              while read dir action file; do
+                if [[ $file =~ .*nix$ ]]; then
+                  set +e
+                  printf "${framedBrackets "started dumping devshells"}"
+                  ${mkBin (flakesUpdate dirs)}
+                  ${mkBin (flakesDumpDevshells dirs)}
+                  printf "${framedBrackets "finished dumping devshells"}"
+                  set -e
+                fi
+              done
+            '';
+            runtimeInputs = [ pkgs.inotify-tools ];
+            description = "Start a watcher that will update `flake.lock`s and evaluate devshells in given directories";
+          })
+          (x:
+            ''
+              ${man.DESCRIPTION}
+              ${x.meta.description}
+            
+              The given directories relative to **CWD** are:
+              ${indentStrings4 dirs_}
+            ''
+          );
+
       # format all .nix files with the formatter specified in the flake in the CWD
       flakesFormat = mkShellApp {
         name = "flakes-format";
