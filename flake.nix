@@ -86,7 +86,7 @@
 
         packages = {
           pushToCachix = flakesTools.pushToCachix;
-          updateLocks = flakesTools.update;
+          updateLocks = flakesTools.updateLocks;
           format = flakesTools.format;
         };
         inherit (formatter) formatter;
