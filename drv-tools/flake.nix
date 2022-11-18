@@ -9,8 +9,10 @@
   outputs = { self, nixpkgs, flake-utils, ... }: flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
+      inherit (pkgs.lib.lists) flatten;
       inherit (pkgs.lib.attrsets) recursiveUpdate filterAttrs;
-      inherit (builtins) foldl' attrValues mapAttrs attrNames readDir map;
+      inherit (builtins) foldl' attrValues mapAttrs attrNames readDir map
+        isString isAttrs dirOf baseNameOf toJSON;
       inherit (pkgs.lib.strings) concatStringsSep concatMapStringsSep;
       # if a set's attribute values are all sets, merge these values recursively
       # Note that the precedence order is undefined, so it's better to 
@@ -28,23 +30,30 @@
       # arg should be a set of sets of inputs
       mkShellApps = appsInputs@{ ... }: mapAttrs (name: value: mkShellApp (value // { inherit name; })) appsInputs;
 
-      runFishScript = { name, fishScriptPath, runtimeInputs ? [ ], text ? "" }: mkShellApp {
-        inherit name;
-        runtimeInputs = runtimeInputs ++ [ pkgs.fish pkgs.jq ];
-        text =
-          let CURRENT_SYSTEM = "CURRENT_SYSTEM"; in
+      runFishScript =
+        { name
+        , fishScriptPath
+        , runtimeInputs ? [ ]
+        , text ? ""
+        , description ? ''Run a **fish** script at **${fishScriptPath}**''
+        , longDescription ? ''
+            ${DESCRIPTION}
+            ${description}
           ''
-            export CURRENT_SYSTEM=${system}
+        }: mkShellApp rec {
+          inherit name;
+          runtimeInputs = runtimeInputs ++ [ pkgs.fish pkgs.jq ];
+          text =
+            let CURRENT_SYSTEM = "CURRENT_SYSTEM"; in
+            ''
+              export CURRENT_SYSTEM=${system}
             
-            ${text}
+              ${text}
 
-            fish ${fishScriptPath}
-          '';
-        longDescription = ''
-          ${DESCRIPTION}
-          run a **fish** script at **${fishScriptPath}**
-        '';
-      };
+              fish ${fishScriptPath}
+            '';
+          inherit description longDescription;
+        };
 
       # read something in a directory using the builtin function
       readXs = dir: type: attrNames (
@@ -80,8 +89,8 @@
         args@{ name
         , text
         , runtimeInputs ? [ ]
-        , longDescription ? "no detailed description provided"
         , description ? "no description provided"
+        , longDescription ? "no detailed description provided"
         }:
         withMan
           (withMeta
@@ -93,7 +102,7 @@
             )
             { meta = { inherit longDescription description; }; }
           )
-          longDescription
+          (_: longDescription)
       ;
 
       withAttrs = attrSet1: attrSet2: recursiveUpdate attrSet1 attrSet2;
@@ -111,12 +120,14 @@
       indentStrings4 = indentStrings_ 4;
       indentStrings8 = indentStrings_ 8;
       indentStrings_ = n: y: "\n" + (concatMapStringsSep "\n" (x: (applyN n (s: " " + s) "") + x) y) + "\n";
-
+      
       # add a longDescription to a derivation
       # add a man generated from longDescription
-      withMan = drv: longDescription:
+      # takes a function from a derivation with description 
+      withMan = drv: fLongDescription:
         let
           name = drv.name;
+          longDescription = fLongDescription drv;
           man = ''
             ---
             title: ${name}
@@ -126,36 +137,34 @@
             ${longDescription}
           '';
           manPath = "$out/share/man/man1";
+          drv_ = pkgs.symlinkJoin {
+            inherit name;
+            paths = [ drv ];
+            nativeBuildInputs = [ pkgs.pandoc ];
+            postBuild = ''
+              mkdir -p ${manPath}
+              cat <<EOT > $out/${name}.1.md 
+              ${man}
+              EOT
+              rm -rf ${manPath}
+              mkdir -p ${manPath}
+              pandoc $out/${name}.1.md -st man -o ${manPath}/${name}.1
+              rm $out/${name}.1.md
+            '';
+          };
         in
-        withLongDescription
-          (
-            pkgs.symlinkJoin {
-              inherit name;
-              paths = [ drv ];
-              nativeBuildInputs = [ pkgs.pandoc ];
-              postBuild = ''
-                mkdir -p ${manPath}
-                cat <<EOT > $out/${name}.1.md 
-                ${man}
-                EOT
-                rm -rf ${manPath}
-                mkdir -p ${manPath}
-                pandoc $out/${name}.1.md -st man -o ${manPath}/${name}.1
-                rm $out/${name}.1.md
-              '';
-            }
-          )
-          longDescription;
+        withLongDescription drv_ longDescription;
 
       # String -> String -> Set -> IO ()
       writeJSON = name: path: dataNix:
+        # assert builtins.isString name && buil
         let
-          dataJSON = builtins.toJSON dataNix;
+          dataJSON = toJSON dataNix;
           name_ = "write-${name}-json";
-          dir = builtins.dirOf path;
-          file = builtins.baseNameOf path;
+          dir = dirOf path;
+          file = baseNameOf path;
         in
-        mkShellApp {
+        mkShellApp rec {
           name = name_;
           runtimeInputs = [ pkgs.python310 ];
           text = ''
@@ -165,9 +174,10 @@
             } | python -m json.tool > ${path}
             printf "${framedBrackets "ok %s"}" "${name_}"
           '';
+          description = "Write a given **Nix** expression as **JSON** into a **path**";
           longDescription = ''
             ${DESCRIPTION}
-            Write a given **Nix** expression as **JSON** into a **path**
+            ${description}
           '';
         };
 
@@ -182,9 +192,10 @@
           sed -i -E "s/(\[|\{)/\1\n/g" $nix_path
           nixpkgs-fmt $nix_path
         '';
+        description = "Convert **.json** to **.nix**";
         longDescription = ''
           ${DESCRIPTION}
-          Convert **.json** to **.nix**
+          ${description}
 
           ${EXAMPLES}
           **json2nix .vscode/settings.json my-settings.nix**
@@ -193,8 +204,8 @@
       };
 
       runInEachDir = args@{ dirs, command, name, preMessage ? "", message ? "", postMessage ? "", runtimeInputs ? [ ], longDescription ? "" }:
-        let dirs_ = pkgs.lib.lists.flatten dirs; in
-        mkShellApp {
+        let dirs_ = flatten dirs; in
+        mkShellApp rec {
           name = "${name}-in-each-dir";
           inherit runtimeInputs;
           text =
@@ -217,7 +228,11 @@
             ''
               printf "%s" '${postMessage}'
             '';
+          description = "run ${name} in each given directory";
           longDescription = ''
+            ${NAME}
+            **${name}** - ${description}
+
             ${longDescription}
 
             ${NOTES}
