@@ -6,14 +6,22 @@
     flake-utils.follows = "flake-utils_/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils, ... }: flake-utils.lib.eachDefaultSystem (system:
+  outputs =
+    { self
+    , nixpkgs
+    , flake-utils
+    , ...
+    }: flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
       inherit (pkgs.lib.lists) flatten;
       inherit (pkgs.lib.attrsets) recursiveUpdate filterAttrs;
       inherit (builtins) foldl' attrValues mapAttrs attrNames readDir map
         isString isAttrs dirOf baseNameOf toJSON;
-      inherit (pkgs.lib.strings) concatStringsSep concatMapStringsSep;
+      inherit (pkgs.lib.strings)
+        concatStringsSep concatMapStringsSep
+        removePrefix removeSuffix;
+      inherit (pkgs.lib) escapeShellArg;
       # if a set's attribute values are all sets, merge these values recursively
       # Note that the precedence order is undefined, so it's better to 
       # have unique values at each set level
@@ -35,7 +43,7 @@
         , fishScriptPath
         , runtimeInputs ? [ ]
         , text ? ""
-        , description ? ''Run a **fish** script at **${fishScriptPath}**''
+        , description ? ''Run a `fish` script at `${fishScriptPath}`''
         , longDescription ? ''
             ${DESCRIPTION}
             ${description}
@@ -143,9 +151,7 @@
             nativeBuildInputs = [ pkgs.pandoc ];
             postBuild = ''
               mkdir -p ${manPath}
-              cat <<EOT > $out/${name}.1.md 
-              ${man}
-              EOT
+              printf '%s' ${escapeShellArg man} > $out/${name}.1.md
               rm -rf ${manPath}
               mkdir -p ${manPath}
               pandoc $out/${name}.1.md -st man -o ${manPath}/${name}.1
@@ -163,7 +169,7 @@
           name_ = "write-${name}-json";
           dir = dirOf path;
           file = baseNameOf path;
-          description = "Write a **Nix** expression for **${name}** as **JSON** into **${path}**";
+          description = "Write a `Nix` expression for `${name}` as `JSON` into `${path}`";
         in
         mkShellApp {
           name = name_;
@@ -184,29 +190,27 @@
 
       # use when need to generate settings.json etc.
       json2nix =
-        let
-          description = "Convert **.json** to **.nix**";
-        in
-        mkShellApp {
-          name = "json2nix";
-          runtimeInputs = [ pkgs.nixpkgs-fmt ];
-          text = ''
-            json_path=$1
-            nix_path=$2
-            nix eval --impure --expr "with builtins; fromJSON (readFile ./$json_path)" > $nix_path
-            sed -i -E "s/(\[|\{)/\1\n/g" $nix_path
-            nixpkgs-fmt $nix_path
-          '';
-          inherit description;
-          longDescription = ''
+        withMan
+          (mkShellApp {
+            name = "json2nix";
+            runtimeInputs = [ pkgs.nixpkgs-fmt ];
+            text = ''
+              json_path=$1
+              nix_path=$2
+              nix eval --impure --expr "with builtins; fromJSON (readFile ./$json_path)" > $nix_path
+              sed -i -E "s/(\[|\{)/\1\n/g" $nix_path
+              nixpkgs-fmt $nix_path
+            '';
+            description = "Convert `.json` to `.nix`";
+          })
+          (x: ''
             ${DESCRIPTION}
-            ${description}
-
+            ${x.meta.description}
+            
             ${EXAMPLES}
-            **json2nix .vscode/settings.json my-settings.nix**
-            :   Convert exising settings.json into a nix file
-          '';
-        };
+            `json2nix .vscode/settings.json my-settings.nix`
+            :   Convert exising `settings.json` into a nix file
+          '');
 
       runInEachDir =
         args@{ dirs
@@ -249,12 +253,12 @@
           description = "run ${name} in each given directory";
           longDescription = ''
             ${NAME}
-            **${name_}** - ${description}
+            `${name_}` - ${description}
 
             ${longDescription}
 
             ${NOTES}
-            The directories relative to **CWD** are:
+            The directories relative to `CWD` are:
 
             ${indentStrings4 dirs_}
           '';
@@ -309,6 +313,7 @@
 
       # tests 
       devShells.default = pkgs.mkShell {
+        # shellHook = "man ${json2nix.name}";
         name = "default";
         buildInputs = [ pkgs.tree json2nix pkgs.fish ];
       };
