@@ -219,9 +219,12 @@
         , description ? ""
         , longDescription ? description
         }:
-        let dirs_ = flatten dirs; in
+        let
+          dirs_ = flatten dirs;
+          name_ = "${name}-in-each-dir";
+        in
         mkShellApp {
-          name = "${name}-in-each-dir";
+          name = name_;
           inherit runtimeInputs;
           text =
             let INITIAL_CWD = "INITIAL_CWD";
@@ -246,9 +249,8 @@
           description = "run ${name} in each given directory";
           longDescription = ''
             ${NAME}
-            ${description}
+            **${name_}** - ${description}
 
-            ${DESCRIPTION}
             ${longDescription}
 
             ${NOTES}
