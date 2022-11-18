@@ -9,7 +9,7 @@
   outputs = { self, nixpkgs, flake-utils, ... }: flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-      inherit (pkgs.lib.attrsets) recursiveUpdate;
+      inherit (pkgs.lib.attrsets) recursiveUpdate filterAttrs;
       inherit (builtins) foldl' attrValues mapAttrs attrNames readDir map;
       inherit (pkgs.lib.strings) concatStringsSep concatMapStringsSep;
       # if a set's attribute values are all sets, merge these values recursively
@@ -48,7 +48,7 @@
 
       # read something in a directory using the builtin function
       readXs = dir: type: attrNames (
-        pkgs.lib.attrsets.filterAttrs (name_: type_: type_ == type) (readDir dir)
+        filterAttrs (name_: type_: type_ == type) (readDir dir)
       );
 
       readFiles = dir: readXs dir "regular";
@@ -76,21 +76,30 @@
       concatMapStringsNewline = concatMapStringsSep "\n";
 
       # ignore shellcheck when writing a shell application
-      mkShellApp = args@{ name, text, runtimeInputs ? [ ], longDescription ? "" }:
+      mkShellApp =
+        args@{ name
+        , text
+        , runtimeInputs ? [ ]
+        , longDescription ? "no detailed description provided"
+        , description ? "no description provided"
+        }:
         withMan
-          (
-            pkgs.writeShellApplication ({ inherit name text; } // {
-              runtimeInputs = pkgs.lib.lists.flatten (args.runtimeInputs or [ ]);
-              checkPhase = "";
-            }
+          (withMeta
+            (
+              pkgs.writeShellApplication ({ inherit name text; } // {
+                runtimeInputs = pkgs.lib.lists.flatten runtimeInputs;
+                checkPhase = "";
+              })
             )
+            { meta = { inherit longDescription description; }; }
           )
           longDescription
       ;
 
-      withAttrs = drv: attrSet: pkgs.lib.attrsets.recursiveUpdate drv attrSet;
+      withAttrs = attrSet1: attrSet2: recursiveUpdate attrSet1 attrSet2;
       withMeta = drv: meta: withAttrs drv { inherit meta; };
       withLongDescription = drv: longDescription: withAttrs drv { meta = { inherit longDescription; }; };
+      withDescription = drv: description: withAttrs drv { meta = { inherit description; }; };
 
       # man headings
       NAME = "# NAME";
@@ -105,10 +114,8 @@
 
       # add a longDescription to a derivation
       # add a man generated from longDescription
-      withMan_ = drv: withMan drv drv.meta.longDescription;
       withMan = drv: longDescription:
         let
-          drv_ = withLongDescription drv longDescription;
           name = drv.name;
           man = ''
             ---
@@ -120,21 +127,25 @@
           '';
           manPath = "$out/share/man/man1";
         in
-        pkgs.symlinkJoin {
-          inherit name;
-          paths = [ drv_ ];
-          nativeBuildInputs = [ pkgs.pandoc ];
-          postBuild = ''
-            mkdir -p ${manPath}
-            cat <<EOT > $out/${name}.1.md 
-            ${man}
-            EOT
-            rm -rf ${manPath}
-            mkdir -p ${manPath}
-            pandoc $out/${name}.1.md -st man -o ${manPath}/${name}.1
-            rm $out/${name}.1.md
-          '';
-        };
+        withLongDescription
+          (
+            pkgs.symlinkJoin {
+              inherit name;
+              paths = [ drv ];
+              nativeBuildInputs = [ pkgs.pandoc ];
+              postBuild = ''
+                mkdir -p ${manPath}
+                cat <<EOT > $out/${name}.1.md 
+                ${man}
+                EOT
+                rm -rf ${manPath}
+                mkdir -p ${manPath}
+                pandoc $out/${name}.1.md -st man -o ${manPath}/${name}.1
+                rm $out/${name}.1.md
+              '';
+            }
+          )
+          longDescription;
 
       # String -> String -> Set -> IO ()
       writeJSON = name: path: dataNix:
@@ -172,8 +183,8 @@
           nixpkgs-fmt $nix_path
         '';
         longDescription = ''
-          ${NAME}
-          **${name}** - Convert **.json** to **.nix**
+          ${DESCRIPTION}
+          Convert **.json** to **.nix**
 
           ${EXAMPLES}
           **json2nix .vscode/settings.json my-settings.nix**
@@ -183,7 +194,7 @@
 
       runInEachDir = args@{ dirs, command, name, preMessage ? "", message ? "", postMessage ? "", runtimeInputs ? [ ], longDescription ? "" }:
         let dirs_ = pkgs.lib.lists.flatten dirs; in
-        (mkShellApp {
+        mkShellApp {
           name = "${name}-in-each-dir";
           inherit runtimeInputs;
           text =
@@ -214,7 +225,7 @@
 
             ${indentStrings4 dirs_}
           '';
-        });
+        };
 
       # apply an `op` `cnt` times to the initial value `ini` to get `res`
       # initially, `res` = `ini`
