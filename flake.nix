@@ -1,24 +1,24 @@
 {
   inputs = {
     nixpkgs_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs;
-    flake-utils_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils;
-    flake-tools.url = github:br4ch1st0chr0n3/flakes?dir=flake-tools;
-    drv-tools.url = github:br4ch1st0chr0n3/flakes?dir=drv-tools;
     nixpkgs.follows = "nixpkgs_/nixpkgs";
+    flake-utils_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils;
+    flakes-tools.url = github:br4ch1st0chr0n3/flakes?dir=flakes-tools;
+    drv-tools.url = github:br4ch1st0chr0n3/flakes?dir=drv-tools;
     flake-utils.follows = "flake-utils_/flake-utils";
   };
   outputs =
     { self
     , nixpkgs
     , flake-utils
-    , flake-tools
+    , flakes-tools
     , drv-tools
     , ...
     }: flake-utils.lib.eachDefaultSystem
       (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        inherit (flake-tools.functions.${system}) mkFlakesTools;
+        inherit (flakes-tools.functions.${system}) mkFlakesTools;
         flakesTools = mkFlakesTools [ "." ];
         hcl = import ./.nix/hcl.nix;
         tfTools = import ./.nix/tf-tools.nix { inherit pkgs system drv-tools; };
@@ -29,7 +29,7 @@
         inherit hcl;
         packages = tests // tfTools.packages // {
           pushToCachix = flakesTools.pushToCachix;
-          updateLocks = flakesTools.update;
+          updateLocks = flakesTools.updateLocks;
         };
       });
 
