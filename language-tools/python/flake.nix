@@ -31,10 +31,9 @@
             poetry install --no-root
           '';
           runtimeInputs = [ pkgs.poetry ];
-          longDescription = ''
-            Create Python `.venv`s via `poetry`.
-          '';
+          description = "Create Python **.venv**s via **poetry** in given directories";
         };
+      testCreateVenvs = createVenvs [ "." ];
     in
     {
       snippets = {
@@ -42,6 +41,9 @@
       };
       functions = {
         inherit createVenvs;
+      };
+      devShells.default = pkgs.mkShell {
+        buildInputs = [ testCreateVenvs ];
       };
     }
     );

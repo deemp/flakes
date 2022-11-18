@@ -130,8 +130,7 @@
             inherit dirs;
             name = "flakes-update";
             command = "nix flake update";
-            description = ''Update `flake.lock`-s'';
-            longDescription = description;
+            description = ''Update **flake.lock**s'';
           };
 
 
@@ -220,7 +219,7 @@
               done
             '';
             runtimeInputs = [ pkgs.inotify-tools ];
-            description = "Start a watcher that will update `flake.lock`s and evaluate devshells in given directories";
+            description = "Start a watcher that will update **flake.lock**s and evaluate devshells in given directories";
           })
           (x:
             ''
@@ -242,7 +241,7 @@
           })
           (x: ''
             ${man.DESCRIPTION}
-            ${x.meta.description} using the formatter set in the **CWD** `flake.nix`
+            ${x.meta.description} using the formatter set in the **CWD** **flake.nix**
           ''
           );
 
