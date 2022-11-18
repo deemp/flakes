@@ -203,7 +203,17 @@
         '';
       };
 
-      runInEachDir = args@{ dirs, command, name, preMessage ? "", message ? "", postMessage ? "", runtimeInputs ? [ ], longDescription ? "" }:
+      runInEachDir =
+        args@{ dirs
+        , command
+        , name
+        , preMessage ? ""
+        , message ? ""
+        , postMessage ? ""
+        , runtimeInputs ? [ ]
+        , description ? ""
+        , longDescription ? description
+        }:
         let dirs_ = flatten dirs; in
         mkShellApp rec {
           name = "${name}-in-each-dir";
