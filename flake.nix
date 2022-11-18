@@ -23,13 +23,16 @@
         hcl = import ./.nix/hcl.nix;
         tfTools = import ./.nix/tf-tools.nix { inherit pkgs system drv-tools; };
         tests = (import ./.nix/tests.nix { inherit pkgs system drv-tools; });
-      in
-      {
-        functions = tfTools.functions;
-        inherit hcl;
         packages = tests // tfTools.packages // {
           pushToCachix = flakesTools.pushToCachix;
           updateLocks = flakesTools.updateLocks;
+        };
+      in
+      {
+        functions = tfTools.functions;
+        inherit packages hcl;
+        devShells.default = pkgs.mkShell {
+          buildInputs = pkgs.lib.lists.flatten (builtins.attrValues packages);
         };
       });
 

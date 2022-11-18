@@ -1,22 +1,27 @@
 { pkgs, system, drv-tools }:
 let
-  inherit (drv-tools.functions.${system}) mkShellApp framedBrackets concatStringsNewline mkBin;
+  inherit (drv-tools.functions.${system}) mkShellApp framedBrackets concatStringsNewline mkBin withMan;
+  man = drv-tools.configs.${system}.man;
   inherit (pkgs.lib.strings) escapeShellArg concatMapStringsSep;
   inherit (pkgs.lib.lists) unique;
   inherit (builtins) isList dirOf map isString;
 
   writeTF = writeFile ".tf";
-  writeFile = extension: expr: filePath: mkShellApp {
-    name = "hcl-write-file";
-    text = ''
-      printf ${escapeShellArg "${expr}"} > ${filePath}${extension}
-      terraform fmt ${filePath}${extension}
-    '';
-    runtimeInputs = [ pkgs.terraform ];
-    longDescription = ''
-      Write an `HCL` expression into `${filePath}${extension}` and format it.
-    '';
-  };
+  writeFile = extension: expr: filePath:
+    withMan
+      (mkShellApp {
+        name = "hcl-write-file";
+        text = ''
+          printf ${escapeShellArg "${expr}"} > ${filePath}${extension}
+          terraform fmt ${filePath}${extension}
+        '';
+        runtimeInputs = [ pkgs.terraform ];
+        description = ''Write an **HCL** expression into **${filePath}${extension}** and format it'';
+      })
+      (x: ''
+        ${man.DESCRIPTION}
+        ${x.meta.description}
+      '');
 
   writeTfvars = writeFiles_ ".auto.tfvars";
   writeTFs = writeFiles_ ".tf";
@@ -27,23 +32,27 @@ let
       dirs = unique (map ({ filePath, ... }: dirOf filePath) data);
       f = concatMapStringsSep "\n";
     in
-    mkShellApp {
-      name = "hcl-write-files";
-      text = concatStringsNewline
-        [
-          (f (dir: "mkdir -p '${dir}'") dirs)
-          (f ({ expr, filePath }: "printf ${escapeShellArg "${expr}"} > '${filePath}${extension}'") data)
-          ("printf '${framedBrackets "written files"}'")
-          (f ({ filePath, ... }: "printf ${escapeShellArg "${filePath}\n"}") data)
-          ("printf '${framedBrackets "formatted files"}'")
-          (f (dir: "terraform fmt ${dir}") dirs)
-        ];
-      runtimeInputs = [ pkgs.terraform ];
-      longDescription = ''
-        Write `HCL` expressions into corresponding `$FILE_PATH${extension}`-s
-        and format the parent directories of these files.
-      '';
-    };
+    withMan
+      (mkShellApp {
+        name = "hcl-write-files";
+        text = concatStringsNewline
+          [
+            (f (dir: "mkdir -p '${dir}'") dirs)
+            (f ({ expr, filePath }: "printf ${escapeShellArg "${expr}"} > '${filePath}${extension}'") data)
+            ("printf '${framedBrackets "written files"}'")
+            (f ({ filePath, ... }: "printf ${escapeShellArg "${filePath}\n"}") data)
+            ("printf '${framedBrackets "formatted files"}'")
+            (f (dir: "terraform fmt ${dir}") dirs)
+          ];
+        runtimeInputs = [ pkgs.terraform ];
+        description = "Write **HCL** expressions into corresponding **FILE_PATH${extension}**-s";
+      })
+      (x:
+        ''
+          ${man.DESCRIPTION}
+          ${x.meta.description} and format the parent directories of these files.
+        ''
+      );
 
   # remove newlines between characters
   # https://stackoverflow.com/a/31109819
@@ -74,36 +83,55 @@ let
           printf '\nin' >> "${nixPath}"
         '';
     in
-    mkShellApp {
-      name = "tf2nix";
-      text = concatStringsNewline [
-        (f (dir: ''mkdir -p "${dir}"'') dirs)
-        ("printf '${framedBrackets "wrote temporary files"}'")
-        (f (filePath: ''cat "${filePath}" > "${out filePath}" && printf '%s\n' "${out filePath}"'') filePaths)
-        ("printf '${framedBrackets "formatted files"}'")
-        (f (dir: ''terraform fmt "${dir}"'') dirs)
-        (f (filePath: transform (out filePath) "${out filePath}.nix") filePaths)
-        ("printf '${framedBrackets "removed temporary files"}'")
-        (f (filePath: ''rm "${out filePath}" && printf "%s\n" "${out filePath}"'') filePaths)
-      ];
-      runtimeInputs = [ pkgs.terraform pkgs.gnused ];
-      longDescription = ''
-        Try to naively convert Terraform files to Nix. Write the resulting files under `${outDir}`.
-        Put expressions in a file into `let in` blocks to reduce the amount of syntax errors
-      '';
-    };
-  # convert a given .tf file to Nix and write it under ./tmp
-  convertTf2Nix = let
-    out = "converted";
-    tf2nix_ = tf2nix out [ "$1" ];
-  in
-  mkShellApp {
-    name = "convert-tf-to-nix";
-    text = ''
-      mkdir -p "${out}/$(dirname "$1")"
-      ${mkBin tf2nix_} $1
-    '';
-  };
+    withMan
+      (mkShellApp
+        {
+          name = "tf2nix";
+          text = concatStringsNewline [
+            (f (dir: ''mkdir -p "${dir}"'') dirs)
+            ("printf '${framedBrackets "wrote temporary files"}'")
+            (f (filePath: ''cat "${filePath}" > "${out filePath}" && printf '%s\n' "${out filePath}"'') filePaths)
+            ("printf '${framedBrackets "formatted files"}'")
+            (f (dir: ''terraform fmt "${dir}"'') dirs)
+            (f (filePath: transform (out filePath) "${out filePath}.nix") filePaths)
+            ("printf '${framedBrackets "removed temporary files"}'")
+            (f (filePath: ''rm "${out filePath}" && printf "%s\n" "${out filePath}"'') filePaths)
+          ];
+          runtimeInputs = [ pkgs.terraform pkgs.gnused ];
+          description = ''Naively convert **Terraform** files to **Nix**'';
+        }
+      )
+      (x:
+        ''
+          ${man.DESCRIPTION}
+          ${x.meta.description}. Write the resulting files under **${outDir}**.
+          Put expressions in a file into **let in** blocks to reduce the amount of syntax errors
+        ''
+      );
+  convertTf2Nix =
+    let
+      out = "converted";
+      tf2nix_ = tf2nix out [ "$1" ];
+    in
+    withMan
+      (
+        mkShellApp {
+          name = "convert-tf-to-nix";
+          text = ''
+            mkdir -p "${out}/$(dirname "$1")"
+            ${mkBin tf2nix_} $1
+          '';
+          description = "Convert a given **.tf** file to Nix and write it under **${out}/PATH**";
+        }
+      )
+      (x: ''
+        ${man.DESCRIPTION}
+        ${x.meta.description}
+
+        ${man.EXAMPLES}
+        **${x.name} A/file.tf**
+        :   convert **file.tf** to **${out}/A/file.nix**
+      '');
 in
 {
   functions = {
