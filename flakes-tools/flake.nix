@@ -208,7 +208,7 @@
 
       # just inherit necessary functions
       mkFlakesTools = dirs: {
-        update = flakesUpdate dirs;
+        updateLocks = flakesUpdate dirs;
         pushToCachix = flakesPushToCachix dirs;
         updateAndPushToCachix = flakesUpdateAndPushToCachix dirs;
         dumpDevshells = flakesDumpDevshells dirs;
