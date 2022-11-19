@@ -29,7 +29,8 @@
       (system:
       let
         inherit (my-codium.configs.${system}) extensions;
-        inherit (my-codium.functions.${system}) mkCodium;
+        inherit (my-codium.functions.${system}) mkCodium writeSettingsJSON;
+        inherit (my-codium.configs.${system}) settingsNix;
         inherit (drv-tools.functions.${system}) mkShellApp;
         inherit (python-tools.snippets.${system}) activateVenv;
         inherit (vscode-extensions.packages.${system}) vscode open-vsx;
@@ -55,20 +56,34 @@
           ];
         };
         flakesTools = mkFlakesTools [ "." ];
+        writeSettings = writeSettingsJSON settingsNix;
         devshell = my-devshell.devshell.${system};
       in
       {
         devShells.default = devshell.mkShell {
           bash.extra = activateVenv;
-          packages = [ pkgs.nodePackages.near-cli codium pkgs.poetry ];
+          packages = [
+            pkgs.nodePackages.near-cli
+            codium
+            pkgs.poetry
+            createVenvs
+            writeSettings
+          ];
           commands = [
             {
               name = codium.name;
               help = codium.meta.description;
+              category = "ide";
             }
             {
               name = createVenvs.name;
               help = createVenvs.meta.description;
+              category = "ide";
+            }
+            {
+              name = writeSettings.name;
+              help = writeSettings.meta.description;
+              category = "ide";
             }
           ];
         };
