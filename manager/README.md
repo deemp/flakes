@@ -18,7 +18,7 @@ Goal: initialize a new project via `manager`. Start `VSCodium` with extensions a
 
 1. Install `Nix` - complete all steps from [here](https://github.com/br4ch1st0chr0n3/flakes/blob/main/README/InstallNix.md)
 
-1. Create a new project. `flake.nix` there will provide `manager` in a devshell:
+1. Create a new project. `flake.nix` there will provide `VSCodium`, `manager`, and other tools in a devshell:
 
 ```console
 nix shell github:br4ch1st0chr0n3/flakes/main?dir=manager
