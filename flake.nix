@@ -1,27 +1,29 @@
 {
   inputs = {
-    nixpkgs_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs;
-    flake-utils_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils;
-    flake-tools.url = github:br4ch1st0chr0n3/flakes?dir=flake-tools;
-    drv-tools.url = github:br4ch1st0chr0n3/flakes?dir=drv-tools;
+    nixpkgs_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs";
+    flake-utils_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils";
+    flakes-tools.url = "github:br4ch1st0chr0n3/flakes?dir=flakes-tools";
+    drv-tools.url = "github:br4ch1st0chr0n3/flakes?dir=drv-tools";
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils.follows = "flake-utils_/flake-utils";
-    formatter.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/formatter;
-    my-codium.url = github:br4ch1st0chr0n3/flakes?dir=codium;
-    nix-vscode-marketplace_.url = github:br4ch1st0chr0n3/flakes?dir=source-flake/nix-vscode-marketplace;
-    nix-vscode-marketplace.follows = "nix-vscode-marketplace_/nix-vscode-marketplace";
-    python-tools.url = github:br4ch1st0chr0n3/flakes?dir=language-tools/python;
+    formatter.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/formatter";
+    my-codium.url = "github:br4ch1st0chr0n3/flakes?dir=codium";
+    vscode-extensions_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/vscode-extensions";
+    vscode-extensions.follows = "vscode-extensions_/vscode-extensions";
+    python-tools.url = "github:br4ch1st0chr0n3/flakes?dir=language-tools/python";
+    my-devshell.url = "github:br4ch1st0chr0n3/flakes?dir=devshell";
   };
   outputs =
     { self
     , nixpkgs
     , flake-utils
-    , flake-tools
+    , flakes-tools
     , drv-tools
     , my-codium
     , formatter
     , python-tools
-    , nix-vscode-marketplace
+    , vscode-extensions
+    , my-devshell
     , ...
     }: flake-utils.lib.eachDefaultSystem
       (system:
@@ -29,13 +31,18 @@
         inherit (my-codium.configs.${system}) extensions;
         inherit (my-codium.functions.${system}) mkCodium;
         inherit (drv-tools.functions.${system}) mkShellApp;
-        inherit (python-tools.functions.${system}) createVenvs;
         inherit (python-tools.snippets.${system}) activateVenv;
-        inherit (nix-vscode-marketplace.packages.${system}) vscode open-vsx;
+        inherit (vscode-extensions.packages.${system}) vscode open-vsx;
+        inherit (flakes-tools.functions.${system}) mkFlakesTools;
+        createVenvs = python-tools.functions.${system}.createVenvs [ "." ];
         pkgs = nixpkgs.legacyPackages.${system};
 
         codium = mkCodium {
-          extensions = extensions // { add = { inherit (vscode.mtxr) sqltools; }; };
+          extensions = {
+            inherit (extensions)
+              python markdown github nix misc typescript yaml;
+            other = { inherit (vscode.mtxr) sqltools; };
+          };
           runtimeDependencies = [
             (
               builtins.attrValues
@@ -47,14 +54,27 @@
             )
           ];
         };
+        flakesTools = mkFlakesTools [ "." ];
+        devshell = my-devshell.devshell.${system};
       in
       {
-        devShells.default = pkgs.mkShell {
-          shellHook = activateVenv;
+        devShells.default = devshell.mkShell {
+          bash.extra = activateVenv;
+          packages = [ pkgs.nodePackages.near-cli codium pkgs.poetry ];
+          commands = [
+            {
+              name = codium.name;
+              help = codium.meta.description;
+            }
+            {
+              name = createVenvs.name;
+              help = createVenvs.meta.description;
+            }
+          ];
         };
         packages = {
-          default = codium;
-          createVenvs = createVenvs [ "." ];
+          pushToCachix = flakesTools.pushToCachix;
+          updateLocks = flakesTools.updateLocks;
         };
       });
 
