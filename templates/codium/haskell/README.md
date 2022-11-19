@@ -2,9 +2,15 @@
 
 `VSCodium` with extensions and executables for `Haskell`
 
+## Prerequisites
+
+See [Prerequisites](https://github.com/br4ch1st0chr0n3/flakes/blob/main/README/Prerequisites.md)
+
+## Quick start
+
 `flake.nix` provides a devshell with tools and their descriptions
 
-1. Run devshell
+1. Run a devshell
 
 ```console
 nix develop
@@ -43,13 +49,13 @@ It has a Haskell `lzma` package as a dependency. This package depends on a `C` l
 `Nix` delivers this library as a package `pkgs.lzma` in `stack-shell`.
 
 There's also a `pkgs.hello` package in `stack-shell`.
-This allows `someFunc` from `src/Lib.hs` to call the `hello` command.
+This allows `someFunc` from `src/Lib.hs` to call the `hello` as a shell command.
 
 ```console
 stack run
 ```
 
-This `hello` executable will also be available in `ghci`:
+This `hello` executable will also be available in `ghci` as a shell command:
 
 ```console
 stack ghci
@@ -79,9 +85,9 @@ Necessary components of `Stack` + `Nix` integration:
 
 ## manager
 
-Can be useful if you'd like to write many small unrelated `Haskell` modules, maybe with a couple of other imported modules.
+`manager` can be useful if you'd like to write many small unrelated `Haskell` modules, maybe with a couple of other imported modules.
 
-`manager` [flake](https://github.com/br4ch1st0chr0n3/flakes/tree/main/manager)
+See [manager](https://github.com/br4ch1st0chr0n3/flakes/tree/main/manager).
 
 Get `manager` in a devshell:
 
@@ -89,6 +95,10 @@ Get `manager` in a devshell:
 nix develop
 manager
 ```
+
+## More info
+
+See [Haskell](https://github.com/br4ch1st0chr0n3/flakes/blob/main/README/Haskell.md)
 
 ## Troubleshooting
 
