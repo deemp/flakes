@@ -30,8 +30,8 @@ codium .
 
 ## Used flakes
 
-`VSCodium` flake - [here](https://github.com/br4ch1st0chr0n3/flakes/tree/main/templates/codium/haskell)
-`manager` flake - [here](https://github.com/br4ch1st0chr0n3/flakes/tree/main/manager)
+- [VSCodium](https://github.com/br4ch1st0chr0n3/flakes/tree/main/templates/codium/haskell)
+- [manager](https://github.com/br4ch1st0chr0n3/flakes/tree/main/manager)
 
 ## Nix + Stack
 
