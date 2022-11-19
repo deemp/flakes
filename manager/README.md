@@ -35,19 +35,19 @@ codium .
 
 1. Open `README.md`
 
-1. In case of problems see [Troubleshooting](https://github.com/br4ch1st0chr0n3/flakes#troubleshooting)
+## Contribute
 
-## Develop this project
+You can help improve `manager`
 
-Open IDE:
+1. Clone the `flakes` [repo](https://github.com/br4ch1st0chr0n3/flakes)
+1. Open `VSCodium` and start development:
 
-  ```sh
-  nix develop nix-utils
+  ```console
+  cd manager
+  nix develop nix-utils/
   codium .
   ```
 
-Build
+## Troubleshooting
 
-  ```sh
-  stack build
-  ```
+See [Troubleshooting](https://github.com/br4ch1st0chr0n3/flakes#troubleshooting)
