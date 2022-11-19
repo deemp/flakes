@@ -28,7 +28,7 @@
     ];
   };
 
-  "vscode.markdown-language-features" = {
+  markdown-language-features = {
     "[markdown]" = {
       "editor.defaultFormatter" = "DavidAnson.vscode-markdownlint";
     };
@@ -90,7 +90,7 @@
     };
   };
 
-  "vscode.json-language-features" = {
+  json-language-features = {
     "[jsonc]" = {
       "editor.defaultFormatter" = "vscode.json-language-features";
     };
