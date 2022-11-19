@@ -25,6 +25,7 @@ nix shell github:br4ch1st0chr0n3/flakes/main?dir=manager
 mkdir new-project
 cd new-project
 manager
+# answer `y` if prompted
 manager init
 direnv allow
 nix develop
