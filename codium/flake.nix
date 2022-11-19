@@ -85,8 +85,7 @@
               Verify executables are on `PATH`: 
                   
                   Open VSCodium
-                  Open a terminal there and run
-                  printf '\$PATH'
+                  Open a terminal there and run `printf '$PATH'`
 
               `PATH` should contain the Nix store paths of binaries that you set as runtime dependencies
 
