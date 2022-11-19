@@ -26,6 +26,7 @@ Nix flakes for tools that I use
 - [terrafix](https://github.com/br4ch1st0chr0n3/terrafix) - generate `Terraform` files from DRY `Nix` expressions
 - [try-phi](https://github.com/objectionary/try-phi) - online interactive translator and interpreter of EO and 𝜑-calculus
 - [devops-labs](https://github.com/br4ch1st0chr0n3/devops-labs) - `Nix` in devops projects
+- [blockchain](https://github.com/br4ch1st0chr0n3/blockchain) - A repo for `BDLD` course
 
 ## Prerequisites
 
