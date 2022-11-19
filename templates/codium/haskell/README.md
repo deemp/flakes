@@ -59,18 +59,11 @@ Necessary components of `Stack` + `Nix` integration:
 
 Can be useful if you'd like to write many small unrelated `Haskell` modules, maybe with a couple of other imported modules.
 
-### Get manager
+`manager` [flake](https://github.com/br4ch1st0chr0n3/flakes/tree/main/manager)
 
-When having this `flake.nix` in the `CWD`:
+Get `manager` in a devshell from this flake:
 
 ```console
 nix develop
-manager
-```
-
-Take from a remote repo:
-
-```console
-nix shell github:br4ch1st0chr0n3/flakes/main?dir=manager
 manager
 ```
