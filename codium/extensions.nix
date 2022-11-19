@@ -65,4 +65,7 @@ in
   fish = {
     inherit (open-vsx.bmalehorn) vscode-fish;
   };
+  sql = {
+    inherit (vscode.mtxr) sqltools;
+  };
 }
