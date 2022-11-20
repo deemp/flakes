@@ -15,7 +15,7 @@ Still, some actions like writing the correct dependencies and language extension
 ## Prerequisites
 
 - [Prerequisites](https://github.com/deemp/flakes#prerequisites)
-- [VSCodium](https://github.com/deemp/flakes/tree/main/templates/codium/haskell)
+- [VSCodium template](https://github.com/deemp/flakes/tree/main/templates/codium/haskell)
 - [template](./template/README.md)
 
 ## Usage
@@ -51,3 +51,15 @@ You can help improve `manager`
   nix develop nix-dev/
   codium .
   ```
+
+## Miscellaneous
+
+- Dealing with exceptions - [src](http://www.mega-nerd.com/erikd/Blog/CodeHacking/Haskell/what_do_you_mean.html)
+
+- Lenses - [src](https://en.wikibooks.org/wiki/Haskell/Lenses_and_functional_references)
+  - lens-aeson examples - [src](https://github.com/danidiaz/lens-aeson-examples/blob/master/src/Data/Aeson/Lens/Examples.hs)
+  - more examples - [src](https://www.snoyman.com/blog/2017/05/playing-with-lens-aeson/)
+
+- Safe Resource handling - [src](https://mmhaskell.com/blog/2022/6/23/resources-and-bracket)
+
+- [managed](https://hackage.haskell.org/package/managed-1.0.9) package - with this package, we can collect into a monoid the exceptions that occur when doing and undoing actions. See [manager](./manager/)
