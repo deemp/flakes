@@ -38,21 +38,21 @@
       in
       {
         devShells.default = devshell.mkShell
-        {
-          packages = [ codium ];
-          bash = {
-            extra = ''
-              printf "Hello!\n"
-            '';
+          {
+            packages = [ codium ];
+            bash = {
+              extra = ''
+                printf "Hello!\n"
+              '';
+            };
+            commands = [
+              {
+                name = "codium";
+                help = "VSCodium with `hello` binary on `PATH` and a couple of extensions";
+                category = "ide";
+              }
+            ];
           };
-          commands = [
-            {
-              name = "codium";
-              help = "VSCodium with `hello` binary on `PATH` and a couple of extensions";
-              category = "ide";
-            }
-          ];
-        };
       });
 
   nixConfig = {
