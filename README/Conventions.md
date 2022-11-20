@@ -1,5 +1,9 @@
 # Conventions
 
+## READMEs
+
+In this repo, each flake's `README.md` assumes that the directory of its `flake.nix` is your current working directory in a terminal
+
 ## Dev tools
 
 If you'd like to provide dev tools for your flake, store them in a separate flake under `./nix-dev`.

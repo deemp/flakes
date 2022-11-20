@@ -7,7 +7,6 @@ Nix flakes for tools that I use
 - [Nix prerequisites](./README/Prerequisites.md#nix)
 - [Conventions](./README/Conventions.md)
 - [Troubleshooting](./README/Troubleshooting.md)
-- In this repo, each flake's `README.md` assumes that the directory of its `flake.nix` is your current working directory in a terminal
 
 ## Contents
 
