@@ -1,41 +1,5 @@
 {
   "nodes": {
-    "cachix": {
-      "locked": {
-        "lastModified": 1665647492,
-        "narHash": "sha256-lmVz/50ODqV4h08Xc8dpATwgD1pO/fou+M2KrSXBHSQ=",
-        "owner": "cachix",
-        "repo": "cachix",
-        "rev": "f6fe5df6d96e45359a1e5c448272cfc7e0566da0",
-        "type": "github"
-      },
-      "original": {
-        "owner": "cachix",
-        "repo": "cachix",
-        "rev": "f6fe5df6d96e45359a1e5c448272cfc7e0566da0",
-        "type": "github"
-      }
-    },
-    "cachix_": {
-      "inputs": {
-        "cachix": "cachix"
-      },
-      "locked": {
-        "dir": "source-flake/cachix",
-        "lastModified": 1668955084,
-        "narHash": "sha256-94KQqg3FR5ml3kU5EFwXdnthSDKK4LiNa96D6nuiL3c=",
-        "owner": "br4ch1st0chr0n3",
-        "repo": "flakes",
-        "rev": "5f8fd22cb65971844765996e92329e36560dda47",
-        "type": "github"
-      },
-      "original": {
-        "dir": "source-flake/cachix",
-        "owner": "br4ch1st0chr0n3",
-        "repo": "flakes",
-        "type": "github"
-      }
-    },
     "drv-tools": {
       "inputs": {
         "flake-utils": [
@@ -53,11 +17,11 @@
       },
       "locked": {
         "dir": "drv-tools",
-        "lastModified": 1668955084,
-        "narHash": "sha256-94KQqg3FR5ml3kU5EFwXdnthSDKK4LiNa96D6nuiL3c=",
+        "lastModified": 1668955174,
+        "narHash": "sha256-CH7K5Oz/vrUxubwvEcOxbxcTmQeCQGNZlQJllUUnnEU=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "5f8fd22cb65971844765996e92329e36560dda47",
+        "rev": "37978836b22f21f1a51c15e20ec6d77ba842d051",
         "type": "github"
       },
       "original": {
@@ -88,11 +52,11 @@
       },
       "locked": {
         "dir": "source-flake/flake-utils",
-        "lastModified": 1668954911,
-        "narHash": "sha256-dBLLtk3WJMjKMUERZ78ZEdcvBZN/FVwzVGgQfU3gmf8=",
+        "lastModified": 1668955084,
+        "narHash": "sha256-94KQqg3FR5ml3kU5EFwXdnthSDKK4LiNa96D6nuiL3c=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "79c693a5f03c46e89f6d630ea348fa90262a365c",
+        "rev": "5f8fd22cb65971844765996e92329e36560dda47",
         "type": "github"
       },
       "original": {
@@ -123,11 +87,11 @@
       },
       "locked": {
         "dir": "source-flake/flake-utils",
-        "lastModified": 1668955084,
-        "narHash": "sha256-94KQqg3FR5ml3kU5EFwXdnthSDKK4LiNa96D6nuiL3c=",
+        "lastModified": 1668955174,
+        "narHash": "sha256-CH7K5Oz/vrUxubwvEcOxbxcTmQeCQGNZlQJllUUnnEU=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "5f8fd22cb65971844765996e92329e36560dda47",
+        "rev": "37978836b22f21f1a51c15e20ec6d77ba842d051",
         "type": "github"
       },
       "original": {
@@ -159,11 +123,11 @@
       },
       "locked": {
         "dir": "source-flake/nixpkgs",
-        "lastModified": 1668954911,
-        "narHash": "sha256-dBLLtk3WJMjKMUERZ78ZEdcvBZN/FVwzVGgQfU3gmf8=",
+        "lastModified": 1668955084,
+        "narHash": "sha256-94KQqg3FR5ml3kU5EFwXdnthSDKK4LiNa96D6nuiL3c=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "79c693a5f03c46e89f6d630ea348fa90262a365c",
+        "rev": "5f8fd22cb65971844765996e92329e36560dda47",
         "type": "github"
       },
       "original": {
@@ -195,11 +159,11 @@
       },
       "locked": {
         "dir": "source-flake/nixpkgs",
-        "lastModified": 1668955084,
-        "narHash": "sha256-94KQqg3FR5ml3kU5EFwXdnthSDKK4LiNa96D6nuiL3c=",
+        "lastModified": 1668955174,
+        "narHash": "sha256-CH7K5Oz/vrUxubwvEcOxbxcTmQeCQGNZlQJllUUnnEU=",
         "owner": "br4ch1st0chr0n3",
         "repo": "flakes",
-        "rev": "5f8fd22cb65971844765996e92329e36560dda47",
+        "rev": "37978836b22f21f1a51c15e20ec6d77ba842d051",
         "type": "github"
       },
       "original": {
@@ -211,11 +175,6 @@
     },
     "root": {
       "inputs": {
-        "cachix": [
-          "cachix_",
-          "cachix"
-        ],
-        "cachix_": "cachix_",
         "drv-tools": "drv-tools",
         "flake-utils": [
           "flake-utils_",
