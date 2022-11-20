@@ -43,7 +43,7 @@ git push
 git stash pop
 ```
 
-## Scripts
+## Docs
 
 Each derivation that evaluates to an executable should have:
 
