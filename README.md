@@ -2,6 +2,12 @@
 
 Nix flakes for tools that I use
 
+## Prerequisites
+
+- [Nix prerequisites](./README/Prerequisites.md#nix)
+- [Conventions](./README/Conventions.md)
+- In this repo, each flake's `README` assumes that the directory of its `flake.nix` is your current working directory in a terminal
+
 ## Contents
 
 - [codium](./codium/README.md) - set up VSCodium with binaries on `PATH` and extensions
@@ -27,12 +33,6 @@ Nix flakes for tools that I use
 - [try-phi](https://github.com/objectionary/try-phi) - online interactive translator and interpreter of EO and 𝜑-calculus
 - [devops-labs](https://github.com/br4ch1st0chr0n3/devops-labs) - `Nix` in devops projects
 - [blockchain](https://github.com/br4ch1st0chr0n3/blockchain) - A repo for `BDLD` course
-
-## Prerequisites
-
-- [Nix prerequisites](./README/Prerequisites.md#nix)
-- [Conventions](./README/Conventions.md)
-- In this repo, each flake's `README` assumes that the directory of its `flake.nix` is your current working directory in a terminal
 
 ## Templates
 
