@@ -16,7 +16,7 @@ in
   purescript = {
     inherit (open-vsx.nwolverson) ide-purescript language-purescript;
     inherit (open-vsx.dhall) dhall-lang vscode-dhall-lsp-server;
-    inherit (vscode.deemp) purs-keybindings;
+    inherit (vscode.br4ch1st0chr0n3) purs-keybindings;
     inherit (vscode.ryuta46) multi-command;
     inherit (vscode.chunsen) bracket-select;
   };
