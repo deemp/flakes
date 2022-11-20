@@ -34,7 +34,7 @@
         devshell = my-devshell.devshell.${system};
 
         # A set of VSCodium extensions
-        extensions = import ./extensions.nix {
+        extensions = import ./nix-files/extensions.nix {
           inherit
             system
             vscode-extensions
@@ -42,13 +42,13 @@
         };
 
         # nixified and restructured settings.json
-        settingsNix = import ./settings.nix;
+        settingsNix = import ./nix-files/settings.nix;
 
         # create a codium with a given set of extensions
         # bashInteractive is necessary for correct work
         mkCodium = { extensions ? { }, runtimeDependencies ? [ ] }:
           let
-            codium =
+            testCodium =
               let inherit (pkgs) vscode-with-extensions vscodium;
               in
               (vscode-with-extensions.override {
@@ -68,7 +68,7 @@
                 (
                   pkgs.symlinkJoin {
                     name = "codium";
-                    paths = [ codium ];
+                    paths = [ testCodium ];
                     buildInputs = [ pkgs.makeBinaryWrapper ];
                     postBuild = ''
                       wrapProgram $out/bin/codium \
@@ -113,9 +113,10 @@
         # stuff for testing
 
         # codium with all extensions enabled
-        codium = mkCodium { inherit extensions; };
+        testCodium = mkCodium { inherit extensions; };
 
-        writeSettings = writeSettingsJSON settingsNix;
+        # test write settings
+        testWriteSettings = writeSettingsJSON settingsNix;
       in
       {
         inherit extensions;
@@ -129,22 +130,18 @@
         configs = {
           inherit extensions settingsNix;
         };
-        packages = {
-          testCodium = codium;
-          testWriteSettings = writeSettings;
-        };
         devShells.default = devshell.mkShell {
-          packages = [ codium writeSettings ];
+          packages = [ testCodium testWriteSettings ];
           commands = [
             {
-              name = writeSettings.name;
+              name = testWriteSettings.name;
               category = "ide";
-              help = writeSettings.meta.description;
+              help = testWriteSettings.meta.description;
             }
             {
               name = "codium";
               category = "ide";
-              help = codium.meta.description;
+              help = testCodium.meta.description;
             }
           ];
         };
