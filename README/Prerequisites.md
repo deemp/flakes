@@ -27,8 +27,6 @@ Nix uses `git` to track flake files. So, adding a `flake.nix` to a repo requires
 
 ### Templates
 
-This repo makes several templates available. Learn how you can use them
-
 #### Template format
 
 See [nix flake init](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake-init.html)
