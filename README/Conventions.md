@@ -32,11 +32,10 @@ Thus, the process is as follows:
 git add some-file
 git commit -m "some message"
 git stash
-git push
-# wait some time for locks to be updated
 # can be omitted in case of automatic fetches
 git fetch
 git rebase
+git push
 git stash pop
 ```
 
