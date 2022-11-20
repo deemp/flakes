@@ -44,7 +44,7 @@
               "codium"
               "json2md"
               "devshell"
-              "manager/nix-utils"
+              "manager/nix-dev"
               "manager"
               "."
             ]
@@ -78,16 +78,17 @@
           updateLocks = flakesTools.updateLocks;
           format = flakesTools.format;
         };
-        inherit (formatter) formatter;
-      }) // {
-      templates = {
+      })
+    // {
+      inherit (formatter) formatter;
+      templates = rec {
         codium-generic = {
           path = ./templates/codium/generic;
           description = "VSCodium with extensions and executables";
         };
         codium-haskell = {
           path = ./templates/codium/haskell;
-          description = "VSCodium with extensions and executables for Haskell";
+          description = "${codium-generic.description} for Haskell";
         };
       };
     };
