@@ -4,6 +4,10 @@
 
 In this repo, each flake's `README.md` assumes that the directory of its `flake.nix` is your current working directory in a terminal.
 
+## Prerequisites
+
+To de-duplicate the docs, one of the top sections of each `README.md` here contains a `Prerequisites` section. This section provides the links to other sections that possibly contain the relevant docs. Sometimes, you'll need to traverse multiple `Prerequisites` before you achieve the relevant docs.
+
 ## Dev tools
 
 If you'd like to provide dev tools for your flake, store them in a separate flake under `./nix-dev`.
