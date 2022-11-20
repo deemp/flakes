@@ -2,7 +2,7 @@
 
 ## Nix
 
-## Shell
+### Shell
 
 - `nix shell` - bring package to shell
   
