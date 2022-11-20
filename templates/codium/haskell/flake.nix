@@ -28,21 +28,11 @@
     flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-      inherit (my-codium.functions.${system})
-        writeSettingsJSON
-        mkCodium
-        ;
-      inherit (drv-tools.functions.${system})
-        mkBinName
-        ;
-      inherit (my-codium.configs.${system})
-        extensions
-        settingsNix
-        ;
+      inherit (my-codium.functions.${system}) writeSettingsJSON mkCodium;
+      inherit (drv-tools.functions.${system}) mkBinName;
+      inherit (my-codium.configs.${system}) extensions settingsNix;
       devshell = my-devshell.devshell.${system};
-      inherit (haskell-tools.functions.${system})
-        toolsGHC
-        ;
+      inherit (haskell-tools.functions.${system}) toolsGHC;
       hsShellTools = haskell-tools.toolSets.${system}.shellTools;
       inherit (toolsGHC "92") stack hls ghc;
 
