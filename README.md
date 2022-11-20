@@ -40,9 +40,3 @@ This repo provides several templates. Learn how you can use them.
 
 - Templates [Prerequisites](./README/NixPrerequisites#templates)
 - Dev tools [Conventions](./README/Conventions.md#dev-tools) - to decide where to put the templates
-
-## TODO
-
-<!-- TODO -->
-- Update flakes' inputs when this [issue](https://github.com/NixOS/nix/issues/5790#issuecomment-1315831247) is fixed
-- drop `hpack` fork when this `hpack` [issue](https://github.com/sol/hpack/issues/528) is resolved
