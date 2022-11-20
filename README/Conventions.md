@@ -1,5 +1,15 @@
 # Conventions
 
+## Dev tools
+
+If you'd like to provide dev tools for your flake, store them in a separate flake under `./nix-dev`.
+
+Then, users will be able to call them like
+
+```sh
+nix develop nix-dev/
+```
+
 ## Pushing to a remote repo
 
 All flakes in this repo access some other flakes in this repo via `GitHub` URLs.
@@ -21,16 +31,6 @@ git push
 # wait some time for locks to be updated and these changes to be fetched
 git rebase
 git stash pop
-```
-
-## Dev tools
-
-If you'd like to provide dev tools for your flake, store them in a separate flake under `./nix-utils`.
-
-Then, users will be able to call them like
-
-```sh
-nix develop nix-utils/
 ```
 
 ## Scripts
