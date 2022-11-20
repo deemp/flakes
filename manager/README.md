@@ -14,7 +14,9 @@ Still, some actions like writing the correct dependencies and language extension
 
 ## Prerequisites
 
-See [Prerequisites](https://github.com/br4ch1st0chr0n3/flakes#prerequisites)
+- [Prerequisites](https://github.com/br4ch1st0chr0n3/flakes#prerequisites)
+- [VSCodium](https://github.com/br4ch1st0chr0n3/flakes/tree/main/templates/codium/haskell)
+- [template](./template/README.md)
 
 ## Usage
 
