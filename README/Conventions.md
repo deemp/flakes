@@ -58,7 +58,3 @@ nix-repl> functions.x86_64-linux.mkShellApp
 ```
 
 Now, in `VSCodium`, you can open the code via this link and see comments there
-
-## READMEs
-
-In this repo, each flake's `README` assumes that the directory of its `flake.nix` is your current working directory in a terminal

@@ -32,6 +32,7 @@ Nix flakes for tools that I use
 
 - [Nix prerequisites](./README/Prerequisites.md#nix)
 - [Conventions](./README/Conventions.md)
+- In this repo, each flake's `README` assumes that the directory of its `flake.nix` is your current working directory in a terminal
 
 ## Templates
 
