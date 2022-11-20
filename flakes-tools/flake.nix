@@ -258,20 +258,21 @@
     {
       functions = {
         inherit
-          dumpDevShells
           flakesDumpDevshells
-          flakesFormat
           flakesPushToCachix
           flakesUpdate
           flakesUpdateAndPushToCachix
           flakesWatchDumpDevshells
           mkFlakesTools
-          pushAllToCachix
-          pushDevShellsToCachix
-          pushInputsToCachix
-          pushPackagesToCachix
           pushXToCachix
           ;
+      };
+
+      packages = {
+        inherit
+          dumpDevShells flakesFormat pushAllToCachix
+          pushInputsToCachix pushDevShellsToCachix
+          pushPackagesToCachix;
       };
 
 
