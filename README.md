@@ -6,6 +6,7 @@ Nix flakes for tools that I use
 
 - [Nix prerequisites](./README/Prerequisites.md#nix)
 - [Conventions](./README/Conventions.md)
+- [Troubleshooting](./README/Troubleshooting.md)
 - In this repo, each flake's `README` assumes that the directory of its `flake.nix` is your current working directory in a terminal
 
 ## Contents
@@ -40,10 +41,6 @@ This repo provides several templates. Learn how you can use them.
 
 - Templates [prerequisites](./README/Prerequisites#templates)
 - Dev tools [conventions](./README/Conventions.md#dev-tools) - to decide where to put the templates
-
-## Troubleshooting
-
-See [Troubleshooting](./README/Troubleshooting.md)
 
 ## TODO
 
