@@ -10,7 +10,7 @@ There are `extra-trusted-public-keys`, `extra-trusted-public-keys` (like [here](
 
 ## Repair a derivation
 
-Repair a derivation - [manual](https://github.com/deemp/flakes/blob/main/README/Troubleshooting.md#repair-a-derivation)
+Repair a derivation - [manual](https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-store-repair.html)
 
 Alternative steps:
 
