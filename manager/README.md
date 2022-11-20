@@ -46,6 +46,6 @@ You can help improve `manager`
 
   ```console
   cd manager
-  nix develop nix-utils/
+  nix develop nix-dev/
   codium .
   ```
