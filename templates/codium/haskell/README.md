@@ -74,6 +74,14 @@ Necessary components of `Stack` + `Nix` integration:
   - The name `stack-shell` is chosen arbitrarily
   - The name should be the same as the one used in `stack.nix`
 
+## Tools
+
+Switch to `GHC 9.0.2`:
+
+- in `flake.nix`, change `"92"` to `"90"`
+- in `stack.nix`, change `"924"` to `"902"`
+- in `stack.yaml`, change `resolver` to [lts-19.33](https://www.stackage.org/lts-19.33) or a later one from `stackage`
+
 ## manager
 
 `manager` can be useful if you'd like to write many small unrelated `Haskell` modules, maybe with a couple of other imported modules.
