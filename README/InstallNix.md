@@ -8,9 +8,12 @@
     sh <(curl -L https://nixos.org/nix/install) --no-daemon
     ```
 
-1. Enable [flakes](https://nixos.wiki/wiki/Flakes#Permanent). Create a file if missing
+1. Edit [nix.conf](https://nixos.org/manual/nix/unstable/command-ref/conf-file.html#description)
+    - Create file if missing
+    - [Enable](https://nixos.wiki/wiki/Flakes#Permanent) flakes
+    - Set [show-trace](https://nixos.org/manual/nix/unstable/command-ref/conf-file.html#conf-show-trace) = true
 
-1. Log out, Log in to your OS
+1. Log out, log in to your OS
 
 ### devshells
 
