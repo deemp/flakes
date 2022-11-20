@@ -8,15 +8,17 @@ Sometimes, one wants to experiment with `Haskell` in multiple unrelated files. W
 - Invent new names for `stack`'s build targets
 - Configure `ghcid` to run a specific function
 
-`manager` simplifies them.
+`manager` simplifies these tasks.
 
 Still, some actions like writing the correct dependencies and language extensions in `package.yaml` and `stack.yaml` should be done manually.
+
+## Prerequisites
+
+See [Prerequisites](https://github.com/br4ch1st0chr0n3/flakes#prerequisites)
 
 ## Usage
 
 Goal: initialize a new project via `manager`. Start `VSCodium` with extensions and executables for `Haskell`.
-
-1. Install `Nix` - complete all steps from [here](https://github.com/br4ch1st0chr0n3/flakes/blob/main/README/InstallNix.md)
 
 1. Create a new project. `flake.nix` there will provide `VSCodium`, `manager`, and other tools in a devshell:
 
@@ -47,7 +49,3 @@ You can help improve `manager`
   nix develop nix-utils/
   codium .
   ```
-
-## Troubleshooting
-
-See [Troubleshooting](https://github.com/br4ch1st0chr0n3/flakes#troubleshooting)
