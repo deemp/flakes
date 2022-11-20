@@ -33,6 +33,8 @@ Nix flakes for tools that I use
 - [try-phi](https://github.com/objectionary/try-phi) - online interactive translator and interpreter of EO and 𝜑-calculus
 - [devops-labs](https://github.com/deemp/devops-labs) - `Nix` in devops projects
 - [blockchain](https://github.com/deemp/blockchain) - A repo for `BDLD` course
+- [scala](https://github.com/deemp/scala) - task solutions and notes on Scala courses
+- [lens-examples](https://github.com/deemp/lens-examples) - examples of `Haskell` lens usage
 
 ## Templates
 
