@@ -2,13 +2,13 @@
 
 ## READMEs
 
-In this repo, each flake's `README.md` assumes that the directory of its `flake.nix` is your current working directory in a terminal
+In this repo, each flake's `README.md` assumes that the directory of its `flake.nix` is your current working directory in a terminal.
 
 ## Dev tools
 
 If you'd like to provide dev tools for your flake, store them in a separate flake under `./nix-dev`.
 
-Then, users will be able to call them like
+Then, users will be able to call them like:
 
 ```sh
 nix develop nix-dev/
@@ -22,7 +22,7 @@ One can update `B`'s `flake.lock` this way iff `A`'s changes are pushed to `GitH
 Whenever there's a push to the remote `GitHub` repo, `B`'s `flake.lock` is updated by a `GitHub Action`.
 That's why, there's no need to commit and push `flake.lock` changes.
 After an update is completed, it's necessary to rebase the local changes onto remote changes.
-It's possible to set up automatic `rebase` on `pull`
+It's possible to set up automatic `rebase` on `pull`.
 
 ```sh
 git pull.rebase true
@@ -46,12 +46,12 @@ git stash pop
 
 ## Scripts
 
-Each script should have:
+Each derivation that evaluates to an executable should have:
 
 - `meta.description` attribute written in `CommonMark`
   - This description will be rendered in devshells
-  - It should be a single-line brief description of this script
+  - It should be a single-line brief description of this executable
 - `meta.longDescription` attribute written in `Markdown`
   - This description is used to generate `man` pages for executables
   - The format of a `longDescription` should be recognizable by `pandoc`
-Here's a sample [Markdown input](https://pandoc.org/demo/pandoc.1.md)
+    - Here's a sample [input](https://pandoc.org/demo/pandoc.1.md)
