@@ -10,20 +10,15 @@
 
 1. Enable [flakes](https://nixos.wiki/wiki/Flakes#Permanent). Create a file if missing
 
-1. Log out, Log in to Linux
+1. Log out, Log in to your OS
 
-### devShells
+### devshells
 
-Sometimes, when you enter a devshell:
+Sometimes, when you enter a devshell (e.g., `nix develop`), you may see:
 
-```console
-nix develop
-```
-
-you may see:
-
-- warnings - this is not a problem
-- prompts - answer `y`
+- warnings - not a problem, just read them and google
+- errors - the same story
+- prompts - answer `y` (the simplest way)
 
 ## direnv
 
@@ -37,5 +32,3 @@ This is a tool for running scripts in `.envrc` files when you enter a directory 
         ```
 
 When you see `direnv` errors, run the suggested command
-
-Most often, it's `direnv allow`
