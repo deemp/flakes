@@ -47,7 +47,17 @@ Here's a sample [Markdown input](https://pandoc.org/demo/pandoc.1.md)
 
 ## Docs
 
-Function docs are left as comments in code
+Docs are left as comments in code. You can find an attribute in [nix-repl](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-repl.html) and go to its documentation, e.g.:
+
+```console
+nix repl
+nix-repl> :lf github:br4ch1st0chr0n3/flakes?dir=drv-tools
+nix-repl> functions.<TAB>
+nix-repl> functions.x86_64-linux.mkShellApp
+«lambda @ /nix/store/d82z2sx0q9h4mnijbcm9d6i0db6lf79k-source/drv-tools/flake.nix:97:9»
+```
+
+Now, in `VSCodium`, you can open the code via this link and see comments there
 
 ## READMEs
 
