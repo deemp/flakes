@@ -1,37 +1,44 @@
-# Prerequisites
+# Nix Prerequisites
 
-## Nix
-
-### Install Nix
+## Install Nix
 
 - Complete all steps from [here](InstallNix.md)
 - Join `NixOS` [community](https://nixos.org/community/)
   - [Telegram](https://t.me/ru_nixos/19843)
 
-### Basics
+## Basics
 
 - Study [Nix language](https://nixos.wiki/wiki/Overview_of_the_Nix_Language)
 - Learn about [flakes](#flakes)
 - Read [Nix manual](https://nixos.org/manual/nix/unstable/command-ref/nix-store.html?searchbar=&search=s)
   - Also called `nixman` in docs here
 
-### Git
+## Docs
 
-Nix uses `git` to track flake files. So, adding a `flake.nix` to a repo requires the following steps:
+Docs are usually left as comments in Nix code. You can find an attribute in [nix-repl](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-repl.html) and look up its comments in a file at a given position.
 
-1. Add `flake.nix` in some way (copy the existing `flake.nix`, `nix flake init`, etc.)
-1. `git add flake.nix`
-1. Add `flake.lock` in some way (copy the relevant existing `flake.lock`, generate a new one via `nix flake update`, etc.)
-1. `git add flake.lock`
-1. `git commit` these files
+```console
+nix repl
+nix-repl> :lf github:br4ch1st0chr0n3/flakes?dir=drv-tools
+nix-repl> functions.<TAB>
+nix-repl> functions.x86_64-linux.mkShellApp
+«lambda @ /nix/store/d82z2sx0q9h4mnijbcm9d6i0db6lf79k-source/drv-tools/flake.nix:97:9»
+```
 
-### Templates
+Sometimes, you may evaluate a `description` or a `longDescription` of a derivation:
 
-#### Template format
+```console
+nix-repl> packages.x86_64-linux.json2nix.description
+"Convert `.json` to `.nix`"
+```
+
+## Templates
+
+### Template format
 
 See [nix flake init](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake-init.html)
 
-#### List templates
+### List templates
 
 If a `flake.nix` contains a valid output `templates`, these templates can be listed.
 List flake outputs and search for `templates` in this (`flakes`) repository:
@@ -44,7 +51,7 @@ nix flake show
     └───codium-haskell: template: VSCodium with extensions and executables for Haskell
 ```
 
-#### Explore a template
+### Explore a template
 
 Templates can be accessed in Nix store via `nix repl`:
 
@@ -56,14 +63,14 @@ nix-repl> templates.codium-generic.path
 /nix/store/j3kx4dk567y483pvszr2w8ghnkxich3d-source/templates/codium/generic
 ```
 
-#### Copy
+### Copy
 
 Two ways of copying from templates:
 
 - [nix flake init](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake-init.html)
 - [nix flake new](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake-new.html)
 
-#### Assemble
+### Assemble
 
 Templates may contain arbitrary files. This feature enables the following assembly:
 
@@ -75,7 +82,7 @@ cp flake-1/file1 flake-3
 cp flake-2/file{2,3} flake-3
 ```
 
-### Flakes
+## Flakes
 
 1. What are flakes? How to enable flakes? - [wiki](https://nixos.wiki/wiki/Flakes)
 
@@ -115,6 +122,16 @@ cp flake-2/file{2,3} flake-3
        - `nix profile`
      - How can I pin my global `nixpkgs` to a specific commit SHA?
        - `nix registry`
+   - And many more questions!
+
+1. How to add a flake to a project?
+    - Nix uses `git` to track flake files. So, adding a `flake.nix` to a project requires the following steps:
+       1. `git init` - initialize a `git` repository
+       1. Add `flake.nix` in some way (copy the existing `flake.nix`, `nix flake init`, etc.)
+       1. `git add flake.nix`
+       1. Add `flake.lock` in some way (copy the relevant existing `flake.lock`, generate a new one via `nix flake update`, etc.)
+       1. `git add flake.lock`
+       1. `git commit` these files
 
 1. Flake tutorials: [1](https://nix-tutorial.gitlabpages.inria.fr/nix-tutorial/flakes.html?highlight=flake), [2](https://yuanwang.ca/posts/getting-started-with-flakes.html), [3](https://ghedam.at/a-tour-of-nix-flakes), [4](https://xeiaso.net/blog/nix-flakes-2-2022-02-27)
 
@@ -125,7 +142,7 @@ cp flake-2/file{2,3} flake-3
    - Use them in your projects with `follows` - [example](https://github.com/br4ch1st0chr0n3/flakes/blob/2395f79740fdc5f14f91db10b1acd2892cdee28c/codium/flake.nix#L5)
    - Now, all your projects have the same dependencies since they come from the same source
 
-1. How to have a specific version of `nix` on my system? Approximately so:
+1. How to enable a specific version of `nix` on my system? Approximately so:
 
    ```console
    nix registry remove nix
