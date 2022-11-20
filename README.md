@@ -29,11 +29,11 @@ This repo contains a `Nix` [eDSL](https://wiki.haskell.org/Embedded_domain_speci
   - [Learn Nix in Y minutes](https://learnxinyminutes.com/docs/nix/)
 
 - (Optionally) Understanding of Flakes
-  - [Flakes](https://github.com/br4ch1st0chr0n3/the-little-things/blob/7f9703e2d7f8a3cbf39344cddb7868421b4fcc6d/README.md#flakes) info
+  - [Flakes](https://github.com/deemp/the-little-things/blob/7f9703e2d7f8a3cbf39344cddb7868421b4fcc6d/README.md#flakes) info
 
 ## Sample test
 
-This is one of the [test expressions](.nix/test-data.nix). It's taken from [here](https://github.com/br4ch1st0chr0n3/devops-labs/blob/d40ddd922b33d9639a76cd2d028d4f753a5d04a3/.nix/terraform/docker.nix#L1). The below Nix snippets are in `let in` blocks to have a better syntax highlighting.
+This is one of the [test expressions](.nix/test-data.nix). It's taken from [here](https://github.com/deemp/devops-labs/blob/d40ddd922b33d9639a76cd2d028d4f753a5d04a3/.nix/terraform/docker.nix#L1). The below Nix snippets are in `let in` blocks to have a better syntax highlighting.
 
 There are 2 apps: `app_purescript` and `app_python`. Each of them has a server written in a corresponding language, and these servers show the current time in a browser. Their Docker containers were pushed to Docker Hub. On a host, these apps are under the directories `./app_purescript` and `./app_python`. In Docker containers, each app's code is placed under the `/app` directory.
 
@@ -269,7 +269,7 @@ Overall, we can notice that definitely a lot of expressions have almost complete
 1. Enter the repo
 
   ```console
-  git clone https://github.com/br4ch1st0chr0n3/terrafix
+  git clone https://github.com/deemp/terrafix
   ```
 
 1. Run tests. This will also write into Terraform files expressions generated from [test-data](test-data.nix). Also, the tests will quite naively translate these expressions back into Nix under './tf2nix'
