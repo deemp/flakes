@@ -37,7 +37,7 @@ write-settings-json
 codium .
 ```
 
-1. Open `README.md`
+1. Open `README.md` and follow instructions
 
 ## Contribute
 
