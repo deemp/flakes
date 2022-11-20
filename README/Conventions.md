@@ -22,18 +22,25 @@ One can update `B`'s `flake.lock` this way iff `A`'s changes are pushed to `GitH
 Whenever there's a push to the remote `GitHub` repo, `B`'s `flake.lock` is updated by a `GitHub Action`.
 That's why, there's no need to commit and push `flake.lock` changes.
 After an update is completed, it's necessary to rebase the local changes onto remote changes.
+It's possible to set up automatic `rebase` on `pull`
+
+```sh
+git pull.rebase true
+```
+
 Sometimes, there are local uncommitted changes.
-These changes should be `git stash`ed before doing `git rebase`.
-After rebasing, they can be `git stash pop`ped to continue the work.
+These changes should be `git stash`ed before doing `git pull`.
+After pulling, they can be `git stash pop`ped to continue the work.
 
 Thus, the process is as follows:
 
 ```sh
+git add some-file
 git commit -m "some message"
 git stash
 git push
 # wait some time for locks to be updated and these changes to be fetched
-git rebase
+git pull
 git stash pop
 ```
 
@@ -43,8 +50,8 @@ Each script should have:
 
 - `meta.description` attribute written in `CommonMark`
   - This description will be rendered in devshells
-  - This description should be a single-line brief description of this script
+  - It should be a single-line brief description of this script
 - `meta.longDescription` attribute written in `Markdown`
-  - This description is used to generate `man` pages for this script
+  - This description is used to generate `man` pages for executables
   - The format of a `longDescription` should be recognizable by `pandoc`
 Here's a sample [Markdown input](https://pandoc.org/demo/pandoc.1.md)
