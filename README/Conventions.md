@@ -22,15 +22,9 @@ One can update `B`'s `flake.lock` this way iff `A`'s changes are pushed to `GitH
 Whenever there's a push to the remote `GitHub` repo, `B`'s `flake.lock` is updated by a `GitHub Action`.
 That's why, there's no need to commit and push `flake.lock` changes.
 After an update is completed, it's necessary to rebase the local changes onto remote changes.
-It's possible to set up automatic `rebase` on `pull`.
-
-```sh
-git pull.rebase true
-```
-
-Sometimes, there are local uncommitted changes.
-These changes should be `git stash`ed before doing `git pull`.
-After pulling, they can be `git stash pop`ped to continue the work.
+However, sometimes, there are local uncommitted changes already.
+These changes should be `git stash`ed before doing `git rebase`.
+After rebasing, they can be `git stash pop`ped to continue the work.
 
 Thus, the process is as follows:
 
@@ -39,8 +33,10 @@ git add some-file
 git commit -m "some message"
 git stash
 git push
-# wait some time for locks to be updated and these changes to be fetched
-git pull
+# wait some time for locks to be updated
+# can be omitted in case of automatic fetches
+git fetch
+git rebase
 git stash pop
 ```
 
