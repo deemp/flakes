@@ -2,11 +2,11 @@
 
 ## Prerequisites
 
-See [Prerequisites](https://github.com/br4ch1st0chr0n3/flakes#prerequisites)
+See [Prerequisites](https://github.com/deemp/flakes#prerequisites)
 
 ## Description
 
-This flake is based on the [codium](https://github.com/br4ch1st0chr0n3/flakes/blob/main/codium/README.md) flake.
+This flake is based on the [codium](https://github.com/deemp/flakes/blob/main/codium/README.md) flake.
 
 This flake demonstrates how to enable specific extensions and make the `hello` executable available on `PATH` in `VSCodium`.
 

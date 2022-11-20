@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- [manager](https://github.com/br4ch1st0chr0n3/flakes/tree/main/manager)
+- [manager](https://github.com/deemp/flakes/tree/main/manager)
 
 ## Quick start
 
@@ -19,4 +19,4 @@ codium .
 
 ## Troubleshooting
 
-See [Troubleshooting](https://github.com/br4ch1st0chr0n3/flakes#troubleshooting)
+See [Troubleshooting](https://github.com/deemp/flakes#troubleshooting)

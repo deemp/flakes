@@ -381,8 +381,8 @@ updateHsProjectFiles = do
 nixFlakeInit :: IO ()
 nixFlakeInit = do
   let cleanCurrentDirectory = "rm -rf ..?* .[!.]* *"
-      initCodiumHaskell = "nix flake init -t github:br4ch1st0chr0n3/flakes/main#codium-haskell"
-      initManager = "nix flake init -t github:br4ch1st0chr0n3/flakes/main?dir=manager#init"
+      initCodiumHaskell = "nix flake init -t github:deemp/flakes/main#codium-haskell"
+      initManager = "nix flake init -t github:deemp/flakes/main?dir=manager#init"
       removeConflicts =
         "rm -rf"
           <-> unwords

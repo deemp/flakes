@@ -6,11 +6,11 @@ See [Nix Prerequisites](NixPrerequisites.md)
 
 ## Substituters and keys
 
-There are `extra-trusted-public-keys`, `extra-trusted-public-keys` (like [here](https://github.com/br4ch1st0chr0n3/flakes/blob/7bd58c9cf9708714c29dadd615d85d22ded485ae/flake.nix#L112)). If a substituter like `cachix` fails, comment out the lines containing its address
+There are `extra-trusted-public-keys`, `extra-trusted-public-keys` (like [here](https://github.com/deemp/flakes/blob/7bd58c9cf9708714c29dadd615d85d22ded485ae/flake.nix#L112)). If a substituter like `cachix` fails, comment out the lines containing its address
 
 ## Repair a derivation
 
-Repair a derivation - [manual](https://github.com/br4ch1st0chr0n3/flakes/blob/main/README/Troubleshooting.md#repair-a-derivation)
+Repair a derivation - [manual](https://github.com/deemp/flakes/blob/main/README/Troubleshooting.md#repair-a-derivation)
 
 Alternative steps:
 
@@ -23,4 +23,4 @@ Alternative steps:
 
 ## VSCodium troubleshooting
 
-See [VSCodium troubleshooting](https://github.com/br4ch1st0chr0n3/flakes/blob/main/codium/README.md#troubleshooting)
+See [VSCodium troubleshooting](https://github.com/deemp/flakes/blob/main/codium/README.md#troubleshooting)

@@ -16,7 +16,7 @@ Nix flakes for tools that I use
 - [env2json](./env2json/README.md) - convert `.env` to `.json`
 - [flakes-tools](./flakes-tools/flake.nix) - convenience tools for working with flakes and pushing them to [cachix](https://www.cachix.org/)
 - [json2md](./json2md/README.md) - convert `JSON` to `Markdown`
-  - Can be combined with `builtins.toJSON` and used to generate `.md` docs from Nix expressions - [example](https://github.com/br4ch1st0chr0n3/devops-labs/blob/0ae9881ab58b99f114aaf21cb5cad85f2ce37e40/.nix/write-configs.nix#L26)
+  - Can be combined with `builtins.toJSON` and used to generate `.md` docs from Nix expressions - [example](https://github.com/deemp/devops-labs/blob/0ae9881ab58b99f114aaf21cb5cad85f2ce37e40/.nix/write-configs.nix#L26)
 - [language-tools](./flakes-tools) - tools for languages that I use
 - [manager](./manager/README.md)
   - automate routine actions in projects having multiple unrelated `Haskell` modules
@@ -27,12 +27,12 @@ Nix flakes for tools that I use
 
 ## Other flakes
 
-- [hpack](https://github.com/br4ch1st0chr0n3/hpack) - `0.35.0`, until it's on `nixpkgs`
-- [refmt](https://github.com/br4ch1st0chr0n3/refmt) - `HCL` <-> `JSON` <-> `YAML` converter
-- [terrafix](https://github.com/br4ch1st0chr0n3/terrafix) - generate `Terraform` files from DRY `Nix` expressions
+- [hpack](https://github.com/deemp/hpack) - `0.35.0`, until it's on `nixpkgs`
+- [refmt](https://github.com/deemp/refmt) - `HCL` <-> `JSON` <-> `YAML` converter
+- [terrafix](https://github.com/deemp/terrafix) - generate `Terraform` files from DRY `Nix` expressions
 - [try-phi](https://github.com/objectionary/try-phi) - online interactive translator and interpreter of EO and 𝜑-calculus
-- [devops-labs](https://github.com/br4ch1st0chr0n3/devops-labs) - `Nix` in devops projects
-- [blockchain](https://github.com/br4ch1st0chr0n3/blockchain) - A repo for `BDLD` course
+- [devops-labs](https://github.com/deemp/devops-labs) - `Nix` in devops projects
+- [blockchain](https://github.com/deemp/blockchain) - A repo for `BDLD` course
 
 ## Templates
 

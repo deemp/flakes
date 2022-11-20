@@ -1,10 +1,10 @@
 {
   inputs = {
-    nixpkgs_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs";
+    nixpkgs_.url = "github:deemp/flakes?dir=source-flake/nixpkgs";
     nixpkgs.follows = "nixpkgs_/nixpkgs";
-    flake-utils_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils";
+    flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
-    my-devshell_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/devshell";
+    my-devshell_.url = "github:deemp/flakes?dir=source-flake/devshell";
     my-devshell.follows = "my-devshell_/devshell";
   };
   outputs = { self, nixpkgs, flake-utils, my-devshell, ... }:

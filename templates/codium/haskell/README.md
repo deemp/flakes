@@ -4,7 +4,7 @@
 
 ## Prerequisites
 
-See [Prerequisites](https://github.com/br4ch1st0chr0n3/flakes/blob/main/README/Prerequisites.md)
+See [Prerequisites](https://github.com/deemp/flakes/blob/main/README/Prerequisites.md)
 
 ## Quick start
 
@@ -77,7 +77,7 @@ Necessary components of `Stack` + `Nix` integration:
 
 `manager` can be useful if you'd like to write many small unrelated `Haskell` modules, maybe with a couple of other imported modules.
 
-See [manager](https://github.com/br4ch1st0chr0n3/flakes/tree/main/manager)
+See [manager](https://github.com/deemp/flakes/tree/main/manager)
 
 Get `manager` in a devshell:
 
@@ -88,8 +88,8 @@ manager
 
 ## More info
 
-See [Haskell](https://github.com/br4ch1st0chr0n3/flakes/blob/main/README/Haskell.md)
+See [Haskell](https://github.com/deemp/flakes/blob/main/README/Haskell.md)
 
 ## Troubleshooting
 
-See [Troubleshooting](https://github.com/br4ch1st0chr0n3/flakes#troubleshooting)
+See [Troubleshooting](https://github.com/deemp/flakes#troubleshooting)

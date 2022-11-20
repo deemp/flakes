@@ -44,13 +44,13 @@
       "locked": {
         "lastModified": 1667879480,
         "narHash": "sha256-M3Dz5anGkFpQScU/oiwhxTw3QqKHEIdNuICPjJqH/Ps=",
-        "owner": "br4ch1st0chr0n3",
+        "owner": "deemp",
         "repo": "nix-vscode-extensions",
         "rev": "8f37966352f94e0a76d8daef18b00949e555fdc4",
         "type": "github"
       },
       "original": {
-        "owner": "br4ch1st0chr0n3",
+        "owner": "deemp",
         "repo": "nix-vscode-extensions",
         "rev": "8f37966352f94e0a76d8daef18b00949e555fdc4",
         "type": "github"

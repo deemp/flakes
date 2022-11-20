@@ -14,8 +14,8 @@ Still, some actions like writing the correct dependencies and language extension
 
 ## Prerequisites
 
-- [Prerequisites](https://github.com/br4ch1st0chr0n3/flakes#prerequisites)
-- [VSCodium](https://github.com/br4ch1st0chr0n3/flakes/tree/main/templates/codium/haskell)
+- [Prerequisites](https://github.com/deemp/flakes#prerequisites)
+- [VSCodium](https://github.com/deemp/flakes/tree/main/templates/codium/haskell)
 - [template](./template/README.md)
 
 ## Usage
@@ -25,7 +25,7 @@ Goal: initialize a new project via `manager`. Start `VSCodium` with extensions a
 1. Create a new project. `flake.nix` there will provide `VSCodium`, `manager`, and other tools in a devshell:
 
 ```console
-nix shell github:br4ch1st0chr0n3/flakes/main?dir=manager
+nix shell github:deemp/flakes/main?dir=manager
 mkdir new-project
 cd new-project
 manager
@@ -43,7 +43,7 @@ codium .
 
 You can help improve `manager`
 
-1. Clone the `flakes` [repo](https://github.com/br4ch1st0chr0n3/flakes)
+1. Clone the `flakes` [repo](https://github.com/deemp/flakes)
 1. Open `VSCodium` and start development:
 
   ```console

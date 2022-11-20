@@ -2,7 +2,7 @@
 
 Set up VSCodium with extensions and executables on its `PATH` in several lines of Nix code
 
-See [Prerequisites](https://github.com/br4ch1st0chr0n3/flakes#prerequisites)
+See [Prerequisites](https://github.com/deemp/flakes#prerequisites)
 
 ## Contribute
 
@@ -20,14 +20,14 @@ codium .
 
 ### Missing binaries on PATH in VSCodium
 
-Case: VSCodium doesn't have the binaries provided in `runtimeDependencies` (like [here](https://github.com/br4ch1st0chr0n3/flakes/blob/7bab5d96658007f5ad0c72ec7805b5b4eb5a83dd/templates/codium/generic/flake.nix#L33)) on `PATH`:
+Case: VSCodium doesn't have the binaries provided in `runtimeDependencies` (like [here](https://github.com/deemp/flakes/blob/7bab5d96658007f5ad0c72ec7805b5b4eb5a83dd/templates/codium/generic/flake.nix#L33)) on `PATH`:
 
    1. You need to repair VSCodium's derivation (see [Repair a derivation](#))
    1. Assumptions:
       - current directory is `DIR`
       - there is a `DIR/flake.nix`
-      - VSCodium is given as a derivation `codium`, like [here](https://github.com/br4ch1st0chr0n3/flakes/blob/53b2e4d8bb5fb34c50da1b45f06622bffdb9b7bf/templates/codium/generic/flake.nix#L25)
-   1. In `DIR/flake.nix`, set `packages.default = codium;`, like [here](https://github.com/br4ch1st0chr0n3/flakes/blob/53b2e4d8bb5fb34c50da1b45f06622bffdb9b7bf/templates/codium/generic/flake.nix#L37)
+      - VSCodium is given as a derivation `codium`, like [here](https://github.com/deemp/flakes/blob/53b2e4d8bb5fb34c50da1b45f06622bffdb9b7bf/templates/codium/generic/flake.nix#L25)
+   1. In `DIR/flake.nix`, set `packages.default = codium;`, like [here](https://github.com/deemp/flakes/blob/53b2e4d8bb5fb34c50da1b45f06622bffdb9b7bf/templates/codium/generic/flake.nix#L37)
    1. `Check`:
       1. `cd DIR`
       1. Start VSCodium: `nix run .#`

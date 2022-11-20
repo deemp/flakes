@@ -21,7 +21,7 @@ Docs are usually left as comments in Nix code. You can find an attribute in [nix
 
 ```console
 nix repl
-nix-repl> :lf github:br4ch1st0chr0n3/flakes?dir=drv-tools
+nix-repl> :lf github:deemp/flakes?dir=drv-tools
 nix-repl> functions.<TAB>
 nix-repl> functions.x86_64-linux.mkShellApp
 «lambda @ /nix/store/d82z2sx0q9h4mnijbcm9d6i0db6lf79k-source/drv-tools/flake.nix:97:9»
@@ -147,8 +147,8 @@ cp flake-2/file{2,3} flake-3
 1. Flake tutorials: [1](https://nix-tutorial.gitlabpages.inria.fr/nix-tutorial/flakes.html?highlight=flake), [2](https://yuanwang.ca/posts/getting-started-with-flakes.html), [3](https://ghedam.at/a-tour-of-nix-flakes), [4](https://xeiaso.net/blog/nix-flakes-2-2022-02-27)
 
 1. Flake inputs tip
-   - Store your flake inputs in a repo - [example](https://github.com/br4ch1st0chr0n3/flakes/blob/2395f79740fdc5f14f91db10b1acd2892cdee28c/source-flake)
-   - Use them in your projects with `follows` - [example](https://github.com/br4ch1st0chr0n3/flakes/blob/2395f79740fdc5f14f91db10b1acd2892cdee28c/codium/flake.nix#L5)
+   - Store your flake inputs in a repo - [example](https://github.com/deemp/flakes/blob/2395f79740fdc5f14f91db10b1acd2892cdee28c/source-flake)
+   - Use them in your projects with `follows` - [example](https://github.com/deemp/flakes/blob/2395f79740fdc5f14f91db10b1acd2892cdee28c/codium/flake.nix#L5)
    - Now, all your projects have the same dependencies since they come from the same source
 
 1. How to enable a specific version of `nix` on my system? Approximately so:

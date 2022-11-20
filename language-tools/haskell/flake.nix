@@ -1,10 +1,10 @@
 {
   inputs = {
-    nixpkgs_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/nixpkgs";
+    nixpkgs_.url = "github:deemp/flakes?dir=source-flake/nixpkgs";
     nixpkgs.follows = "nixpkgs_/nixpkgs";
-    flake-utils_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/flake-utils";
+    flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
-    gitignore_.url = "github:br4ch1st0chr0n3/flakes?dir=source-flake/gitignore";
+    gitignore_.url = "github:deemp/flakes?dir=source-flake/gitignore";
     gitignore.follows = "gitignore_/gitignore";
   };
   outputs =

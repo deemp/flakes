@@ -375,13 +375,13 @@
       "locked": {
         "lastModified": 1668303577,
         "narHash": "sha256-7EnItB9bYrcokMeF2A/bD/F1gSaRr4tRqV68LiSN5gQ=",
-        "owner": "br4ch1st0chr0n3",
+        "owner": "deemp",
         "repo": "hpack",
         "rev": "2bc8865572c3d5f83ab97c9bf320f13fe1b30dbc",
         "type": "github"
       },
       "original": {
-        "owner": "br4ch1st0chr0n3",
+        "owner": "deemp",
         "repo": "hpack",
         "rev": "2bc8865572c3d5f83ab97c9bf320f13fe1b30dbc",
         "type": "github"
