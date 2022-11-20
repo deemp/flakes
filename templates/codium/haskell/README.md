@@ -8,19 +8,11 @@ See [Prerequisites](https://github.com/br4ch1st0chr0n3/flakes/blob/main/README/P
 
 ## Quick start
 
-`flake.nix` provides a devshell with tools and their descriptions
-
 1. Run a devshell
 
 ```console
 nix develop
-```
-
-1. Write `settings.json`
-
-1. Now, open `VSCodium` with extensions and executables for `Haskell`:
-
-```console
+write-settings-json
 codium .
 ```
 
@@ -35,17 +27,16 @@ codium .
 Suppose you'd like `Nix` to supply a C library [liblzma](https://tukaani.org/xz/) to `stack` using this integration.
 You'd create a `stack-shell` (more on that below) in `flake.nix` and provide there a `Nix` package `pkgs.lzma`.
 Then, `stack` will create an isolated environment, where this library is present, and run your program in this environment.
-In such an environment, the program will have no access to installed programs like `rm` or `git`.
-But what if your program needs to call these commands in your code?
-In this case, their packages should also go into this isolated environment.
-They will be turned into executables and become available to your program.
-So, they should also be listed in `stack-shell`.
+In such an environment, your program won't have an access to other libraries and programs like `rm` or `git`.
+But what if your program needs to call the `rm` command?
+In this case, your `stack-shell` should contain the relevant package, `pkgs.coreutils`.
+This package will be turned into executables. Then, `rm` and some other commands will become available in that isolated environment.
 
 ### This project
 
 This sample `Haskell` project demonstrates `Stack` + `Nix` integration.
 
-It has a Haskell `lzma` package as a dependency. This package depends on a `C` library `liblzma`.
+It has a Haskell `lzma` package as a dependency (see [package.yaml](./package.yaml)). This package depends on a `C` library `liblzma`.
 `Nix` delivers this library as a package `pkgs.lzma` in `stack-shell`.
 
 There's also a `pkgs.hello` package in `stack-shell`.
@@ -73,12 +64,11 @@ Hello, world!
 Necessary components of `Stack` + `Nix` integration:
 
 - `flake-compat` in `inputs` of `flake.nix`
-  - This is to turn `stack-shell` in `flake.nix` into a valid [stack shell](https://docs.haskellstack.org/en/stable/nix_integration/#external-c-libraries-through-a-shellnix-file)
+  - This is to turn `stack-shell` in `flake.nix` into a valid [stack shell](https://docs.haskellstack.org/en/stable/nix_integration/#external-c-libraries-through-a-shellnix-file) in `stack.nix`
   - [repo](https://github.com/edolstra/flake-compat)
 - Nix [enabled](https://docs.haskellstack.org/en/stable/nix_integration/#configuration-options) in `stack.yaml`
 - `stack.nix`
   - The file should have the same name as the value of `shell-file` in `stack.yaml`
-  - It will evaluate into a valid stack shell
 - `stack-shell` with necessary derivations in `flake.nix`
   - The name `stack-shell` is chosen arbitrarily
   - The name should be the same as the one used in `stack.nix`
@@ -87,7 +77,7 @@ Necessary components of `Stack` + `Nix` integration:
 
 `manager` can be useful if you'd like to write many small unrelated `Haskell` modules, maybe with a couple of other imported modules.
 
-See [manager](https://github.com/br4ch1st0chr0n3/flakes/tree/main/manager).
+See [manager](https://github.com/br4ch1st0chr0n3/flakes/tree/main/manager)
 
 Get `manager` in a devshell:
 
