@@ -263,6 +263,29 @@
   - reduce the number of data traversals
   - make a good alias of a partially applied function
 
+### ADT
+
+- Sum of Products - use `case class`es
+
+  ```scala
+  sealed trait Platform
+  case class IOS(appId: String) extends Platform
+  case class Android(packageId: String, sha1Cert: String) extends Platform
+  ```
+
+- Sum - use `case object`s
+
+  ```scala
+  sealed trait WeekDay
+  case object Mon extends WeekDay
+  case object Tue extends WeekDay
+
+  val day: WeekDay = Mon
+  println(s"Today is $day") // Today is Mon
+  ```
+
+More examples - [src](https://stepik.org/lesson/822904/step/5?unit=826340)
+
 ### Collections
 
 - `Set`, `Seq`, `Map` - [src](https://stepik.org/lesson/466069/step/2?unit=456826)
