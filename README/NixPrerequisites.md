@@ -11,9 +11,11 @@
 - Study [Nix language](https://nixos.wiki/wiki/Overview_of_the_Nix_Language)
 - Learn about [flakes](#flakes)
 - Read [Nix manual](https://nixos.org/manual/nix/unstable/command-ref/nix-store.html?searchbar=&search=s)
-  - Also called `nixman` in docs here
+- Read [nixpkgs manual](https://nixos.org/manual/nixpkgs/unstable/#sec-stdenv-phases)
 
 ## Docs
+
+### Nix repl
 
 Docs are usually left as comments in Nix code. You can find an attribute in [nix-repl](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-repl.html) and look up its comments in a file at a given position.
 
@@ -31,6 +33,15 @@ Sometimes, you may evaluate a `description` or a `longDescription` of a derivati
 nix-repl> packages.x86_64-linux.json2nix.description
 "Convert `.json` to `.nix`"
 ```
+
+### Online
+
+Many docs are available online
+
+- [nix-lib](https://teu5us.github.io/nix-lib.html) - Nix (builtins) & Nixpkgs (lib) Functions
+- [Nixpkgs manual](https://nixos.org/manual/nixpkgs/stable/#nixpkgs-manual)
+- [devdocs](https://devdocs.io/) - search functions
+  - [config](./devdocs-config.json)
 
 ## Templates
 
@@ -86,7 +97,7 @@ cp flake-2/file{2,3} flake-3
 
 1. What are flakes? How to enable flakes? - [wiki](https://nixos.wiki/wiki/Flakes)
 
-1. [nixman](https://nixos.org/manual/nix/unstable/) answers the following questions:
+1. [Nix manual](https://nixos.org/manual/nix/unstable/) answers the following questions:
    - [Glossary](https://nixos.org/manual/nix/unstable/glossary.html#glossary)
      - What does this term mean?
    - [Derivations](https://nixos.org/manual/nix/unstable/language/derivations.html#derivations)
@@ -98,7 +109,7 @@ cp flake-2/file{2,3} flake-3
        - A flake is a function from inputs into outputs. To take this function at a point, a `flake.lock` is used
        - Don't confuse 'inputs' and 'outputs' with the terms `inputs` and `outputs`.
        - I use 'inputs' and 'outputs' to describe the high-level idea of what a flake is.
-       - On the other hand, `inputs` and `outputs` have specifications described in `nixman`.
+       - On the other hand, `inputs` and `outputs` have specifications described in Nix manual.
    - [Flake inputs](https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-flake.html#flake-inputs):
      - How to use old-style packages as flake inputs?
      - How to declare an input? == How to use a flake in another flake?
@@ -116,7 +127,7 @@ cp flake-2/file{2,3} flake-3
          - `nix-repl> :lf nixpkgs` - load flake `nixpkgs`
      - How to see all `derivation`s used to build a specific `derivation`?
        - `nix show-derivation`
-     - How can I temporary make an executable available in my terminal?
+     - How can I temporarily make an executable available in my terminal?
        - `nix shell`
      - How can I install a Nix package on my OS?
        - `nix profile`
@@ -135,8 +146,6 @@ cp flake-2/file{2,3} flake-3
 
 1. Flake tutorials: [1](https://nix-tutorial.gitlabpages.inria.fr/nix-tutorial/flakes.html?highlight=flake), [2](https://yuanwang.ca/posts/getting-started-with-flakes.html), [3](https://ghedam.at/a-tour-of-nix-flakes), [4](https://xeiaso.net/blog/nix-flakes-2-2022-02-27)
 
-1. How to convert an exising project to flakes? - [tutorial](https://garnix.io/blog/converting-to-flakes)
-
 1. Flake inputs tip
    - Store your flake inputs in a repo - [example](https://github.com/br4ch1st0chr0n3/flakes/blob/2395f79740fdc5f14f91db10b1acd2892cdee28c/source-flake)
    - Use them in your projects with `follows` - [example](https://github.com/br4ch1st0chr0n3/flakes/blob/2395f79740fdc5f14f91db10b1acd2892cdee28c/codium/flake.nix#L5)
@@ -149,3 +158,7 @@ cp flake-2/file{2,3} flake-3
    nix registry add nix github:NixOS/nix/4bf70b74a78bf10f3f19ed122ae7377963e14003
    nix profile install nix --priority 4
    ```
+
+1. When should I use overlays over `nixpkgs`? - You [shouldn't](https://zimbatm.com/notes/1000-instances-of-nixpkgs)
+
+1. How to convert an exising project to flakes? - [tutorial](https://garnix.io/blog/converting-to-flakes)
