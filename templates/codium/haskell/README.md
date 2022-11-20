@@ -4,7 +4,8 @@
 
 ## Prerequisites
 
-See [Prerequisites](https://github.com/deemp/flakes/blob/main/README/Prerequisites.md)
+- [Prerequisites](https://github.com/deemp/flakes#prerequisites)
+- [Haskell](https://github.com/deemp/flakes/blob/main/README/Haskell.md)
 
 ## Quick start
 
@@ -85,11 +86,3 @@ Get `manager` in a devshell:
 nix develop
 manager
 ```
-
-## More info
-
-See [Haskell](https://github.com/deemp/flakes/blob/main/README/Haskell.md)
-
-## Troubleshooting
-
-See [Troubleshooting](https://github.com/deemp/flakes#troubleshooting)
