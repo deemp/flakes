@@ -30,7 +30,7 @@ import ExMonoid (Ex (..), ExMonoid (..), mBefore, tCreateDir, tReadFile, tRemove
 import Filesystem.Path.CurrentOS as Path ()
 import Options.Applicative (Parser, argument, command, customExecParser, fullDesc, headerDoc, helper, info, metavar, prefs, showHelpOnError, str, subparser)
 import Options.Applicative.Builder (progDescDoc)
-import Options.Applicative.Help (Doc, Pretty (pretty), bold, comma, dot, fill, hardline, putDoc, softline, squotes, (<+>))
+import Options.Applicative.Help (Doc, Pretty (pretty), bold, comma, dot, fill, hardline, putDoc, softline, squotes)
 import Options.Applicative.Help.Pretty (parens, space, text)
 import System.Directory (doesDirectoryExist, doesPathExist)
 import System.Exit (exitFailure)
@@ -48,8 +48,7 @@ main = do
           ( fullDesc
               <> progDescDoc
                 ( Just $
-                    "Organize Haskell modules and template files"
-                      <> (softline <> "in a" <+> bb "stack" <+> "project so that" <+> bb "HLS" <+> "accepts them")
+                    "Manage repetitive Haskell modules in a" <+> bb "stack" <+> "project"
                 )
               <> headerDoc (Just header')
           )
@@ -65,7 +64,7 @@ main = do
 -- Constants
 
 modulesDir :: FilePath
-modulesDir = "./Modules"
+modulesDir = "Modules"
 
 packageYaml :: FilePath
 packageYaml = "package.yaml"
@@ -79,8 +78,11 @@ defaultTemplate = "Contest"
 ghci :: FilePath
 ghci = ".ghci"
 
+dotGhcid :: FilePath
+dotGhcid = ".ghcid"
+
 ghcid :: FilePath
-ghcid = ".ghcid"
+ghcid = "ghcid"
 
 hieYaml :: FilePath
 hieYaml = "hie.yaml"
@@ -89,16 +91,25 @@ gitignore :: FilePath
 gitignore = ".gitignore"
 
 _FUNCTION_NAME :: String
-_FUNCTION_NAME = "FUNCTION_NAME"
+_FUNCTION_NAME = "<FUNCTION_NAME>"
 
 _EXECUTABLE :: String
-_EXECUTABLE = "EXECUTABLE"
+_EXECUTABLE = "<EXECUTABLE>"
 
 _EXISTING :: String
-_EXISTING = "EXISTING"
+_EXISTING = "<EXISTING>"
 
 _NEW :: String
-_NEW = "NEW"
+_NEW = "<NEW>"
+
+_LOCATOR :: String
+_LOCATOR = "<LOCATOR>"
+
+_LOCATORs :: String
+_LOCATORs = _LOCATOR <> "s"
+
+_GHCID_TARGET :: String
+_GHCID_TARGET = "<GHCID_TARGET>"
 
 mainHs :: FilePath
 mainHs = "Main.hs"
@@ -121,14 +132,8 @@ main' = "main"
 locator :: String
 locator = "locator"
 
-_LOCATOR :: String
-_LOCATOR = "LOCATOR"
-
-_LOCATORs :: String
-_LOCATORs = _LOCATOR <> "s"
-
-_GHCID_TARGET :: String
-_GHCID_TARGET = "GHCID_TARGET"
+locators :: String
+locators = "locators"
 
 mkDir :: FilePath -> FilePath
 mkDir x = modulesDir </> x
@@ -146,22 +151,20 @@ module' :: String
 module' = "module"
 
 fill' :: Doc
-fill' = fill 200 $ text ""
+fill' = fill 100 $ text ""
 
 header' :: Doc
 header' =
   descriptionBlock
-    [ bb _LOCATORs <> fill',
-      "To simplify references to directories and Haskell modules,",
-      bb manager <+> "uses" <+> bb locator <> "s.",
+    [ "To simplify references to directories and Haskell modules,",
+      bb manager <+> "uses" <+> bb locators <> dot,
       locatorForm,
       fill',
-      bb _LOCATORs <+> "and" <+> bb "package.yaml" <> fill',
       bb packageYaml <+> "contains an object" <+> bb executables <> dot,
       "Each" <+> bb executable <+> "has a" <+> bb main' <+> "attribute" <> dot,
       "Its value corresponds to this" <+> bb executable <> "'s main module" <> dot,
       "To simplify references to these modules,",
-      bb manager <+> "uses" <+> bb locator <> "s",
+      bb manager <+> "uses" <+> bb locators,
       fold (intersperse (comma <> space) $ bb <$> [_NEW, _EXISTING]) <> dot,
       "Each of these" <+> bb _LOCATORs <+> "refers to an" <+> bb executable,
       "with" <+> bb main' <+> "at" <+> bb (mkMainHs _LOCATOR) <> dot,
@@ -170,11 +173,13 @@ header' =
       bb _EXECUTABLE <+> "is a" <+> bb _LOCATOR,
       "with all" <+> squotes (bb "/") <+> "replaced by" <+> squotes dot <> dot,
       fill',
-      "Other" <+> bb _LOCATORs <> fill',
       "There are other" <+> bb locator <> "s:",
       fold (intersperse (comma <> space) $ bb <$> [_GHCID_TARGET]) <> dot,
       "Each of these" <+> bb _LOCATORs <+> "refers to a" <+> bb module',
-      "at" <+> bb (mkModuleHs _LOCATOR)
+      "at" <+> bb (mkModuleHs _LOCATOR),
+      fill',
+      "Run" <+> bb "manager COMMAND --help",
+      "to learn more about a" <+> bb "COMMAND"
     ]
 
 -- Types
@@ -210,7 +215,7 @@ instance Show PathType where
     PackageYaml -> packageYaml
     Ghci -> ghci
     Directory -> "directory"
-    Ghcid -> ghcid
+    Ghcid -> dotGhcid
 
 instance Pretty PathType where
   pretty :: PathType -> Doc
@@ -243,6 +248,9 @@ descriptionBlock desc = fold (intersperse softline desc) <> hardline
 
 descriptionBlock' :: [Doc] -> Doc
 descriptionBlock' desc = fold (intersperse softline desc)
+
+(<+>) :: Doc -> Doc -> Doc
+x <+> y = x <> softline <> y
 
 instance Pretty ProcessError where
   pretty :: ProcessError -> Doc
@@ -305,7 +313,7 @@ makeCommand =
       [ "Create an" <+> bb executable <+> "with a locator" <+> bb _NEW,
         "from an existing" <+> bb executable <+> "with a locator" <+> bb _EXISTING,
         "Other modules can be created in" <+> bb (modulesDir </> _NEW),
-        "and, e.g., imported into" <+> bb (modulesDir </> _NEW </> mainHs)
+        "and, e.g., be imported into" <+> bb (modulesDir </> _NEW </> mainHs)
       ]
       <> f
         "rm"
@@ -322,7 +330,7 @@ makeCommand =
       <> f
         "set"
         setCommand
-        [ "Set" <+> bb ghcid <+> "config",
+        [ "Set" <+> bb dotGhcid <+> "config",
           "so that when you run" <+> bb ghcid,
           "in current directory,",
           bb ghcid <+> "will restart",
@@ -333,10 +341,13 @@ makeCommand =
         "init"
         initCommand
         [ "Initialize a" <+> bb manager <+> "project",
-          "in current working directory.",
+          "in current directory.",
           "Also, initialize a git repository.",
           "This action will remove all user files",
-          "in current working directory."
+          "except for",
+          bb ".git" <+> "and" <+> bb ".gitignore",
+          "(if they exist)",
+          "in current directory."
         ]
       <> f
         "update"
@@ -380,7 +391,7 @@ updateHsProjectFiles = do
 
 nixFlakeInit :: IO ()
 nixFlakeInit = do
-  let cleanCurrentDirectory = "rm -rf ..?* .[!.]* *"
+  let cleanCurrentDirectory = "rm -rf ..?* .[!.][!git]* *"
       initCodiumHaskell = "nix flake init -t github:deemp/flakes/main#codium-haskell"
       initManager = "nix flake init -t github:deemp/flakes/main?dir=manager#init"
       removeConflicts =
@@ -405,6 +416,7 @@ nixFlakeInit = do
   callCommand removeConflicts
   putDoc' ("Writing a template" <+> bb "manager" <> ":" <+> bb initManager)
   callCommand initManager
+  putDoc' "Checking for an existing git repository in current directory..."
   isGitInitialized <- doesDirectoryExist ".git"
   unless isGitInitialized $ do
     putDoc' ("Initializing a" <+> bb "git" <+> "repository:" <+> bb gitInit)
@@ -488,7 +500,7 @@ handleCommand cmd = runManaged $ case cmd of
       targetDir = mkDir name
   CommandSet {name, function} -> do
     throwIfBadName name
-    tWriteFile ghcid (encodeUtf8 txtGhcid) (mapThrow EWrite Ghci ghcid)
+    tWriteFile dotGhcid (encodeUtf8 txtGhcid) (mapThrow EWrite Ghci dotGhcid)
     where
       txtGhcid =
         T.pack $

@@ -188,7 +188,7 @@ tRemoveDirWithEmptyParents path f g = do
       targetDirParents =
         let nParents = length (splitDirectories path)
          in -- take directories apart from . and target
-            tail $ take (max 0 (nParents - 2)) (iterate takeDirectory path)
+            tail $ take (max 0 (nParents - 1)) (iterate takeDirectory path)
   ex <- liftIO $ doesDirectoryExist path
   when ex $
     mBracketOnError
