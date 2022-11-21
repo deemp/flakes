@@ -78,11 +78,12 @@ Necessary components of `Stack` + `Nix` integration:
 
 ### ghcid
 
-`ghcid` is a `Very low feature GHCi based IDE`s. It can be used to rerun a function in a given file on changes in a given directory.
+[ghcid](https://github.com/ndmitchell/ghcid) is a `Very low feature GHCi based IDE`s.
+It can be used to rerun a function in a given file on changes in a given directory.
 
 ### GHC
 
-Switch to `GHC 9.0.2`:
+This template uses `GHC 9.2.4`. You can switch to `GHC 9.0.2`:
 
 - in `flake.nix`, change `"92"` to `"90"`
 - in `stack.nix`, change `"924"` to `"902"`
