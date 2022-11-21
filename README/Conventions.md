@@ -10,9 +10,18 @@ To de-duplicate the docs, one of the top sections of each `README.md` here conta
 
 ## Dev tools
 
-If you'd like to provide dev tools for your flake, store them in a separate flake under `./nix-dev`.
+The outputs of a flake depend on its inputs. Inputs of a `flake.nix` are locked in an accompanying `flake.lock`.
+If you expect that your flake will be used as an input to other flakes, you may want to leave only the relevant outputs in this flake.
+Dev tools that you use are irrelevant to users of your flake, so they should be moved into another flake.
+Usually, I place this another flake into a `./nix-dev` directory, near my main `./flake.nix`.
+This way I:
 
-Then, users will be able to call them like:
+- move the irrelevant outputs from my main flake into `nix-dev`
+- move the irrelevant inputs into `nix-dev`
+- hence, reduce the size of my main `flake.lock`
+- hence, reduce the size of `flake.lock`s of my flake's users
+
+Then, it becomes possible to enter a dev environment as follows:
 
 ```sh
 nix develop nix-dev/
