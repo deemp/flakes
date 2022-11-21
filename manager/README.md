@@ -24,6 +24,8 @@ Goal: initialize a new project via `manager`. Start `VSCodium` with extensions a
 
 1. [Install Nix](https://github.com/br4ch1st0chr0n3/flakes/blob/main/README/InstallNix.md)
 
+1. Sometimes, Nix prints warnings and prompts in red color. Read them. Answer `y` if you agree or don't know. You'll be able to change the settings later.
+
 1. Create a new project. There will be a devhshell with `VSCodium`, `manager`, and other tools:
 
 ```console
@@ -31,7 +33,6 @@ nix shell github:deemp/flakes/main?dir=manager
 mkdir new-project
 cd new-project
 manager
-# answer `y` if prompted
 manager init
 direnv allow
 nix develop
