@@ -1,4 +1,4 @@
 {
-  inputs.vscode-extensions.url = "github:deemp/nix-vscode-extensions/8f37966352f94e0a76d8daef18b00949e555fdc4";
+  inputs.vscode-extensions.url = "github:deemp/nix-vscode-extensions/99fab9741f0e51b3152da9b89b5e03230dd607a2";
   outputs = x: { };
 }
