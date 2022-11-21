@@ -99,16 +99,24 @@
         ;
 
         writeSettingsJSON = settings:
-          withMan (writeJSON "settings" "./.vscode/settings.json" (mergeValues settings)) (x: ''
-            ${man.DESCRIPTION}
-            Write `.vscode/settings.json`
-          '');
+          withMan
+            (withDescription (writeJSON "settings" "./.vscode/settings.json" (mergeValues settings))
+              "Write `.vscode/settings.json`")
+            (x: ''
+              ${man.DESCRIPTION}
+              ${x.meta.description}
+            '');
 
         writeTasksJSON = tasks:
-          withMan (writeJSON "tasks" "./.vscode/tasks.json" tasks) (x: ''
-            ${man.DESCRIPTION}
-            Write `.vscode/tasks.json`
-          '');
+          withMan
+            (withDescription
+              (writeJSON "tasks" "./.vscode/tasks.json" tasks)
+              "Write `.vscode/tasks.json`"
+            )
+            (x: ''
+              ${man.DESCRIPTION}
+              ${x.meta.description}
+            '');
 
         # stuff for testing
 
