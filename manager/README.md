@@ -15,7 +15,7 @@ Still, some actions like writing the correct dependencies and language extension
 ## Prerequisites
 
 - [Prerequisites](https://github.com/deemp/flakes#prerequisites)
-- [VSCodium template](https://github.com/deemp/flakes/tree/main/templates/codium/haskell)
+- `VSCodium` for `Haskell` [template](https://github.com/deemp/flakes/tree/main/templates/codium/haskell)
 - [template](./template/README.md)
 
 ## Quick start
@@ -40,7 +40,7 @@ write-settings-json
 codium .
 ```
 
-1. Open `new-project/README.md` and follow instructions
+1. Open `new-project/README.md` and follow instructions there
 
 ## Contribute
 
