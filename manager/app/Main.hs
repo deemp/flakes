@@ -344,8 +344,7 @@ makeCommand =
           "in current directory.",
           "Also, initialize a git repository.",
           "This action will remove all user files",
-          "except for",
-          bb ".git" <+> "and" <+> bb ".gitignore",
+          "except for" <+> bb ".git",
           "(if they exist)",
           "in current directory."
         ]
@@ -397,14 +396,15 @@ nixFlakeInit = do
       removeConflicts =
         "rm -rf"
           <-> unwords
-            [ "package.yaml",
-              "*.cabal",
+            [ "*.cabal",
               "src",
               "app",
               "test",
-              "Modules",
-              "hie.yaml",
               "README.md"
+              packageYaml,
+              modulesDir,
+              hieYaml,
+              gitignore,
             ]
       gitInit = "git init"
       gitCommit = "git add . && git commit -m 'manager init'"
