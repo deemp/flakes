@@ -63,12 +63,12 @@
             {
               name = "codium";
               category = "ide";
-              help = "VSCodium";
+              help = codium.meta.description;
             }
             {
-              name = "${writeSettings.name}";
+              name = writeSettings.name;
               category = "ide";
-              help = "write settings.json for VSCodium";
+              help = writeSettings.meta.description;
             }
           ];
         };
