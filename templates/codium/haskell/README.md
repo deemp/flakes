@@ -78,7 +78,7 @@ Necessary components of `Stack` + `Nix` integration:
 
 ### ghcid
 
-[ghcid](https://github.com/ndmitchell/ghcid) is a `Very low feature GHCi based IDE`s.
+[ghcid](https://github.com/ndmitchell/ghcid) is a `Very low feature GHCi based IDE`.
 It can be used to rerun a function in a given file on changes in a given directory.
 
 ### GHC
