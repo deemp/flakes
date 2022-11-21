@@ -25,7 +25,7 @@ It explains what's available in this project.
 
 1. Edit this project. Use `manager`. Open a terminal in VSCodium. Run commands there.
 
-1. What is `manager`?
+1. What is `manager`? Read carefully:
 
     ```terminal
     manager
