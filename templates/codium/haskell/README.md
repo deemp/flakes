@@ -76,13 +76,19 @@ Necessary components of `Stack` + `Nix` integration:
 
 ## Tools
 
+### ghcid
+
+`ghcid` is a `Very low feature GHCi based IDE`s. It can be used to rerun a function in a given file on changes in a given directory.
+
+### GHC
+
 Switch to `GHC 9.0.2`:
 
 - in `flake.nix`, change `"92"` to `"90"`
 - in `stack.nix`, change `"924"` to `"902"`
 - in `stack.yaml`, change `resolver` to [lts-19.33](https://www.stackage.org/lts-19.33) or a later one from `stackage`
 
-## manager
+### managers
 
 `manager` can be useful if you'd like to write many small unrelated `Haskell` modules, maybe with a couple of other imported modules.
 
