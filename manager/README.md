@@ -18,11 +18,13 @@ Still, some actions like writing the correct dependencies and language extension
 - [VSCodium template](https://github.com/deemp/flakes/tree/main/templates/codium/haskell)
 - [template](./template/README.md)
 
-## Usage
+## Quick start
 
 Goal: initialize a new project via `manager`. Start `VSCodium` with extensions and executables for `Haskell`.
 
-1. Create a new project. `flake.nix` there will provide `VSCodium`, `manager`, and other tools in a devshell:
+1. [Install Nix](https://github.com/br4ch1st0chr0n3/flakes/blob/main/README/InstallNix.md)
+
+1. Create a new project. There will be a devhshell with `VSCodium`, `manager`, and other tools:
 
 ```console
 nix shell github:deemp/flakes/main?dir=manager
@@ -37,7 +39,7 @@ write-settings-json
 codium .
 ```
 
-1. Open `README.md` and follow instructions
+1. Open `new-project/README.md` and follow instructions
 
 ## Contribute
 
@@ -50,6 +52,8 @@ You can help improve `manager`
   cd manager
   nix develop nix-dev/
   codium .
+  # open a terminal in VSCodium
+  ghcid
   ```
 
 ## Miscellaneous
