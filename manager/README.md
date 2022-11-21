@@ -57,7 +57,7 @@ You can help improve `manager`
   ghcid
   ```
 
-## Miscellaneous
+## References
 
 - Dealing with exceptions - [src](http://www.mega-nerd.com/erikd/Blog/CodeHacking/Haskell/what_do_you_mean.html)
 
@@ -67,4 +67,4 @@ You can help improve `manager`
 
 - Safe Resource handling - [src](https://mmhaskell.com/blog/2022/6/23/resources-and-bracket)
 
-- [managed](https://hackage.haskell.org/package/managed-1.0.9) package - with this package, we can collect into a monoid the exceptions that occur when doing and undoing actions. See [manager](./manager/)
+- [managed](https://hackage.haskell.org/package/managed-1.0.9) package - with this package, we can collect into a monoid the exceptions that occur when doing and undoing actions
