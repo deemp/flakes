@@ -2,3 +2,4 @@ result
 .direnv
 .env
 .vscode
+sphinx-builds

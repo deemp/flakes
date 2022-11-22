@@ -26,7 +26,7 @@
         inherit (my-codium.configs.${system}) extensions;
         inherit (my-codium.functions.${system}) mkCodium writeSettingsJSON;
         inherit (my-codium.configs.${system}) settingsNix;
-        inherit (drv-tools.functions.${system}) readDirectories;
+        inherit (drv-tools.functions.${system}) readDirectories withAttrs;
         inherit (flakes-tools.functions.${system}) mkFlakesTools;
         pkgs = nixpkgs.legacyPackages.${system};
         devshell = my-devshell.devshell.${system};
@@ -54,11 +54,16 @@
         codium = mkCodium {
           extensions = { inherit (extensions) nix misc github markdown; };
         };
-        writeSettings = writeSettingsJSON settingsNix;
+        writeSettings = writeSettingsJSON (withAttrs settingsNix {
+          python = {
+            "python.defaultInterpreterPath" = "\${workspaceFolder}/.venv/bin/python3";
+            "python.linting.pylintEnabled" = true;
+          };
+        });
       in
       {
         devShells.default = devshell.mkShell {
-          packages = (builtins.attrValues flakesTools) ++ [ codium writeSettings ];
+          packages = (builtins.attrValues flakesTools) ++ [ codium writeSettings pkgs.poetry ];
           commands = [
             {
               name = "codium";
@@ -69,6 +74,10 @@
               name = writeSettings.name;
               category = "ide";
               help = writeSettings.meta.description;
+            }
+            {
+              name = "poetry";
+              category = "tools";
             }
           ];
         };
