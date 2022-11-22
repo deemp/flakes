@@ -10,7 +10,7 @@ Nix flakes for tools that I use
 
 ## Contents
 
-- [codium](./codium/README.md) - set up VSCodium with binaries on `PATH` and extensions
+- [codium](./codium/README.md) - set up `VSCodium` with extensions and executables on `PATH`
 - [devshell](./devshell/README.md) - Easily create a CLI to your `devShells`
 - [drv-tools](./drv-tools/flake.nix) - convenience tools for working with derivations
 - [env2json](./env2json/README.md) - convert `.env` to `.json`
