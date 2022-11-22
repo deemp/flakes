@@ -8,7 +8,9 @@
 
 ## Basics
 
-- Study [Nix language](https://nixos.wiki/wiki/Overview_of_the_Nix_Language)
+- Study `Nix` language
+  - [here](https://nixos.wiki/wiki/Overview_of_the_Nix_Language)
+  - and [here](https://nixos.org/manual/nix/unstable/language/index.html)
 - Learn about [flakes](#flakes)
 - Read:
   - [Nix manual](https://nixos.org/manual/nix/unstable/command-ref/nix-store.html?searchbar=&search=s)
