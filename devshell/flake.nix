@@ -21,7 +21,8 @@
             devshell_ // {
               mkShell = configuration: devshell_.mkShell (
                 configuration // {
-                  packages = pkgs.lib.lists.flatten configuration.packages;
+                  # bashInteractive - for VSCodium
+                  packages = pkgs.lib.lists.flatten (configuration.packages ++ [ pkgs.bashInteractive ]);
                   commands = (
                     builtins.map
                       (c:
