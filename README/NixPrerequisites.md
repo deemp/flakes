@@ -10,8 +10,10 @@
 
 - Study [Nix language](https://nixos.wiki/wiki/Overview_of_the_Nix_Language)
 - Learn about [flakes](#flakes)
-- Read [Nix manual](https://nixos.org/manual/nix/unstable/command-ref/nix-store.html?searchbar=&search=s)
-- Read [nixpkgs manual](https://nixos.org/manual/nixpkgs/unstable/#sec-stdenv-phases)
+- Read:
+  - [Nix manual](https://nixos.org/manual/nix/unstable/command-ref/nix-store.html?searchbar=&search=s)
+  - [nixpkgs manual](https://nixos.org/manual/nixpkgs/unstable)
+  - [nix.dev](https://nix.dev/) - Good tutorials. No flakes so far
 
 ## Docs
 
