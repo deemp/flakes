@@ -400,11 +400,11 @@ nixFlakeInit = do
               "src",
               "app",
               "test",
-              "README.md",
+              "README.md"
               packageYaml,
               modulesDir,
               hieYaml,
-              gitignore
+              gitignore,
             ]
       gitInit = "git init"
       gitCommit = "git add . && git commit -m 'manager init'"
