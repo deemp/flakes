@@ -22,7 +22,7 @@ Nix flakes for tools that I use
   - Automate routine actions in projects having multiple unrelated `Haskell` modules
 - [source-flake](./source-flake/) - pinned flakes
   - I use them to sync flake inputs in my other flakes
-- [templates](./templates/) - Nix flake templates that can be used to initialize new projects
+- [templates](./templates/) - Nix flake templates
   - See [Templates](#templates)
 
 ## Other flakes
@@ -41,4 +41,4 @@ Nix flakes for tools that I use
 This repo provides several templates. Learn how you can use them.
 
 - Templates [Prerequisites](./README/NixPrerequisites.md#templates)
-- Dev tools [Conventions](./README/Conventions.md#dev-tools) - to decide where to put the templates
+- Dev tools [Conventions](./README/Conventions.md#dev-tools) - decide where to put flakes generated from templates
