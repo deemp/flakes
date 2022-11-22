@@ -40,5 +40,5 @@ Nix flakes for tools that I use
 
 This repo provides several templates. Learn how you can use them.
 
-- Templates [Prerequisites](./README/NixPrerequisites#templates)
+- Templates [Prerequisites](./README/NixPrerequisites.md#templates)
 - Dev tools [Conventions](./README/Conventions.md#dev-tools) - to decide where to put the templates
