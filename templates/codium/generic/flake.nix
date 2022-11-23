@@ -21,8 +21,8 @@
       (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        inherit (my-codium.functions.${system}) mkCodium;
-        inherit (my-codium.configs.${system}) extensions;
+        inherit (my-codium.functions.${system}) mkCodium writeSettingsJSON;
+        inherit (my-codium.configs.${system}) extensions settingsNix;
         inherit (vscode-extensions.packages.${system}) vscode open-vsx;
         codium = mkCodium {
           extensions = {
@@ -34,7 +34,13 @@
           };
           runtimeDependencies = [ pkgs.hello ];
         };
+        writeSettings = writeSettingsJSON {
+          inherit (settingsNix)
+            nix-ide git gitlens editor workbench
+            files markdown-language-features todo-tree;
+        };
         devshell = my-devshell.devshell.${system};
+        inherit (my-devshell.functions.${system}) mkCommands;
       in
       {
         devShells.default = devshell.mkShell
@@ -45,13 +51,7 @@
                 printf "Hello!\n"
               '';
             };
-            commands = [
-              {
-                name = "codium";
-                help = "VSCodium with `hello` binary on `PATH` and a couple of extensions";
-                category = "ide";
-              }
-            ];
+            commands = mkCommands "ide" [ codium writeSettings ];
           };
       });
 
