@@ -58,9 +58,22 @@
                 }
               );
             };
+
+          mkCommands = category: drvs: map
+            (
+              x: {
+                name = x.name;
+                category = category;
+                help = x.meta.description;
+              }
+            )
+            drvs;
         in
         {
           inherit devshell;
+          functions = {
+            inherit mkCommands;
+          };
           devShells.default = devshell.mkShell {
             packages = [ pkgs.gawk pkgs.hello ];
             bash = {
