@@ -27,7 +27,7 @@ in
   github = {
     inherit (open-vsx.github) vscode-pull-request-github;
     inherit (open-vsx.eamodio) gitlens;
-    inherit (open-vsx.cschleiden) vscode-github-actions;
+    inherit (vscode.cschleiden) vscode-github-actions;
   };
   typescript = { inherit (open-vsx.ms-vscode) vscode-typescript-next; };
   markdown = {
@@ -39,7 +39,7 @@ in
   };
   misc = {
     inherit (open-vsx.usernamehw) errorlens;
-    inherit (open-vsx.gruntfuggly) todo-tree;
+    inherit (vscode.gruntfuggly) todo-tree;
   };
   docker = {
     inherit (vscode.ms-vscode-remote) remote-containers;
@@ -60,7 +60,7 @@ in
     inherit (open-vsx.tamasfe) even-better-toml;
   };
   terraform = {
-    inherit (open-vsx.hashicorp) terraform;
+    inherit (vscode.hashicorp) terraform;
   };
   fish = {
     inherit (open-vsx.bmalehorn) vscode-fish;
