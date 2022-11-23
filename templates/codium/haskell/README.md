@@ -86,14 +86,15 @@ It can be used to rerun a function in a given file on changes in a given directo
 This template uses `GHC 9.2.4`. You can switch to `GHC 9.0.2`:
 
 - in `flake.nix`, change `"92"` to `"90"`
-- in `stack.nix`, change `"924"` to `"902"`
 - in `stack.yaml`, change `resolver` to [lts-19.33](https://www.stackage.org/lts-19.33) or a later one from `stackage`
+
+After that, if you're working in `VSCodium`, you should repeat the [Quick Start](#quick-start)
 
 ### managers
 
 `manager` can be useful if you'd like to write many small unrelated `Haskell` modules, maybe with a couple of other imported modules.
 
-See [manager](https://github.com/deemp/flakes/tree/main/manager)
+See [manager](https://github.com/deemp/flakes/tree/main/manager#readme)
 
 Get `manager` in a devshell:
 

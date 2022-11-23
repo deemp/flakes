@@ -2,11 +2,11 @@
 
 ## Prerequisites
 
-- See `VSCodium` for `Haskell` [template](https://github.com/deemp/flakes/tree/main/templates/codium/haskell).
+- See `VSCodium` for `Haskell` [template](https://github.com/deemp/flakes/tree/main/templates/codium/haskell#readme).
 It explains what's available in this project.
 - Next, see Haskell [Prerequisites](https://github.com/br4ch1st0chr0n3/flakes/blob/main/README/Haskell.md).
 - Following that, see [Troubleshooting](https://github.com/br4ch1st0chr0n3/flakes/blob/main/README/Troubleshooting.md).
-- Also, read [manager](https://github.com/deemp/flakes/tree/main/manager) docs.
+- Also, read [manager](https://github.com/deemp/flakes/tree/main/manager#readme) docs.
 - Recurse into `Prerequisites` to get even more info.
 
 ## Quick start

@@ -2,7 +2,7 @@
 
 Several templates for setting up `VSCodium` as a flake.
 
-They're based on [codium](https://github.com/deemp/flakes/tree/main/codium) flake.
+They're based on [codium](https://github.com/deemp/flakes/tree/main/codium#readme) flake.
 
 ## Example
 
