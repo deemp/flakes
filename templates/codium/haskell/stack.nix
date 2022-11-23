@@ -1,4 +1,4 @@
-{ ghcVersion ? "924" }: (
+{ ghcVersion }: (
   (import
     (
       let lock = builtins.fromJSON (builtins.readFile ./flake.lock); in
