@@ -23,6 +23,10 @@ nix:
   enable: true
   shell-file: stack.nix
 
+ghc-options:
+  "$everything": -haddock
+  "$locals": -Wall
+
 # User packages to be built.
 # Various formats can be used as shown in the example below.
 #
