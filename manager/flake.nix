@@ -4,6 +4,7 @@
     flake-utils.follows = "haskell-tools/flake-utils";
     haskell-tools.url = "github:deemp/flakes?dir=language-tools/haskell";
     hpack_.url = "github:deemp/flakes?dir=source-flake/hpack";
+    drv-tools.url = "github:deemp/flakes?dir=drv-tools";
     hpack.follows = "hpack_/hpack";
     flake-compat = {
       url = "github:edolstra/flake-compat";
@@ -16,6 +17,7 @@
     , nixpkgs
     , hpack
     , haskell-tools
+    , drv-tools
     , ...
     }:
     flake-utils.lib.eachDefaultSystem
@@ -25,6 +27,8 @@
         hsShellTools = haskell-tools.toolSets.${system}.shellTools;
         inherit (haskell-tools.functions.${system}) toolsGHC;
         inherit (toolsGHC "90") staticExecutable;
+        inherit (drv-tools.functions.${system}) withDescription withMan;
+        inherit (drv-tools.configs.${system}) man;
         managerTools = [
           hpack.packages.${system}.default
           pkgs.haskellPackages.implicit-hie
@@ -37,17 +41,29 @@
             manager_ = "manager";
             manager-exe = staticExecutable manager_ ./.;
           in
-          pkgs.symlinkJoin {
-            name = manager_;
-            paths = [ manager-exe ];
-            buildInputs = [ pkgs.makeBinaryWrapper ];
-            postBuild = ''
-              wrapProgram $out/bin/${manager_} \
-                --set PATH ${
-                  pkgs.lib.makeBinPath managerTools
+          withMan
+            (
+              withDescription
+                (
+                  pkgs.symlinkJoin {
+                    name = manager_;
+                    paths = [ manager-exe ];
+                    buildInputs = [ pkgs.makeBinaryWrapper ];
+                    postBuild = ''
+                      wrapProgram $out/bin/${manager_} \
+                        --set PATH ${
+                          pkgs.lib.makeBinPath managerTools
+                          }
+                    '';
                   }
-            '';
-          };
+                ) "Manage repetitive Haskell modules"
+            )
+            (
+              x: ''
+                ${man.DESCRIPTION}
+                ${x.meta.description}
+              ''
+            );
       in
       {
         packages = {
