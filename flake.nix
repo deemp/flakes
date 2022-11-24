@@ -1,14 +1,18 @@
 {
   inputs = {
-    my-codium.url = "github:br4ch1st0chr0n3/flakes?dir=codium";
-    nixpkgs.follows = "my-codium/nixpkgs";
-    flake-utils.follows = "my-codium/flake-utils";
-    drv-tools.follows = "my-codium/drv-tools";
-    my-devshell.follows = "my-codium/my-devshell";
-    flake-tools.url = "github:br4ch1st0chr0n3/flakes?dir=flake-tools";
-    manager.url = "github:br4ch1st0chr0n3/flakes?dir=manager";
-    haskell-tools.follows = "manager/haskell-tools";
-    flake-compat.follows = "manager/flake-compat";
+    nixpkgs_.url = "github:deemp/flakes?dir=source-flake/nixpkgs";
+    nixpkgs.follows = "nixpkgs_/nixpkgs";
+    my-codium.url = "github:deemp/flakes?dir=codium";
+    drv-tools.url = "github:deemp/flakes?dir=drv-tools";
+    flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
+    flake-utils.follows = "flake-utils_/flake-utils";
+    haskell-tools.url = "github:deemp/flakes?dir=language-tools/haskell";
+    my-devshell.url = "github:deemp/flakes?dir=devshell";
+    manager.url = "github:deemp/flakes?dir=manager";
+    flake-compat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
+    };
   };
   outputs =
     { self
@@ -17,57 +21,45 @@
     , my-codium
     , drv-tools
     , haskell-tools
-    , flake-tools
-    , manager
     , my-devshell
+    , manager
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-      inherit (my-codium.functions.${system})
-        writeSettingsJSON
-        mkCodium
-        ;
-      inherit (my-codium.configs.${system})
-        extensions
-        settingsNix
-        ;
+      inherit (my-codium.functions.${system}) writeSettingsJSON mkCodium;
+      inherit (drv-tools.functions.${system}) mkBinName;
+      inherit (my-codium.configs.${system}) extensions settingsNix;
       devshell = my-devshell.devshell.${system};
-      inherit (flake-tools.functions.${system})
-        mkFlakesTools
-        ;
-      inherit (haskell-tools.functions.${system})
-        toolsGHC
-        ;
+      inherit (haskell-tools.functions.${system}) toolsGHC;
       hsShellTools = haskell-tools.toolSets.${system}.shellTools;
-      inherit (toolsGHC "92") staticExecutable stack hls;
+      inherit (toolsGHC "92") stack hls ghc;
 
       writeSettings = writeSettingsJSON {
         inherit (settingsNix) haskell todo-tree files editor gitlens
           git nix-ide workbench markdown-all-in-one;
       };
 
-      tools = (builtins.attrValues hsShellTools) ++ [
-        manager.packages.${system}.default
-        stack
-        writeSettings
-        hls
-        pkgs.jq
-      ];
+      tools =
+        [
+          hsShellTools.implicit-hie
+          hsShellTools.ghcid
+          manager.packages.${system}.default
+          stack
+          writeSettings
+          hls
+          ghc
+        ];
 
       codium = mkCodium {
         extensions = { inherit (extensions) nix haskell misc github markdown; };
         runtimeDependencies = tools;
       };
-
-      flakesTools = mkFlakesTools [ "." ];
     in
     {
       packages = {
-        default = hls;
-        pushToCachix = flakesTools.pushToCachix;
-        updateLocks = flakesTools.update;
+        default = codium;
       };
 
       devShells.default = devshell.mkShell
@@ -75,35 +67,42 @@
           packages = [ codium ] ++ tools;
           bash = {
             extra = ''
-              source <(manager --bash-completion-script '$(which manager)')
+              printf "Hello!\n"
             '';
           };
           commands = [
             {
-              name = "codium, ghcid, stack";
-              help = "available in codium";
-            }
-            {
-              name = "${writeSettings.name}";
-              help = "write .vscode/settings.json";
+              name = "ghcid, stack, ghc, jq";
             }
             {
               name = "manager";
-              category = "tools";
               help = "manage Haskell modules and template files";
+              category = "ide";
+            }
+            {
+              name = "codium";
+              help = "VSCodium with a couple of extensions and given executables on `PATH`";
+              category = "ide";
+            }
+            {
+              name = "${writeSettings.name}";
+              help = "write `.vscode/settings.json`";
+              category = "ide";
             }
           ];
         };
 
-      stack-shell = { ghcVersion }:
+      # Nix-provided libraries for stack
+      stack-dependencies = { ghcVersion }:
 
         pkgs.haskell.lib.buildStackProject {
-          name = "nix-managed-stack-shell";
+          name = "stack-dependencies";
 
           ghc = pkgs.haskell.compiler.${ghcVersion};
 
           buildInputs = [
-            pkgs.zlib
+            pkgs.lzma
+            pkgs.hello
           ];
         };
     });
@@ -113,13 +112,13 @@
       "https://haskell-language-server.cachix.org"
       "https://nix-community.cachix.org"
       "https://hydra.iohk.io"
-      "https://br4ch1st0chr0n3.cachix.org"
+      "https://deemp.cachix.org"
     ];
     extra-trusted-public-keys = [
       "haskell-language-server.cachix.org-1:juFfHrwkOxqIOZShtC4YC1uT1bBcq2RSvC7OMKx0Nz8="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
-      "br4ch1st0chr0n3.cachix.org-1:o1FA93L5vL4LWi+jk2ECFk1L1rDlMoTH21R1FHtSKaU="
+      "deemp.cachix.org-1:9shDxyR2ANqEPQEEYDL/xIOnoPwxHot21L5fiZnFL18="
     ];
   };
 }

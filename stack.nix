@@ -1,4 +1,4 @@
-{ ghcVersion ? "924" }: (
+{ ghcVersion }: (
   (import
     (
       let lock = builtins.fromJSON (builtins.readFile ./flake.lock); in
@@ -9,4 +9,4 @@
     )
     { src = ./.; }
   ).defaultNix
-).outputs.stack-shell.${builtins.currentSystem} { inherit ghcVersion; }
+).outputs.stack-dependencies.${builtins.currentSystem} { inherit ghcVersion; }

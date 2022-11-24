@@ -5,44 +5,37 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           nix-managed
-version:        0.0.0
+version:        0.1.0.0
 license:        BSD3
+license-file:   LICENSE
 build-type:     Simple
 
-executable Chapter1
+executable A
   main-is: Main.hs
   other-modules:
-      Chapter1
-      Ex1
-      Ex2
-      Ex3
-      Template
       Paths_nix_managed
   hs-source-dirs:
-      ./Modules/Chapter1
+      ./Modules/A
   default-extensions:
       TypeApplications
-      BlockArguments
-      QuasiQuotes
-      ScopedTypeVariables
   ghc-options: -Wall
   build-depends:
       base >=4.7 && <5
-    , sockets-and-pipes >=0.3
   default-language: Haskell2010
 
-executable Templates.SimpleMain
-  main-is: SimpleMain.hs
+executable B
+  main-is: Main.hs
   other-modules:
+      AnotherModule
       Paths_nix_managed
   hs-source-dirs:
-      ./Templates
+      ./Modules/B
   default-extensions:
       TypeApplications
-      BlockArguments
-      QuasiQuotes
-      ScopedTypeVariables
   ghc-options: -Wall
   build-depends:
       base >=4.7 && <5
+    , directory
+    , filepath
+    , relude
   default-language: Haskell2010
