@@ -58,6 +58,7 @@
         flakesTools = mkFlakesTools [ "." ];
         writeSettings = writeSettingsJSON settingsNix;
         devshell = my-devshell.devshell.${system};
+        inherit (my-devshell.functions.${system}) mkCommands;
       in
       {
         devShells.default = devshell.mkShell {
@@ -68,24 +69,9 @@
             pkgs.poetry
             createVenvs
             writeSettings
+            pkgs.rustup
           ];
-          commands = [
-            {
-              name = codium.name;
-              help = codium.meta.description;
-              category = "ide";
-            }
-            {
-              name = createVenvs.name;
-              help = createVenvs.meta.description;
-              category = "ide";
-            }
-            {
-              name = writeSettings.name;
-              help = writeSettings.meta.description;
-              category = "ide";
-            }
-          ];
+          commands = mkCommands "ide" [ codium createVenvs writeSettings ];
         };
         packages = {
           pushToCachix = flakesTools.pushToCachix;
