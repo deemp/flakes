@@ -11,12 +11,12 @@ It explains what's available in this project.
 
 ## Quick start
 
-1. If you haven't yet started `VSCodium`, open it:
+1. If you haven't yet started `VSCodium` from this flake:
 
     ```terminal
     nix develop
     # if you haven't yet written 
-    # or have already changed
+    # or have already changed the settings
     write-settings-json
     codium .
     ```
