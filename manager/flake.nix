@@ -56,7 +56,7 @@
                           }
                     '';
                   }
-                ) "Manage repetitive Haskell modules"
+                ) "Manage repetitive Haskell modules. Run `manager -h`"
             )
             (
               x: ''
