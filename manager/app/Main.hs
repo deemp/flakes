@@ -508,7 +508,7 @@ handleCommand cmd = runManaged $ case cmd of
             "\n"
             [ "-c stack ghci" <-> mkModuleHs name,
               "-W",
-              "-r=:" <> function,
+              "-r=" <> function,
               "--reload=" <> modulesDir
             ]
   where
