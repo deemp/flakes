@@ -42,6 +42,13 @@ codium .
 
 1. Open `new-project/README.md` and follow instructions there
 
+1. If you'd like to enable completions on `<TAB>` in your shell - see [this](https://github.com/pcapriotti/optparse-applicative#bash-zsh-and-fish-completions). With completions enabled, you'll be able to get `manager`'s list of commands:
+
+  ```sh
+  manager <TAB>
+  --help  -h      add     init    list    rm      set     update
+  ```
+
 ## Contribute
 
 You can help improve `manager`
