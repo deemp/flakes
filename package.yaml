@@ -1,23 +1,21 @@
 default-extensions:
 - TypeApplications
+- ImportQualifiedPost
+- BlockArguments
+- OverloadedStrings
 
 dependencies:
 - base >= 4.7 && < 5
 
 executables:
-  A:
+  Chapters:
+    dependencies: sockets-and-pipes
     main: Main.hs
-    source-dirs: ./Modules/A
-  B:
-    dependencies:
-    - filepath
-    - directory
-    - relude
+    source-dirs: Modules/Chapters
+  ChaptersA:
+    dependencies: sockets-and-pipes
     main: Main.hs
-    source-dirs: ./Modules/B
-
-ghc-options:
-- -Wall
+    source-dirs: Modules/ChaptersA
 
 license: BSD3
 

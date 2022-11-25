@@ -19,6 +19,10 @@
 # resolver: https://example.com/snapshots/2018-01-01.yaml
 resolver: nightly-2022-11-12
 
+ghc-options:
+  "$everything": -haddock
+  "$locals": -Wall
+
 nix: 
   enable: true
   shell-file: stack.nix
@@ -38,8 +42,8 @@ packages:
 # These entries can reference officially published versions as well as
 # forks / in-progress versions pinned to a git hash. For example:
 #
-# extra-deps:
-# - acme-missiles-0.3
+extra-deps:
+- sockets-and-pipes-0.3
 # - git: https://github.com/commercialhaskell/stack.git
 #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a
 #

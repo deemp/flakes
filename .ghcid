@@ -1,2 +1,4 @@
+-c stack ghci Modules/Chapters/C_1_5.hs
 -W
--r=:main
+-r=howManyHandles
+--reload=Modules

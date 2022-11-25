@@ -10,32 +10,62 @@ license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
 
-executable A
+executable Chapters
   main-is: Main.hs
   other-modules:
+      C_0_Setup
+      C_1_2_Writing_to_a_file
+      C_1_3_Diligent_cleanup
+      C_1_4_MonadIO
+      C_1_5_Exercises
+      C_2_1_Packed_characters
+      C_2_2_Reading_from_a_file
+      C_2_3_Exercises
+      C_3_1_Packed_octets
+      C_3_2_Copying_a_file
+      C_3_5_Avoiding_system_defaults
+      C_3_6_Exercises
+      C_4_1_Open_Up_and_Connect
+      C_4_2_Extra_details
+      C_4_3_Names_and_Addresses
+      C_4_4_Address_Information
       Paths_nix_managed
   hs-source-dirs:
-      ./Modules/A
+      Modules/Chapters
   default-extensions:
       TypeApplications
-  ghc-options: -Wall
+      ImportQualifiedPost
+      BlockArguments
+      OverloadedStrings
   build-depends:
       base >=4.7 && <5
+    , sockets-and-pipes
   default-language: Haskell2010
 
-executable B
+executable ChaptersA
   main-is: Main.hs
   other-modules:
-      AnotherModule
+      C_0
+      C_1_2
+      C_1_3
+      C_1_4
+      C_1_5
+      C_2_1
+      C_2_2
+      C_2_3
+      C_3_1
+      C_3_2
+      C_3_4
+      C_3_6
       Paths_nix_managed
   hs-source-dirs:
-      ./Modules/B
+      Modules/ChaptersA
   default-extensions:
       TypeApplications
-  ghc-options: -Wall
+      ImportQualifiedPost
+      BlockArguments
+      OverloadedStrings
   build-depends:
       base >=4.7 && <5
-    , directory
-    , filepath
-    , relude
+    , sockets-and-pipes
   default-language: Haskell2010
