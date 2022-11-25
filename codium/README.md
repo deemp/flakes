@@ -4,6 +4,16 @@ Set up VSCodium with extensions and executables on its `PATH` in several lines o
 
 See [Prerequisites](https://github.com/deemp/flakes#prerequisites)
 
+## Conventions
+
+In a project with multiple subprojects, one needs to switch between toolsets for each subproject.
+In some cases, it's convenient to start several `VSCodium` instances, one per sub-project.
+Then, one needs to decide how to deliver `VSCodium` in such a project. There are several options.
+
+1. A single `VSCodium` with a superset of required extensions and executables on its `PATH` over the sub-projects.
+1. A `VSCodium` per sub-project
+1. A mix of these
+
 ## Contribute
 
 ```console
@@ -22,7 +32,7 @@ codium .
 
 Case: VSCodium doesn't have the binaries provided in `runtimeDependencies` (like [here](https://github.com/deemp/flakes/blob/7bab5d96658007f5ad0c72ec7805b5b4eb5a83dd/templates/codium/generic/flake.nix#L33)) on `PATH`:
 
-   1. You need to repair VSCodium's derivation (see [Repair a derivation](#))
+   1. You need to repair VSCodium's derivation
    1. Assumptions:
       - current directory is `DIR`
       - there is a `DIR/flake.nix`
