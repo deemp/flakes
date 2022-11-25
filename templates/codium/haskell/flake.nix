@@ -67,7 +67,8 @@
           packages = [ codium ] ++ tools;
           bash = {
             extra = ''
-              printf "Hello!\n"
+              # enable completions for `manager`
+              source <(manager --bash-completion-script `which manager`)
             '';
           };
           commands = [
