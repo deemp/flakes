@@ -98,7 +98,10 @@
         , text
         , runtimeInputs ? [ ]
         , description ? "no description provided"
-        , longDescription ? "no detailed description provided"
+        , longDescription ? ''
+            ${DESCRIPTION}
+            ${description}
+          ''
         }:
         withMan
           (withMeta
