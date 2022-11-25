@@ -185,10 +185,6 @@
             printf "${framedBrackets "ok %s"}" "${name_}"
           '';
           inherit description;
-          longDescription = ''
-            ${DESCRIPTION}
-            ${description}
-          '';
         };
 
       # use when need to generate settings.json etc.
