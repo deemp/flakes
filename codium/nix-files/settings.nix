@@ -115,4 +115,8 @@
     "python.linting.mypyCategorySeverity.error" = "Error";
     "python.linting.mypyEnabled" = true;
   };
+
+  window = {
+    "window.restoreWindows" = "none";
+  };
 }
