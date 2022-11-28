@@ -52,6 +52,7 @@
       "original": {
         "owner": "deemp",
         "repo": "nix-vscode-extensions",
+        "rev": "5ecfef9e1c15015e83e1e9253d7fc0eee5c9c3dd",
         "type": "github"
       }
     }
