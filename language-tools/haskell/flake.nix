@@ -92,7 +92,7 @@
       toolsGHC = ghcVersion: {
         hls = hlsGHC ghcVersion;
         stack = stackWithDependencies ghcVersion [ ];
-        ghc = pkgs.haskell.compiler."ghc${ghcVersion}";
+        ghc = withAttrs (pkgs.haskell.compiler."ghc${ghcVersion}") { name = "ghc"; };
         callCabal = callCabalGHC ghcVersion;
         staticExecutable = staticExecutableGHC ghcVersion;
         inherit justStaticExecutables;
