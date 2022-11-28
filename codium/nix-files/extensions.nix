@@ -6,8 +6,8 @@ let
 in
 {
   haskell = {
-    inherit (open-vsx.haskell) haskell;
-    inherit (open-vsx.justusadam) language-haskell;
+    inherit (vscode.haskell) haskell;
+    inherit (vscode.justusadam) language-haskell;
     inherit (vscode.visortelle) haskell-spotlight;
   };
   yaml = {
@@ -25,8 +25,8 @@ in
     inherit (open-vsx.jnoortheen) nix-ide;
   };
   github = {
-    inherit (open-vsx.github) vscode-pull-request-github;
-    inherit (open-vsx.eamodio) gitlens;
+    inherit (vscode.github) vscode-pull-request-github;
+    inherit (vscode.eamodio) gitlens;
     inherit (vscode.cschleiden) vscode-github-actions;
   };
   typescript = { inherit (open-vsx.ms-vscode) vscode-typescript-next; };
@@ -47,13 +47,13 @@ in
     inherit (open-vsx.exiasr) hadolint;
   };
   python = {
-    inherit (open-vsx.donjayamanne) python-extension-pack;
-    inherit (open-vsx.njpwerner) autodocstring;
-    inherit (open-vsx.ms-python) python;
+    inherit (vscode.donjayamanne) python-extension-pack;
+    inherit (vscode.njpwerner) autodocstring;
+    inherit (vscode.ms-python) python;
     inherit (open-vsx.samuelcolvin) jinjahtml;
     inherit (vscode.monosans) djlint;
-    inherit (open-vsx.batisteo) vscode-django;
-    inherit (open-vsx.kevinrose) vsc-python-indent;
+    inherit (vscode.batisteo) vscode-django;
+    inherit (vscode.kevinrose) vsc-python-indent;
     inherit (vscode.visualstudioexptteam) vscodeintellicode;
   };
   toml = {
