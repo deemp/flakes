@@ -29,9 +29,10 @@
     let
       pkgs = nixpkgs.legacyPackages.${system};
       inherit (my-codium.functions.${system}) writeSettingsJSON mkCodium;
-      inherit (drv-tools.functions.${system}) mkBinName;
+      inherit (drv-tools.functions.${system}) mkBinName withAttrs;
       inherit (my-codium.configs.${system}) extensions settingsNix;
       devshell = my-devshell.devshell.${system};
+      inherit (my-devshell.functions.${system}) mkCommands;
       inherit (haskell-tools.functions.${system}) toolsGHC;
       hsShellTools = haskell-tools.toolSets.${system}.shellTools;
       inherit (toolsGHC "92") stack hls ghc;
@@ -41,20 +42,18 @@
           git nix-ide workbench markdown-all-in-one;
       };
 
-      tools =
-        [
-          hsShellTools.implicit-hie
-          hsShellTools.ghcid
-          manager.packages.${system}.default
-          stack
-          writeSettings
-          hls
-          ghc
-        ];
+      tools = [
+        hsShellTools.implicit-hie
+        hsShellTools.ghcid
+        manager.packages.${system}.default
+        stack
+        writeSettings
+        ghc
+      ];
 
       codium = mkCodium {
         extensions = { inherit (extensions) nix haskell misc github markdown; };
-        runtimeDependencies = tools;
+        runtimeDependencies = tools ++ [ hls ];
       };
     in
     {
@@ -71,26 +70,7 @@
               source <(manager --bash-completion-script `which manager`)
             '';
           };
-          commands = [
-            {
-              name = "ghcid, stack, ghc, jq";
-            }
-            {
-              name = "manager";
-              help = "manage Haskell modules and template files";
-              category = "ide";
-            }
-            {
-              name = "codium";
-              help = "VSCodium with a couple of extensions and given executables on `PATH`";
-              category = "ide";
-            }
-            {
-              name = "${writeSettings.name}";
-              help = "write `.vscode/settings.json`";
-              category = "ide";
-            }
-          ];
+          commands = mkCommands "tools" (tools ++ [ codium ]);
         };
 
       # Nix-provided libraries for stack
