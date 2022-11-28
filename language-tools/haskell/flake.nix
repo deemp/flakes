@@ -17,14 +17,13 @@
     flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-      shellTools = {
-        inherit (pkgs.haskellPackages)
-          # auto generate LSP hie.yaml file fm cabal
-          implicit-hie
-          # GHCi based bare bones IDE
-          ghcid
-          ;
-      };
+      withAttrs = pkgs.lib.attrsets.recursiveUpdate;
+      shellTools =
+        let hpkgs = pkgs.haskellPackages; in
+        {
+          implicit-hie = withAttrs hpkgs.implicit-hie { name = "gen-hie"; };
+          ghcid = withAttrs hpkgs.ghcid { name = "ghcid"; };
+        };
 
       # wrap Stack to work with our Nix integration
       # let running programs use specified binaries
@@ -126,7 +125,7 @@
           stack runghc -- Ex
           rm Ex.*
         '';
-        buildInputs = [ stack ];
+        buildInputs = [ stack ] ++ (builtins.attrValues shellTools);
       };
     }
     );
