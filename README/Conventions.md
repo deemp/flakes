@@ -14,7 +14,7 @@ The outputs of a flake depend on its inputs. Inputs of a `flake.nix` are locked 
 If you expect that your flake will be used as an input to other flakes, you may want to leave only the relevant outputs in this flake.
 Dev tools that you use are irrelevant to users of your flake, so they should be moved into another flake.
 Usually, I place this another flake into a `./nix-dev` directory, near my main `./flake.nix`.
-This way I:
+This way, I:
 
 - move the irrelevant outputs from my main flake into `nix-dev`
 - move the irrelevant inputs into `nix-dev`
