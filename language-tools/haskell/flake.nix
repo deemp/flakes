@@ -36,22 +36,26 @@
             runtimeDependencies
           ];
         in
-        pkgs.symlinkJoin {
-          # will be available as the usual `stack` in terminal
-          name = "stack";
-          paths = [ pkgs.stack ];
-          buildInputs = [ pkgs.makeBinaryWrapper ];
-          # --system-ghc    # Use the existing GHC on PATH (will come from this Nix file)
-          # --no-install-ghc  # Don't try to install GHC if no matching GHC found on PATH
-          postBuild = ''
-            wrapProgram $out/bin/stack \
-              --add-flags "\
-                --system-ghc \
-                --no-install-ghc \
-              " \
-              --prefix PATH : ${pkgs.lib.makeBinPath deps}
-          '';
-        };
+        withAttrs
+          (pkgs.symlinkJoin {
+            # will be available as the usual `stack` in terminal
+            name = "stack";
+            paths = [ pkgs.stack ];
+            buildInputs = [ pkgs.makeBinaryWrapper ];
+            # --system-ghc    # Use the existing GHC on PATH (will come from this Nix file)
+            # --no-install-ghc  # Don't try to install GHC if no matching GHC found on PATH
+            postBuild = ''
+              wrapProgram $out/bin/stack \
+                --add-flags "\
+                  --system-ghc \
+                  --no-install-ghc \
+                " \
+                --prefix PATH : ${pkgs.lib.makeBinPath deps}
+            '';
+          })
+          {
+            meta.description = pkgs.stack.description;
+          };
 
       # a convenience function for building haskell packages
       # can be used for a project with GHC 9.0.2 as follows:
