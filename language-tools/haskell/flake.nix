@@ -54,7 +54,7 @@
             '';
           })
           {
-            meta.description = pkgs.stack.description;
+            meta.description = pkgs.stack.meta.description;
           };
 
       # a convenience function for building haskell packages
