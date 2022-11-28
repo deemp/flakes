@@ -48,7 +48,7 @@
         # bashInteractive is necessary for correct work
         mkCodium = { extensions ? { }, runtimeDependencies ? [ ] }:
           let
-            testCodium =
+            codium =
               let inherit (pkgs) vscode-with-extensions vscodium;
               in
               (vscode-with-extensions.override {
@@ -68,7 +68,7 @@
                 (
                   pkgs.symlinkJoin {
                     name = "codium";
-                    paths = [ testCodium ];
+                    paths = [ codium ];
                     buildInputs = [ pkgs.makeBinaryWrapper ];
                     postBuild = ''
                       wrapProgram $out/bin/codium \
@@ -124,7 +124,13 @@
         testCodium = mkCodium { inherit extensions; };
 
         # test write settings
-        testWriteSettings = writeSettingsJSON settingsNix;
+        testWriteSettings = writeSettingsJSON (
+          settingsNix // {
+            other = {
+              "window.restoreWindows" = "none";
+            };
+          }
+        );
       in
       {
         inherit extensions;
