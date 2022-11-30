@@ -56,6 +56,9 @@ in
     inherit (vscode.kevinrose) vsc-python-indent;
     inherit (vscode.visualstudioexptteam) vscodeintellicode;
   };
+  kubernetes = {
+    inherit (vscode.ipedrazas) kubernetes-snippets;
+  };
   toml = {
     inherit (open-vsx.tamasfe) even-better-toml;
   };
