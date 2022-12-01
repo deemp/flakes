@@ -42,7 +42,10 @@
           extensions = {
             inherit (extensions)
               python markdown github nix misc typescript yaml;
-            other = { inherit (vscode.mtxr) sqltools; };
+            other = {
+              inherit (vscode.mtxr) sqltools;
+              inherit (vscode.nomicfoundation) hardhat-solidity;
+            };
           };
           runtimeDependencies = [
             (
