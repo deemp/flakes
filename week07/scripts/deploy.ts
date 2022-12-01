@@ -33,36 +33,6 @@ async function main() {
   console.log(`acc1 staked token 1 on vault 0`)
   console.log(`now, balance of acc1  is ${await nftStaking.balanceOf(acc1.address, 0)}`)
 
-
-  // await rewards1.connect(owner).addController(owner.address)
-  
-  // console.log(collection1.address)
-  // console.log((await nftStaking.multiVault(0)).collection)
-  // TODO fix Error: VM Exception while processing transaction: reverted with reason string 'ERC721: caller is not token owner or approved
-  
-
-  // console.log(await (await nftStaking.multiVault(0)).collection.)
-    // .collection1.connect(acc1).walletOfOwner(acc1.address))
-  
-  // await collection2.mint(acc1.address, await collection2.maxMintAmount())
-  // await collection1.mint(acc2.address, 2)
-  
-  // await nftStaking.connect(acc1).stake(0, [1])
-  // console.log(await nftStaking.connect(acc1).balanceOf(acc1.address, 1))
-  // await nftStaking.connect(acc1).balanceOf(acc1.address, 1)
-  
-  
-  // const rewards = await Rewards.deploy()
-  // const nftStaking = await NFTStaking.deploy()
-
-  // await nftStaking.deployed()
-
-  // await rewards.addController(nftStaking.address)
-
-  // console.log(`Collection: ${collection1.address}`)
-  // console.log(`Collection: ${collection2.address}`)
-  // console.log(`Rewards: ${rewards.address}`)
-  // console.log(`NFTStaking: ${nftStaking.address}`)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
