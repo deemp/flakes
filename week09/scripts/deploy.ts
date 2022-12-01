@@ -4,49 +4,50 @@ import { ethers } from "hardhat";
 async function main(contractName: string) {
   console.log(`Testing contract ${contractName}`)
 
-  const Collection = await ethers.getContractFactory(contractName)
+  const Contract = await ethers.getContractFactory(contractName)
 
   const accounts = await ethers.getSigners()
   const owner = accounts[0]
 
   console.log(`TimeLock owner: ${owner.address}`)
-  const collection = await Collection.connect(owner).deploy()
+  const contract = (await Contract.connect(owner).deploy()).connect(owner)
 
-  console.log(`Collection address: ${collection.address}`)
+  console.log(`Collection address: ${contract.address}`)
 
   const initBalance = await owner.getBalance()
   console.log(`Owner's initial balance: ${initBalance}`)
 
-  await collection.deposit({ value: 3000 })
-  const initDepositBalance = await collection.balances(owner.address)
+  const oneEth = 100000000000000000000n
+
+  await contract.deposit({ value: oneEth })
+  
+  const initDepositBalance = await contract.balances(owner.address)
   console.log(`Owner's initial deposit balance: ${initDepositBalance}`)
 
-  const afterDepositBalance = await owner.getBalance()
-  console.log(`Owner's balance after depositing: ${afterDepositBalance}`)
+  const lockTime = await contract.lockTime(owner.address)
 
-  const lockTime = await collection.lockTime(owner.address)
-
-  const MAX_INT = ethers.BigNumber.from(115792089237316195423570985008687907853269984665640564039457584007913129639935n)
+  const MAX_INT = ethers.BigNumber.from(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffn)
   const lockTimeIncrease = MAX_INT.sub(lockTime).add(1)
 
   console.log(`Increase lock time by: ${lockTimeIncrease}`)
 
-  await collection.increaseLockTime(lockTimeIncrease)
+  await contract.increaseLockTime(lockTimeIncrease)
 
-  const newLockTime = await collection.lockTime(owner.address)
+  const newLockTime = await contract.lockTime(owner.address)
 
   console.log(`New lock time: ${newLockTime}`)
 
   console.log(`Withdrawing`)
 
-  await collection.withdraw()
+  await contract.withdraw()
 
-  const finalDepositBalance = await collection.balances(owner.address)
+  const finalDepositBalance = await contract.balances(owner.address)
   console.log(`Owner's final deposit balance: ${finalDepositBalance}`)
 
   const finalBalance = await owner.getBalance()
   console.log(`Owner's final balance: ${finalBalance}`)
 
+  // FIXME negative change
   console.log(`Balance changed by: ${finalBalance.sub(initBalance)}`)
 }
 
