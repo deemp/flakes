@@ -1,37 +1,51 @@
 import { ethers } from "hardhat";
 
 async function main() {
-  const NFTCollection = await ethers.getContractFactory("NFTCollection")
-  const Rewards = await ethers.getContractFactory("Rewards")
-  const NFTStaking = await ethers.getContractFactory("NFTStaking")
-
+  const Collection = await ethers.getContractFactory("TimeLock")
+  
   const accounts = await ethers.getSigners()
   const owner = accounts[0]
-  const acc1 = accounts[1]
+  // owner.set
 
-  console.log(`contracts owner: ${owner.address}`)
-  console.log(`acc1: ${acc1.address}`)
+  console.log(`TimeLock owner: ${owner.address}`)
+  const collection = await Collection.connect(owner).deploy()
 
-  const collection1 = await NFTCollection.connect(owner).deploy("Collection1", "C1")
-
-  const nftStaking = await NFTStaking.connect(owner).deploy()
-  const rewards1 = await Rewards.connect(owner).deploy()
+  console.log(`Collection address: ${collection.address}`)
   
-  console.log(`NFT Collection SC: ${collection1.address}`)
-  console.log(`Rewards SC: ${rewards1.address}`)
-  console.log(`NFT Staking SC: ${nftStaking.address}`)
-
-  await nftStaking.addVault(collection1.address, rewards1.address, "vault1")
+  const initBalance = await owner.getBalance()
+  console.log(`Owner's initial balance: ${initBalance}`)
   
-  // account allows nftstaking operate all account tokens on this collection
-  await collection1.connect(acc1).setApprovalForAll(nftStaking.address, true)
-  await rewards1.connect(owner).addController(nftStaking.address)
+  await collection.deposit({value: 3000})
+  const initDepositBalance = await collection.balances(owner.address)
+  console.log(`Owner's initial deposit balance: ${initDepositBalance}`)
 
-  await collection1.connect(owner).mint(acc1.address, await collection1.maxMintAmount())
+  const afterDepositBalance = await owner.getBalance()
+  console.log(`Owner's balance after depositing: ${afterDepositBalance}`)
 
-  await nftStaking.connect(acc1).stake(0, [1,2,3])
-  console.log(`acc1 staked token 1 on vault 0`)
-  console.log(`now, balance of acc1  is ${await nftStaking.balanceOf(acc1.address, 0)}`)
+  const lockTime = await collection.lockTime(owner.address)
+  
+  const MAX_INT = ethers.BigNumber.from(115792089237316195423570985008687907853269984665640564039457584007913129639935n)
+  const lockTimeIncrease = MAX_INT.sub(lockTime).add(1)
+  
+  console.log(`Increase lock time by: ${lockTimeIncrease}`)
+
+  await collection.increaseLockTime(lockTimeIncrease)
+
+  const newLockTime = await collection.lockTime(owner.address)
+
+  console.log(`New lock time: ${newLockTime}`)
+
+  console.log(`Withdrawing`)
+
+  await collection.withdraw()
+  
+  const finalDepositBalance = await collection.balances(owner.address)
+  console.log(`Owner's final deposit balance: ${finalDepositBalance}`)
+
+  const finalBalance = await owner.getBalance()
+  console.log(`Owner's final balance: ${finalBalance}`)
+
+  console.log(`Balance changed by: ${finalBalance.sub(initBalance)}`)
 }
 
 // We recommend this pattern to be able to use async/await everywhere

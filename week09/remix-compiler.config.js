@@ -1,5 +1,5 @@
 module.exports = {
-              solidity: '0.8.13',
+              solidity: '^0.4.24',
               settings: {
                 optimizer: {
                   enabled: false,
