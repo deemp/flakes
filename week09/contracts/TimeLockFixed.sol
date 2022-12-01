@@ -1,6 +1,6 @@
 pragma solidity ^0.4.24;
 
-contract TimeLock {
+contract TimeLockFixed {
     mapping(address => uint) public balances;
     mapping(address => uint) public lockTime;
 
@@ -10,12 +10,14 @@ contract TimeLock {
     }
 
     function increaseLockTime(uint _secondsToIncrease) public {
-        lockTime[msg.sender] += _secondsToIncrease;
+        uint c = lockTime[msg.sender] + _secondsToIncrease;
+        require(c >= lockTime[msg.sender], "Overflow encountered");
+        lockTime[msg.sender] = c;
     }
 
     function withdraw() public {
         require(balances[msg.sender] > 0, "Error: empty deposit balance");
-        require(now > lockTime[msg.sender], "Error: lock time hasn't yet expired!");
+        require(now > lockTime[msg.sender], "Error: lock time hasn't yet expired");
         msg.sender.transfer(balances[msg.sender]);
         balances[msg.sender] = 0;
     }

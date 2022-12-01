@@ -24,6 +24,16 @@ The work is unfinished
     npx hardhat run scripts/deploy.ts --network localhost
     ```
 
+## Solution
+
+The problem was that `increaseLockTime` allows overflows in the original SC.
+
+![img](README/TimeLock.png)
+
+To fix this, I checked for overflow in `increaseLockTime` (see [TimeLockFixed](./contracts/TimeLockFixed.sol))
+
+![img](README/TimeLockFixed.png)
+
 ## Sample Hardhat Project
 
 This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
