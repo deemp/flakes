@@ -47,32 +47,3 @@ executable Chapters
       base >=4.7 && <5
     , sockets-and-pipes
   default-language: Haskell2010
-
-executable ChaptersA
-  main-is: Main.hs
-  other-modules:
-      C_0
-      C_1_2
-      C_1_3
-      C_1_4
-      C_1_5
-      C_2_1
-      C_2_2
-      C_2_3
-      C_3_1
-      C_3_2
-      C_3_4
-      C_3_6
-      Paths_nix_managed
-  hs-source-dirs:
-      Modules/ChaptersA
-  default-extensions:
-      TypeApplications
-      ImportQualifiedPost
-      BlockArguments
-      OverloadedStrings
-      QuasiQuotes
-  build-depends:
-      base >=4.7 && <5
-    , sockets-and-pipes
-  default-language: Haskell2010

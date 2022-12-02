@@ -13,10 +13,6 @@ executables:
     dependencies: sockets-and-pipes
     main: Main.hs
     source-dirs: Modules/Chapters
-  ChaptersA:
-    dependencies: sockets-and-pipes
-    main: Main.hs
-    source-dirs: Modules/ChaptersA
 
 license: BSD3
 

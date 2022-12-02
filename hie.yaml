@@ -1,44 +1,5 @@
 cradle:
   stack:
-    - path: "./Modules/ChaptersA/Main.hs"
-      component: "nix-managed:exe:ChaptersA"
-
-    - path: "./Modules/ChaptersA/C_0.hs"
-      component: "nix-managed:exe:ChaptersA"
-
-    - path: "./Modules/ChaptersA/C_1_2.hs"
-      component: "nix-managed:exe:ChaptersA"
-
-    - path: "./Modules/ChaptersA/C_1_3.hs"
-      component: "nix-managed:exe:ChaptersA"
-
-    - path: "./Modules/ChaptersA/C_1_4.hs"
-      component: "nix-managed:exe:ChaptersA"
-
-    - path: "./Modules/ChaptersA/C_1_5.hs"
-      component: "nix-managed:exe:ChaptersA"
-
-    - path: "./Modules/ChaptersA/C_2_1.hs"
-      component: "nix-managed:exe:ChaptersA"
-
-    - path: "./Modules/ChaptersA/C_2_2.hs"
-      component: "nix-managed:exe:ChaptersA"
-
-    - path: "./Modules/ChaptersA/C_2_3.hs"
-      component: "nix-managed:exe:ChaptersA"
-
-    - path: "./Modules/ChaptersA/C_3_1.hs"
-      component: "nix-managed:exe:ChaptersA"
-
-    - path: "./Modules/ChaptersA/C_3_2.hs"
-      component: "nix-managed:exe:ChaptersA"
-
-    - path: "./Modules/ChaptersA/C_3_4.hs"
-      component: "nix-managed:exe:ChaptersA"
-
-    - path: "./Modules/ChaptersA/C_3_6.hs"
-      component: "nix-managed:exe:ChaptersA"
-
     - path: "./Modules/Chapters/Main.hs"
       component: "nix-managed:exe:Chapters"
 
@@ -100,4 +61,7 @@ cradle:
       component: "nix-managed:exe:Chapters"
 
     - path: "./Modules/Chapters/C_5_5_Serving_others.hs"
+      component: "nix-managed:exe:Chapters"
+
+    - path: "./Modules/Chapters/C_5_6_Exercises.hs"
       component: "nix-managed:exe:Chapters"
