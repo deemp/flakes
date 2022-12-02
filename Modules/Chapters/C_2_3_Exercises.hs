@@ -1,4 +1,4 @@
-module C_2_3_Exercises(repeatUntil) where
+module C_2_3_Exercises (repeatUntil) where
 
 import C_0_Setup (getDataDir)
 import C_1_5_Exercises (fileResource)
@@ -16,7 +16,10 @@ import System.FilePath ((</>))
 digitsOnly :: Text -> Text
 digitsOnly = T.filter isDigit
 
--- >>>digitsOnly (T.pack "ab c123 def4")
+testDigitsOnly :: Text
+testDigitsOnly = digitsOnly (T.pack "ab c123 def4")
+
+-- >>>testDigitsOnly
 -- "1234"
 
 capitalizeLast :: Text -> Text
@@ -69,12 +72,7 @@ unless cond = when (not cond)
 
 -- Ex 7
 
-repeatUntil ::
-  Monad m =>
-  m chunk ->
-  (chunk -> Bool) ->
-  (chunk -> m x) ->
-  m ()
+repeatUntil :: Monad m => m chunk -> (chunk -> Bool) -> (chunk -> m x) -> m ()
 repeatUntil getChunk isEnd f = continue
  where
   continue = do

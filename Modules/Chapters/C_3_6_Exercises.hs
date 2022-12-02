@@ -1,10 +1,12 @@
 module C_3_6_Exercises where
 
 import Data.ByteString as BS (ByteString, map)
+import Data.String (fromString)
+import Data.Text (Text)
 import Data.Text qualified as T
 import Data.Text.Encoding qualified as T
 import Data.Text.IO qualified as T
-import Data.String (fromString)
+import Relude (UnicodeException)
 
 -- Ex 8
 
@@ -13,6 +15,7 @@ greet nameBS = case T.decodeUtf8' nameBS of
   Left _ -> putStrLn "Invalid byte string"
   Right nameText -> T.putStrLn (T.pack "Hello, " <> nameText)
 
+p1 :: Either UnicodeException Text
 p1 = T.decodeUtf8' "♫"
 
 -- >>>p1

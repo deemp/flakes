@@ -3,6 +3,7 @@ default-extensions:
 - ImportQualifiedPost
 - BlockArguments
 - OverloadedStrings
+- QuasiQuotes
 
 dependencies:
 - base >= 4.7 && < 5

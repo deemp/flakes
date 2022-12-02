@@ -39,3 +39,11 @@
 - `SockAddr` - if know protocol and socket type
 - `AddrInfo` - `SockAddr` + info about protocol
 - `getAddrInfo` == `host` - look up a name and IP address
+
+## C_5_3
+
+- Header lines should end with `\r\n`
+
+## C_5_4
+
+- Body lines should not end with `\r\n`

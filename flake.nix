@@ -38,7 +38,7 @@
 
       writeSettings = writeSettingsJSON {
         inherit (settingsNix) haskell todo-tree files editor gitlens
-          git nix-ide workbench markdown-all-in-one markdown-language-features;
+          git nix-ide workbench markdown-all-in-one;
       };
 
       tools =
@@ -67,7 +67,7 @@
           packages = [ codium ] ++ tools;
           bash = {
             extra = ''
-              c
+              printf "Hello!\n"
             '';
           };
           commands = [
@@ -111,7 +111,7 @@
     extra-substituters = [
       "https://haskell-language-server.cachix.org"
       "https://nix-community.cachix.org"
-      "https://hydra.iohk.io"
+      # "https://hydra.iohk.io"
       "https://deemp.cachix.org"
     ];
     extra-trusted-public-keys = [

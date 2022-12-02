@@ -29,6 +29,11 @@ executable Chapters
       C_4_2_Extra_details
       C_4_3_Names_and_Addresses
       C_4_4_Address_Information
+      C_4_5_Exercises
+      C_5_3_ASCII_strings
+      C_5_4_HTTP_responses
+      C_5_5_Serving_others
+      C_5_6_Exercises
       Paths_nix_managed
   hs-source-dirs:
       Modules/Chapters
@@ -37,6 +42,7 @@ executable Chapters
       ImportQualifiedPost
       BlockArguments
       OverloadedStrings
+      QuasiQuotes
   build-depends:
       base >=4.7 && <5
     , sockets-and-pipes
@@ -65,6 +71,7 @@ executable ChaptersA
       ImportQualifiedPost
       BlockArguments
       OverloadedStrings
+      QuasiQuotes
   build-depends:
       base >=4.7 && <5
     , sockets-and-pipes

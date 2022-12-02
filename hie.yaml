@@ -89,3 +89,15 @@ cradle:
 
     - path: "./Modules/Chapters/C_4_4_Address_Information.hs"
       component: "nix-managed:exe:Chapters"
+
+    - path: "./Modules/Chapters/C_4_5_Exercises.hs"
+      component: "nix-managed:exe:Chapters"
+
+    - path: "./Modules/Chapters/C_5_3_ASCII_strings.hs"
+      component: "nix-managed:exe:Chapters"
+
+    - path: "./Modules/Chapters/C_5_4_HTTP_responses.hs"
+      component: "nix-managed:exe:Chapters"
+
+    - path: "./Modules/Chapters/C_5_5_Serving_others.hs"
+      component: "nix-managed:exe:Chapters"
