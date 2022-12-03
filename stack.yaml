@@ -21,7 +21,7 @@ resolver: nightly-2022-11-12
 
 ghc-options:
   "$everything": -haddock
-  "$locals": -Wall
+  "$locals": -Wall -Wno-unused-top-binds
 
 nix: 
   enable: true

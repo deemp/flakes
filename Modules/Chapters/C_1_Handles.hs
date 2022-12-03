@@ -1,6 +1,7 @@
-module C_1_5_Exercises where
+{-# LANGUAGE ImportQualifiedPost #-}
 
-import C_0_Setup (getDataDir)
+module C_1_Handles (fileResource, getDataDir, greetingTxt) where
+
 import Control.Exception (Exception (..))
 import Control.Exception.Safe qualified as Ex
 import Control.Monad.IO.Class (MonadIO (..))
@@ -8,11 +9,42 @@ import Control.Monad.Trans.Resource (ReleaseKey, ResourceT, allocate, runResourc
 import Data.Functor ((<&>))
 import GHC.IO.Handle (Handle)
 import GHC.IO.IOMode (IOMode (..))
+import Relude (print, putStrLn, show)
+import System.Directory qualified as Dir
 import System.FilePath ((</>))
 import System.IO qualified as IO
-import C_1_2_Writing_to_a_file (greetingTxt)
+import Prelude hiding (print, putStrLn, show)
 
--- Ex 1
+-- 0 Setup
+
+getDataDir :: IO FilePath
+getDataDir = do
+  dir <- Dir.getXdgDirectory Dir.XdgData "sockets-and-pipes"
+  Dir.createDirectoryIfMissing True dir
+  return dir
+
+-- 1.2 Writing to a file
+
+greetingTxt :: IO.FilePath
+greetingTxt = "greeting.txt"
+
+writeGreetingFile :: IO ()
+writeGreetingFile = do
+  dir <- getDataDir
+  h <- IO.openFile (dir </> greetingTxt) WriteMode
+  IO.putStrLn ("handle: " <> show h)
+  IO.hPutStrLn h "hello"
+  IO.hClose h
+  IO.putStrLn dir
+
+-- 1.4 MonadIO
+
+helloWorld :: MonadIO m => m ()
+helloWorld = liftIO (IO.putStrLn "hello, world")
+
+-- 1.5 Exercises
+
+---- Ex 1
 
 writeGreetingSafe :: IO ()
 writeGreetingSafe = runResourceT @IO do
@@ -27,7 +59,7 @@ fileResource p m =
     (IO.openFile p m)
     IO.hClose
 
--- Ex 2
+---- Ex 2
 
 handlePrintTest :: IO ()
 handlePrintTest = runResourceT do
@@ -35,7 +67,7 @@ handlePrintTest = runResourceT do
   liftIO $ print p1
   liftIO $ IO.hShow p1 >>= print
 
--- Ex 3
+---- Ex 3
 
 howManyHandles :: IO ()
 howManyHandles = runResourceT @IO do

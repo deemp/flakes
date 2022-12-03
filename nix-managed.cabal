@@ -13,27 +13,12 @@ build-type:     Simple
 executable Chapters
   main-is: Main.hs
   other-modules:
-      C_0_Setup
-      C_1_2_Writing_to_a_file
-      C_1_3_Diligent_cleanup
-      C_1_4_MonadIO
-      C_1_5_Exercises
-      C_2_1_Packed_characters
-      C_2_2_Reading_from_a_file
-      C_2_3_Exercises
-      C_3_1_Packed_octets
-      C_3_2_Copying_a_file
-      C_3_5_Avoiding_system_defaults
-      C_3_6_Exercises
-      C_4_1_Open_Up_and_Connect
-      C_4_2_Extra_details
-      C_4_3_Names_and_Addresses
-      C_4_4_Address_Information
-      C_4_5_Exercises
-      C_5_3_ASCII_strings
-      C_5_4_HTTP_responses
-      C_5_5_Serving_others
-      C_5_6_Exercises
+      C_1_Handles
+      C_2_Chunks
+      C_3_Bytes
+      C_4_Sockets
+      C_5_HTTP
+      C_6_HTTP_types
       Paths_nix_managed
   hs-source-dirs:
       Modules/Chapters
@@ -41,8 +26,8 @@ executable Chapters
       TypeApplications
       ImportQualifiedPost
       BlockArguments
-      OverloadedStrings
       QuasiQuotes
+      NoOverloadedStrings
   build-depends:
       base >=4.7 && <5
     , sockets-and-pipes

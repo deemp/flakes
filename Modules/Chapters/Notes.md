@@ -1,4 +1,13 @@
-## Notes
+# Notes
+
+## C_2_1
+
+- `Text` is strict
+
+## C_3_1
+
+- Can pack octets `01101000 -> 104`
+- `Word8, Word16, Word32, Word64`
 
 ## C_3_3
 
@@ -47,3 +56,7 @@
 ## C_5_4
 
 - Body lines should not end with `\r\n`
+
+## C_6_5
+
+- A lazy `ByteString` is like a lazy list of strict `ByteString`s

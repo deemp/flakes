@@ -2,8 +2,8 @@ default-extensions:
 - TypeApplications
 - ImportQualifiedPost
 - BlockArguments
-- OverloadedStrings
 - QuasiQuotes
+- NoOverloadedStrings
 
 dependencies:
 - base >= 4.7 && < 5

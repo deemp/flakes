@@ -3,65 +3,20 @@ cradle:
     - path: "./Modules/Chapters/Main.hs"
       component: "nix-managed:exe:Chapters"
 
-    - path: "./Modules/Chapters/C_0_Setup.hs"
+    - path: "./Modules/Chapters/C_1_Handles.hs"
       component: "nix-managed:exe:Chapters"
 
-    - path: "./Modules/Chapters/C_1_2_Writing_to_a_file.hs"
+    - path: "./Modules/Chapters/C_2_Chunks.hs"
       component: "nix-managed:exe:Chapters"
 
-    - path: "./Modules/Chapters/C_1_3_Diligent_cleanup.hs"
+    - path: "./Modules/Chapters/C_3_Bytes.hs"
       component: "nix-managed:exe:Chapters"
 
-    - path: "./Modules/Chapters/C_1_4_MonadIO.hs"
+    - path: "./Modules/Chapters/C_4_Sockets.hs"
       component: "nix-managed:exe:Chapters"
 
-    - path: "./Modules/Chapters/C_1_5_Exercises.hs"
+    - path: "./Modules/Chapters/C_5_HTTP.hs"
       component: "nix-managed:exe:Chapters"
 
-    - path: "./Modules/Chapters/C_2_1_Packed_characters.hs"
-      component: "nix-managed:exe:Chapters"
-
-    - path: "./Modules/Chapters/C_2_2_Reading_from_a_file.hs"
-      component: "nix-managed:exe:Chapters"
-
-    - path: "./Modules/Chapters/C_2_3_Exercises.hs"
-      component: "nix-managed:exe:Chapters"
-
-    - path: "./Modules/Chapters/C_3_1_Packed_octets.hs"
-      component: "nix-managed:exe:Chapters"
-
-    - path: "./Modules/Chapters/C_3_2_Copying_a_file.hs"
-      component: "nix-managed:exe:Chapters"
-
-    - path: "./Modules/Chapters/C_3_5_Avoiding_system_defaults.hs"
-      component: "nix-managed:exe:Chapters"
-
-    - path: "./Modules/Chapters/C_3_6_Exercises.hs"
-      component: "nix-managed:exe:Chapters"
-
-    - path: "./Modules/Chapters/C_4_1_Open_Up_and_Connect.hs"
-      component: "nix-managed:exe:Chapters"
-
-    - path: "./Modules/Chapters/C_4_2_Extra_details.hs"
-      component: "nix-managed:exe:Chapters"
-
-    - path: "./Modules/Chapters/C_4_3_Names_and_Addresses.hs"
-      component: "nix-managed:exe:Chapters"
-
-    - path: "./Modules/Chapters/C_4_4_Address_Information.hs"
-      component: "nix-managed:exe:Chapters"
-
-    - path: "./Modules/Chapters/C_4_5_Exercises.hs"
-      component: "nix-managed:exe:Chapters"
-
-    - path: "./Modules/Chapters/C_5_3_ASCII_strings.hs"
-      component: "nix-managed:exe:Chapters"
-
-    - path: "./Modules/Chapters/C_5_4_HTTP_responses.hs"
-      component: "nix-managed:exe:Chapters"
-
-    - path: "./Modules/Chapters/C_5_5_Serving_others.hs"
-      component: "nix-managed:exe:Chapters"
-
-    - path: "./Modules/Chapters/C_5_6_Exercises.hs"
+    - path: "./Modules/Chapters/C_6_HTTP_types.hs"
       component: "nix-managed:exe:Chapters"
