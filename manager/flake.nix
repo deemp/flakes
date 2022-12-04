@@ -103,7 +103,7 @@
     extra-substituters = [
       "https://haskell-language-server.cachix.org"
       "https://nix-community.cachix.org"
-      "https://hydra.iohk.io"
+      "https://cache.iog.io"
       "https://deemp.cachix.org"
     ];
     extra-trusted-public-keys = [
