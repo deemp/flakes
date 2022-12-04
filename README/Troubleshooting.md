@@ -9,8 +9,7 @@ See [Nix Prerequisites](NixPrerequisites.md)
 Many of my flakes provide `VSCodium` with extensions in devshells. This dependency on extensions makes devshells prone to errors when such extensions are unavailable. Should this be the case, exclude `VSCodium` (usually called `codium`) from devshells inputs (in `devshell`, usually called `packages`).
 
 ## Substituters and keys
-
-There are `extra-trusted-public-keys`, `extra-trusted-public-keys` (like [here](https://github.com/deemp/flakes/blob/7bd58c9cf9708714c29dadd615d85d22ded485ae/flake.nix#L112)). If a substituter like `cachix` fails, comment out the lines containing its address
+To provide binary caches, `flake.nix` files specify `nixConfig.extra-trusted-substituters`. If you try, e.g., `nix develop`, and `Nix` unsuccessfully tries to download from a cache several times, this cache has probably failed. Comment out the lines containing its `URL` address in `extra-trusted-substituters`.
 
 ## Repair a derivation
 
