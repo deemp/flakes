@@ -8,6 +8,10 @@ In this repo, each flake's `README.md` assumes that the directory of its `flake.
 
 To de-duplicate the docs, one of the top sections of each `README.md` here contains a `Prerequisites` section. This section provides the links to other sections that possibly contain the relevant docs. Sometimes, you'll need to traverse multiple `Prerequisites` before you achieve the relevant docs.
 
+## nixConfig
+
+I inserted a number of binary caches into `nixConfig` attribute of each `flake.nix`. These caches should accelerate builds for my flakes' users. It is recommended that you add the `extra-trusted-substituters` from `flake.nix` of interest into your [nix.conf](https://nixos.org/manual/nix/stable/command-ref/conf-file.html#conf-trusted-substituters) as `trusted-substituters`. See this [discussion](https://t.me/ru_nixos/137950).
+
 ## Dev tools
 
 The outputs of a flake depend on its inputs. Inputs of a `flake.nix` are locked in an accompanying `flake.lock`.
