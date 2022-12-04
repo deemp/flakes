@@ -13,9 +13,9 @@
     sh <(curl -L https://nixos.org/nix/install) --no-daemon
     ```
 
-### devshells
+## Nix messages
 
-Sometimes, when you enter a devshell (e.g., `nix develop`), you may see:
+Sometimes, when you enter a devshell (e.g., `nix develop`) or run a default package of a flake, you may see:
 
 - warnings - not a problem, just read them and google
 - errors - the same story
