@@ -23,7 +23,7 @@ Sometimes, when you enter a devshell (e.g., `nix develop`) or run a default pack
 
 ## direnv
 
-This is a tool for running scripts in `.envrc` files when you enter a directory containing such file
+This is a tool for running scripts in `.envrc` files when you enter a directory containing such file. One of its usages with flakes is to automatically build, cache, and enter a devshell when you enter that flake's directory in a terminal. See [Direnv integration](https://nixos.wiki/wiki/Flakes#Direnv_integration)
 
 1. Install `direnv` - [src](https://direnv.net/docs/installation.html#installation)
     1. Install the binary
