@@ -3,9 +3,8 @@ module C_6_HTTP_types where
 import ASCII qualified as A
 import ASCII.Decimal qualified as A (Digit (..))
 import Data.ByteString qualified as BS
-import Data.ByteString.Lazy qualified as LBS
 import Data.ByteString.Lazy (toChunks)
-import Data.Int (Int64)
+import Data.ByteString.Lazy qualified as LBS
 
 data Request = Request RequestLine [HeaderField] (Maybe MessageBody)
 data Response = Response StatusLine [HeaderField] (Maybe MessageBody)
@@ -36,8 +35,8 @@ helloResponse :: Response
 helloResponse = Response start [host, lang] (Just $ MessageBody [A.string|Hello|])
  where
   start = StatusLine (HttpVersion A.Digit1 A.Digit1) (StatusCode A.Digit2 A.Digit0 A.Digit0) (ReasonPhrase [A.string|OK|])
-  host = HeaderField (FieldName [A.string|Host|]) (FieldValue [A.string|www.example.com|])
-  lang = HeaderField (FieldName [A.string|Accept-Language|]) (FieldValue [A.string|en, mi|])
+  host = HeaderField (FieldName [A.string|Content-Type|]) (FieldValue [A.string|text/plain; charset=us-ascii|])
+  lang = HeaderField (FieldName [A.string|Content-Length|]) (FieldValue [A.string|6|])
 
 --- Ex 17
 
@@ -54,3 +53,6 @@ p = BS.length <$> toChunks inf
 >>>LBS.take 10 inf
 "abcdefghij"
 -}
+
+httpVersion :: HttpVersion
+httpVersion = HttpVersion A.Digit1 A.Digit1

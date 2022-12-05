@@ -60,3 +60,9 @@
 ## C_6_5
 
 - A lazy `ByteString` is like a lazy list of strict `ByteString`s
+
+## C_7_2
+
+- speed testing - `criterion`
+- `Data.Text.Lazy.Builder` significantly speeds up building large text from chunks
+- `fold` and `foldMap`

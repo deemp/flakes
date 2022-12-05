@@ -1,11 +1,10 @@
-module C_5_HTTP () where
+module C_5_HTTP (crlf, helloRequestString, helloResponseString) where
 
 import ASCII qualified as A
 import ASCII.Char qualified as A
 import C_4_Sockets (openAndConnect, resolve)
 import Control.Monad.IO.Class (MonadIO (..))
 import Control.Monad.Trans.Resource (runResourceT)
-import Data.ByteString (intercalate)
 import Data.ByteString qualified as BS
 import Network.Simple.TCP (HostPreference (..))
 import Network.Simple.TCP qualified as Net
@@ -20,14 +19,15 @@ crlf :: [A.Char]
 crlf = [A.CarriageReturn, A.LineFeed]
 
 text :: [BS.ByteString] -> BS.ByteString
-text xs = intercalate [A.string||] (map line xs)
+text = foldMap line
 
 helloRequestString :: BS.ByteString
 helloRequestString =
   text
     [ [A.string|GET /hello.txt HTTP/1.1|]
-    , [A.string|User-Agent: curl/7.16.3|]
-    , [A.string|User-Agent: curl/7.16.3|]
+    , [A.string|Host: www.example.com|]
+    , [A.string|Accept-Language: en, mi|]
+    , [A.string||]
     ]
 
 -- 5.4 HTTP responses

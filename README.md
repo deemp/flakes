@@ -21,70 +21,12 @@ It explains what's available in this project.
     codium .
     ```
 
-1. Open a `Haskell` file `Modules/B/Main.hs` and hover over a function. `Haskell Language Server` should start giving you type info.
+1. Open a `Haskell` file `Modules/Chapters/C_1_Handles.hs` and hover over a function. `Haskell Language Server` should start giving you type info.
 
 1. Edit this project. Use `manager`. Open a terminal in VSCodium. Run commands there.
 
-1. What is `manager`? Read carefully:
+1. What is `manager`? Read carefully its help and its docs (see [Prerequisites](#prerequisites))
 
     ```terminal
     manager
     ```
-
-1. Run the `main` function in `Modules/B/Main.hs` using `ghcid`:
-
-    ```terminal
-    manager set B/Main main
-    ghcid
-    ```
-
-1. Run the `someFunction` function in `Modules/B/AnotherModule.hs` using `ghcid`:
-    1. Stop the previous `ghcid` process: `Ctrl` (`Cmd`) + `C`
-    2. Start it with a new configuration
-
-        ```terminal
-        manager set B/AnotherModule someFunction
-        ghcid
-        ```
-
-1. See what are the available `executables`:
-
-    ```terminal
-    manager list
-    ```
-
-1. Copy an `executable` `A` to produce an `executable` `C`.
-    1. Use `manager`:
-
-        ```terminal
-        manager add C A
-        ```
-
-    1. Check that `HLS` works: hover over a function in `Modules/C/Main.hs`.
-
-1. Now, add a new module `CModule.hs` to `Modules/C`.
-    1. Copy an existing module:
-
-        ```terminal
-        cp Modules/B/AnotherModule.hs Modules/C/CModule.hs
-        ```
-
-    1. Next, make `stack` and `HLS` aware of it:
-
-        ```terminal
-        manager update
-        ```
-
-1. Okay, load this new module into `stack repl`:
-
-    ```terminal
-    stack repl Modules/C/CModule.hs
-    ```
-
-1. Now, delete the `C` `executable`. Anyway, you know how to recreate it:
-
-    ```terminal
-    manager rm C
-    ```
-
-1. If you `manager rm` all `executables`, you'll have to manually add your new `executables`. See `Haskell` [Prerequisites](#prerequisites) then.

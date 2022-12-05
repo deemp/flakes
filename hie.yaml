@@ -20,3 +20,6 @@ cradle:
 
     - path: "./Modules/Chapters/C_6_HTTP_types.hs"
       component: "nix-managed:exe:Chapters"
+
+    - path: "./Modules/Chapters/C_7_Encoding.hs"
+      component: "nix-managed:exe:Chapters"
