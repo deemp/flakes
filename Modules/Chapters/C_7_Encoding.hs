@@ -1,4 +1,4 @@
-module C_7_Encoding () where
+module C_7_Encoding (encodeLineEnd, encodeStatusLine, encodeResponse) where
 
 import ASCII qualified as A
 import ASCII.Char qualified as AC
@@ -65,21 +65,28 @@ encodeRequest (Request requestLine headerFields bodyMaybe) =
     <> encodeLineEnd
     <> optionallyEncode encodeMessageBody bodyMaybe
 
-encodeMessageBody :: MessageBody -> BSB.Builder
-encodeMessageBody (MessageBody s) = BSB.lazyByteString s
+encodeResponse :: Response -> BSB.Builder
+encodeResponse (Response statusLine headerFields bodyMaybe) =
+  encodeStatusLine statusLine
+    <> repeatedlyEncode (\x -> encodeHeaderField x <> encodeLineEnd) headerFields
+    <> encodeLineEnd
+    <> optionallyEncode encodeMessageBody bodyMaybe
+
+encodeLineEnd :: BSB.Builder
+encodeLineEnd = A.lift crlf
+
+-- 7.4 Higher-order encodings
 
 optionallyEncode :: (a -> BSB.Builder) -> Maybe a -> BSB.Builder
 optionallyEncode = foldMap
 
-encodeHeaderField :: HeaderField -> BSB.Builder
-encodeHeaderField (HeaderField (FieldName x) (FieldValue y)) =
-  BSB.byteString x
-    <> A.lift [AC.Colon]
-    <> encodeSpace
-    <> BSB.byteString y
-
 repeatedlyEncode :: (a -> BSB.Builder) -> [a] -> BSB.Builder
 repeatedlyEncode = foldMap
+
+-- 7.5 The start line
+
+encodeSpace :: BSB.Builder
+encodeSpace = A.lift [AC.Space]
 
 encodeRequestLine :: RequestLine -> BSB.Builder
 encodeRequestLine (RequestLine method requestTarget httpVersion) =
@@ -90,18 +97,11 @@ encodeRequestLine (RequestLine method requestTarget httpVersion) =
     <> encodeHttpVersion httpVersion
     <> encodeLineEnd
 
-encodeRequestTarget :: RequestTarget -> BSB.Builder
-encodeRequestTarget (RequestTarget rt) = BSB.byteString rt
-
 encodeMethod :: Method -> BSB.Builder
 encodeMethod (Method m) = BSB.byteString m
 
-encodeResponse :: Response -> BSB.Builder
-encodeResponse (Response statusLine headerFields bodyMaybe) =
-  encodeStatusLine statusLine
-    <> repeatedlyEncode (\x -> encodeHeaderField x <> encodeLineEnd) headerFields
-    <> encodeLineEnd
-    <> optionallyEncode encodeMessageBody bodyMaybe
+encodeRequestTarget :: RequestTarget -> BSB.Builder
+encodeRequestTarget (RequestTarget rt) = BSB.byteString rt
 
 encodeStatusLine :: StatusLine -> BSB.Builder
 encodeStatusLine (StatusLine httpVersion statusCode reasonPhrase) =
@@ -118,9 +118,6 @@ encodeStatusCode (StatusCode c1 c2 c3) = A.lift [c1, c2, c3]
 encodeReasonPhrase :: ReasonPhrase -> BSB.Builder
 encodeReasonPhrase (ReasonPhrase s) = BSB.byteString s
 
-encodeSpace :: BSB.Builder
-encodeSpace = A.lift [AC.Space]
-
 encodeHttpVersion :: HttpVersion -> BSB.Builder
 encodeHttpVersion (HttpVersion v1 v2) =
   BSB.byteString [A.string|HTTP/|]
@@ -128,8 +125,17 @@ encodeHttpVersion (HttpVersion v1 v2) =
     <> A.lift [AC.FullStop]
     <> A.digitString v2
 
-encodeLineEnd :: BSB.Builder
-encodeLineEnd = A.lift crlf
+-- 7.6 Exercises
+
+encodeHeaderField :: HeaderField -> BSB.Builder
+encodeHeaderField (HeaderField (FieldName x) (FieldValue y)) =
+  BSB.byteString x
+    <> A.lift [AC.Colon]
+    <> encodeSpace
+    <> BSB.byteString y
+
+encodeMessageBody :: MessageBody -> BSB.Builder
+encodeMessageBody (MessageBody s) = BSB.lazyByteString s
 
 req :: BSB.Builder
 req = encodeRequest helloRequest

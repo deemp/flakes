@@ -66,3 +66,17 @@
 - speed testing - `criterion`
 - `Data.Text.Lazy.Builder` significantly speeds up building large text from chunks
 - `fold` and `foldMap`
+
+## C_8_2
+
+- `http-types` - library with common types and expressions for http message construction
+- `LBS.length` gives an `Int64`
+
+## C_8_3
+
+- `Integer` - unbounded integers
+- `Int<n>` - integer with a given number of bits, like `Int64`
+- `Int` - `2^29 - 1` or more (depends)
+- Length of a laazy bytestring can be `2^64` bytes
+- `LBS.length :: LBS.ByteString -> Int64`
+

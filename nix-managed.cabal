@@ -20,6 +20,7 @@ executable Chapters
       C_5_HTTP
       C_6_HTTP_types
       C_7_Encoding
+      C_8_Responding
       Paths_nix_managed
   hs-source-dirs:
       Modules/Chapters

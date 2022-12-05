@@ -1,4 +1,4 @@
--c stack ghci Modules/Chapters/C_1_5.hs
+-c stack ghci Modules/Chapters/C_8_Responding.hs
 -W
--r=howManyHandles
+-r=stuckCountingServer
 --reload=Modules
