@@ -26,3 +26,6 @@ cradle:
 
     - path: "./Modules/Chapters/C_8_Responding.hs"
       component: "nix-managed:exe:Chapters"
+
+    - path: "./Modules/Chapters/C_9_Content_types.hs"
+      component: "nix-managed:exe:Chapters"

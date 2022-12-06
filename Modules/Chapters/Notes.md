@@ -56,6 +56,7 @@
 ## C_5_4
 
 - Body lines should not end with `\r\n`
+- `lift` - lift a character set into its superset - [ASCII.Lift](https://hackage.haskell.org/package/ascii-superset-1.0.1.13/docs/ASCII-Lift.html)
 
 ## C_6_5
 
@@ -80,3 +81,6 @@
 - Length of a laazy bytestring can be `2^64` bytes
 - `LBS.length :: LBS.ByteString -> Int64`
 
+## C_9_4
+
+- `MultiWayIf` - language extension, if with guards - [src](https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/multiway_if.html)

@@ -1,4 +1,12 @@
-module C_8_Responding () where
+module C_8_Responding (
+  contentLength,
+  contentType,
+  status,
+  ok,
+  bodyLengthValue,
+  contentLengthField,
+  sendResponse,
+) where
 
 import ASCII qualified as A
 import ASCII.Decimal qualified as A
@@ -67,6 +75,9 @@ contentType = FieldName [A.string|Content-Type|]
 contentLength :: FieldName
 contentLength = FieldName [A.string|Content-Length|]
 
+contentLengthField :: MessageBody -> HeaderField
+contentLengthField body = HeaderField contentLength (bodyLengthValue body)
+
 plainAscii :: FieldValue
 plainAscii = FieldValue [A.string|text/plain; charset=us-ascii|]
 
@@ -97,11 +108,11 @@ stuckCountingServer = serve @IO HostAny "8000" \(s, _) -> do
 
 -- 8.5 Exercises
 
---- Exercise 21
+--- Ex 21
 
--- curl http://localhost:8000 --dump-header -
+-- c`url http://localhost:8000 --dump-header -
 
---- Exercise 22
+--- Ex 22
 
 mid :: Word8 -> Word8 -> Word8
 mid x y = fromInteger (div (toInteger x + toInteger y) 2)

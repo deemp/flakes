@@ -1,10 +1,36 @@
-module C_7_Encoding (encodeLineEnd, encodeStatusLine, encodeResponse) where
+module C_7_Encoding (
+  encodeLineEnd,
+  encodeStatusLine,
+  encodeResponse,
+  encodeRequestLine,
+  repeatedlyEncode,
+  encodeHeaderField,
+  encodeMessageBody,
+  optionallyEncode,
+  encodeRequest,
+) where
 
 import ASCII qualified as A
 import ASCII.Char qualified as AC
 import C_1_Handles (getDataDir)
 import C_5_HTTP (crlf, helloRequestString, helloResponseString)
-import C_6_HTTP_types (FieldName (FieldName), FieldValue (FieldValue), HeaderField (HeaderField), HttpVersion (..), MessageBody (MessageBody), Method (Method), ReasonPhrase (ReasonPhrase), Request (Request), RequestLine (RequestLine), RequestTarget (RequestTarget), Response (Response), StatusCode (StatusCode), StatusLine (StatusLine), helloRequest, helloResponse)
+import C_6_HTTP_types (
+  FieldName (FieldName),
+  FieldValue (FieldValue),
+  HeaderField (HeaderField),
+  HttpVersion (..),
+  MessageBody (MessageBody),
+  Method (Method),
+  ReasonPhrase (ReasonPhrase),
+  Request (Request),
+  RequestLine (RequestLine),
+  RequestTarget (RequestTarget),
+  Response (Response),
+  StatusCode (StatusCode),
+  StatusLine (StatusLine),
+  helloRequest,
+  helloResponse,
+ )
 import Data.ByteString qualified as BS
 import Data.ByteString.Builder qualified as BSB
 import Data.Foldable (Foldable (..))
