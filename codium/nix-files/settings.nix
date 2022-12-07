@@ -5,6 +5,10 @@
 
   haskell = {
     "haskell.manageHLS" = "PATH";
+    "[haskell]" = {
+      "editor.defaultFormatter" = "haskell.haskell";
+    };
+    "haskell.formattingProvider" = "fourmolu";
   };
 
   todo-tree = {
