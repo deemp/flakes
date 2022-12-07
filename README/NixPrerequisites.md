@@ -3,8 +3,6 @@
 ## Install Nix
 
 - Complete all steps from [here](InstallNix.md)
-- Join `NixOS` [community](https://nixos.org/community/)
-  - [Telegram](https://t.me/ru_nixos/19843)
 
 ## Basics
 

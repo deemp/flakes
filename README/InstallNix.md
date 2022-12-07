@@ -13,6 +13,11 @@
     sh <(curl -L https://nixos.org/nix/install) --no-daemon
     ```
 
+## Community
+
+- Join `NixOS` [community](https://nixos.org/community/)
+  - [Telegram](https://t.me/ru_nixos/19843)
+
 ## Nix messages
 
 Sometimes, when you enter a devshell (e.g., `nix develop`) or run a default package of a flake, you may see:
