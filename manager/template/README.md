@@ -22,11 +22,16 @@ It explains what's available in this project.
 
 1. Open a `Haskell` file `Modules/B/Main.hs` and hover over a function. `Haskell Language Server` should start giving you type info.
 
-1. Edit this project. Use `manager`. Open a terminal in VSCodium. Run commands there.
+1. Add `manager` to `flake.nix`.
+   1. Add `inputs.manager.url = github:deemp/flakes?dir=manager;`
+   1. Add `manager` to the argument set of outputs
+   1. Add `manager.packages.${system}.default` to the `codiumTools` list
 
-1. What is `manager`? Read carefully:
+1. Open a terminal in `VSCodium`. Run commands there.
 
-    ```terminal
+    ```console
+    nix flake update manager
+    nix develop
     manager
     ```
 
