@@ -37,6 +37,12 @@ executables:
     source-dirs: app
     dependencies:
       manager
+  drafts.autocomplete:
+    main: Main.hs
+    source-dirs: drafts/autocomplete
+  drafts.lens:
+    main: Main.hs
+    source-dirs: drafts/lens
 
 library:
   source-dirs: src

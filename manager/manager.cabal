@@ -11,12 +11,91 @@ build-type:     Simple
 
 library
   exposed-modules:
-      Draft
       ExMonoid
   other-modules:
       Paths_manager
   hs-source-dirs:
       src
+  default-extensions:
+      DuplicateRecordFields
+      ExistentialQuantification
+      FlexibleContexts
+      InstanceSigs
+      LambdaCase
+      NamedFieldPuns
+      OverloadedStrings
+      RankNTypes
+      RecordWildCards
+      KindSignatures
+      ScopedTypeVariables
+      TypeApplications
+  ghc-options: -Wall
+  build-depends:
+      Cabal
+    , aeson
+    , base >=4.7 && <5
+    , bytestring
+    , directory
+    , filepath
+    , lens
+    , lens-aeson
+    , managed
+    , mtl
+    , optparse-applicative
+    , process
+    , system-filepath
+    , temporary
+    , text
+    , unordered-containers
+    , yaml
+  default-language: Haskell2010
+
+executable drafts.autocomplete
+  main-is: Main.hs
+  other-modules:
+      Paths_manager
+  hs-source-dirs:
+      drafts/autocomplete
+  default-extensions:
+      DuplicateRecordFields
+      ExistentialQuantification
+      FlexibleContexts
+      InstanceSigs
+      LambdaCase
+      NamedFieldPuns
+      OverloadedStrings
+      RankNTypes
+      RecordWildCards
+      KindSignatures
+      ScopedTypeVariables
+      TypeApplications
+  ghc-options: -Wall
+  build-depends:
+      Cabal
+    , aeson
+    , base >=4.7 && <5
+    , bytestring
+    , directory
+    , filepath
+    , lens
+    , lens-aeson
+    , managed
+    , mtl
+    , optparse-applicative
+    , process
+    , system-filepath
+    , temporary
+    , text
+    , unordered-containers
+    , yaml
+  default-language: Haskell2010
+
+executable drafts.lens
+  main-is: Main.hs
+  other-modules:
+      Paths_manager
+  hs-source-dirs:
+      drafts/lens
   default-extensions:
       DuplicateRecordFields
       ExistentialQuantification

@@ -4,3 +4,6 @@ import Lib
 
 main :: IO ()
 main = someFunc
+
+-- This code will be evaluated by ghcid
+-- $> putStrLn

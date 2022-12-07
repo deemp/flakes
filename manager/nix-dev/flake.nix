@@ -27,18 +27,11 @@
     flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-      inherit (my-codium.functions.${system})
-        writeSettingsJSON
-        mkCodium
-        ;
-      inherit (my-codium.configs.${system})
-        extensions
-        settingsNix
-        ;
+      inherit (my-codium.functions.${system}) writeSettingsJSON mkCodium;
+      inherit (my-codium.configs.${system}) extensions settingsNix;
       devshell = my-devshell.devshell.${system};
-      inherit (haskell-tools.functions.${system})
-        toolsGHC
-        ;
+      inherit (my-devshell.functions.${system}) mkCommands;
+      inherit (haskell-tools.functions.${system}) toolsGHC;
       hsShellTools = haskell-tools.toolSets.${system}.shellTools;
       inherit (toolsGHC "90") stack hls;
       hpack = my-hpack.packages.${system}.default;
@@ -49,7 +42,7 @@
           json-language-features markdown-language-features;
       };
 
-      tools = [
+      codiumTools = [
         hsShellTools.implicit-hie
         hpack
         hsShellTools.ghcid
@@ -63,6 +56,8 @@
         extensions = { inherit (extensions) nix haskell misc github markdown; };
         runtimeDependencies = tools;
       };
+
+      tools = codiumTools ++ [ codium ];
     in
     {
       packages = {
@@ -72,35 +67,26 @@
       devShells.default =
         devshell.mkShell
           {
-            packages = [ codium ] ++ tools;
-            bash = {
-              extra = ''
-              '';
-            };
-            commands = [
-              {
-                name = "codium, ghcid, stack, ghc, jq";
-                help = "available in codium";
-              }
-              {
-                name = "${writeSettings.name}";
-                help = "write .vscode/settings.json";
-              }
-              {
-                name = "test-gen-hie";
-                category = "test";
-                help = "run gen-hie from a Haskell script";
-                command = ''
-                  cat <<EOT > Ex.hs
-                  module Ex where
-                  import System.Process
-                  main = putStrLn =<< readProcess "gen-hie" ["--help"] ""
-                  EOT
-                  stack runghc -- Ex
-                  rm Ex.*
-                '';
-              }
-            ];
+            packages = tools;
+            bash.extra = "";
+            commands =
+              (mkCommands "tools" [ tools ]) ++
+              [
+                {
+                  name = "test-gen-hie";
+                  category = "test";
+                  help = "run gen-hie from a Haskell script";
+                  command = ''
+                    cat <<EOT > Ex.hs
+                    module Ex where
+                    import System.Process
+                    main = putStrLn =<< readProcess "gen-hie" ["--help"] ""
+                    EOT
+                    stack runghc -- Ex
+                    rm Ex.*
+                  '';
+                }
+              ];
           };
     });
 

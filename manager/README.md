@@ -1,6 +1,6 @@
 # manager
 
-Manage repetitive `Haskell` modules and templates.
+Manage `Haskell` projects with multiple `Main.hs` modules.
 
 Sometimes, one wants to experiment with `Haskell` in multiple unrelated files. When creating such files, one's tasks can be:
 
@@ -11,6 +11,11 @@ Sometimes, one wants to experiment with `Haskell` in multiple unrelated files. W
 `manager` simplifies these tasks.
 
 Still, some actions like writing the correct dependencies and language extensions in `package.yaml` and `stack.yaml` should be done manually.
+
+## Disclaimer
+
+- `manager` satisfies my needs. It shouldn't necessarily satisfy yours
+- This is an experimentation place for un-doable actions and accumulating exceptions into a monoid (described in [ExMonoid](src/ExMonoid.hs))
 
 ## Prerequisites
 

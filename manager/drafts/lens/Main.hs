@@ -1,4 +1,4 @@
-module Draft where
+module Main(main) where
 
 import Control.Lens ((^?))
 import Data.Aeson (Value (..), object)
@@ -14,9 +14,13 @@ ff = fromMaybe (object []) (val ^? key "executables" . key "Book")
 
 -- _Object
 
+
 -- s = val ^? key "a"
 
 {-
 >>> f
 Object (fromList [])
 -}
+
+main :: IO ()
+main = putStrLn "Hello!"

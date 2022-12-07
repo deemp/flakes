@@ -50,10 +50,14 @@
                     paths = [ manager-exe ];
                     buildInputs = [ pkgs.makeBinaryWrapper ];
                     postBuild = ''
-                      wrapProgram $out/bin/${manager_} \
-                        --set PATH ${
+                      # wrapProgram $out/bin/${manager_} \
+                        # --set PATH ${
                           pkgs.lib.makeBinPath managerTools
                           }
+                      COMPLETIONS=$out/share/bash-completion/completions
+                      MANAGER=${manager-exe}/bin/${manager_}
+                      mkdir -p $COMPLETIONS
+                      cat <($MANAGER --bash-completion-script $MANAGER) > $COMPLETIONS/${manager_}
                     '';
                   }
                 ) "Manage repetitive Haskell modules. Run `manager -h`"
@@ -63,7 +67,8 @@
                 ${man.DESCRIPTION}
                 ${x.meta.description}
               ''
-            );
+            )
+        ;
       in
       {
         packages = {
@@ -73,8 +78,8 @@
         devShells.default = pkgs.mkShell {
           buildInputs = [ manager ];
           shellHook = ''
-            source <(manager --bash-completion-script `which manager`)
-            manager
+            # source <(manager --bash-completion-script `which manager`)
+            # manager
           '';
         };
 
