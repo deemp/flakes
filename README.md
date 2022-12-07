@@ -19,7 +19,7 @@ Nix flakes for tools that I use
   - Can be combined with `builtins.toJSON` and used to generate `.md` docs from Nix expressions - [example](https://github.com/deemp/devops-labs/blob/0ae9881ab58b99f114aaf21cb5cad85f2ce37e40/.nix/write-configs.nix#L26)
 - [language-tools](./flakes-tools) - tools for languages that I use
 - [manager](./manager/README.md)
-  - Automate routine actions in projects having multiple unrelated `Haskell` modules
+  - Manage `Haskell` projects with multiple `Main.hs` files
 - [source-flake](./source-flake/) - pinned flakes
   - I use them to sync flake inputs in my other flakes
 - [templates](./templates/) - Nix flake templates
