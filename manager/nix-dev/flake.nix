@@ -54,7 +54,7 @@
 
       codium = mkCodium {
         extensions = { inherit (extensions) nix haskell misc github markdown; };
-        runtimeDependencies = tools;
+        runtimeDependencies = codiumTools;
       };
 
       tools = codiumTools ++ [ codium ];
@@ -70,7 +70,7 @@
             packages = tools;
             bash.extra = "";
             commands =
-              (mkCommands "tools" [ tools ]) ++
+              (mkCommands "tools" tools) ++
               [
                 {
                   name = "test-gen-hie";
