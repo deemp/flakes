@@ -2,36 +2,35 @@ module ExMonoid where
 
 import Control.Applicative ((<|>))
 import Control.Exception (Exception, catch, handle)
-import Control.Exception.Base (
-  Exception (fromException),
-  SomeException,
-  mask,
-  throwIO,
- )
-import Control.Monad.Except (
-  MonadIO (liftIO),
-  unless,
-  when,
- )
+import Control.Exception.Base
+  ( Exception (fromException),
+    SomeException,
+    mask,
+    throwIO,
+  )
+import Control.Monad.Except
+  ( MonadIO (liftIO),
+    unless,
+    when,
+  )
 import Control.Monad.Managed (MonadManaged, managed, runManaged)
 import qualified Data.ByteString as BS
 import Data.Foldable (traverse_)
 import Data.Maybe (fromMaybe)
 import Options.Applicative.Help (Doc, Pretty (..), vsep)
 import Options.Applicative.Help.Pretty (string)
-import System.Directory (
-  copyFile,
-  createDirectoryIfMissing,
-  doesDirectoryExist,
-  doesFileExist,
-  listDirectory,
-  removeDirectory,
-  removeDirectoryRecursive,
-  removeFile,
-  removePathForcibly,
-  renameFile,
- )
-import qualified System.Directory as Dir
+import System.Directory
+  ( copyFile,
+    createDirectoryIfMissing,
+    doesDirectoryExist,
+    doesFileExist,
+    listDirectory,
+    removeDirectory,
+    removeDirectoryRecursive,
+    removeFile,
+    removePathForcibly,
+    renameFile,
+  )
 import System.FilePath (splitDirectories, takeDirectory, takeFileName, (</>))
 import System.IO.Temp (createTempDirectory)
 
@@ -58,12 +57,6 @@ instance Pretty PrettyException where
 
 instance Exception ExMonoid
 
-getDirectory :: IO FilePath
-getDirectory = do
-  dir <- Dir.getXdgDirectory Dir.XdgData "nix-managed"
-  Dir.createDirectoryIfMissing True dir
-  return dir
-
 fmapE :: forall e a. Exception e => (e -> a) -> ExMonoid -> [Maybe a]
 fmapE f (ExMonoid s) = (f <$>) . fromException <$> s
 
@@ -87,9 +80,8 @@ mBracket x f y g = managed (bracket' (f x) (g . y))
 mAfter :: MonadManaged m => b -> (b -> IO a2) -> m ()
 mAfter x = mBracket (return ()) id (const x)
 
-{- | Like the original bracketOnError, but assumes that any action can cause an exception
- collects all exceptions into a monoid
--}
+-- | Like the original bracketOnError, but assumes that any action can cause an exception
+-- collects all exceptions into a monoid
 bracketOnError' :: IO a -> (a -> IO b) -> (a -> IO c) -> IO c
 bracketOnError' before after thing =
   mask $ \restore ->
@@ -104,10 +96,9 @@ bracketOnError' before after thing =
 catchThrow :: IO a -> IO a
 catchThrow y = y `catch` (\(x :: SomeException) -> throwIO $ ExMonoid $ maybe [x] (\(ExMonoid x') -> x') (fromException x))
 
-{- | perform an action A
- if it causes an exception, perform an action B
- collect exceptions of both actions into a monoid
--}
+-- | perform an action A
+-- if it causes an exception, perform an action B
+-- collect exceptions of both actions into a monoid
 onException' :: IO a -> IO b -> IO a
 onException' io what =
   io
@@ -131,12 +122,11 @@ mAfterOnError x f = mBracketOnError (return ()) f (const x) id
 tReadFile :: MonadManaged m => FilePath -> (IO BS.ByteString -> IO a) -> m a
 tReadFile x = mBefore (BS.readFile x)
 
-{- | safely write a file
-
- only map the write exception
-
- TODO allow to map other exceptions
--}
+-- | safely write a file
+--
+-- only map the write exception
+--
+-- TODO allow to map other exceptions
 tWriteFile :: MonadManaged m => FilePath -> BS.ByteString -> (IO () -> IO b) -> m b
 tWriteFile path new write_ = do
   -- we check if such file exists
@@ -161,12 +151,11 @@ tWriteFile path new write_ = do
   -- finally, we write our new contents
   mBefore (BS.writeFile path new) write_
 
-{- | safely remove a file
-
- only map the remove exception
-
- TODO allow to map other exceptions
--}
+-- | safely remove a file
+--
+-- only map the remove exception
+--
+-- TODO allow to map other exceptions
 tRemoveFile :: MonadManaged m => FilePath -> (IO () -> IO ()) -> m ()
 tRemoveFile path remove_ = do
   -- we check if such file exists
