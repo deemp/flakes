@@ -2,7 +2,6 @@
 { system, vscode-extensions, vscode-extensions-selected }:
 let
   inherit (vscode-extensions.packages.${system}) vscode open-vsx;
-  # my-extensions = vscode-extensions-selected.packages.${system}.vscode;
 in
 {
   haskell = {
