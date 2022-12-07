@@ -9,6 +9,8 @@
 
 ## Quick start
 
+1. Install Nix - see [how](https://github.com/deemp/flakes/blob/main/README/InstallNix.md).
+
 1. In a new terminal, run `VSCodium` from a devshell:
 
 ```console
