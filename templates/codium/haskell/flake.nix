@@ -8,7 +8,6 @@
     flake-utils.follows = "flake-utils_/flake-utils";
     haskell-tools.url = "github:deemp/flakes?dir=language-tools/haskell";
     my-devshell.url = "github:deemp/flakes?dir=devshell";
-    manager.url = "github:deemp/flakes?dir=manager";
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
@@ -22,7 +21,6 @@
     , drv-tools
     , haskell-tools
     , my-devshell
-    , manager
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -42,10 +40,9 @@
           git nix-ide workbench markdown-all-in-one;
       };
 
-      tools = [
+      codiumTools = [
         hsShellTools.implicit-hie
         hsShellTools.ghcid
-        manager.packages.${system}.default
         stack
         writeSettings
         ghc
@@ -53,8 +50,10 @@
 
       codium = mkCodium {
         extensions = { inherit (extensions) nix haskell misc github markdown; };
-        runtimeDependencies = tools ++ [ hls ];
+        runtimeDependencies = codiumTools ++ [ hls ];
       };
+
+      tools = codiumTools ++ [ codium ];
     in
     {
       packages = {
@@ -64,13 +63,8 @@
       devShells.default = devshell.mkShell
         {
           packages = [ codium ] ++ tools;
-          bash = {
-            extra = ''
-              # enable completions for `manager`
-              source <(manager --bash-completion-script `which manager`)
-            '';
-          };
-          commands = mkCommands "tools" (tools ++ [ codium ]);
+          bash.extra = ''printf "Hello, world!\n"'';
+          commands = mkCommands "tools" tools;
         };
 
       # Nix-provided libraries for stack
