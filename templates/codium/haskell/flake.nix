@@ -37,7 +37,7 @@
 
       writeSettings = writeSettingsJSON {
         inherit (settingsNix) haskell todo-tree files editor gitlens
-          git nix-ide workbench markdown-all-in-one;
+          git nix-ide workbench markdown-all-in-one markdown-language-features;
       };
 
       codiumTools = [
