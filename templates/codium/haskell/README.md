@@ -12,6 +12,9 @@
 1. In a new terminal, run `VSCodium` from a devshell:
 
 ```console
+nix flake new my-project -t github:deemp/flakes#codium-haskell
+cd my-project
+git init && git add . && git commit -m "init"
 nix develop
 write-settings-json
 codium .
