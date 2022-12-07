@@ -18,11 +18,9 @@
     let
       pkgs = nixpkgs.legacyPackages.${system};
       withAttrs = pkgs.lib.attrsets.recursiveUpdate;
-      shellTools =
-        let hpkgs = pkgs.haskellPackages; in
+      shellTools = 
         {
-          implicit-hie = withAttrs hpkgs.implicit-hie { name = "gen-hie"; };
-          ghcid = withAttrs hpkgs.ghcid { name = "ghcid"; };
+          inherit (pkgs.haskellPackages) implicit-hie ghcid;
         };
 
       # wrap Stack to work with our Nix integration
@@ -92,7 +90,7 @@
       toolsGHC = ghcVersion: {
         hls = hlsGHC ghcVersion;
         stack = stackWithDependencies ghcVersion [ ];
-        ghc = withAttrs (pkgs.haskell.compiler."ghc${ghcVersion}") { name = "ghc"; };
+        ghc = pkgs.haskell.compiler."ghc${ghcVersion}";
         callCabal = callCabalGHC ghcVersion;
         staticExecutable = staticExecutableGHC ghcVersion;
         inherit justStaticExecutables;
