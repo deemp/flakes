@@ -41,11 +41,11 @@
       },
       "locked": {
         "dir": "source-flake/flake-utils",
-        "lastModified": 1670463534,
-        "narHash": "sha256-Uj375PZ3lNCt+aI1LwX3vgg5CpN+jICMdxQucbzUn94=",
+        "lastModified": 1670550170,
+        "narHash": "sha256-13czQS6DQavLtLHr0KjSxc69vWtJgg66hO1RIdxA0HE=",
         "owner": "deemp",
         "repo": "flakes",
-        "rev": "09b0f34fbef2c3076709d11fcad1e6af2a17d987",
+        "rev": "7f3450927a740b5b488a88e6bef000f9e7503858",
         "type": "github"
       },
       "original": {
@@ -76,11 +76,11 @@
       },
       "locked": {
         "dir": "source-flake/devshell",
-        "lastModified": 1670463534,
-        "narHash": "sha256-Uj375PZ3lNCt+aI1LwX3vgg5CpN+jICMdxQucbzUn94=",
+        "lastModified": 1670550170,
+        "narHash": "sha256-13czQS6DQavLtLHr0KjSxc69vWtJgg66hO1RIdxA0HE=",
         "owner": "deemp",
         "repo": "flakes",
-        "rev": "09b0f34fbef2c3076709d11fcad1e6af2a17d987",
+        "rev": "7f3450927a740b5b488a88e6bef000f9e7503858",
         "type": "github"
       },
       "original": {
@@ -112,11 +112,11 @@
       },
       "locked": {
         "dir": "source-flake/nixpkgs",
-        "lastModified": 1670463534,
-        "narHash": "sha256-Uj375PZ3lNCt+aI1LwX3vgg5CpN+jICMdxQucbzUn94=",
+        "lastModified": 1670550170,
+        "narHash": "sha256-13czQS6DQavLtLHr0KjSxc69vWtJgg66hO1RIdxA0HE=",
         "owner": "deemp",
         "repo": "flakes",
-        "rev": "09b0f34fbef2c3076709d11fcad1e6af2a17d987",
+        "rev": "7f3450927a740b5b488a88e6bef000f9e7503858",
         "type": "github"
       },
       "original": {
