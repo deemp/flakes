@@ -68,10 +68,10 @@
         };
 
       # Nix-provided libraries for stack
-      stack-dependencies = { ghcVersion }:
+      stack-shell = { ghcVersion }:
 
         pkgs.haskell.lib.buildStackProject {
-          name = "stack-dependencies";
+          name = "stack-shell";
 
           ghc = pkgs.haskell.compiler.${ghcVersion};
 
