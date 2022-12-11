@@ -60,6 +60,7 @@ in
   };
   kubernetes = {
     inherit (vscode.ipedrazas) kubernetes-snippets;
+    inherit (vscode.ms-kubernetes-tools) vscode-kubernetes-tools;
   };
   toml = {
     inherit (open-vsx.tamasfe) even-better-toml;
