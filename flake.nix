@@ -7,21 +7,24 @@
     drv-tools.url = "github:deemp/flakes?dir=drv-tools";
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
-    vscode-extensions_.url = "github:deemp/flakes?dir=source-flake/vscode-extensions";
-    vscode-extensions.follows = "vscode-extensions_/vscode-extensions";
     my-devshell.url = "github:deemp/flakes?dir=devshell";
     python-tools.url = "github:deemp/flakes?dir=language-tools/python";
+    haskell-tools.url = "github:deemp/flakes?dir=language-tools/haskell";
+    flake-compat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
+    };
   };
   outputs =
     { self
     , nixpkgs
     , my-codium
     , flake-utils
-    , vscode-extensions
     , my-devshell
     , python-tools
     , flakes-tools
     , drv-tools
+    , haskell-tools
     , ...
     }: flake-utils.lib.eachDefaultSystem
       (system:
@@ -29,9 +32,14 @@
         pkgs = nixpkgs.legacyPackages.${system};
         inherit (my-codium.functions.${system}) mkCodium writeSettingsJSON;
         inherit (my-codium.configs.${system}) extensions settingsNix;
-        inherit (vscode-extensions.packages.${system}) vscode open-vsx;
         inherit (flakes-tools.functions.${system}) mkFlakesTools;
-        inherit (drv-tools.functions.${system}) mkShellApps framedNewlines;
+        inherit (drv-tools.functions.${system})
+          mkShellApps framedNewlines mkBinName withAttrs;
+        devshell = my-devshell.devshell.${system};
+        inherit (my-devshell.functions.${system}) mkCommands;
+        inherit (haskell-tools.functions.${system}) toolsGHC;
+        hsShellTools = haskell-tools.toolSets.${system}.shellTools;
+        inherit (toolsGHC "92") stack hls ghc;
         createVenvs = python-tools.functions.${system}.createVenvs [ "." ];
         writeSettings = writeSettingsJSON {
           inherit (settingsNix) todo-tree files editor gitlens
@@ -44,8 +52,9 @@
             {
               inherit (pkgs)
                 rabbitmq-server hadolint kubernetes docker
-                poetry minikube kubernetes-helm;
-              inherit writeSettings createVenvs;
+                poetry minikube kubernetes-helm postgresql_15;
+              inherit writeSettings createVenvs stack ghc;
+              inherit (hsShellTools) implicit-hie ghcid;
             } // scripts
           );
         codium = mkCodium {
@@ -54,10 +63,8 @@
               nix misc markdown github docker
               python toml yaml kubernetes haskell;
           };
-          runtimeDependencies = codiumTools;
+          runtimeDependencies = codiumTools ++ [ hls ];
         };
-        devshell = my-devshell.devshell.${system};
-        inherit (my-devshell.functions.${system}) mkCommands;
         flakesTools = mkFlakesTools [ "." ];
         tools = codiumTools ++ [ codium ];
         helmPluginsPath = "helm/plugins";
@@ -69,6 +76,8 @@
                 ${setHelmEnv}
                 helm plugin install https://github.com/databus23/helm-diff || echo "installed 'helm-diff'"
                 helm plugin install https://github.com/jkroepke/helm-secrets || echo "installed 'helm-secrets'"
+
+                helm repo add bitnami https://charts.bitnami.com/bitnami
               '';
               description = "Install Helm plugins";
               runtimeInputs = [ pkgs.kubernetes-helm ];
@@ -82,17 +91,34 @@
                 
             export HELM_CONFIG_HOME=$PWD/helm/config
             mkdir -p $HELM_CONFIG_HOME
+
+            export HELM_CONFIG_HOME=$PWD/helm/config
+            mkdir -p $HELM_CONFIG_HOME
           '';
       in
       {
         packages = {
           inherit (flakesTools) updateLocks pushToCachix;
+          default = codium;
         };
         devShells.default = devshell.mkShell
           {
             packages = tools;
             bash.extra = setHelmEnv;
             commands = (mkCommands "ide" tools);
+          };
+        # Nix-provided libraries for stack
+        stack-shell = { ghcVersion }:
+
+          pkgs.haskell.lib.buildStackProject {
+            name = "stack-shell";
+
+            ghc = pkgs.haskell.compiler.${ghcVersion};
+
+            buildInputs = [
+              pkgs.lzma
+              pkgs.hello
+            ];
           };
       });
 
