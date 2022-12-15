@@ -1,11 +1,20 @@
 {
-    "[html]": {
-        "editor.defaultFormatter": "monosans.djlint"
+    "[haskell]": {
+        "editor.defaultFormatter": "haskell.haskell"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[jsonc]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
     },
     "[markdown]": {
         "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
     },
     "editor.formatOnSave": true,
+    "emmet.includeLanguages": {
+        "jinja-html": "html"
+    },
     "files.associations": {
         "*.html": "html",
         "*.jinja": "jinja-html"
@@ -16,6 +25,7 @@
         "**/.spago/**": true
     },
     "git.autofetch": true,
+    "git.autofetchPeriod": 5,
     "gitlens.codeLens.authors.enabled": false,
     "gitlens.codeLens.enabled": false,
     "gitlens.codeLens.recentChange.enabled": false,
@@ -24,41 +34,20 @@
     "gitlens.hovers.currentLine.over": "line",
     "gitlens.hovers.enabled": false,
     "gitlens.statusBar.enabled": false,
-    "git.autofetchPeriod": 10,
-    "json.schemas": [
-        {
-            "fileMatch": [
-                "**/*.markdownlint.json"
-            ],
-            "url": "https://raw.githubusercontent.com/DavidAnson/markdownlint/main/schema/markdownlint-config-schema.json"
-        },
-        {
-            "fileMatch": [
-                "**/pyproject.toml"
-            ],
-            "url": "https://json.schemastore.org/pyproject.json"
-        }
-    ],
+    "haskell.formattingProvider": "fourmolu",
+    "haskell.manageHLS": "PATH",
     "markdown.extension.orderedList.autoRenumber": false,
-    "markdownlint.config": {},
-    "markdownlint.lintWorkspaceGlobs": [
-        "**/*.{md,mkd,mdwn,mdown,markdown,markdn,mdtxt,mdtext,workbook}",
-        "!**/bower_components",
-        "!**/node_modules",
-        "!**/vendor",
-        "!**/.*"
-    ],
     "nix.enableLanguageServer": true,
+    "nix.formatterPath": "nixpkgs-fmt",
     "nix.serverPath": "rnix-lsp",
     "purescript.formatter": "purs-tidy",
-    "purescript.outputDirectory": "./app_purescript/output/",
-    "purescript.packagePath": "./app_purescript",
-    "purescript.sourcePath": "./app_purescript/src",
+    "purescript.outputDirectory": "./front/output/",
+    "purescript.packagePath": "./front",
+    "purescript.sourcePath": "./front/src",
     "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python3",
     "python.formatting.provider": "black",
     "python.linting.mypyCategorySeverity.error": "Error",
     "python.linting.mypyEnabled": true,
-    "python.linting.pylintEnabled": true,
     "todo-tree.filtering.excludeGlobs": [
         "**/vendor/**",
         "**/node_modules/**",
@@ -71,7 +60,19 @@
         "**/*.stack-work"
     ],
     "todo-tree.regex.regex": "((--\\s*($TAGS))|\\{-\\s($TAGS).*(\\n.*)*-})|(//|#|<!--|/\\*|^\\s*\\*)\\s*($TAGS)",
+    "vscode-dhall-lsp-server.executable": "dhall-lsp-server",
+    "window.restoreWindows": "none",
     "workbench.colorTheme": "Monokai",
     "workbench.sideBar.location": "right",
-    "solidity.compileUsingRemoteVersion": "v0.8.4+commit.c7e474f2"
+    "yaml.schemas": {
+        "https://json.schemastore.org/github-action.json": "actions/**/action.yml",
+        "https://json.schemastore.org/github-workflow.json": "workflows/**/*.yml",
+        "https://raw.githubusercontent.com/Onemind-Services-LLC/kubernetes-json-schema/master/schema/v1.10.0/configmap.json": "**/{k8s,kubernetes}/**/ConfigMap.yaml",
+        "https://raw.githubusercontent.com/Onemind-Services-LLC/kubernetes-json-schema/master/schema/v1.10.0/deployment.json": "**/{k8s,kubernetes}/**/Deployment.yaml",
+        "https://raw.githubusercontent.com/Onemind-Services-LLC/kubernetes-json-schema/master/schema/v1.10.0/persistentvolume.json": "**/{k8s,kubernetes}/**/PersistentVolume.yaml",
+        "https://raw.githubusercontent.com/Onemind-Services-LLC/kubernetes-json-schema/master/schema/v1.10.0/persistentvolumeclaim.json": "**/{k8s,kubernetes}/**/PersistentVolumeClaim.yaml",
+        "https://raw.githubusercontent.com/Onemind-Services-LLC/kubernetes-json-schema/master/schema/v1.10.0/secret.json": "**/{k8s,kubernetes}/**/Secrets.yaml",
+        "https://raw.githubusercontent.com/Onemind-Services-LLC/kubernetes-json-schema/master/schema/v1.10.0/service.json": "**/{k8s,kubernetes}/**/Service.yaml",
+        "https://raw.githubusercontent.com/Onemind-Services-LLC/kubernetes-json-schema/master/schema/v1.10.0/statefulset.json": "**/{k8s,kubernetes}/**/StatefulSet.yaml"
+    }
 }

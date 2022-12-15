@@ -38,6 +38,14 @@
         createVenvs = python-tools.functions.${system}.createVenvs [ "." ];
         pkgs = nixpkgs.legacyPackages.${system};
 
+        codiumTools = [
+          pkgs.docker
+          pkgs.poetry
+          pkgs.rustup
+          pkgs.nodePackages.near-cli
+          createVenvs
+          writeSettings
+        ];
         codium = mkCodium {
           extensions = {
             inherit (extensions)
@@ -47,34 +55,19 @@
               inherit (vscode.nomicfoundation) hardhat-solidity;
             };
           };
-          runtimeDependencies = [
-            (
-              builtins.attrValues
-                {
-                  inherit (pkgs)
-                    docker poetry direnv rnix-lsp
-                    nixpkgs-fmt fish mysql;
-                }
-            )
-          ];
+          runtimeDependencies = codiumTools;
         };
         flakesTools = mkFlakesTools [ "." ];
         writeSettings = writeSettingsJSON settingsNix;
         devshell = my-devshell.devshell.${system};
         inherit (my-devshell.functions.${system}) mkCommands;
+        tools = codiumTools ++ [ codium ];
       in
       {
         devShells.default = devshell.mkShell {
           bash.extra = activateVenv;
-          packages = [
-            pkgs.nodePackages.near-cli
-            codium
-            pkgs.poetry
-            createVenvs
-            writeSettings
-            pkgs.rustup
-          ];
-          commands = mkCommands "ide" [ codium createVenvs writeSettings ];
+          packages = tools;
+          commands = mkCommands "ide" tools;
         };
         packages = {
           pushToCachix = flakesTools.pushToCachix;
