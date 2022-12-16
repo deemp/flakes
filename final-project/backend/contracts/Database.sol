@@ -4,6 +4,7 @@ pragma solidity ^0.8.17;
 contract Database {
     struct Table {
         string[] columns;
+        // column name -> values
         mapping(string => string[]) values;
         bool exists;
     }
@@ -31,11 +32,16 @@ contract Database {
 
     function CREATE_TABLE(string memory a, string[] memory b) public {
         table[a].columns = b;
+        string[] memory p;
+        for (uint i = 0; i < b.length; i++) {
+            table[a].values[b[i]] = p;
+        }
         table[a].exists = true;
     }
 
     function DROP_TABLE(string memory a) public {
         delete table[a];
+        table[a].exists = false;
     }
 
     mapping(string => string) toInsert;

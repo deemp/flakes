@@ -12,11 +12,11 @@ import FormGroup from '@mui/material/FormGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
-import { TabContext, TabList, TabPanel } from "@mui/lab";
-import Typography from '@mui/material/Typography';
-import { safeParse2dArray, safeParseArray, ParseResult } from "./Parser";
+import { safeParse2dArray, safeParseArray } from "./Parser";
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
+
+declare let window: any
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -31,7 +31,7 @@ function App() {
 
 
   /*-----------STATES---------------*/
-  const { connect, metaState, getChain, getAccounts } = useMetamask()
+  const { connect, metaState, getAccounts } = useMetamask()
   const [tableName, setTableName] = useState("")
   const [columns, setColumns] = useState("")
   const [values, setValues] = useState("")
@@ -43,40 +43,18 @@ function App() {
   const [isQueryValid, setQueryValid] = useState(false)
   const [isTableNameValid, setTableNameValid] = useState(false)
   const [tabIndex, setTabIndex] = useState(0);
+  const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+  const [typedContract, setTypedContract] = useState<Database>()
 
-  // const [typedContract, setTypedContract] = useState<Database>()
-  // const [contract, setContract] = useState()
-
-  // class MetamaskState {
-  //   isAvailable: boolean
-  //   isConnected: boolean
-  // }
-
-  // class Buttons {
-  //   metamask: MetamaskButtons
-  // }
-
-  // class State {
-  //   buttons: Buttons
-  // }
-
-  // let initState: State = {
-  //   buttons: {
-  //     metamask: {
-  //       isAvailable: false,
-  //       isConnected: false
-  //     }
-  //   }
-  // }
-
-  // const [metamaskState, meta] = useState<MetamaskState>({ isAvailable: false, isConnected: false })
-  // const [selectedImage, setSelectedImage] = useState()
-  // const [p, updP] = useState(0)
-  // const [candidateFormData, setCandidateFormData] = useState({ name: '', imageHash: '' })
-  // const [selectResults, updataSelectResults] = useState([])
-  // const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
 
   /*-----------SIDE EFFECTS---------------*/
+  // useEffect(() => {
+  //   if (!window.ethereum) return
+  //   const provider = new ethers.providers.Web3Provider(window.ethereum)
+  //   const erc20 = new ethers.Contract(contractAddress, abi, provider)
+  //   // setTypedContract(getContract(contractAddress) as Database)
+  // }, [])
+
   useEffect(() => {
     if (!metaState.isConnected) {
       (async () => {
@@ -117,28 +95,6 @@ function App() {
     setQueryValid(res)
   }, [tabIndex, tableName, columns, values])
 
-  // const updateTableName = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const {name, value} = e.target
-
-  //   // const
-  //   // setTableName(newName)
-  // //   (newName: string) {
-
-  // // }
-  // }
-
-  // useEffect((nam) => {
-  //   setTableName()
-  // }, [])
-  // useEffect(() => {
-  //   setTypedContract(getContract(contractAddress) as Database)
-  // }, [])
-
-  // useEffect(() => {
-  //   upd
-  // })
-
-
   /*-----------FUNCTIONS---------------*/
   // async function addAccount() {
   // if you want to use the typed contract
@@ -178,9 +134,9 @@ function App() {
   function mkColumnsColumn(columns_: string): string {
     const p = safeParseArray(columns_)
     const res = p.hasError ? [] : p.parsed
-    return `{
+    return `(
       ${res.map(x => `  ${x}  string`).join(",\n")}
-    }`
+    )`
   }
 
   function mkWhere(columns_: string, values_: string) {
@@ -367,17 +323,25 @@ function App() {
                   </Button>
                 </Item>
               </Grid>
-              <Grid item id="full-query">
-                <Item>
-                  {tabIndex === 0 && isQueryValid && `CREATE TABLE ${tableName} ${mkColumnsColumn(columns)}`}
-                  {tabIndex === 1 && isQueryValid && `SELECT ${mkColumnsRow(columns)} FROM ${tableName}`}
-                  {tabIndex === 2 && isQueryValid && `INSERT INTO ${tableName} ${mkColumnsRow(columns)} VALUES ${values}`}
-                  {tabIndex === 3 && isQueryValid && `DELETE FROM ${tableName} WHERE ${mkWhere(columns, values)}`}
-                  {tabIndex === 4 && isQueryValid && `DROP TABLE ${tableName}`}
-                </Item>
-              </Grid>
+              {isQueryValid &&
+                <Grid item id="full-query">
+                  <Item>
+                    {tabIndex === 0 && `CREATE TABLE ${tableName} ${mkColumnsColumn(columns)}`}
+                    {tabIndex === 1 && `SELECT ${mkColumnsRow(columns)} FROM ${tableName}`}
+                    {tabIndex === 2 && `INSERT INTO ${tableName} ${mkColumnsRow(columns)} VALUES ${values}`}
+                    {tabIndex === 3 && `DELETE FROM ${tableName} WHERE ${mkWhere(columns, values)}`}
+                    {tabIndex === 4 && `DROP TABLE ${tableName}`}
+                  </Item>
+                </Grid>
+              }
             </Grid>
           </Grid>
+        </Item>
+      </Grid>
+      <Grid item xs={6} md={6}>
+        <Item>
+          Here should be the result of a transaction, but I didn't manage to connect to my SC
+          {/* {typedContract.address} */}
         </Item>
       </Grid>
     </Grid>
