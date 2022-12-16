@@ -32,6 +32,7 @@
           mkBin indentStrings4 withDescription;
         man = drv-tools.configs.${system}.man;
         devshell = my-devshell.devshell.${system};
+        inherit (my-devshell.functions.${system}) mkCommands;
 
         # A set of VSCodium extensions
         extensions = import ./nix-files/extensions.nix {
@@ -131,6 +132,7 @@
             };
           }
         );
+        tools = [ testCodium testWriteSettings ];
       in
       {
         inherit extensions;
@@ -145,19 +147,8 @@
           inherit extensions settingsNix;
         };
         devShells.default = devshell.mkShell {
-          packages = [ testCodium testWriteSettings ];
-          commands = [
-            {
-              name = testWriteSettings.name;
-              category = "ide";
-              help = testWriteSettings.meta.description;
-            }
-            {
-              name = "codium";
-              category = "ide";
-              help = testCodium.meta.description;
-            }
-          ];
+          packages = tools;
+          commands = mkCommands "ide" tools;
         };
       });
 
