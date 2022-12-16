@@ -45,9 +45,9 @@ in
     inherit (open-vsx.ms-azuretools) vscode-docker;
     inherit (open-vsx.exiasr) hadolint;
   };
-  c-cpp = {
-    inherit (vscode.ms-vscode) cpptools-themes cmake-tools cpptools;
-  };
+  # c-cpp = {
+  #   inherit (vscode.ms-vscode) cpptools-themes cmake-tools cpptools;
+  # };
   python = {
     inherit (vscode.donjayamanne) python-extension-pack;
     inherit (vscode.njpwerner) autodocstring;
