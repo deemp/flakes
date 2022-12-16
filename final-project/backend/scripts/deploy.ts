@@ -33,7 +33,7 @@ async function main() {
   console.log("DROP the 'films' table")
   await db.DROP_TABLE("films")
 
-  console.log("DROP the 'films' table")
+  console.log("CREATE the 'films' table")
   await db.CREATE_TABLE("films", ["title", "year", "budget"])
 
   console.log("Selecting from a clean 'films' table")
