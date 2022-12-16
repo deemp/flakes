@@ -89,8 +89,8 @@ function App() {
         (tabIndex == 0 && civ) ||
         (tabIndex == 1 && civ) ||
         (tabIndex == 2 && civ && viv && cv) ||
-        (tabIndex == 3 && civ && viv && cv) ||
-        (tabIndex == 4)
+        (tabIndex == 3)
+        // (tabIndex == 3 && civ && viv && cv) ||
       )
     setQueryValid(res)
   }, [tabIndex, tableName, columns, values])
@@ -260,7 +260,7 @@ function App() {
                     <Tab label="CREATE TABLE" />
                     <Tab label="SELECT * FROM" />
                     <Tab label="INSERT INTO" />
-                    <Tab label="DELETE FROM" />
+                    {/* <Tab label="DELETE FROM" /> */}
                     <Tab label="DROP TABLE" />
                   </Tabs>
                   <Box sx={{ margin: 2 }}>
@@ -293,18 +293,18 @@ function App() {
                       <Box>
                         <Stack direction="column" alignItems="left" spacing={2} mb={4}>
                           {tableNameInput}
+                        </Stack>
+                      </Box>
+                    )}
+                    {/* {tabIndex === 3 && (
+                      <Box>
+                        <Stack direction="column" alignItems="left" spacing={2} mb={4}>
+                          {tableNameInput}
                           {columnsInput}
                           {valuesInput}
                         </Stack>
                       </Box>
-                    )}
-                    {tabIndex === 4 && (
-                      <Box>
-                        <Stack direction="column" alignItems="left" spacing={2} mb={4}>
-                          {tableNameInput}
-                        </Stack>
-                      </Box>
-                    )}
+                    )} */}
                   </Box>
                 </Box>
               </Item>
@@ -317,7 +317,6 @@ function App() {
                     component="span"
                     color={isQueryValid ? "success" : "error"}
                     disabled={!isQueryValid}
-                  // onClick={() => updP(p + 1)}
                   >
                     {isQueryValid ? "run query" : "check your query"}
                   </Button>
@@ -328,9 +327,9 @@ function App() {
                   <Item>
                     {tabIndex === 0 && `CREATE TABLE ${tableName} ${mkColumnsColumn(columns)}`}
                     {tabIndex === 1 && `SELECT ${mkColumnsRow(columns)} FROM ${tableName}`}
-                    {tabIndex === 2 && `INSERT INTO ${tableName} ${mkColumnsRow(columns)} VALUES ${values}`}
-                    {tabIndex === 3 && `DELETE FROM ${tableName} WHERE ${mkWhere(columns, values)}`}
-                    {tabIndex === 4 && `DROP TABLE ${tableName}`}
+                    {tabIndex === 2 && `INSERT INTO ${tableName} ${mkColumnsRow(columns)} VALUES ${mkColumnsRow(values)}`}
+                    {tabIndex === 3 && `DROP TABLE ${tableName}`}
+                    {/* {tabIndex === 3 && `DELETE FROM ${tableName} WHERE ${mkWhere(columns, values)}`} */}
                   </Item>
                 </Grid>
               }

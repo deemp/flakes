@@ -3,9 +3,11 @@ pragma solidity ^0.8.17;
 
 contract Database {
     struct Table {
+        // column names
         string[] columns;
         // column name -> values
         mapping(string => string[]) values;
+        // if a table exists
         bool exists;
     }
 
