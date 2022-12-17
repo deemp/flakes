@@ -1,5 +1,3 @@
-{-# LANGUAGE ImportQualifiedPost #-}
-
 module C_1_Handles (fileResource, getDataDir, greetingTxt) where
 
 import Control.Exception (Exception (..))

@@ -4,15 +4,16 @@ default-extensions:
 - BlockArguments
 - QuasiQuotes
 - NoOverloadedStrings
+- InstanceSigs
 
 dependencies:
 - base >= 4.7 && < 5
 
 executables:
-  Chapters:
+  SocketsAndPipes:
     dependencies: sockets-and-pipes
     main: Main.hs
-    source-dirs: Modules/Chapters
+    source-dirs: Resources/SocketsAndPipes
 
 license: BSD3
 

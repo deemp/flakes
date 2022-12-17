@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module C_2_Chunks (repeatUntil) where
 
 import C_1_Handles (fileResource, getDataDir, greetingTxt)

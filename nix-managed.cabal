@@ -10,7 +10,7 @@ license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
 
-executable Chapters
+executable SocketsAndPipes
   main-is: Main.hs
   other-modules:
       C_10_Change
@@ -26,13 +26,14 @@ executable Chapters
       C_9_Content_types
       Paths_nix_managed
   hs-source-dirs:
-      Modules/Chapters
+      Resources/SocketsAndPipes
   default-extensions:
       TypeApplications
       ImportQualifiedPost
       BlockArguments
       QuasiQuotes
       NoOverloadedStrings
+      InstanceSigs
   build-depends:
       base >=4.7 && <5
     , sockets-and-pipes
