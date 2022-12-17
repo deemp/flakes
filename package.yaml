@@ -17,7 +17,9 @@ executables:
   DevelopersRoadmap:
     dependencies: sockets-and-pipes
     main: Main.hs
-    source-dirs: Resources/DevelopersRoadmap/Junior1
+    source-dirs:
+      - Resources/DevelopersRoadmap
+      - Resources/DevelopersRoadmap/src
 
 license: BSD3
 

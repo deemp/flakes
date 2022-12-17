@@ -13,9 +13,12 @@ build-type:     Simple
 executable DevelopersRoadmap
   main-is: Main.hs
   other-modules:
+      Junior1
+      Junior3
       Paths_nix_managed
   hs-source-dirs:
-      Resources/DevelopersRoadmap/Junior1
+      Resources/DevelopersRoadmap
+      Resources/DevelopersRoadmap/src
   default-extensions:
       TypeApplications
       ImportQualifiedPost
