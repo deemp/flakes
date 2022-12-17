@@ -1,0 +1,13 @@
+resolver: lts-19.18
+
+packages:
+  - .
+
+# allow-newer: true
+
+nix:
+  enable: true
+  packages: [zlib]
+
+ghc-options:
+  "$everything": -haddock
