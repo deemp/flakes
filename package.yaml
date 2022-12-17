@@ -14,6 +14,10 @@ executables:
     dependencies: sockets-and-pipes
     main: Main.hs
     source-dirs: Resources/SocketsAndPipes
+  DevelopersRoadmap:
+    dependencies: sockets-and-pipes
+    main: Main.hs
+    source-dirs: Resources/DevelopersRoadmap/Junior1
 
 license: BSD3
 
