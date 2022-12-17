@@ -2,7 +2,7 @@
 
 {-# HLINT ignore "Use putStrLn" #-}
 
-module C_3_Bytes () where
+module C_3_Bytes (binaryFileResource) where
 
 import Data.Word (Word8)
 

@@ -3,6 +3,9 @@ cradle:
     - path: "./Modules/Chapters/Main.hs"
       component: "nix-managed:exe:Chapters"
 
+    - path: "./Modules/Chapters/C_10_Change.hs"
+      component: "nix-managed:exe:Chapters"
+
     - path: "./Modules/Chapters/C_1_Handles.hs"
       component: "nix-managed:exe:Chapters"
 

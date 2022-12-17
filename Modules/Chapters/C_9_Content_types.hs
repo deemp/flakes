@@ -1,4 +1,4 @@
-module C_9_Content_types () where
+module C_9_Content_types (textOk, countHelloText, countHelloHtml, htmlOk) where
 
 import ASCII qualified as A
 import C_6_HTTP_types (
