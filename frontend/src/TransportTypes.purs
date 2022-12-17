@@ -6,11 +6,13 @@ import Data.Argonaut.Decode.Generic (class DecodeRep, genericDecodeJsonWith)
 import Data.Argonaut.Encode.Class (class EncodeJson, encodeJson)
 import Data.Argonaut.Encode.Generic (class EncodeRep, genericEncodeJsonWith)
 import Data.Argonaut.Types.Generic (Encoding)
+import Data.Codec.Argonaut.Common (either)
 import Data.Either (Either(..))
 import Data.Function (($))
 import Data.Generic.Rep (class Generic)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
+import Effect.Class.Console (logShow)
 
 
 -- Common
@@ -298,6 +300,7 @@ data Response'
     Registered
   | LoggedIn
   | LoggedOut
+  | BannedBy {user :: User}
   | AskReceived {responseId :: SId Response_}
   | -- when broadcasting a message, it becomes many messages with different ids
     -- for each entity, they will have a different id
@@ -318,6 +321,7 @@ data Response'
   | RespondAutoComplete {name :: SName Entity_, names :: Array (Tuple2 Entity (SName Entity_))}
   | InvalidRequest {reason :: Reason}
   | RespondKnownEntities {knownEntities :: Array Entity}
+
 
 -- | data coming from a server
 -- not necessarily a response to a client
@@ -488,6 +492,8 @@ class MyJson a where
   myDecodeJson :: Json -> Either JsonDecodeError a
 
 newtype MyJ a = MyJ a
+
+t = MyJ
 
 instance (Generic a b, EncodeRep b, DecodeRep b) => MyJson a where 
   myEncodeJson = genericEncodeJsonWith enc

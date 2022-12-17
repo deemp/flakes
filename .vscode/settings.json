@@ -6,5 +6,7 @@
     },
     "purescript.outputDirectory": "./frontend/output/",
     "purescript.packagePath": "./frontend",
-    "purescript.sourcePath": "./frontend/src"
+    "purescript.sourcePath": "./frontend/src",
+    "purescript.buildCommand": "(cd frontend && spago build --purs-args --json-errors)",
+    "vscode-dhall-lsp-server.executable": "dhall-lsp-server"
 }

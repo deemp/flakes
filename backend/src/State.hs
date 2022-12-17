@@ -1,69 +1,105 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE TypeOperators #-}
 
 module State
   ( AppState,
-    newAppState,
+    -- newAppState,
     addUser,
-    removeUser,
-    addChannel,
-    removeChannel,
-    getChannelList,
-    getQueuesForChannel,
+    banUser,
+    -- addChannel,
+    -- removeChannel,
+    -- getChannelList,
+    -- getQueuesForChannel,
     getAllQueues,
   )
 where
 
-import Common
 import Control.Concurrent.STM (TQueue)
 import Data.Function ((&))
 import qualified Data.HashMap.Strict as HM
 import qualified Data.HashSet as HS
 import Data.Maybe (maybeToList)
+import Data.Text
+import TransportTypes
 
-data AppState = AppState
-  { users :: HM.HashMap User (TQueue ServerCommand),
-    channels :: HS.HashSet Channel
+
+-- TODO smart constructor for user
+-- - check user name valid
+-- - check user name available
+-- data PosInt where
+--   Pos :: 
+
+data ChannelData = ChannelData
+  { id :: Int,
+    channel :: Channel,
+    admins :: HS.HashSet User
   }
 
-newAppState :: AppState
-newAppState = AppState HM.empty (HS.singleton defaultChannel)
+data MemberMedium = MemberMedium {
+  medium :: Medium,
+  permissions :: Permissions
+}
 
-addUser :: User -> TQueue ServerCommand -> AppState -> AppState
-addUser user queue AppState {..} = AppState newUsers newChannels
-  where
-    channel = Private user
-    newUsers = HM.insert user queue users
-    newChannels = HS.insert channel channels
+data AppState = AppState
+  { -- a queue of commands for the server to execute per each user
+    -- commands are kept for independent sessions
+    userCommands :: HM.HashMap User (TQueue ClientRequest),
+    userPasswords :: HM.HashMap User Text,
+    channels :: HS.HashSet ChannelData,
+    usersOnline :: HS.HashSet User,
+    -- A user can create channels and invite people there
+    -- If a creator leaves a channel the channel will be GC-d
+    userChannels :: HM.HashMap User (HS.HashSet Channel)
+  }
 
-removeUser :: User -> AppState -> AppState
-removeUser user AppState {..} = AppState newUsers newChannels
-  where
-    channel = Private user
-    newUsers = HM.delete user users
-    newChannels = HS.delete channel channels
+-- Like Telegram channel
+-- defaultChannel :: ChannelData
+-- defaultChannel = ChannelData {channel = Channel "main", admins = HS.empty}
 
-addChannel :: Channel -> AppState -> AppState
-addChannel channel AppState {..} = AppState users (HS.insert channel channels)
+-- newAppState :: AppState
+-- newAppState =
+--   AppState
+--     { userCommands = HM.empty,
+--       channels = HS.singleton defaultChannel,
+--       userChannels = HM.empty,
+--       usersOnline = HS.empty,
+--       userPasswords = HM.empty
+--     }
+ 
+addUser :: User -> TQueue ClientRequest -> AppState -> AppState
+addUser user queue t@AppState {..} =
+  t
+    { userCommands = HM.insertWith (\new old -> old) user queue userCommands,
+      userChannels = HM.insertWith (\new old -> old) user HS.empty userChannels
+    }
 
-removeChannel :: Channel -> AppState -> AppState
-removeChannel channel AppState {..} = AppState users (HS.delete channel channels)
+banUser :: User -> Channel -> AppState -> AppState
+banUser user channel t@AppState {..} =
+  t
+    { userChannels = HM.update (Just . HS.delete channel) user userChannels
+    }
 
-getChannelList :: AppState -> [Channel]
-getChannelList state = state & channels & HS.toList
+-- TODO when a user creates a channel
+-- it adds a channel
+-- and joins the channel
 
-getQueuesForChannel :: Channel -> AppState -> [TQueue ServerCommand]
-getQueuesForChannel (Public _) state = getAllQueues state
-getQueuesForChannel (Private user) state = state & users & HM.lookup user & maybeToList
+-- addChannel :: Channel -> AppState -> AppState
+-- addChannel channel t@AppState {..} = t {channels = HS.insert channel channels}
 
-getAllQueues :: AppState -> [TQueue ServerCommand]
-getAllQueues state = state & users & HM.elems
+-- removeChannel :: Channel -> AppState -> AppState
+-- removeChannel channel t@AppState {..} = t {channels = HS.delete channel channels}
+
+-- getChannelList :: AppState -> [Channel]
+-- getChannelList state = state & channels & HS.toList
+
+-- getQueuesForChannel :: Channel -> AppState -> [TQueue ClientRequest]
+-- getQueuesForChannel (Public _) state = getAllQueues state
+-- getQueuesForChannel (Private user) state = state & userCommands & HM.lookup user & maybeToList
+
+getAllQueues :: AppState -> [TQueue ClientRequest]
+getAllQueues state = state & userCommands & HM.elems

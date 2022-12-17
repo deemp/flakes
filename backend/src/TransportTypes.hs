@@ -1,14 +1,14 @@
+{-# LANGUAGE DefaultSignatures #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE EmptyDataDeriving #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE DefaultSignatures #-}
-{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 module TransportTypes
@@ -366,6 +366,7 @@ data Response'
     Registered
   | LoggedIn
   | LoggedOut
+  | BannedBy {user :: User}
   | -- TODO maybe not needed as soon as a websocket is open
     -- but maybe a client's response processing queue is full
     AskReceived {responseId :: SId Response_}
@@ -401,8 +402,6 @@ data ServerResponse = ServerResponse
     response :: Response'
   }
   deriving (Show, Eq, Ord, Generic)
-
-
 
 -- TODO safe SId
 -- can be used like this
@@ -453,7 +452,7 @@ data Info_ = Info_ deriving (Description)
 
 data D = DA | DB
 
--- class MyShow a where 
+-- class MyShow a where
 --   sh :: a -> String
 --   default sh :: a -> String
 --   sh s = "str"
@@ -461,12 +460,11 @@ data D = DA | DB
 -- instance MyShow a => Show a where
 --   show = sh
 
-
 -- TODO admin hierarchy
 
 -- Each command should be recognizable
 
-{- TODO uncomment
+-- {- TODO uncomment
 $(deriveJSON options ''SName)
 
 $(deriveJSON options ''SAlias)
