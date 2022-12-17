@@ -65,7 +65,7 @@
 ## C_7_2
 
 - speed testing - `criterion`
-- `Data.Text.Lazy.Builder` significantly speeds up building large text from chunks
+- `Data.Text.Lazy.Builder` significantly speeds up building large text from chunks as compared to strict `Text`
 - `fold` and `foldMap`
 
 ## C_8_2
@@ -84,3 +84,11 @@
 ## C_9_4
 
 - `MultiWayIf` - language extension, if with guards - [src](https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/multiway_if.html)
+
+## C_10_1
+
+- Sockets connect machines; files connect processes; `TVar`s connect threads.
+
+## C_10_5 
+
+- `stm-containers` - `TVar` - based hash map
