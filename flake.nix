@@ -8,7 +8,6 @@
     flake-utils.follows = "flake-utils_/flake-utils";
     haskell-tools.url = "github:deemp/flakes?dir=language-tools/haskell";
     my-devshell.url = "github:deemp/flakes?dir=devshell";
-    manager.url = "github:deemp/flakes?dir=manager";
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
@@ -22,7 +21,6 @@
     , drv-tools
     , haskell-tools
     , my-devshell
-    , manager
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -32,21 +30,21 @@
       inherit (drv-tools.functions.${system}) mkBinName;
       inherit (my-codium.configs.${system}) extensions settingsNix;
       devshell = my-devshell.devshell.${system};
+      inherit (my-devshell.functions.${system}) mkCommands;
       inherit (haskell-tools.functions.${system}) toolsGHC;
       hsShellTools = haskell-tools.toolSets.${system}.shellTools;
-      inherit (toolsGHC "92") stack hls ghc;
+      inherit (toolsGHC "92") hls ghc;
 
       writeSettings = writeSettingsJSON {
         inherit (settingsNix) haskell todo-tree files editor gitlens
           git nix-ide workbench markdown-all-in-one;
       };
 
-      tools =
+      codiumTools =
         [
           hsShellTools.implicit-hie
           hsShellTools.ghcid
-          manager.packages.${system}.default
-          stack
+          pkgs.stack
           writeSettings
           hls
           ghc
@@ -54,8 +52,10 @@
 
       codium = mkCodium {
         extensions = { inherit (extensions) nix haskell misc github markdown; };
-        runtimeDependencies = tools;
+        runtimeDependencies = codiumTools;
       };
+
+      tools = codiumTools ++ [ codium ];
     in
     {
       packages = {
@@ -64,32 +64,11 @@
 
       devShells.default = devshell.mkShell
         {
-          packages = [ codium ] ++ tools;
+          packages = tools;
           bash = {
-            extra = ''
-              printf "Hello!\n"
-            '';
+            extra = ''printf "Hello!\n"'';
           };
-          commands = [
-            {
-              name = "ghcid, stack, ghc, jq";
-            }
-            {
-              name = "manager";
-              help = "manage Haskell modules and template files";
-              category = "ide";
-            }
-            {
-              name = "codium";
-              help = "VSCodium with a couple of extensions and given executables on `PATH`";
-              category = "ide";
-            }
-            {
-              name = "${writeSettings.name}";
-              help = "write `.vscode/settings.json`";
-              category = "ide";
-            }
-          ];
+          commands = mkCommands "tools" tools;
         };
 
       # Nix-provided libraries for stack
