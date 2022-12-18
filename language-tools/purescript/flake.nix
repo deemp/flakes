@@ -15,8 +15,10 @@
     let
       pkgs = nixpkgs.legacyPackages.${system};
       shellTools = {
-        inherit (pkgs) dhall-lsp-server spago nodejs-16_x purescript;
+        inherit (pkgs) dhall-lsp-server nodejs-16_x purescript;
         inherit (pkgs.nodePackages) purescript-language-server purs-tidy;
+      } // {
+        spago = pkgs.lib.meta.addMetaAttrs { description = "spago-${pkgs.spago.version}"; } pkgs.spago;
       };
     in
     {
