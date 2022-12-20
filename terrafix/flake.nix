@@ -3,7 +3,6 @@
     nixpkgs_.url = github:deemp/flakes?dir=source-flake/nixpkgs;
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils_.url = github:deemp/flakes?dir=source-flake/flake-utils;
-    flakes-tools.url = github:deemp/flakes?dir=flakes-tools;
     drv-tools.url = github:deemp/flakes?dir=drv-tools;
     flake-utils.follows = "flake-utils_/flake-utils";
   };
@@ -11,7 +10,6 @@
     { self
     , nixpkgs
     , flake-utils
-    , flakes-tools
     , drv-tools
     , ...
     }: flake-utils.lib.eachDefaultSystem
@@ -20,13 +18,10 @@
         pkgs = nixpkgs.legacyPackages.${system};
         inherit (flakes-tools.functions.${system}) mkFlakesTools;
         flakesTools = mkFlakesTools [ "." ];
-        hcl = import ./.nix/hcl.nix;
-        tfTools = import ./.nix/tf-tools.nix { inherit pkgs system drv-tools; };
-        tests = (import ./.nix/tests.nix { inherit pkgs system drv-tools; });
-        packages = tests // tfTools.packages // {
-          pushToCachix = flakesTools.pushToCachix;
-          updateLocks = flakesTools.updateLocks;
-        };
+        hcl = import ./nix-files/hcl.nix;
+        tfTools = import ./nix-files/tf-tools.nix { inherit pkgs system drv-tools; };
+        tests = import ./nix-files/tests.nix { inherit pkgs system drv-tools; };
+        packages = tests // tfTools.packages;
       in
       {
         functions = tfTools.functions;

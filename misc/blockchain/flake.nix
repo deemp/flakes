@@ -2,7 +2,6 @@
   inputs = {
     nixpkgs_.url = "github:deemp/flakes?dir=source-flake/nixpkgs";
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
-    flakes-tools.url = "github:deemp/flakes?dir=flakes-tools";
     drv-tools.url = "github:deemp/flakes?dir=drv-tools";
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils.follows = "flake-utils_/flake-utils";
@@ -17,7 +16,6 @@
     { self
     , nixpkgs
     , flake-utils
-    , flakes-tools
     , drv-tools
     , my-codium
     , formatter
@@ -34,7 +32,6 @@
         inherit (drv-tools.functions.${system}) mkShellApp;
         inherit (python-tools.snippets.${system}) activateVenv;
         inherit (vscode-extensions.packages.${system}) vscode open-vsx;
-        inherit (flakes-tools.functions.${system}) mkFlakesTools;
         createVenvs = python-tools.functions.${system}.createVenvs [ "." ];
         pkgs = nixpkgs.legacyPackages.${system};
 
@@ -68,10 +65,6 @@
           bash.extra = activateVenv;
           packages = tools;
           commands = mkCommands "ide" tools;
-        };
-        packages = {
-          pushToCachix = flakesTools.pushToCachix;
-          updateLocks = flakesTools.updateLocks;
         };
       });
 
