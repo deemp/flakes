@@ -1,0 +1,9 @@
+.deps
+tmp
+artifacts
+.deps
+node_modules
+build
+cache
+flatten
+.vscode
