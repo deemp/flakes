@@ -1,0 +1,28 @@
+default-extensions:
+- TypeApplications
+- ImportQualifiedPost
+- BlockArguments
+- QuasiQuotes
+- NoOverloadedStrings
+- InstanceSigs
+
+dependencies:
+- base >= 4.7 && < 5
+
+executables:
+  SocketsAndPipes:
+    dependencies: sockets-and-pipes
+    main: Main.hs
+    source-dirs: Resources/SocketsAndPipes
+  DevelopersRoadmap:
+    dependencies: sockets-and-pipes
+    main: Main.hs
+    source-dirs:
+      - Resources/DevelopersRoadmap
+      - Resources/DevelopersRoadmap/src
+
+license: BSD3
+
+name: nix-managed
+
+version: 0.1.0.0
