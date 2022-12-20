@@ -2,103 +2,11 @@
 
 ## Nix
 
-### Shell
-
-- `nix shell` - bring package to shell
-  
-  ```sh
-  $ nix shell nixpkgs#jq
-  $ jq --version
-  jq-1.6
-  $ which jq
-  /nix/store/5x1jpz4grhzl1psmrxj42wzmvllqgbhm-jq-1.6-bin/bin/jq
-  ```
-
-### Flakes
-
-1. What are flakes, how to enable them?
-   - see the official [wiki](https://nixos.wiki/wiki/Flakes)
-
-   > `outputs`: A function that, given an attribute set containing the outputs of each of the input flakes keyed by their identifier, yields the Nix values provided by this flake. Thus, in the example above, `inputs.nixpkgs` contains the result of the call to the `outputs` function of the `nixpkgs` flake.
-
-1. A flake with a derivation - [hello-flake](hello-flake/flake.nix)
-
-   ```sh
-   cd hello-flake && nix run
-   ```
-
-1. How to use a flake in another flake? Should I build it somehow?
-
-   - Specify it in `inputs`, then use the derivations from its `outputs` where appropriate. They will use flake's inputs to build
-
-1. A simple flake [tutorial](https://nix-tutorial.gitlabpages.inria.fr/nix-tutorial/flakes.html?highlight=flake) with simple examples
-
-1. A very thorough [tutorial](https://yuanwang.ca/posts/getting-started-with-flakes.html) on flakes
-
-1. Another flake [tutorial](https://ghedam.at/a-tour-of-nix-flakes)
-
-1. Another [blog](https://xeiaso.net/blog/nix-flakes-2-2022-02-27) on flakes
-
-1. How to convert an exising project to flakes?
-
-   - Like [this](https://garnix.io/blog/converting-to-flakes)
-
-1. How to bring old-style packages to a flake?
-   - use `flake = false` in inputs - [example](https://github.com/br4ch1st0chr0n3/flakes/blob/c3c578c3798bea79897d774293e34a1fadb06f8b/inputs/flake.nix#L16)
-
-1. Flake inputs tip
-   - Store your flake inputs in a repo - [example](https://github.com/br4ch1st0chr0n3/flakes/blob/c3c578c3798bea79897d774293e34a1fadb06f8b/inputs/flake.nix)
-   - Use them in your projects - [example](https://github.com/br4ch1st0chr0n3/flakes/blob/c3c578c3798bea79897d774293e34a1fadb06f8b/codium/flake.nix#L3)
-   - Use `nix flake update` in dependent projects to update the inputs
-
-1. What's the difference between a flake's package and a derivation?
-   - `outputs.packages.${system}` is a set with derivations as values
-
-1. Can add an additional nix config to a
-
 ### Docs
-
-1. [nix-lib](https://teu5us.github.io/nix-lib.html)
-
-1. [Glossary](https://nixos.org/manual/nix/unstable/glossary.html#gloss-closure)
 
 1. It's recommended to add bookmarks for search engines in your browser, like described here [Browser](README.md#browser)
 
-1. Nix [Documentation gaps](https://nixos.wiki/wiki/Documentation_Gaps)
-
-1. Full Nix [manual](https://nixos.org/manual/nixpkgs/stable/), including helper functions
-   - dark [version](https://ryantm.github.io/nixpkgs/languages-frameworks/texlive/#sec-language-texlive)
-
-1. [Docs](https://devdocs.io/) for many functions
-
-   - [config](./devdocs-config.json)
-
 1. Search for a package file: `nix edit nixpkgs#makeWrapper`
-
-1. What means `some-pkg.follows = "another/package";`?
-
-   - [src](https://discourse.nixos.org/t/nix-flake-to-aggregate-and-concurrently-update-some-dependencies/10774/8?u=br4ch1st0chr0n3)
-   - [Example](https://ianthehenry.com/posts/how-to-learn-nix/flakes/):
-
-   ```sh
-   $ nix flake metadata github:edolstra/dwarffs
-   Resolved URL:  github:edolstra/dwarffs
-   Locked URL:    github:edolstra/dwarffs/f691e2c991e75edb22836f1dbe632c40324215c5
-   Description:   A filesystem that fetches DWARF debug info from the Internet on demand
-   Path:          /nix/store/769s05vjydmc2lcf6b02az28wsa9ixh1-source
-   Revision:      f691e2c991e75edb22836f1dbe632c40324215c5
-   Last modified: 2021-01-21 06:41:26
-   Inputs:
-   ├───nix: github:NixOS/nix/6254b1f5d298ff73127d7b0f0da48f142bdc753c
-   │   ├───lowdown-src: github:kristapsdz/lowdown/1705b4a26fbf065d9574dce47a94e8c7c79e052f
-   │   └───nixpkgs: github:NixOS/nixpkgs/ad0d20345219790533ebe06571f82ed6b034db31
-   └───nixpkgs follows input 'nix/nixpkgs'
-   ```
-
-   so we can write `inputs.nixpkgs.follows = "nix/nixpkgs";`[]
-
-1. We can set the `nix.conf` to
-   - [show-trace](https://nixos.org/manual/nix/unstable/command-ref/conf-file.html?highlight=trace#conf-show-trace)
 
 1. How to use `nix-doc`?
 
@@ -111,7 +19,7 @@
    ```sh
    $ nix repl
    nix-repl> :lf nixpkgs
-   nix-repl> legacypackages.x86_64-linux
+   nix-repl> legacyPackages.x86_64-linux
    ```
 
 1. Learn about a command:
@@ -119,19 +27,6 @@
    ```sh
    nix help command
    ```
-
-1. One may write docs in Markdown
-   - I use [longDescription](https://github.com/br4ch1st0chr0n3/flakes/blob/5883de8f1eabac3a5a0069b1330b4b0f7c630b9a/drv-tools/flake.nix#L151)
-   - And [desc](https://github.com/br4ch1st0chr0n3/flakes/blob/5883de8f1eabac3a5a0069b1330b4b0f7c630b9a/drv-tools/flake.nix#L210) to show it in a terminal
-
-### Troubleshooting
-
-- Sometimes, if you `wrapProgram` with `--prefix PATH`, this program's `PATH` may not contain the specified binary paths
-   1. example - [mkCodium](https://github.com/br4ch1st0chr0n3/flakes/blob/42ea51cac48ff6d17e76055c905f081fabdbf8f7/codium/flake.nix#L75) for VSCodium
-   2. get this derivation's nix store path. search for the original executable, not given by `devshell`
-   3. try to `nix store delete` it
-   4. if fail, make it not alive
-   5. `nix store repair` it
 
 ### Useful functions
 
@@ -152,14 +47,6 @@
 1. What is `expression`, `closure`, `derivation`?
 
    - [expression, closure, derivation](https://medium.com/scientific-breakthrough-of-the-afternoon/closure-vs-derivation-in-the-nix-package-manager-ec0eccc53407)
-
-1. Where are nix configs stored?
-
-   - [here](https://nixos.wiki/wiki/Flakes#Permanent)
-
-1. When should I use overlays over `nixpkgs`?
-
-   - You [shouldn't](https://zimbatm.com/notes/1000-instances-of-nixpkgs)
 
 1. There are [phases](https://nixos.org/manual/nixpkgs/unstable/#sec-stdenv-phases)
    - They can be run via `nix develop` - [src](https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-develop.html#examples)
@@ -194,7 +81,7 @@
 
 ### Making derivations and exes
 
-1. Wen derivations are built, they may produce executables. Locations of these executables are determined by bash scripts. If you make a derivation you can use `buildInputs` to specify the derivations you'd like to be accessible during in scripts during `phases` or in a `shellHook`
+1. When derivations are built, they may produce executables. Locations of these executables are determined by bash scripts. If you make a derivation you can use `buildInputs` to specify the derivations you'd like to be accessible during in scripts during `phases` or in a `shellHook`
 
 1. It's more reliable to use paths to binaries rather than specify, e.g. `buildInputs` and call programs by names
    - This helped me when configuring tasks for VSCodium [here](https://github.com/br4ch1st0chr0n3/devops-labs/blob/b400993e18b0e1ebc515141450c51f2d6c8b3f67/.nix/commands.nix#L37)
@@ -275,6 +162,9 @@
    nix-repl> nixpkgs.lib
    ```
 
+1. Symlinked things cannot be written or opened. They should first be removed - [src](https://nixos.wiki/wiki/Nix_Cookbook#Wrapping_packages)
+   - [add man page](https://github.com/br4ch1st0chr0n3/flakes/blob/b57918dfa6cf694e81886cb0dd858731f4987b08/drv-tools/flake.nix#L132)
+
 ### Y2nix
 
 1. Here's a sample `poetry2nix` [flake](https://github.com/nix-community/poetry2nix/blob/869580c729e658ffe74d8d1d0c3cb132d33a6126/templates/app/flake.nix) - can be used for Python
@@ -308,6 +198,8 @@
 1. How to package a Haskell app - [tutorial](https://www.haskellforall.com/2022/08/incrementally-package-haskell-program.html)
 
 1. How to integrate `stack` with Nix? - [src](https://docs.haskellstack.org/en/stable/nix_integration/#supporting-both-nix-and-non-nix-developers)
+
+1. It's possible to supply Nix packages to stack so that one can run in `ghci`: `ghci> :? hpack` - [example](https://github.com/br4ch1st0chr0n3/flakes/blob/559da0d489e466d2f8d8b5a5dc00dc7c6256b832/templates/codium/haskell/flake.nix#L113)
 
 1. See `flake-compat`
    - Create a `devShells.stack-shell = {ghcVersion} : ....` by following the appropriate section of [docs](https://docs.haskellstack.org/en/stable/nix_integration/#external-c-libraries-through-a-shellnix-file) (might be just `{ghc}`)
@@ -363,9 +255,14 @@
 
 - `git rebase -Xtheirs another_branch` - to favor current branch over `another_branch` - [src](https://demisx.github.io/git/rebase/2015/07/02/git-rebase-keep-my-branch-changes.html)
 
+- [Add](https://git-scm.com/book/en/v2/Git-Tools-Submodules) a submodule
+- Clone [nested submodules](https://stackoverflow.com/a/6562038)
+- Convert a submodule to a folder while preserving its history: [src](https://medium.com/walkme-engineering/how-to-merge-a-git-submodule-into-its-main-repository-d83a215a319c)
+
 ## GitHub
 
 1. GitHub dislikes `nix develop` and `nix-shel`. You should run commands via `nix develop -c bash -c 'command'`
+1. Get info about forks: [gitpop3](https://andremiras.github.io/gitpop3/)
 
 ### Actions
 
@@ -396,6 +293,11 @@
 
 1. `actions/checkout` doesn't pull the latest commit
    2. If a previous job pushes to the repo, need to pull in a current job
+
+## Heroku
+
+- Build a subdirectory: [buildpack](https://elements.heroku.com/buildpacks/timanovsky/subdir-heroku-buildpack)
+- Deploy to Heroku: GH [action](https://github.com/marketplace/actions/deploy-to-heroku?version=v3.12.12)
 
 ## Docker
 
@@ -502,6 +404,35 @@
    a = 2
    ```
 
+- "[Automating](https://brandonchinn178.github.io/blog/2022/05/19/automating-fourmolu-releases-with-github-actions.html) Fourmolu releases" - use Python for CI
+
+## Kubernetes
+
+- [Intro](https://www.youtube.com/watch?v=q_nj340pkQo)
+  - There are `worker` nodes and `master` nodes. They run in a `cluster`
+  - A `worker` node may run several `containers`
+  - `k8s` can give access to services in a `cluster` via `DNS` or `ports`. It can perform `load balancing`
+  - can attach local or remote disks to a cluster
+  - automated `rollback` and `update` of `Docker images`
+    - create nodes with a new image, check they work ok, kill nodes made with old images
+    - `green deployment`
+  - restarts containers if something happens to them
+
+- Overview - [src](https://kubernetes.io/docs/concepts/overview/)
+  - Can translate `.env` to `ConfigMap` - [src](https://humanitec.com/blog/handling-environment-variables-with-kubernetes)
+    - `kubectl create configmap postgres-config --from-env-file=postgres-config.properties`
+  - Can refer to data of a running instance
+
+    ```yaml
+    env:
+    - name: PRODUCT_BE_SERVER_URL
+      valueFrom:
+          fieldRef:
+            fieldPath: status.podIP
+    ```
+
+- A service is an interface to a backend
+
 ## Networks
 
 1. [OpenVPN](https://openvpn.net/community-resources/how-to/)
@@ -516,6 +447,10 @@
    - LAN -
    - Gateways -
    - Firewall rules -
+
+## Study
+
+- Begin by reading the abstract and the table of contents from RFC 7230. Never neglect the table of contents: it helps you understand the scope of the document and the context of the specific parts you’ll be reading.
 
 ## Pending Questions
 
