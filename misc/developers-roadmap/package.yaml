@@ -1,0 +1,21 @@
+default-extensions:
+- TypeApplications
+- ImportQualifiedPost
+- BlockArguments
+- QuasiQuotes
+- NoOverloadedStrings
+- InstanceSigs
+
+dependencies:
+- base >= 4.7 && < 5
+
+executables:
+  DevelopersRoadmap:
+    main: Main.hs
+    source-dirs: src
+
+license: BSD3
+
+name: developers-roadmap
+
+version: 0.1.0.0

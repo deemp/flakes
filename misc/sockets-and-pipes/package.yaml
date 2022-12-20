@@ -13,13 +13,7 @@ executables:
   SocketsAndPipes:
     dependencies: sockets-and-pipes
     main: Main.hs
-    source-dirs: Resources/SocketsAndPipes
-  DevelopersRoadmap:
-    dependencies: sockets-and-pipes
-    main: Main.hs
-    source-dirs:
-      - Resources/DevelopersRoadmap
-      - Resources/DevelopersRoadmap/src
+    source-dirs: src/SocketsAndPipes
 
 license: BSD3
 
