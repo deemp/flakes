@@ -46,8 +46,7 @@
               "json2md"
               "devshell"
               "terrafix"
-              "manager"
-              "manager/nix-dev"
+              "misc/manager/nix-dev"
               "."
             ]
           ]
