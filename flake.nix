@@ -1,8 +1,7 @@
 {
   inputs = {
-    # nixpkgs_.url = "github:deemp/flakes?dir=source-flake/nixpkgs";
-    # nixpkgs.follows = "nixpkgs_/nixpkgs";
-    nixpkgs.url = "github:NixOS/nixpkgs/ed6654123003549dcdc7d65abbbd0d0c650e93b2";
+    nixpkgs_.url = "github:deemp/flakes?dir=source-flake/nixpkgs";
+    nixpkgs.follows = "nixpkgs_/nixpkgs";
     my-codium.url = "github:deemp/flakes?dir=codium";
     flakes-tools.url = "github:deemp/flakes?dir=flakes-tools";
     drv-tools.url = "github:deemp/flakes?dir=drv-tools";

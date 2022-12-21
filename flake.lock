@@ -1088,6 +1088,26 @@
         "type": "github"
       }
     },
+    "nixpkgs__11": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_14"
+      },
+      "locked": {
+        "dir": "source-flake/nixpkgs",
+        "lastModified": 1671598997,
+        "narHash": "sha256-xeDZT/PlylheiwSghBqYN0QZXQvtzQ3tW0F7C51c+mM=",
+        "owner": "deemp",
+        "repo": "flakes",
+        "rev": "9eac09ddbed7da181e81c8aef103bdabd9890a22",
+        "type": "github"
+      },
+      "original": {
+        "dir": "source-flake/nixpkgs",
+        "owner": "deemp",
+        "repo": "flakes",
+        "type": "github"
+      }
+    },
     "nixpkgs__2": {
       "inputs": {
         "nixpkgs": "nixpkgs_2"
@@ -1261,7 +1281,11 @@
         "haskell-tools": "haskell-tools",
         "my-codium": "my-codium",
         "my-devshell": "my-devshell_2",
-        "nixpkgs": "nixpkgs_14"
+        "nixpkgs": [
+          "nixpkgs_",
+          "nixpkgs"
+        ],
+        "nixpkgs_": "nixpkgs__11"
       }
     },
     "vscode-extensions": {
