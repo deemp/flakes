@@ -8,6 +8,7 @@
     flake-utils.follows = "flake-utils_/flake-utils";
     haskell-tools.url = "github:deemp/flakes?dir=language-tools/haskell";
     my-devshell.url = "github:deemp/flakes?dir=devshell";
+    flakes-tools.url = "github:deemp/flakes?dir=flakes-tools";
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
@@ -16,6 +17,7 @@
   outputs =
     { self
     , flake-utils
+    , flakes-tools
     , nixpkgs
     , my-codium
     , drv-tools
@@ -29,6 +31,7 @@
       inherit (my-codium.functions.${system}) writeSettingsJSON mkCodium;
       inherit (drv-tools.functions.${system}) mkBinName withAttrs;
       inherit (my-codium.configs.${system}) extensions settingsNix;
+      inherit (flakes-tools.functions.${system}) mkFlakesTools;
       devshell = my-devshell.devshell.${system};
       inherit (my-devshell.functions.${system}) mkCommands;
       inherit (haskell-tools.functions.${system}) toolsGHC;
@@ -54,10 +57,12 @@
       };
 
       tools = codiumTools ++ [ codium ];
+      flakesTools = mkFlakesTools [ "." ];
     in
     {
       packages = {
         default = codium;
+        inherit (flakesTools) updateLocks pushToCachix;
       };
 
       devShells.default = devshell.mkShell
