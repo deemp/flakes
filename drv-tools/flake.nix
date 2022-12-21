@@ -164,9 +164,9 @@
         in
         withLongDescription (withMeta drv_ drv.meta) longDescription;
 
-      # String -> String -> Set -> IO ()
+      # String -> String -> Any -> IO ()
       writeJSON = name: path: dataNix:
-        # assert builtins.isString name && buil
+        assert isString name && isString path;
         let
           dataJSON = toJSON dataNix;
           name_ = "write-${name}-json";
@@ -185,6 +185,28 @@
             printf "${framedBrackets "ok %s"}" "${name_}"
           '';
           inherit description;
+        };
+
+      # String -> String -> Any -> IO ()
+      writeYAML = name: path: dataNix:
+        assert builtins.isString name && isString path;
+        let
+          name_ = "write-${name}-yaml";
+          dir = dirOf path;
+          file = baseNameOf path;
+          tmpJSON = "${file}.tmp";
+          writeJSON_ = writeJSON "tmp-json" tmpJSON dataNix;
+        in
+        mkShellApp {
+          name = name_;
+          runtimeInputs = [ pkgs.yq-go ];
+          text = ''
+            ${mkBin writeJSON_}
+            cat ${tmpJSON} | yq e -MP - > ${path}
+            rm ${tmpJSON}
+            printf "${framedBrackets "ok %s"}" "${name_}"
+          '';
+          description = "Write a `Nix` expression for `${name}` as `YAML` into `${path}`";
         };
 
       # use when need to generate settings.json etc.
@@ -303,6 +325,7 @@
           withMan
           withMeta
           writeJSON
+          writeYAML
           ;
       };
 
