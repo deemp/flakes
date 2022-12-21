@@ -16,8 +16,6 @@
       (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        inherit (flakes-tools.functions.${system}) mkFlakesTools;
-        flakesTools = mkFlakesTools [ "." ];
         hcl = import ./nix-files/hcl.nix;
         tfTools = import ./nix-files/tf-tools.nix { inherit pkgs system drv-tools; };
         tests = import ./nix-files/tests.nix { inherit pkgs system drv-tools; };
