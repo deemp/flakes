@@ -42,13 +42,14 @@
             mkBin mkBinName writeJSON withMan mkShellApp
             framedBrackets mkShellApps;
           inherit (drv-tools.configs.${system}) man;
-          nix2mdSilent = outPath: nixExpr@{ ... }:
+          nix2mdSilent = outPath: dataNix:
             assert builtins.isString outPath;
+            assert builtins.isList dataNix;
             let
               outName = baseNameOf outPath;
               outDir = dirOf outPath;
               tmpJSON = "${outName}.tmp.json";
-              writeTmpJSON = writeJSON "pre-md" "./${tmpJSON}" nixExpr;
+              writeTmpJSON = writeJSON "pre-md" "./${tmpJSON}" dataNix;
               json2md = out1.packages.${system}.default;
               mdlint = pkgs.nodePackages.markdownlint-cli2;
               name = "nix-to-md";
@@ -70,12 +71,13 @@
               '';
             };
 
-          nix2md = outPath: nixExpr@{ ... }:
+          nix2md = outPath: dataNix:
             assert builtins.isString outPath;
+            assert builtins.isList dataNix;
             withMan
               (
                 let
-                  nix2md_ = nix2mdSilent outPath nixExpr;
+                  nix2md_ = nix2mdSilent outPath dataNix;
                   name = nix2md_.name;
                 in
                 mkShellApp {
@@ -94,7 +96,7 @@
 
           test = mkShellApps {
             testNix2md = {
-              text = "${mkBin (nix2md "tmp/some.md" { h1 = "Some text"; })}";
+              text = "${mkBin (nix2md "tmp/some.md" [{ h1 = "Some text"; }])}";
             };
           };
 
@@ -108,7 +110,7 @@
             inherit nix2mdSilent nix2md;
           };
           devShells.default = pkgs.mkShell {
-            buildInputs = [ json2md ];
+            buildInputs = [ json2md ] ++ builtins.attrValues test;
           };
         }
       );
