@@ -128,6 +128,16 @@
     "python.defaultInterpreterPath" = "\${workspaceFolder}/.venv/bin/python3";
   };
 
+  errorlens = {
+    "errorLens.enabledDiagnosticLevels" = [
+      "info"
+      "warning"
+      "hint"
+      "error"
+    ];
+    "errorLens.enabled" = true;
+  };
+
   window = {
     "window.restoreWindows" = "none";
   };
