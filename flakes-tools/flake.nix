@@ -41,7 +41,13 @@
             (
               inp // {
                 name = "push-${name}-to-cachix";
-                runtimeInputs = runtimeInputs ++ [ pkgs.cachix ];
+                runtimeInputs =
+                  runtimeInputs ++
+                  [
+                    pkgs.cachix
+                    pkgs.jq
+                    pkgs.findutils
+                  ];
               }
             )
           )
@@ -176,7 +182,11 @@
           );
 
       # dump a devshell by running a dummy command in it
-      dumpDevShells = runFishScript { name = "dump-devshells"; fishScriptPath = ./scripts/dump-devshells.fish; };
+      dumpDevShells = runFishScript {
+        name = "dump-devshells";
+        fishScriptPath = ./scripts/dump-devshells.fish;
+        runtimeInputs = [ pkgs.jq pkgs.findutils ];
+      };
 
       # dump devshells in given directories
       # can be combined with updating flake locks
