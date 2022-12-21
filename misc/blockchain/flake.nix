@@ -54,7 +54,6 @@
           };
           runtimeDependencies = codiumTools;
         };
-        flakesTools = mkFlakesTools [ "." ];
         writeSettings = writeSettingsJSON settingsNix;
         devshell = my-devshell.devshell.${system};
         inherit (my-devshell.functions.${system}) mkCommands;
