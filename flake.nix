@@ -1,14 +1,14 @@
 {
   inputs = {
-    nixpkgs_.url = "github:deemp/flakes?dir=source-flake/nixpkgs";
-    nixpkgs.follows = "nixpkgs_/nixpkgs";
+    # nixpkgs_.url = "github:deemp/flakes?dir=source-flake/nixpkgs";
+    # nixpkgs.follows = "nixpkgs_/nixpkgs";
+    nixpkgs.url = "github:NixOS/nixpkgs/ed6654123003549dcdc7d65abbbd0d0c650e93b2";
     my-codium.url = "github:deemp/flakes?dir=codium";
     flakes-tools.url = "github:deemp/flakes?dir=flakes-tools";
     drv-tools.url = "github:deemp/flakes?dir=drv-tools";
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
     my-devshell.url = "github:deemp/flakes?dir=devshell";
-    python-tools.url = "github:deemp/flakes?dir=language-tools/python";
     haskell-tools.url = "github:deemp/flakes?dir=language-tools/haskell";
     flake-compat = {
       url = "github:edolstra/flake-compat";
@@ -21,7 +21,6 @@
     , my-codium
     , flake-utils
     , my-devshell
-    , python-tools
     , flakes-tools
     , drv-tools
     , haskell-tools
@@ -40,10 +39,9 @@
         inherit (haskell-tools.functions.${system}) toolsGHC;
         hsShellTools = haskell-tools.toolSets.${system}.shellTools;
         inherit (toolsGHC "92") stack hls ghc;
-        createVenvs = python-tools.functions.${system}.createVenvs [ "." ];
         writeSettings = writeSettingsJSON {
           inherit (settingsNix) todo-tree files editor gitlens
-            git nix-ide workbench markdown-all-in-one python
+            git nix-ide workbench markdown-all-in-one
             markdown-language-features yaml haskell
             ;
         };
@@ -53,7 +51,7 @@
               inherit (pkgs)
                 rabbitmq-server hadolint kubernetes docker
                 poetry minikube kubernetes-helm postgresql_15;
-              inherit writeSettings createVenvs stack ghc;
+              inherit writeSettings stack ghc;
               inherit (hsShellTools) implicit-hie ghcid;
             } // scripts
           );
@@ -72,7 +70,7 @@
           {
             installHelmPlugins = {
               text = ''
-                printf "${framedNewlines "installing helm plugins into $PWD/${helmPluginsPath}"}"
+                printf "${framedNewlines "installing helm plugins into $HELM_PLUGINS"}"
                 ${setHelmEnv}
                 helm plugin install https://github.com/databus23/helm-diff || echo "installed 'helm-diff'"
                 helm plugin install https://github.com/jkroepke/helm-secrets || echo "installed 'helm-secrets'"
