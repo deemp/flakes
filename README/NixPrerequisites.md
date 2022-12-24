@@ -47,9 +47,16 @@ Many docs are available online
 
 ## Templates
 
-### Template format
+### Use a template
 
-See [nix flake init](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake-init.html)
+Two ways of copying from templates:
+
+- [nix flake init](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake-init.html)
+- [nix flake new](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake-new.html)
+
+### Update a cached template
+
+If you notice that `nix flake init`, `nix flake new`, etc. give you an old version of a template, run `nix flake lock` on that template. This action will force `nix` to update the cached version of the template somewhere in `~/.cache/nix`. - [src](https://t.me/ru_nixos/140144)
 
 ### List templates
 
@@ -75,13 +82,6 @@ nix-repl> templates.<TAB>
 nix-repl> templates.codium-generic.path
 /nix/store/j3kx4dk567y483pvszr2w8ghnkxich3d-source/templates/codium/generic
 ```
-
-### Copy
-
-Two ways of copying from templates:
-
-- [nix flake init](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake-init.html)
-- [nix flake new](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake-new.html)
 
 ### Assemble
 
