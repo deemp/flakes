@@ -1,4 +1,0 @@
--c stack ghci Modules/Chapters/C_9_Content_types.hs
--W
--r=stuckCountingServerHtml
---reload=Modules

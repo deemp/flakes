@@ -37,7 +37,6 @@
             (f "source-flake")
             (f "language-tools")
             (f "templates/codium")
-            (f "misc")
             [
               "drv-tools"
               "flakes-tools"
@@ -46,7 +45,6 @@
               "json2md"
               "devshell"
               "terrafix"
-              "misc/manager/nix-dev"
               "."
             ]
           ]

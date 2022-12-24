@@ -1,7 +1,0 @@
--c stack ghci drafts/autocomplete/Main.hs
--W
--r=:main
---reload=./
---reverse-errors
---no-height-limit
---allow-eval
