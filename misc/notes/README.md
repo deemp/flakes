@@ -165,6 +165,11 @@
 1. Symlinked things cannot be written or opened. They should first be removed - [src](https://nixos.wiki/wiki/Nix_Cookbook#Wrapping_packages)
    - [add man page](https://github.com/br4ch1st0chr0n3/flakes/blob/b57918dfa6cf694e81886cb0dd858731f4987b08/drv-tools/flake.nix#L132)
 
+1. `pkgs.dockerTools.buildLayeredImage` - build a docker image
+   1. Pass static executables
+   1. Set entrypoint: `config.Entrypoint = [ command ]`. No need for `bash`
+   1. `docker inspect` the image
+
 ### Y2nix
 
 1. Here's a sample `poetry2nix` [flake](https://github.com/nix-community/poetry2nix/blob/869580c729e658ffe74d8d1d0c3cb132d33a6126/templates/app/flake.nix) - can be used for Python
@@ -298,6 +303,8 @@
 
 - Build a subdirectory: [buildpack](https://elements.heroku.com/buildpacks/timanovsky/subdir-heroku-buildpack)
 - Deploy to Heroku: GH [action](https://github.com/marketplace/actions/deploy-to-heroku?version=v3.12.12)
+- Deploy a Docker container to Heroku
+  - Use [ENTRYPOINT](https://devcenter.heroku.com/articles/container-registry-and-runtime#dockerfile-commands-and-runtime)
 
 ## Docker
 
@@ -381,6 +388,16 @@
 ## Yandex Cloud
 
 1. [Иерархия ресурсов Yandex Cloud](https://cloud.yandex.ru/docs/resource-manager/concepts/resources-hierarchy)
+1. Deploy a container
+   1. Build and load a container `back:latest`: `nix run .#backDocker`
+   1. Push it to Docker Hub
+   1. ssh to Yandex Cloud VM
+   1. Tag, pull, run the container and expose its ports: `docker run -p 0.0.0.0:8082:8082 back:latest back`
+      1. Use `0.0.0.0` to listen to any network interface - [SO](https://stackoverflow.com/a/20778887)
+      1. `sudo netstat -ntlpu` should show that your app uses `0.0.0.0`
+   1. Enable forwarding from docker containers to the outside world - [src](https://docs.docker.com/network/bridge/#enable-forwarding-from-docker-containers-to-the-outside-world)
+   1. Buy a cheap domain on `reg.ru`, for example. Make a DNS record that maps to the VM's IP
+      1. Wait, check that record using nslookup until it shows the correct IP (1h+)
 
 ## Virtual Machines
 
