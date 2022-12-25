@@ -45,6 +45,8 @@
               "codium"
               "json2md"
               "devshell"
+              "manager"
+              "manager/nix-dev"
               "terrafix"
               "."
             ]
