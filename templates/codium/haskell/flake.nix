@@ -29,14 +29,15 @@
     let
       pkgs = nixpkgs.legacyPackages.${system};
       inherit (my-codium.functions.${system}) writeSettingsJSON mkCodium;
-      inherit (drv-tools.functions.${system}) mkBinName withAttrs;
+      inherit (drv-tools.functions.${system}) mkBinName withAttrs withMan withDescription;
+      inherit (drv-tools.configs.${system}) man;
       inherit (my-codium.configs.${system}) extensions settingsNix;
       inherit (flakes-tools.functions.${system}) mkFlakesTools;
       devshell = my-devshell.devshell.${system};
       inherit (my-devshell.functions.${system}) mkCommands;
       inherit (haskell-tools.functions.${system}) toolsGHC;
       hsShellTools = haskell-tools.toolSets.${system}.shellTools;
-      inherit (toolsGHC "92") stack hls ghc;
+      inherit (toolsGHC "92") stack hls ghc staticExecutable;
 
       writeSettings = writeSettingsJSON {
         inherit (settingsNix) haskell todo-tree files editor gitlens
@@ -49,12 +50,46 @@
         stack
         writeSettings
         ghc
+        myPackage
       ];
 
       codium = mkCodium {
         extensions = { inherit (extensions) nix haskell misc github markdown; };
         runtimeDependencies = codiumTools ++ [ hls ];
       };
+
+      myPackageDeps = [
+        pkgs.hello
+        pkgs.lzma
+      ];
+      myPackage =
+        let
+          packageName = "nix-managed";
+          packageExe = staticExecutable packageName ./.;
+        in
+        withMan
+          (
+            withDescription
+              (
+                pkgs.symlinkJoin {
+                  name = packageName;
+                  paths = [ packageExe ];
+                  buildInputs = [ pkgs.makeBinaryWrapper ];
+                  postBuild = ''
+                    wrapProgram $out/bin/${packageName} \
+                      --set PATH ${
+                        pkgs.lib.makeBinPath myPackageDeps
+                       }
+                  '';
+                }
+              ) "Demo Nix-packaged `Haskell` program"
+          )
+          (
+            x: ''
+              ${man.DESCRIPTION}
+              ${x.meta.description}
+            ''
+          );
 
       tools = codiumTools ++ [ codium ];
       flakesTools = mkFlakesTools [ "." ];
@@ -80,10 +115,7 @@
 
           ghc = pkgs.haskell.compiler.${ghcVersion};
 
-          buildInputs = [
-            pkgs.lzma
-            pkgs.hello
-          ];
+          buildInputs = myPackageDeps;
         };
     });
 
