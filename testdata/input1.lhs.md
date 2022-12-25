@@ -1,26 +1,26 @@
 # Monoid reduction parsing/execution
 
-I gave our apprentice the excersise to write a program 
-that takes strings in the form 
+I gave our apprentice the excersise to write a program
+that takes strings in the form
 
-```
+```console
 "1+4+2+3"
 ```
 
 with variable length and write it in way that it is easily
 extendible to strings of the form
 
-```
+```console
 "1*2*3*4"
 ```
 
 Not a hugely interesting task normally.
 However, after giving the task, it occurred to me, that
-the examples involved evaluating Monoids, specifically 
+the examples involved evaluating Monoids, specifically
 the product and sum monoid on natural numbers.
 
 This got me thinking:
-What would be an elegant, extendible way to write such a 
+What would be an elegant, extendible way to write such a
 program?
 
 This is what I came up with:
@@ -38,16 +38,15 @@ Next, let's import the needed modules:
 
 ```haskell
 module Main where
-import Data.Monoid          -- obviously when we are talking monoids 
-import Data.List            -- an interesting monoid, and some helper functions
+import Data.Monoid ( Product(..), Sum(..))          -- obviously when we are talking monoids 
+import Data.List ( intercalate)            -- an interesting monoid, and some helper functions
 ```
-
 
 ## What we want to have
 
 What is is exactly what we want to have? We want something
 that expresses an idea for reducing a monoid string (a string
-that expresses a monoid computation) that generalizes over 
+that expresses a monoid computation) that generalizes over
 any monoid we throw at it.
 
 In Haskell we use a typeclass for that:
@@ -61,39 +60,46 @@ class (Monoid (m a)) => Reducible m a where
 
 This states that a `Reducible` has to be a `Monoid`
 and we would like to konw what `Char` `op`erand it is associated with.
-Additioally, we would like to know how to construct the `Monoid` form 
+Additioally, we would like to know how to construct the `Monoid` form
 a value and a way to extract a value from the `Monoid`.
-Here `MultiParamTypeClasses` enables us to writd `Reducible m a` 
+Here `MultiParamTypeClasses` enables us to writd `Reducible m a`
 so that monoids with different base types can behave differently.
 
-Now that we have written down what we want, we can try to implement 
+Now that we have written down what we want, we can try to implement
 a `Reducible`. To begin, we will start with the `Sum` and `Product`
 monoids mentioned in the beginning:
 
 ```haskell
 instance (Num a) => Reducible Sum a where
+        op :: Num a => Sum a -> Char
         op     _ = '+'
+        constr :: Num a => Sum a -> a -> Sum a
         constr _ = Sum
+        get :: Num a => Sum a -> Sum a -> a
         get    _ = getSum
 
 instance (Num a) => Reducible Product a where
+        op :: Num a => Product a -> Char
         op     _ = '*'
+        constr :: Num a => Product a -> a -> Product a
         constr _ = Product
+        get :: Num a => Product a -> Product a -> a
         get    _ = getProduct
 ```
 
 As you might have noticed, we completely ignore the given argument in all
-three functions. The argument is merely used as a phantom type, for 
-the compiler to disambiguate what instance (and with it, which dictionary) 
+three functions. The argument is merely used as a phantom type, for
+the compiler to disambiguate what instance (and with it, which dictionary)
 will be used at runtime.
-The `FlexibleInstances` extension allows us to specify an instance with a 
+The `FlexibleInstances` extension allows us to specify an instance with a
 `Num` constraint, to let us use the two instances with all `Num` instances.
 
 ## How do we work with this?
-Let's define how we actually reduce a "monoid string" to the value it 
+
+Let's define how we actually reduce a "monoid string" to the value it
 represents.
 
-The function `reduce'` takes a string and the information what monoid 
+The function `reduce'` takes a string and the information what monoid
 the string represents and calculates the value from it:
 
 ```haskell
@@ -103,7 +109,7 @@ reduce' :: (Read a, Reducible m a) => String -> m a -> a
 We need the Read a to make sure, that we can actually parse the values
 the monoid holds. It would be nicer and safer to use a proper parser here
 but for the sake of simplicity we keep it like that.
-(We can always wrap a `pureTry` around the call to `reduce'`, which, again, 
+(We can always wrap a `pureTry` around the call to `reduce'`, which, again,
 is not a nice complete way to do it, but easier. ^^)
 Now let's drop reduce's curtain of uncertainty:
 
@@ -129,17 +135,18 @@ splitOn :: (Eq a) => a -> [a] -> [[a]]
 splitOn _ [] = [[]]
 splitOn c (h:t) 
   | h == c    = []:rest
-  | otherwise = (h:(head rest)):(tail rest)
+  | otherwise = (h:head rest):tail rest
    where rest = splitOn c t 
 ```
 
 no funny business here.
 
-## However...
-... we would like an interface that is a bit simpler.
-Wouldn't it be nice, to write 
+## However
 
-```
+... we would like an interface that is a bit simpler.
+Wouldn't it be nice, to write
+
+```console
 reduce "1+2+3+4"
 ```
 
@@ -151,12 +158,11 @@ Let's write such a function:
 reduce :: String -> Int
 ```
 
-The type now restricts us to returning `Int`s, but we could easily write 
+The type now restricts us to returning `Int`s, but we could easily write
 another function that returns strings, etc.
-(We could even use TemplateHaskell or something along the `Typeable` and 
+(We could even use TemplateHaskell or something along the `Typeable` and
 `Data` typeclasses to automatically write such functions or return polymorphic
 results and work with them, but that is something for another post.)
- 
 
 ```haskell
 reduce s
@@ -169,19 +175,22 @@ reduce s
 The implementation is actually rather straight forward:
 we just peek into the string what operand we find and then make a call to
 `reduce'` with the proper monoid type.
-Probably you have found the `'.'` by now and wonder if you missed something 
+Probably you have found the `'.'` by now and wonder if you missed something
 up until now.
 Don't fear, you haven't.
 I have saved somthing interesting for the end.
 You probably konw that Lists also have a monoid instance in Haskell.
 Therefore, we can reasonably write an instance for `Reducible`saved somthing interesting for the end.
 You probably konw that Lists also have a monoid instance in Haskell.
-Therefore, we can reasonably write an instance for `Reducible`: 
+Therefore, we can reasonably write an instance for `Reducible`:
 
 ```haskell
 instance Reducible [] Int where
+  op :: [Int] -> Char
   op     _ = ':'
+  constr :: [Int] -> Int -> [Int]
   constr _ = (:[])
+  get :: [Int] -> [Int] -> Int
   get    _ = sum -- length -- basically all [a] -> Int Functions
 ```
 
@@ -191,7 +200,7 @@ the binary monoid operation `<>`.
 What is this good for you ask?
 Monoids are bound by certain laws<sup id="laws">[1](#fn_laws)</sup>.
 
-```
+```console
 -- Identity laws
 x <> mempty = x
 mempty <> x = x
@@ -203,21 +212,21 @@ mempty <> x = x
 These state that the binary operation needs to be associative (so we couldn't have
 a monoid operation for division for example, as this would violate associativity.
 However, moving the reduction operation to the reducible instead, we can specify
-a function that is not associative by just implementing a function from 
+a function that is not associative by just implementing a function from
 
-```
+```console
 [Int] -> Int
 ```
 
 For example:
 
-```
+```console
 foldl (/) 1 list
 ```
 
-or even have a non binary function such as 
+or even have a non binary function such as
 
-```     
+```console
 f l = func l True
   where
     func []       _     = []
@@ -227,26 +236,29 @@ f l = func l True
 ```
 
 which is sensitive to where in the list the operands are.
- 
-As an additional example this is how one could implement string concattenation 
+
+As an additional example this is how one could implement string concattenation
 using a reducible:
- 
 
 ```haskell
 instance Reducible [] String where
+  op :: [String] -> Char
   op     _ = '.'
+  constr :: [String] -> String -> [String]
   constr _ = (:[])
+  get :: [String] -> [String] -> String
   get    _ = intercalate [] 
 ```
 
-
 ## Final Words
-The final example along with the ability to shift the reduction step to the 
+
+The final example along with the ability to shift the reduction step to the
 reducible opens up insersting applications for implementing simple DSL computations
 or just fast, easily understandable parsers for complex data structures.
-(Like implementing a `Reducible [] Foo` where Foo is some complex data type.) 
+(Like implementing a `Reducible [] Foo` where Foo is some complex data type.)
 
 ```haskell
+main :: IO ()
 main = do
         print $ reduce "1+2+3+4"
         print $ reduce "2*3*4"
