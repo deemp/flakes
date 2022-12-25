@@ -1,0 +1,57 @@
+default-extensions:
+  - DuplicateRecordFields
+  - ExistentialQuantification
+  - FlexibleContexts
+  - InstanceSigs
+  - LambdaCase
+  - NamedFieldPuns
+  - OverloadedStrings
+  - RankNTypes
+  - RecordWildCards
+  - KindSignatures
+  - ScopedTypeVariables
+  - TypeApplications
+
+dependencies:
+  - base >= 4.7 && < 5
+  - text
+  - managed
+  - directory
+  - bytestring
+  - mtl
+  - filepath
+  - temporary
+  - system-filepath
+  - aeson
+  - optparse-applicative
+  - yaml
+  - unordered-containers
+  - lens-aeson
+  - lens
+  - process
+  - Cabal
+
+executables:
+  manager:
+    main: Main.hs
+    source-dirs: app
+    dependencies:
+      manager
+  drafts.autocomplete:
+    main: Main.hs
+    source-dirs: drafts/autocomplete
+  drafts.lens:
+    main: Main.hs
+    source-dirs: drafts/lens
+
+library:
+  source-dirs: src
+
+ghc-options:
+  - -Wall
+
+license: BSD3
+
+name: manager
+
+version: 0.1.0.0
