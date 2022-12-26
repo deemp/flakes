@@ -9,6 +9,11 @@
     haskell-tools.url = "github:deemp/flakes?dir=language-tools/haskell";
     my-devshell.url = "github:deemp/flakes?dir=devshell";
     flakes-tools.url = "github:deemp/flakes?dir=flakes-tools";
+    # necessary for stack - nix integration
+    flake-compat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
+    };
   };
   outputs =
     { self
