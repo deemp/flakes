@@ -62,7 +62,7 @@
           mkCommands = category: drvs: map
             (
               x: {
-                name = x.name;
+                name = x.pname;
                 category = category;
                 help = x.meta.description;
               }
