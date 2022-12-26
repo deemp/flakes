@@ -37,8 +37,9 @@
       devshell = my-devshell.devshell.${system};
       inherit (my-devshell.functions.${system}) mkCommands;
       inherit (haskell-tools.functions.${system}) toolsGHC;
-      hsShellTools = haskell-tools.toolSets.${system}.shellTools;
-      inherit (toolsGHC "92") stack hls ghc staticExecutable;
+      inherit (toolsGHC "92")
+        stack hls ghc staticExecutable
+        implicit-hie ghcid;
 
       writeSettings = writeSettingsJSON {
         inherit (settingsNix) haskell todo-tree files editor gitlens
@@ -46,8 +47,8 @@
       };
 
       codiumTools = [
-        hsShellTools.implicit-hie
-        hsShellTools.ghcid
+        implicit-hie
+        ghcid
         stack
         writeSettings
         ghc
@@ -72,17 +73,19 @@
           (
             withDescription
               (
-                pkgs.symlinkJoin {
-                  name = packageName;
-                  paths = [ packageExe ];
-                  buildInputs = [ pkgs.makeBinaryWrapper ];
-                  postBuild = ''
-                    wrapProgram $out/bin/${packageName} \
-                      --set PATH ${
-                        pkgs.lib.makeBinPath myPackageDeps
-                       }
-                  '';
-                }
+                withAttrs
+                  (pkgs.symlinkJoin {
+                    name = packageName;
+                    paths = [ packageExe ];
+                    buildInputs = [ pkgs.makeBinaryWrapper ];
+                    postBuild = ''
+                      wrapProgram $out/bin/${packageName} \
+                        --set PATH ${
+                          pkgs.lib.makeBinPath myPackageDeps
+                         }
+                    '';
+                  })
+                  { pname = packageName; }
               ) "Demo Nix-packaged `Haskell` program"
           )
           (
