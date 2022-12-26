@@ -1,8 +1,14 @@
-# lhsc
+# lima
+
+> `li`terate Haskell and `ma`rkdown
 
 Convert between `.lhs` (`Literate Haskell` files) and `.md` (`Markdown`).
 
-`lhsc` abides the `round-trip property`. It converts `file.lhs` -> `file.lhs.md` -> `file.lhs.md.lhs` and usually guarrantees `file.lhs = file.lhs.md.lhs` in terms of their contents.
+`lima` abides the `round-trip property`. It converts `file.lhs` -> `file.lhs.md` -> `file.lhs.md.lhs` and usually guarrantees `file.lhs = file.lhs.md.lhs` in terms of their contents.
+
+## Disclaimer
+
+This is a fork of [LiterateMarkdown](https://github.com/haskie-lambda/LiterateMarkdown). I just wanted to fix some errors and change the app name.
 
 ## Transformations
 
@@ -24,7 +30,7 @@ If you'd like to provide some code in `.lhs`, follow these rules:
 
 ## Usage
 
-`lhsc (toLhs|toMd) file1 [file2] [...]`
+`lima (toLhs|toMd) file1 [file2] [...]`
 The `toLhs` and `toMd` commands are case-insensitive.
 The tool will convert each file from the one format to the specified one, creating the files `file1.md` `file2.md` ... or `file1.lhs` `file2.lhs` ... in the same directory respectively.
 
@@ -33,4 +39,12 @@ To install the executable on Windows, if you can't convince cabal to use [`--bin
 ## Contribute
 
 1. Learn about `Nix` - [src](https://github.com/deemp/flakes#prerequisites)
-1. `nix develop` to get `cabal` on `PATH`
+1. Open `VSCodium`:
+
+  ```sh
+  nix develop nix-dev/
+  write-settings-json
+  codium .
+  ```
+
+1. Open a Haskell file there, hower over a term and wait until `HLS` shows the hints

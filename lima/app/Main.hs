@@ -9,7 +9,7 @@ import Data.Maybe (isNothing, fromJust)
 
 usage :: String
 usage = "Usage: \
-         \lhsc (toLhs|toMd) file1 [file2] [...]"
+         \lima (toLhs|toMd) file1 [file2] [...]"
 
 exitErr :: String -> IO a
 exitErr msg = putStrLn (msg ++ "\n" ++ usage) >> exitWith (ExitFailure 1)
