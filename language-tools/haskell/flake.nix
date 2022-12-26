@@ -18,14 +18,10 @@
     let
       pkgs = nixpkgs.legacyPackages.${system};
       withAttrs = pkgs.lib.attrsets.recursiveUpdate;
-      shellTools = 
-        {
-          inherit (pkgs.haskellPackages) implicit-hie ghcid;
-        };
 
       # wrap Stack to work with our Nix integration
       # let running programs use specified binaries
-      stackWithDependencies = ghcVersion: runtimeDependencies:
+      stackWithDependenciesGHC = ghcVersion: runtimeDependencies:
         assert builtins.isString ghcVersion;
         assert builtins.isList runtimeDependencies;
         let
@@ -89,23 +85,20 @@
       # https://docs.haskellstack.org/en/stable/nix_integration/#supporting-both-nix-and-non-nix-developers
       toolsGHC = ghcVersion: {
         hls = hlsGHC ghcVersion;
-        stack = stackWithDependencies ghcVersion [ ];
+        stack = stackWithDependenciesGHC ghcVersion [ ];
         ghc = pkgs.haskell.compiler."ghc${ghcVersion}";
         callCabal = callCabalGHC ghcVersion;
         staticExecutable = staticExecutableGHC ghcVersion;
         inherit justStaticExecutables;
-        stackWithDependencies = stackWithDependencies ghcVersion;
+        stackWithDependencies = stackWithDependenciesGHC ghcVersion;
+        inherit (pkgs.haskellPackages) implicit-hie ghcid;
       };
 
-      stack = (toolsGHC "90").stackWithDependencies [ shellTools.implicit-hie ];
+      stack =
+        let inherit (toolsGHC "90") stackWithDependencies implicit-hie; in
+        stackWithDependencies [ implicit-hie ];
     in
     {
-      packages = {
-        inherit stackWithDependencies;
-      };
-      toolSets = {
-        inherit shellTools;
-      };
       functions = {
         inherit
           toolsGHC
@@ -127,7 +120,7 @@
           stack runghc -- Ex
           rm Ex.*
         '';
-        buildInputs = [ stack ] ++ (builtins.attrValues shellTools);
+        buildInputs = [ stack ];
       };
     }
     );
