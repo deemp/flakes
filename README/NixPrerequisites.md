@@ -164,3 +164,9 @@ cp flake-2/file{2,3} flake-3
 1. When should I use overlays over `nixpkgs`? - You [shouldn't](https://zimbatm.com/notes/1000-instances-of-nixpkgs)
 
 1. How to convert an exising project to flakes? - [tutorial](https://garnix.io/blog/converting-to-flakes)
+
+## Nix
+
+1. How to wrap an executable to run it with flags?
+   - See the example with `pkgs.runCommand` in [Wrapping Packages](https://nixos.wiki/wiki/Nix_Cookbook#Wrapping_packages)
+   - another example in [language-tools/haskell](https://github.com/deemp/flakes/blob/4ed230763b12a2805b0369cf4446fff1e490a582/language-tools/haskell/flake.nix#L36)
