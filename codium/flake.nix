@@ -29,7 +29,8 @@
 
         inherit (drv-tools.functions.${system})
           withMan writeJSON toList mergeValues
-          mkBin indentStrings4 withDescription;
+          mkBin indentStrings4 withDescription
+          withAttrs;
         man = drv-tools.configs.${system}.man;
         devshell = my-devshell.devshell.${system};
         inherit (my-devshell.functions.${system}) mkCommands;
@@ -67,15 +68,17 @@
             (
               withDescription
                 (
-                  pkgs.symlinkJoin {
-                    name = "codium";
-                    paths = [ codium ];
-                    buildInputs = [ pkgs.makeBinaryWrapper ];
-                    postBuild = ''
-                      wrapProgram $out/bin/codium \
-                        --prefix PATH : ${pkgs.lib.makeBinPath deps}
-                    '';
-                  }
+                  withAttrs
+                    (pkgs.symlinkJoin {
+                      name = "codium";
+                      paths = [ codium ];
+                      buildInputs = [ pkgs.makeBinaryWrapper ];
+                      postBuild = ''
+                        wrapProgram $out/bin/codium \
+                          --prefix PATH : ${pkgs.lib.makeBinPath deps}
+                      '';
+                    })
+                    { pname = "codium"; }
                 ) "`VSCodium` with extensions and executables on `PATH`."
             )
             (x: ''
