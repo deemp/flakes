@@ -45,7 +45,7 @@
         , text ? ""
         , description ? ''Run a `fish` script at `${fishScriptPath}`''
         , longDescription ? ''
-            ${DESCRIPTION}
+            ${man.DESCRIPTION}
             ${description}
           ''
         }: mkShellApp {
@@ -73,10 +73,10 @@
       readSymlinks = dir: readXs dir "symlink";
 
       # assuming that a `name` of a program coincides with its main executable's name
-      mkBin = drv@{ name, ... }: "${drv}/bin/${name}";
+      mkBin = drv@{ pname, ... }: "${drv}/bin/${pname}";
 
       # same as mkBin, but need to provide the necessary executable name
-      mkBinName = drv@{ name, ... }: name_: "${drv}/bin/${name_}";
+      mkBinName = drv@{ pname, ... }: name_: "${drv}/bin/${name_}";
 
       # frame a text with newlines
       framedNewlines = framed_ "\n\n" "\n\n";
@@ -92,6 +92,15 @@
       # concatMap strings and separate them by a newline character
       concatMapStringsNewline = concatMapStringsSep "\n";
 
+      # man headings
+      man = {
+        NAME = "# NAME";
+        SYNOPSYS = "# SYNOPSYS";
+        DESCRIPTION = "# DESCRIPTION";
+        EXAMPLES = "# EXAMPLES";
+        NOTES = "# NOTES";
+      };
+
       # ignore shellcheck when writing a shell application
       mkShellApp =
         args@{ name
@@ -99,17 +108,21 @@
         , runtimeInputs ? [ ]
         , description ? "no description provided"
         , longDescription ? ''
-            ${DESCRIPTION}
+            ${man.DESCRIPTION}
             ${description}
           ''
         }:
         withMan
           (withMeta
             (
-              pkgs.writeShellApplication ({ inherit name text; } // {
-                runtimeInputs = pkgs.lib.lists.flatten runtimeInputs;
-                checkPhase = "";
-              })
+              withAttrs
+                (
+                  pkgs.writeShellApplication ({ inherit name text; } // {
+                    runtimeInputs = pkgs.lib.lists.flatten runtimeInputs;
+                    checkPhase = "";
+                  })
+                )
+                { pname = name; }
             )
             { inherit longDescription description; }
           )
@@ -121,12 +134,6 @@
       withLongDescription = drv: longDescription: withAttrs drv { meta = { inherit longDescription; }; };
       withDescription = drv: description: withAttrs drv { meta = { inherit description; }; };
 
-      # man headings
-      NAME = "# NAME";
-      DESCRIPTION = "# DESCRIPTION";
-      EXAMPLES = "# EXAMPLES";
-      NOTES = "# NOTES";
-
       # for code blocks in man
       indentStrings4 = indentStrings_ 4;
       indentStrings8 = indentStrings_ 8;
@@ -134,14 +141,15 @@
 
       # add a longDescription to a derivation
       # add a man generated from longDescription
-      # takes a function from a derivation with description 
+      # the function :: derivation with description -> long description
       withMan = drv: fLongDescription:
+        assert builtins.hasAttr "description" drv.meta;
         let
-          name = drv.name;
+          pname = drv.pname;
           longDescription = fLongDescription drv;
           man = ''
             ---
-            title: ${name}
+            title: ${pname}
             section: 1
             header: User Manual
             ---
@@ -149,16 +157,17 @@
           '';
           manPath = "$out/share/man/man1";
           drv_ = pkgs.symlinkJoin {
-            inherit name;
+            name = pname;
+            inherit pname;
             paths = [ drv ];
             nativeBuildInputs = [ pkgs.pandoc ];
             postBuild = ''
               mkdir -p ${manPath}
-              printf '%s' ${escapeShellArg man} > $out/${name}.1.md
+              printf '%s' ${escapeShellArg man} > $out/${pname}.1.md
               rm -rf ${manPath}
               mkdir -p ${manPath}
-              pandoc $out/${name}.1.md -st man -o ${manPath}/${name}.1
-              rm $out/${name}.1.md
+              ${mkBinName pkgs.pandoc "pandoc"} $out/${pname}.1.md -st man -o ${manPath}/${pname}.1
+              rm $out/${pname}.1.md
             '';
           };
         in
@@ -218,6 +227,7 @@
             text = ''
               json_path=$1
               nix_path=$2
+              mkdir -p $(dirname "''${2}")
               nix eval --impure --expr "with builtins; fromJSON (readFile ./$json_path)" > $nix_path
               sed -i -E "s/(\[|\{)/\1\n/g" $nix_path
               nixpkgs-fmt $nix_path
@@ -225,11 +235,11 @@
             description = "Convert `.json` to `.nix`";
           })
           (x: ''
-            ${DESCRIPTION}
+            ${man.DESCRIPTION}
             ${x.meta.description}
             
-            ${EXAMPLES}
-            `json2nix .vscode/settings.json my-settings.nix`
+            ${man.EXAMPLES}
+            `json2nix .vscode/settings.json nix-files/settings.nix`
             :   Convert exising `settings.json` into a nix file
           '');
 
@@ -273,12 +283,12 @@
             '';
           description = "run ${name} in each given directory";
           longDescription = ''
-            ${NAME}
+            ${man.NAME}
             `${name_}` - ${description}
 
             ${longDescription}
 
-            ${NOTES}
+            ${man.NOTES}
             The directories relative to `CWD` are:
 
             ${indentStrings4 dirs_}
@@ -329,13 +339,11 @@
           ;
       };
 
-      configs.man = {
-        inherit NAME DESCRIPTION EXAMPLES NOTES;
-      };
+      configs = { inherit man; };
 
       # tests 
       devShells.default = pkgs.mkShell {
-        # shellHook = "man ${json2nix.name}";
+        shellHook = "man ${mkBin json2nix}";
         name = "default";
         buildInputs = [ pkgs.tree json2nix pkgs.fish ];
       };
