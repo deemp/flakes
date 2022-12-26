@@ -47,6 +47,8 @@
               "devshell"
               "manager"
               "manager/nix-dev"
+              "lima"
+              "lima/nix-dev"
               "terrafix"
               "."
             ]

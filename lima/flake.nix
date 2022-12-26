@@ -25,7 +25,7 @@
       devshell = my-devshell.devshell.${system};
       inherit (my-devshell.functions.${system}) mkCommands;
       inherit (haskell-tools.functions.${system}) toolsGHC;
-      inherit (toolsGHC "92") stack hls ghc staticExecutable;
+      inherit (toolsGHC "92") staticExecutable cabal;
 
       myPackage =
         let
@@ -33,18 +33,22 @@
           packageExe = staticExecutable packageName ./.;
         in
         withMan
-          (withDescription packageExe "Convert between `Literate Haskell` (`lhs`) and `Markdown` (`.md`)")
+          (withDescription packageExe "Convert between `Literate Haskell` (`.lhs`) and `Markdown` (`.md`)")
           (
             self: ''
               ${man.DESCRIPTION}
               ${self.meta.description}
 
               ${man.SYNOPSYS}
-              ${packageName}
+              `${packageName} (toLhs|toMd) file1 [file2] [...]`
+
+              ${man.EXAMPLES}
+              `${packageName} toMd testdata/input0.lhs testdata/input1.lhs`
+              :   convert: `testdata/input0.lhs` ->  `testdata/input0.lhs.md` and `testdata/input1.lhs` -> `testdata/input1.lhs.md`
             ''
           );
 
-      tools = [ myPackage pkgs.cabal-install ];
+      tools = [ myPackage cabal ];
     in
     {
       packages = {
