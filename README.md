@@ -18,7 +18,7 @@ Nix flakes for tools that I use
 - [json2md](./json2md/README.md) - convert `JSON` to `Markdown`
   - Can be combined with `builtins.toJSON` and used to generate `.md` docs from Nix expressions - [example](https://github.com/deemp/devops-labs/blob/0ae9881ab58b99f114aaf21cb5cad85f2ce37e40/.nix/write-configs.nix#L26)
 - [language-tools](./flakes-tools) - tools for languages that I use
-- [LiterateMarkdown] - convert between `Literate Haskell` (`.lhs`) and `Markdown` (`.md`) with [round-trip property](https://hedgehog.qa/article/haskell-round-trip) usually kept
+- [lima] - convert between `Literate Haskell` (`.lhs`) and `Markdown` (`.md`) with [round-trip property](https://hedgehog.qa/article/haskell-round-trip) usually kept (a fork of [LiterateMarkdown](https://github.com/haskie-lambda/LiterateMarkdown))
 - [manager](./manager) - a `Haskell` CLI app for managing projects with multiple `Main.hs` modules
 - [terrafix](./terrafix) - generate `Terraform` files from DRY `Nix` expressions
 - [source-flake](./source-flake/) - pinned flakes
