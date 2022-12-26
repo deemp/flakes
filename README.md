@@ -15,8 +15,8 @@ Nix flakes for tools that I use
 - [drv-tools](./drv-tools/flake.nix) - convenience tools for working with derivations
 - [env2json](./env2json/README.md) - convert `.env` to `.json`
 - [flakes-tools](./flakes-tools/flake.nix) - convenience tools for working with flakes and pushing them to [cachix](https://www.cachix.org/)
-- [json2md](./json2md/README.md) - convert `JSON` to `Markdown`
-  - Can be combined with `builtins.toJSON` and used to generate `.md` docs from Nix expressions - [example](https://github.com/deemp/devops-labs/blob/0ae9881ab58b99f114aaf21cb5cad85f2ce37e40/.nix/write-configs.nix#L26)
+- [json2md](./json2md/README.md) - convert `JSON` (or `Nix`) to `Markdown`
+  - I use it to generate `.md` docs from Nix expressions - [example](https://github.com/deemp/devops-labs/blob/0ae9881ab58b99f114aaf21cb5cad85f2ce37e40/.nix/write-configs.nix#L26)
 - [language-tools](./flakes-tools) - tools for languages that I use
 - [lima](./lima) - convert between `Literate Haskell` (`.lhs`) and `Markdown` (`.md`) with [round-trip property](https://hedgehog.qa/article/haskell-round-trip) usually kept (a fork of [LiterateMarkdown](https://github.com/haskie-lambda/LiterateMarkdown))
 - [manager](./manager) - a `Haskell` CLI app for managing projects with multiple `Main.hs` modules
