@@ -9,10 +9,6 @@
     haskell-tools.url = "github:deemp/flakes?dir=language-tools/haskell";
     my-devshell.url = "github:deemp/flakes?dir=devshell";
     flakes-tools.url = "github:deemp/flakes?dir=flakes-tools";
-    flake-compat = {
-      url = "github:edolstra/flake-compat";
-      flake = false;
-    };
   };
   outputs =
     { self
@@ -102,7 +98,7 @@
 
       devShells.default = devshell.mkShell
         {
-          packages = [ codium ] ++ tools;
+          packages = tools;
           bash.extra = ''printf "Hello, world!\n"'';
           commands = mkCommands "tools" tools;
         };
