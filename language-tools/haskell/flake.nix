@@ -6,22 +6,23 @@
     flake-utils.follows = "flake-utils_/flake-utils";
     gitignore_.url = "github:deemp/flakes?dir=source-flake/gitignore";
     gitignore.follows = "gitignore_/gitignore";
+    drv-tools.url = "github:deemp/flakes?dir=drv-tools";
   };
   outputs =
     { self
     , nixpkgs
     , flake-utils
     , gitignore
+    , drv-tools
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-      withAttrs = pkgs.lib.attrsets.recursiveUpdate;
+      inherit (drv-tools.functions.${system}) withAttrs concatMapStringsNewline framedBrackets;
 
-      # wrap Stack to work with our Nix integration
-      # let running programs use specified binaries
-      stackWithDependenciesGHC = ghcVersion: runtimeDependencies:
+      # build tool with GHC of a specific version and other runtime deps available to this tool on PATH
+      buildToolWithDependenciesGHC = name: drv: flags: ghcVersion: runtimeDependencies:
         assert builtins.isString ghcVersion;
         assert builtins.isList runtimeDependencies;
         let
@@ -29,27 +30,33 @@
             pkgs.haskell.compiler."ghc${ghcVersion}"
             runtimeDependencies
           ];
+          flags_ = concatMapStringsNewline (x: x + " \\") flags;
         in
         withAttrs
-          (pkgs.symlinkJoin {
-            # will be available as the usual `stack` in terminal
-            name = "stack";
-            paths = [ pkgs.stack ];
-            buildInputs = [ pkgs.makeBinaryWrapper ];
-            # --system-ghc    # Use the existing GHC on PATH (will come from this Nix file)
-            # --no-install-ghc  # Don't try to install GHC if no matching GHC found on PATH
-            postBuild = ''
-              wrapProgram $out/bin/stack \
+          (pkgs.runCommand name
+            { buildInputs = [ pkgs.makeBinaryWrapper ]; }
+            ''
+              mkdir $out
+              ln -s ${drv}/* $out
+              rm $out/bin
+              mkdir $out/bin
+              
+              makeWrapper ${drv}/bin/${name} $out/bin/${name} \
                 --add-flags "\
-                  --system-ghc \
-                  --no-install-ghc \
+                  ${flags_}
                 " \
                 --prefix PATH : ${pkgs.lib.makeBinPath deps}
-            '';
-          })
+            ''
+          )
           {
-            meta.description = pkgs.stack.meta.description;
+            pname = name;
+            meta.description = drv.meta.description;
           };
+
+      # --system-ghc    # Use the existing GHC on PATH (will come from a Nix file)
+      # --no-install-ghc  # Don't try to install GHC if no matching GHC found on PATH
+      stackWithDependenciesGHC = buildToolWithDependenciesGHC "stack" pkgs.stack [ "--system-ghc" "--no-install-ghc" ];
+      cabalWithDependenciesGHC = buildToolWithDependenciesGHC "cabal" pkgs.cabal-install [ "--enable-nix" ];
 
       # a convenience function for building haskell packages
       # can be used for a project with GHC 9.0.2 as follows:
@@ -72,9 +79,10 @@
         let
           inherit (pkgs.haskell.packages."ghc${ghcVersion}") callCabal2nix;
           inherit (gitignore.lib) gitignoreSource;
+          exe = justStaticExecutables
+            (callCabal2nix name (gitignoreSource path) { });
         in
-        justStaticExecutables
-          (callCabal2nix name (gitignoreSource path) { });
+        withAttrs exe { pname = name; };
 
       # see the possible values for ghcVersion here
       # https://haskell4nix.readthedocs.io/nixpkgs-users-guide.html#how-to-install-haskell-language-server
@@ -86,17 +94,23 @@
       toolsGHC = ghcVersion: {
         hls = hlsGHC ghcVersion;
         stack = stackWithDependenciesGHC ghcVersion [ ];
+        cabal = cabalWithDependenciesGHC ghcVersion [ ];
         ghc = pkgs.haskell.compiler."ghc${ghcVersion}";
         callCabal = callCabalGHC ghcVersion;
         staticExecutable = staticExecutableGHC ghcVersion;
         inherit justStaticExecutables;
         stackWithDependencies = stackWithDependenciesGHC ghcVersion;
+        cabalWithDependencies = cabalWithDependenciesGHC ghcVersion;
         inherit (pkgs.haskellPackages) implicit-hie ghcid;
       };
 
       stack =
         let inherit (toolsGHC "90") stackWithDependencies implicit-hie; in
         stackWithDependencies [ implicit-hie ];
+
+      cabal =
+        let inherit (toolsGHC "90") cabalWithDependencies implicit-hie; in
+        cabalWithDependencies [ implicit-hie ];
     in
     {
       functions = {
@@ -106,22 +120,31 @@
       };
 
       test = {
-        inherit stack;
+        inherit stack cabal;
       };
 
       # test stack has `hello` on PATH
       devShells.default = pkgs.mkShell {
         shellHook = ''
           cat <<EOT > Ex.hs
-          module Ex where
+          {- cabal:
+          build-depends: base
+                      , process
+          -}
+
           import System.Process
           main = putStrLn =<< readProcess "gen-hie" ["--help"] ""
           EOT
+          
+          printf "${framedBrackets "stack runs"}"
           stack runghc -- Ex
+          
+          printf "${framedBrackets "cabal runs"}"
+          cabal run Ex.hs
+          
           rm Ex.*
         '';
-        buildInputs = [ stack ];
+        buildInputs = [ stack cabal ];
       };
-    }
-    );
+    });
 }
