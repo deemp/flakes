@@ -174,13 +174,13 @@
         withLongDescription (withMeta drv_ drv.meta) longDescription;
 
       # String -> String -> Any -> IO ()
+      # make a script to write a nix expr to a file path
       writeJSON = name: path: dataNix:
         assert isString name && isString path;
         let
           dataJSON = toJSON dataNix;
           name_ = "write-${name}-json";
           dir = dirOf path;
-          file = baseNameOf path;
           description = "Write a `Nix` expression for `${name}` as `JSON` into `${path}`";
         in
         mkShellApp {
@@ -197,6 +197,7 @@
         };
 
       # String -> String -> Any -> IO ()
+      # make a script to write a nix expr to a file path
       writeYAML = name: path: dataNix:
         assert builtins.isString name && isString path;
         let
@@ -210,6 +211,7 @@
           name = name_;
           runtimeInputs = [ pkgs.yq-go ];
           text = ''
+            mkdir -p ${dir}
             ${mkBin writeJSON_}
             cat ${tmpJSON} | yq e -MP - > ${path}
             rm ${tmpJSON}
