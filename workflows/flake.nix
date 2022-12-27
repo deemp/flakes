@@ -146,9 +146,9 @@
           };
       };
 
-      nix-ci_ = steps_: {
+      nixCI_ = steps_: {
         jobs = {
-          nix-ci = {
+          nixCI = {
             name = "Nix CI";
             strategy.matrix.os = oss;
             runs-on = expr names.matrix.os;
@@ -174,20 +174,20 @@
         inherit on;
       };
 
-      nix-ci = nix-ci_ [ ];
+      nixCI = nixCI_ [ ];
     in
     {
       packages = {
-        writeWorkflowsDir = writeYAML "workflow" "./tmp/nix-ci.yaml" nix-ci;
-        writeWorkflows = writeWorkflow "nix-ci" nix-ci;
+        writeWorkflowsDir = writeYAML "workflow" "./tmp/nixCI.yaml" nixCI;
+        writeWorkflows = writeWorkflow "nixCI" nixCI;
       };
       functions = {
         inherit
           writeYAML writeWorkflow expr genId
-          stepsIf mkAccessors mkAccessors_ run nix-ci_;
+          stepsIf mkAccessors mkAccessors_ run nixCI_;
       };
       configs = {
-        inherit oss os names on steps nix-ci;
+        inherit oss os names on steps nixCI;
       };
     });
 }
