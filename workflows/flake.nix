@@ -28,8 +28,13 @@
       inherit (pkgs.lib.trivial) id;
       genId = list: genAttrs list id;
 
-      oss = [ "ubuntu-20.04" "ubuntu-22.04" "macos-11" "macos-12" ];
-      os = genId oss;
+      os = mapAttrs (name: val: "${val}") {
+        ubuntu-20 = "ubuntu-20.04";
+        ubuntu-22 = "ubuntu-22.04";
+        macos-11 = "macos-11";
+        macos-12 = "macos-12";
+      };
+      oss = attrValues os;
 
       # insert if: expression into steps
       # can omit ${{ }} - https://docs.github.com/en/actions/learn-github-actions/expressions#example-expression-in-an-if-conditional
@@ -153,7 +158,7 @@
                 (steps.installNix)
               ]
               ++
-              (stepsIf ("${names.matrix.os} == ${os."ubuntu-20.04"}") [
+              (stepsIf ("${names.matrix.os} == '${os.ubuntu-20}'") [
                 (steps.configGitAsGHActions)
                 (steps.updateLocksAndCommit)
               ])
@@ -173,8 +178,8 @@
     in
     {
       packages = {
-        testWriteWorkflow1 = writeYAML "workflow" "./tmp/nix-ci.yaml" nix-ci;
-        testWriteWorkflow2 = writeWorkflow "nix-ci" nix-ci;
+        writeWorkflowsDir = writeYAML "workflow" "./tmp/nix-ci.yaml" nix-ci;
+        writeWorkflows = writeWorkflow "nix-ci" nix-ci;
       };
       functions = {
         inherit
