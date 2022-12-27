@@ -203,12 +203,14 @@
         let
           name_ = "write-${name}-yaml";
           tmpJSON = "${path}.tmp";
+          dir = dirOf path;
           writeJSON_ = writeJSON "yaml-tmp" tmpJSON dataNix;
         in
         mkShellApp {
           name = name_;
           runtimeInputs = [ pkgs.yq-go ];
           text = ''
+            mkdir -p ${dir}
             ${mkBin writeJSON_}
             cat ${tmpJSON} | yq e -MP - > ${path}
             rm ${tmpJSON}
