@@ -57,7 +57,7 @@
         writeSettings = writeSettingsJSON settingsNix;
         codiumTools = [ writeSettings ];
         codium = mkCodium {
-          extensions = { inherit (extensions) nix misc github markdown; };
+          extensions = { inherit (extensions) nix misc github markdown yaml; };
           runtimeDependencies = codiumTools;
         };
         tools = [ codium writeSettings ];
