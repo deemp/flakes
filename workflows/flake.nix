@@ -21,6 +21,8 @@
         mapAttrs toString attrValues attrNames map
         isAttrs;
 
+      writeWorkflow = name: writeYAML name ".github/workflows/${name}.yaml";
+
       expr = expr_: "\${{ ${toString expr_} }}";
       inherit (pkgs.lib.attrsets) genAttrs;
       inherit (pkgs.lib.trivial) id;
@@ -171,10 +173,13 @@
     in
     {
       packages = {
-        testWriteWorkflow = writeYAML "workflow" "./tmp/nix-ci.yaml" nix-ci;
+        testWriteWorkflow1 = writeYAML "workflow" "./tmp/nix-ci.yaml" nix-ci;
+        testWriteWorkflow2 = writeWorkflow "nix-ci" nix-ci;
       };
       functions = {
-        inherit writeYAML expr genId stepsIf mkAccessors mkAccessors_ run nix-ci_;
+        inherit
+          writeYAML writeWorkflow expr genId
+          stepsIf mkAccessors mkAccessors_ run nix-ci_;
       };
       configs = {
         inherit oss os names on steps nix-ci;
