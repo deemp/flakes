@@ -28,7 +28,7 @@
       inherit (pkgs.lib.trivial) id;
       genId = list: genAttrs list id;
 
-      os = mapAttrs (name: val: "${val}") {
+      os = {
         ubuntu-20 = "ubuntu-20.04";
         ubuntu-22 = "ubuntu-22.04";
         macos-11 = "macos-11";
