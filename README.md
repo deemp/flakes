@@ -20,11 +20,12 @@ Nix flakes for tools that I use
 - [language-tools](./flakes-tools) - tools for languages that I use
 - [lima](./lima) - convert between `Literate Haskell` (`.lhs`) and `Markdown` (`.md`) with [round-trip property](https://hedgehog.qa/article/haskell-round-trip) usually kept (a fork of [LiterateMarkdown](https://github.com/haskie-lambda/LiterateMarkdown))
 - [manager](./manager) - a `Haskell` CLI app for managing projects with multiple `Main.hs` modules
-- [terrafix](./terrafix) - generate `Terraform` files from DRY `Nix` expressions
 - [source-flake](./source-flake/) - pinned flakes
   - I use them to sync flake inputs in my flakes
 - [templates](./templates/) - Nix flake templates
   - See [Templates](#templates)
+- [terrafix](./terrafix) - `eDSL` to generate `Terraform` files from DRY `Nix` expressions
+- [workflows](./workflows) - generate `GH Actions` Workflows from DRY `Nix` expressions
 
 ## Projects
 
