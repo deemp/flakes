@@ -202,16 +202,13 @@
         assert builtins.isString name && isString path;
         let
           name_ = "write-${name}-yaml";
-          dir = dirOf path;
-          file = baseNameOf path;
-          tmpJSON = "${file}.tmp";
-          writeJSON_ = writeJSON "tmp-json" tmpJSON dataNix;
+          tmpJSON = "${path}.tmp";
+          writeJSON_ = writeJSON "yaml-tmp" tmpJSON dataNix;
         in
         mkShellApp {
           name = name_;
           runtimeInputs = [ pkgs.yq-go ];
           text = ''
-            mkdir -p ${dir}
             ${mkBin writeJSON_}
             cat ${tmpJSON} | yq e -MP - > ${path}
             rm ${tmpJSON}
