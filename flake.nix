@@ -50,6 +50,7 @@
               "lima"
               "lima/nix-dev"
               "terrafix"
+              "workflows"
               "."
             ]
           ]
