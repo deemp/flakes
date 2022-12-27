@@ -174,10 +174,10 @@
         testWriteWorkflow = writeYAML "workflow" "./tmp/nix-ci.yaml" nix-ci;
       };
       functions = {
-        inherit writeYAML expr genId stepsIf mkAccessors mkAccessors_ run nix-ci_ nix-ci;
+        inherit writeYAML expr genId stepsIf mkAccessors mkAccessors_ run nix-ci_;
       };
       configs = {
-        inherit oss os names on steps;
+        inherit oss os names on steps nix-ci;
       };
     });
 }
