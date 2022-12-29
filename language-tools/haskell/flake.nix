@@ -45,7 +45,8 @@
                 --add-flags "\
                   ${flags_}
                 " \
-                --prefix PATH : ${pkgs.lib.makeBinPath deps}
+                --prefix PATH : ${pkgs.lib.makeBinPath deps} \
+                --prefix LD_LIBRARY_PATH : ${pkgs.lib.makeLibraryPath deps}
             ''
           )
           {
