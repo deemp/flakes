@@ -22,13 +22,12 @@
       inherit (drv-tools.functions.${system}) withAttrs concatMapStringsNewline framedBrackets;
 
       # build tool with GHC of a specific version and other runtime deps available to this tool on PATH
-      buildToolWithDependenciesGHC = name: drv: flags: ghcVersion: runtimeDependencies:
-        assert builtins.isString ghcVersion;
-        assert builtins.isList runtimeDependencies;
+      buildToolWithFlagsGHC = name: drv: flags: ghcVersion:
+        assert builtins.isString name && builtins.isString ghcVersion
+          && builtins.isAttrs drv && builtins.isList flags;
         let
-          deps = pkgs.lib.lists.flatten [
+          deps = [
             pkgs.haskell.compiler."ghc${ghcVersion}"
-            runtimeDependencies
           ];
           flags_ = concatMapStringsNewline (x: x + " \\") flags;
         in
@@ -45,19 +44,19 @@
                 --add-flags "\
                   ${flags_}
                 " \
-                --prefix PATH : ${pkgs.lib.makeBinPath deps} \
-                --prefix LD_LIBRARY_PATH : ${pkgs.lib.makeLibraryPath deps}
+                --prefix PATH : ${pkgs.lib.makeBinPath deps}
             ''
           )
           {
             pname = name;
-            meta.description = drv.meta.description;
+            inherit (drv) meta;
           };
 
       # --system-ghc    # Use the existing GHC on PATH (will come from a Nix file)
       # --no-install-ghc  # Don't try to install GHC if no matching GHC found on PATH
-      stackWithDependenciesGHC = buildToolWithDependenciesGHC "stack" pkgs.stack [ "--system-ghc" "--no-install-ghc" ];
-      cabalWithDependenciesGHC = buildToolWithDependenciesGHC "cabal" pkgs.cabal-install [ "--enable-nix" ];
+      stackWithFlagsGHC = buildToolWithFlagsGHC "stack" pkgs.stack [ "--system-ghc" "--no-install-ghc" ];
+      # --enable-nix - allow use a shell.nix if present
+      cabalWithFlagsGHC = buildToolWithFlagsGHC "cabal" pkgs.cabal-install [ "--enable-nix" ];
 
       # a convenience function for building haskell packages
       # can be used for a project with GHC 9.0.2 as follows:
@@ -94,24 +93,17 @@
       # https://docs.haskellstack.org/en/stable/nix_integration/#supporting-both-nix-and-non-nix-developers
       toolsGHC = ghcVersion: {
         hls = hlsGHC ghcVersion;
-        stack = stackWithDependenciesGHC ghcVersion [ ];
-        cabal = cabalWithDependenciesGHC ghcVersion [ ];
+        stack = stackWithFlagsGHC ghcVersion;
+        cabal = cabalWithFlagsGHC ghcVersion;
         ghc = pkgs.haskell.compiler."ghc${ghcVersion}";
         callCabal = callCabalGHC ghcVersion;
         staticExecutable = staticExecutableGHC ghcVersion;
         inherit justStaticExecutables;
-        stackWithDependencies = stackWithDependenciesGHC ghcVersion;
-        cabalWithDependencies = cabalWithDependenciesGHC ghcVersion;
         inherit (pkgs.haskellPackages) implicit-hie ghcid;
       };
 
-      stack =
-        let inherit (toolsGHC "90") stackWithDependencies implicit-hie; in
-        stackWithDependencies [ implicit-hie ];
-
-      cabal =
-        let inherit (toolsGHC "90") cabalWithDependencies implicit-hie; in
-        cabalWithDependencies [ implicit-hie ];
+      ghcVersion_ = "90";
+      inherit (toolsGHC ghcVersion_) stack cabal implicit-hie;
     in
     {
       functions = {
@@ -125,7 +117,7 @@
       };
 
       # test stack has `hello` on PATH
-      devShells.default = pkgs.mkShell {
+      devShells.default = pkgs.haskell.packages."ghc${ghcVersion_}".shellFor {
         shellHook = ''
           cat <<EOT > Ex.hs
           {- cabal:
@@ -145,7 +137,12 @@
           
           rm Ex.*
         '';
-        buildInputs = [ stack cabal ];
+        packages = ps: [ ];
+        buildInputs = [
+          stack
+          cabal
+          implicit-hie
+        ];
       };
     });
 }
