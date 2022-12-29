@@ -1,4 +1,4 @@
 {
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/ed6654123003549dcdc7d65abbbd0d0c650e93b2";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/1bb598fb4588b8752674bfbddcf9403daf2d6e09";
   outputs = x: { };
 }
