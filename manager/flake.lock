@@ -17,11 +17,11 @@
       },
       "locked": {
         "dir": "drv-tools",
-        "lastModified": 1672398547,
-        "narHash": "sha256-rS1XZ9EDRgm/jLA9Ol8gbUbWxvTB8uBNMYMBSKq/pFM=",
+        "lastModified": 1672406502,
+        "narHash": "sha256-7nhdfP9HJvdVtF35iXbt2+aeA4lmCjDUKMLhYzDV+dk=",
         "owner": "deemp",
         "repo": "flakes",
-        "rev": "746e7d0913808203e2043c94e3b69ab7a2c982d5",
+        "rev": "24915ffc618fcd15e68ddbbf25a20c1509c4a2ac",
         "type": "github"
       },
       "original": {
@@ -254,11 +254,11 @@
       },
       "locked": {
         "dir": "language-tools/haskell",
-        "lastModified": 1672398547,
-        "narHash": "sha256-rS1XZ9EDRgm/jLA9Ol8gbUbWxvTB8uBNMYMBSKq/pFM=",
+        "lastModified": 1672406502,
+        "narHash": "sha256-7nhdfP9HJvdVtF35iXbt2+aeA4lmCjDUKMLhYzDV+dk=",
         "owner": "deemp",
         "repo": "flakes",
-        "rev": "746e7d0913808203e2043c94e3b69ab7a2c982d5",
+        "rev": "24915ffc618fcd15e68ddbbf25a20c1509c4a2ac",
         "type": "github"
       },
       "original": {
