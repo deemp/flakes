@@ -170,3 +170,5 @@ cp flake-2/file{2,3} flake-3
 1. How to wrap an executable to run it with flags?
    - See the example with `pkgs.runCommand` in [Wrapping Packages](https://nixos.wiki/wiki/Nix_Cookbook#Wrapping_packages)
    - another example in [language-tools/haskell](https://github.com/deemp/flakes/blob/4ed230763b12a2805b0369cf4446fff1e490a582/language-tools/haskell/flake.nix#L36)
+
+1. How to fix broken Haskell packages? - [src](https://gutier.io/post/development-fixing-broken-haskell-packages-nixpkgs/)
