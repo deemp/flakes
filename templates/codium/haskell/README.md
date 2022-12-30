@@ -26,11 +26,37 @@ codium .
 
 1. Wait until `Haskell Language Server` (`HLS`) starts giving you type info.
 
+## Nix run
+
+`Nix` provides necessary packages, binaries and libraries to the app. So, you can build this app using `Nix` and run it.
+
+```console
+nix run
+```
+
+## Docker
+
+Next, you can use `pkgs.dockerTools.buildLayeredImage` to build a Docker container with this app inside and run it:
+
+```console
+nix develop .#docker
+```
+
+## Cabal + Nix integration
+
+We can also start a shell where `cabal` will have `GHC` with necessary packages. This is what `pkgs.haskell.packages.ghc<version>.shellFor` is for.
+
+```console
+nix develop .#cabal
+```
+
+Also, you can supply other binaries that your app will be able to call. This is similar to `Stack` + `Nix` integration. Read the section below to learn how shell works in general.
+
 ## Stack + Nix integration
 
 ### Background
 
-Suppose you'd like `Nix` to supply a C library [liblzma](https://tukaani.org/xz/) to `stack` using [this integration](https://docs.haskellstack.org/en/stable/nix_integration/).
+Suppose you'd like `Nix` to supply a `C` library [liblzma](https://tukaani.org/xz/) to `stack` using [this integration](https://docs.haskellstack.org/en/stable/nix_integration/).
 You'd create a `stack-shell` (more on that below) in `flake.nix` and provide there a `Nix` package `pkgs.lzma`.
 Then, `stack` will create an isolated environment, where this library is present, and run your program in this environment.
 In such an environment, your program won't have an access to other libraries and programs like `rm` or `git`.

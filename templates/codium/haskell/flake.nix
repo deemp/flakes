@@ -7,9 +7,9 @@
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
     haskell-tools.url = "github:deemp/flakes?dir=language-tools/haskell";
-    my-devshell.url = "github:deemp/flakes?dir=devshell";
+    devshell.url = "github:deemp/flakes?dir=devshell";
     flakes-tools.url = "github:deemp/flakes?dir=flakes-tools";
-    # necessary for stack - nix integration
+    # necessary for stack-nix integration
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
@@ -23,95 +23,196 @@
     , my-codium
     , drv-tools
     , haskell-tools
-    , my-devshell
+    , devshell
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
     let
+      # --- imports ---
       pkgs = nixpkgs.legacyPackages.${system};
       inherit (my-codium.functions.${system}) writeSettingsJSON mkCodium;
-      inherit (drv-tools.functions.${system}) mkBinName withAttrs withMan withDescription;
+      inherit (drv-tools.functions.${system}) mkBin withAttrs withMan withDescription mkShellApp;
       inherit (drv-tools.configs.${system}) man;
       inherit (my-codium.configs.${system}) extensions settingsNix;
       inherit (flakes-tools.functions.${system}) mkFlakesTools;
-      devshell = my-devshell.devshell.${system};
-      inherit (my-devshell.functions.${system}) mkCommands;
+      inherit (devshell.functions.${system}) mkCommands mkShell;
       inherit (haskell-tools.functions.${system}) toolsGHC;
-      inherit (toolsGHC "92")
-        stack hls ghc staticExecutable
-        implicit-hie ghcid;
 
-      writeSettings = writeSettingsJSON {
-        inherit (settingsNix) haskell todo-tree files editor gitlens
-          git nix-ide workbench markdown-all-in-one markdown-language-features;
-      };
+      # set ghc version
+      ghcVersion_ = "92";
+      inherit (toolsGHC ghcVersion_) stack hls cabal staticExecutable implicit-hie ghcid callCabal;
 
-      codiumTools = [
-        implicit-hie
-        ghcid
-        stack
-        writeSettings
-        ghc
-        myPackage
-      ];
+      # my app
+      myPackageName = "nix-managed";
 
-      codium = mkCodium {
-        extensions = { inherit (extensions) nix haskell misc github markdown; };
-        runtimeDependencies = codiumTools ++ [ hls ];
-      };
-
-      myPackageDeps = [
-        pkgs.hello
+      # --- non-haskell deps ---
+      myPackageDepsLibs = [
         pkgs.lzma
       ];
-      myPackage =
+      myPackageDepsBin = [
+        pkgs.hello
+      ];
+      myPackageDeps = myPackageDepsLibs ++ myPackageDepsBin;
+
+
+      # --- cabal shell ---
+      inherit (builtins) concatLists attrValues;
+      inherit (pkgs.haskell.lib)
+        # doJailbreak - remove package bounds from .cabal
+        doJailbreak
+        # dontCheck - skip tests
+        dontCheck;
+
+      # haskell packages with overrides
+      # see https://gutier.io/post/development-fixing-broken-haskell-packages-nixpkgs/
+      hp = pkgs.haskell.packages."ghc${ghcVersion_}".override {
+        overrides = self: super: {
+          lzma = dontCheck (doJailbreak super.lzma);
+          myPackage = callCabal myPackageName ./. { };
+        };
+      };
+
+      cabalShell =
+        hp.shellFor {
+          packages = ps: [ ps.myPackage ];
+          nativeBuildInputs = myPackageDeps ++ [ pkgs.cabal-install ];
+          LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath myPackageDepsLibs;
+          withHoogle = true;
+          # get other tools with names
+          shellHook = ''
+            cabal update
+            cabal run
+          '';
+        };
+
+      # --- nix-packaged app ---
+      # Turn app into a static executable
+      myPackageExe =
         let
-          packageName = "nix-managed";
-          packageExe = staticExecutable packageName ./.;
+          exe = staticExecutable myPackageName ./.;
         in
         withMan
-          (
-            withDescription
-              (
-                withAttrs
-                  (pkgs.symlinkJoin {
-                    name = packageName;
-                    paths = [ packageExe ];
-                    buildInputs = [ pkgs.makeBinaryWrapper ];
-                    postBuild = ''
-                      wrapProgram $out/bin/${packageName} \
-                        --set PATH ${
-                          pkgs.lib.makeBinPath myPackageDeps
-                         }
-                    '';
-                  })
-                  { pname = packageName; }
-              ) "Demo Nix-packaged `Haskell` program"
+          (withDescription
+            (withAttrs
+              (pkgs.runCommand myPackageName
+                { buildInputs = [ pkgs.makeBinaryWrapper ]; }
+                ''
+                  mkdir $out
+                  ln -s ${exe}/* $out
+
+                  rm $out/share
+                  mkdir $out/share
+                  cp -r ${exe}/share $out/share
+                        
+                  rm $out/bin
+                  mkdir $out/bin
+
+                  makeWrapper ${exe}/bin/${myPackageName} $out/bin/${myPackageName} \
+                    --prefix PATH : ${
+                      pkgs.lib.makeBinPath myPackageDepsBin
+                     } \
+                    --prefix LD_LIBRARY_PATH : ${
+                      pkgs.lib.makeLibraryPath myPackageDepsLibs
+                    }
+                ''
+              )
+              { pname = myPackageName; }
+            )
+            "Demo Nix-packaged `Haskell` program "
           )
           (
             x: ''
               ${man.DESCRIPTION}
               ${x.meta.description}
             ''
-          );
+          )
+      ;
 
+      # --- docker image of the package ---
+      myPackageImageTag = "latest";
+      myPackageImage = pkgs.dockerTools.buildLayeredImage {
+        name = myPackageName;
+        tag = myPackageImageTag;
+        config.Entrypoint = [ "bash" "-c" myPackageName ];
+        contents = [ pkgs.bash myPackageExe ];
+      };
+
+      dockerShell = mkShell {
+        packages = [ pkgs.docker ];
+        bash.extra = ''
+          docker load < ${myPackageImage}
+          docker run -it ${myPackageName}:${myPackageImageTag}
+        '';
+        commands = mkCommands "tools" [ pkgs.docker ];
+      };
+
+      # --- all dev tools ---
       tools = codiumTools ++ [ codium ];
+
+      # --- flakes tools ---
       flakesTools = mkFlakesTools [ "." ];
+
+      # --- codium ---
+      # what to write in settings.json
+      writeSettings = writeSettingsJSON {
+        inherit (settingsNix) haskell todo-tree files editor gitlens
+          git nix-ide workbench markdown-all-in-one markdown-language-features;
+      };
+
+      # dev tools
+      codiumTools = [
+        implicit-hie
+        ghcid
+        stack
+        writeSettings
+        cabal
+      ];
+
+      # VSCodium with dev tools
+      codium = mkCodium {
+        extensions = { inherit (extensions) nix haskell misc github markdown; };
+        runtimeDependencies = codiumTools ++ [ hls ];
+      };
+
+      stackShell = mkShell {
+        packages = [ stack ];
+        shellHook = ''
+          stack build
+        '';
+        commands = mkCommands "tools" [ pkgs.stack ];
+      };
     in
     {
       packages = {
-        default = codium;
+        default = myPackageExe;
         inherit (flakesTools) updateLocks pushToCachix;
       };
 
-      devShells.default = devshell.mkShell
-        {
-          packages = tools;
-          bash.extra = ''printf "Hello, world!\n"'';
-          commands = mkCommands "tools" tools;
-        };
+      devShells = {
+        # --- devshell with dev tools ---
+        default = mkShell
+          {
+            packages = tools;
+            bash.extra = ''printf "Welcome home!\n"'';
+            commands = mkCommands "tools" tools;
+          };
 
-      # Nix-provided libraries for stack
+        # --- shell for cabal ---
+        # can cabal build inside
+        cabal = cabalShell;
+
+        # --- shell for docker ---
+        # runs a container with myPackage
+        docker = dockerShell;
+
+        # --- shell for docker ---
+        # runs a container with myPackage
+        stack = stackShell;
+      };
+
+      # --- shell for stack-nix integration
+      # this is not a nix devShell
+      # this shell will automatically be called by stack
       stack-shell = { ghcVersion }:
 
         pkgs.haskell.lib.buildStackProject {
