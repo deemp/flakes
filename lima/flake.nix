@@ -5,7 +5,7 @@
     drv-tools.url = "github:deemp/flakes?dir=drv-tools";
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
-    my-devshell.url = "github:deemp/flakes?dir=devshell";
+    devshell.url = "github:deemp/flakes?dir=devshell";
     haskell-tools.url = "github:deemp/flakes?dir=language-tools/haskell";
   };
   outputs =
@@ -14,7 +14,7 @@
     , nixpkgs
     , drv-tools
     , haskell-tools
-    , my-devshell
+    , devshell
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -22,8 +22,7 @@
       pkgs = nixpkgs.legacyPackages.${system};
       inherit (drv-tools.functions.${system}) mkBinName withAttrs withMan withDescription;
       inherit (drv-tools.configs.${system}) man;
-      devshell = my-devshell.devshell.${system};
-      inherit (my-devshell.functions.${system}) mkCommands;
+      inherit (devshell.functions.${system}) mkCommands mkShell;
       inherit (haskell-tools.functions.${system}) toolsGHC;
       inherit (toolsGHC "92") staticExecutable cabal;
 
@@ -55,7 +54,7 @@
         default = myPackage;
       };
 
-      devShells.default = devshell.mkShell
+      devShells.default = mkShell
         {
           packages = tools;
           bash.extra = '''';

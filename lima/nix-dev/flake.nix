@@ -7,7 +7,7 @@
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
     haskell-tools.url = "github:deemp/flakes?dir=language-tools/haskell";
-    my-devshell.url = "github:deemp/flakes?dir=devshell";
+    devshell.url = "github:deemp/flakes?dir=devshell";
     flakes-tools.url = "github:deemp/flakes?dir=flakes-tools";
   };
   outputs =
@@ -18,7 +18,7 @@
     , my-codium
     , drv-tools
     , haskell-tools
-    , my-devshell
+    , devshell
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -26,8 +26,7 @@
       pkgs = nixpkgs.legacyPackages.${system};
       inherit (my-codium.functions.${system}) writeSettingsJSON mkCodium;
       inherit (my-codium.configs.${system}) extensions settingsNix;
-      devshell = my-devshell.devshell.${system};
-      inherit (my-devshell.functions.${system}) mkCommands;
+      inherit (devshell.functions.${system}) mkCommands mkShell;
       inherit (haskell-tools.functions.${system}) toolsGHC;
       inherit (toolsGHC "92") hls cabal;
 
@@ -53,7 +52,7 @@
         default = codium;
       };
 
-      devShells.default = devshell.mkShell
+      devShells.default = mkShell
         {
           packages = tools;
           bash.extra = ''printf "Hello, world!\n"'';

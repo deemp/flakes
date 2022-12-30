@@ -7,7 +7,7 @@
     flake-utils.follows = "flake-utils_/flake-utils";
     vscode-extensions_.url = "github:deemp/flakes?dir=source-flake/vscode-extensions";
     vscode-extensions.follows = "vscode-extensions_/vscode-extensions";
-    my-devshell.url = "github:deemp/flakes?dir=devshell";
+    devshell.url = "github:deemp/flakes?dir=devshell";
   };
   outputs =
     { self
@@ -15,7 +15,7 @@
     , my-codium
     , flake-utils
     , vscode-extensions
-    , my-devshell
+    , devshell
     , ...
     }: flake-utils.lib.eachDefaultSystem
       (system:
@@ -39,11 +39,10 @@
             nix-ide git gitlens editor workbench
             files markdown-language-features todo-tree;
         };
-        devshell = my-devshell.devshell.${system};
-        inherit (my-devshell.functions.${system}) mkCommands;
+        inherit (devshell.functions.${system}) mkCommands mkShell;
       in
       {
-        devShells.default = devshell.mkShell
+        devShells.default = mkShell
           {
             packages = [ codium ];
             bash = {
