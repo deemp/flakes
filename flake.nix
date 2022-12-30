@@ -8,7 +8,7 @@
     drv-tools.url = "github:deemp/flakes?dir=drv-tools";
     formatter.url = "github:deemp/flakes?dir=source-flake/formatter";
     my-codium.url = "github:deemp/flakes?dir=codium";
-    my-devshell.url = "github:deemp/flakes?dir=devshell";
+    devshell.url = "github:deemp/flakes?dir=devshell";
     workflows.url = "github:deemp/flakes?dir=workflows";
   };
   outputs =
@@ -19,7 +19,7 @@
     , drv-tools
     , my-codium
     , formatter
-    , my-devshell
+    , devshell
     , workflows
     , ...
     }: flake-utils.lib.eachDefaultSystem
@@ -31,10 +31,9 @@
         inherit (my-codium.configs.${system}) settingsNix;
         inherit (drv-tools.functions.${system}) readDirectories;
         inherit (flakes-tools.functions.${system}) mkFlakesTools;
-        inherit (my-devshell.functions.${system}) mkCommands;
+        inherit (devshell.functions.${system}) mkCommands mkShell;
         inherit (workflows.functions.${system}) writeWorkflow;
         inherit (workflows.configs.${system}) nixCI;
-        devshell = my-devshell.devshell.${system};
 
         flakesTools = (mkFlakesTools (
           let f = dir: (builtins.map (x: "${dir}/${x}") (readDirectories ./${dir})); in
@@ -68,7 +67,7 @@
         tools = [ codium writeSettings ];
       in
       {
-        devShells.default = devshell.mkShell
+        devShells.default = mkShell
           {
             packages = tools;
             commands = mkCommands "tools" tools;
