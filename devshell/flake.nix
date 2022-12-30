@@ -68,13 +68,14 @@
               }
             )
             drvs;
+          mkShell = devshell.mkShell;
         in
         {
           inherit devshell;
           functions = {
-            inherit mkCommands;
+            inherit mkCommands mkShell;
           };
-          devShells.default = devshell.mkShell {
+          devShells.default = mkShell {
             packages = [ pkgs.gawk pkgs.hello ];
             bash = {
               extra = ''
