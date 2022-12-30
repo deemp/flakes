@@ -166,6 +166,7 @@
         stack
         writeSettings
         cabal
+        cabal
       ];
 
       # VSCodium with dev tools
@@ -174,13 +175,22 @@
         runtimeDependencies = codiumTools ++ [ hls ];
       };
 
+      # --- stack shell ---
       stackShell = mkShell {
         packages = [ stack ];
-        shellHook = ''
-          stack build
+        bash.extra = ''
+          stack run
         '';
         commands = mkCommands "tools" [ pkgs.stack ];
       };
+
+      # --- default shell ---
+      defaultShell = mkShell
+        {
+          packages = tools;
+          bash.extra = mkBin myPackageExe;
+          commands = mkCommands "tools" tools;
+        };
     in
     {
       packages = {
@@ -190,15 +200,11 @@
 
       devShells = {
         # --- devshell with dev tools ---
-        default = mkShell
-          {
-            packages = tools;
-            bash.extra = ''printf "Welcome home!\n"'';
-            commands = mkCommands "tools" tools;
-          };
+        # runs nix-packaged app
+        default = defaultShell;
 
         # --- shell for cabal ---
-        # can cabal build inside
+        # runs cabal
         cabal = cabalShell;
 
         # --- shell for docker ---
@@ -206,7 +212,7 @@
         docker = dockerShell;
 
         # --- shell for docker ---
-        # runs a container with myPackage
+        # runs stack
         stack = stackShell;
       };
 

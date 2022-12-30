@@ -26,12 +26,12 @@ codium .
 
 1. Wait until `Haskell Language Server` (`HLS`) starts giving you type info.
 
-## Nix run
+## Nix
 
 `Nix` provides necessary packages, binaries and libraries to the app. So, you can build this app using `Nix` and run it.
 
 ```console
-nix run
+nix develop
 ```
 
 ## Docker
@@ -57,6 +57,7 @@ Also, you can supply other binaries that your app will be able to call. This is 
 ### Background
 
 Suppose you'd like `Nix` to supply a `C` library [liblzma](https://tukaani.org/xz/) to `stack` using [this integration](https://docs.haskellstack.org/en/stable/nix_integration/).
+Suppose you'd like `Nix` to supply a `C` library [liblzma](https://tukaani.org/xz/) to `stack` using [this integration](https://docs.haskellstack.org/en/stable/nix_integration/).
 You'd create a `stack-shell` (more on that below) in `flake.nix` and provide there a `Nix` package `pkgs.lzma`.
 Then, `stack` will create an isolated environment, where this library is present, and run your program in this environment.
 In such an environment, your program won't have an access to other libraries and programs like `rm` or `git`.
@@ -73,6 +74,10 @@ It has a Haskell `lzma` package as a dependency (see [package.yaml](./package.ya
 
 There's also a `pkgs.hello` package in `stack-shell`.
 This allows `someFunc` from `src/Lib.hs` to call the `hello` as a shell command.
+
+```console
+nix develop .#stack
+```
 
 ```console
 stack run
