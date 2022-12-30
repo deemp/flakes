@@ -40,7 +40,6 @@ Other projects in separate repositories:
 
 Nix-packaged:
 
-- [hpack](https://github.com/deemp/hpack) - `0.35.0`, until it's fixed on `nixpkgs`
 - [refmt](https://github.com/deemp/refmt) - `HCL` <-> `JSON` <-> `YAML` converter
 
 ## Templates
