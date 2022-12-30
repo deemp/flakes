@@ -6,13 +6,11 @@
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
     haskell-tools.url = "github:deemp/flakes?dir=language-tools/haskell";
-    my-hpack_.url = "github:deemp/flakes?dir=source-flake/hpack";
-    my-hpack.follows = "my-hpack_/hpack";
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
     };
-    my-devshell.url = "github:deemp/flakes?dir=devshell";
+    devshell.url = "github:deemp/flakes?dir=devshell";
   };
   outputs =
     { self
@@ -20,8 +18,7 @@
     , nixpkgs
     , my-codium
     , haskell-tools
-    , my-devshell
-    , my-hpack
+    , devshell
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -29,12 +26,9 @@
       pkgs = nixpkgs.legacyPackages.${system};
       inherit (my-codium.functions.${system}) writeSettingsJSON mkCodium;
       inherit (my-codium.configs.${system}) extensions settingsNix;
-      devshell = my-devshell.devshell.${system};
-      inherit (my-devshell.functions.${system}) mkCommands;
+      inherit (devshell.functions.${system}) mkCommands mkShell;
       inherit (haskell-tools.functions.${system}) toolsGHC;
-      hsShellTools = haskell-tools.toolSets.${system}.shellTools;
-      inherit (toolsGHC "90") stack hls;
-      hpack = my-hpack.packages.${system}.default;
+      inherit (toolsGHC "90") stack hls hpack implicit-hie ghcid;
 
       writeSettings = writeSettingsJSON {
         inherit (settingsNix) haskell todo-tree files editor gitlens
@@ -43,13 +37,12 @@
       };
 
       codiumTools = [
-        hsShellTools.implicit-hie
         hpack
-        hsShellTools.ghcid
         stack
         writeSettings
         hls
         pkgs.jq
+        implicit-hie
       ];
 
       codium = mkCodium {
@@ -65,7 +58,7 @@
       };
 
       devShells.default =
-        devshell.mkShell
+        mkShell
           {
             packages = tools;
             bash.extra = "";
