@@ -177,11 +177,11 @@
 
       # --- stack shell ---
       stackShell = mkShell {
-        packages = [ stack ];
+        packages = [ stack ghcid ];
         bash.extra = ''
           stack run
         '';
-        commands = mkCommands "tools" [ pkgs.stack ];
+        commands = mkCommands "tools" [ stack ghcid ];
       };
 
       # --- default shell ---
@@ -205,13 +205,14 @@
 
         # --- shell for cabal ---
         # runs cabal
+        # runs cabal
         cabal = cabalShell;
 
         # --- shell for docker ---
         # runs a container with myPackage
         docker = dockerShell;
 
-        # --- shell for docker ---
+        # --- shell for stack ---
         # runs stack
         stack = stackShell;
       };
