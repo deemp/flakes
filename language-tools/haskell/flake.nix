@@ -21,13 +21,16 @@
       pkgs = nixpkgs.legacyPackages.${system};
       inherit (drv-tools.functions.${system}) withAttrs concatMapStringsNewline framedBrackets;
 
-      # build tool with GHC of a specific version and other runtime deps available to this tool on PATH
+      # GHC of a specific version
+      ghcGHC = ghcVersion: pkgs.haskell.compiler."ghc${ghcVersion}";
+
+      # build tool with GHC of a specific version available on PATH
       buildToolWithFlagsGHC = name: drv: flags: ghcVersion:
         assert builtins.isString name && builtins.isString ghcVersion
           && builtins.isAttrs drv && builtins.isList flags;
         let
           deps = [
-            pkgs.haskell.compiler."ghc${ghcVersion}"
+            (ghcGHC ghcVersion)
           ];
           flags_ = concatMapStringsNewline (x: x + " \\") flags;
         in
@@ -58,29 +61,28 @@
       # --enable-nix - allow use a shell.nix if present
       cabalWithFlagsGHC = buildToolWithFlagsGHC "cabal" pkgs.cabal-install [ "--enable-nix" ];
 
+      haskellPackagesGHCOverride = ghcVersion: override: pkgs.haskell.packages."ghc${ghcVersion}".override override;
+
       # a convenience function for building haskell packages
       # can be used for a project with GHC 9.0.2 as follows:
-      # callCabal = callCabalGHC "902";
+      # callCabal = callCabalGHCOverride "902" { };
       # dep = callCabal "dependency-name" ./dependency-path { };
       # my-package = callCabal "my-package-name" ./my-package-path { inherit dependency; };
-      callCabalGHC = ghcVersion: name: path: args:
+      callCabalGHCOverride = ghcVersion: override: name: path: args:
         let
-          inherit (pkgs.haskell.packages."ghc${ghcVersion}") callCabal2nix;
+          inherit (haskellPackagesGHCOverride ghcVersion override) callCabal2nix;
           inherit (gitignore.lib) gitignoreSource;
         in
         callCabal2nix name (gitignoreSource path) args;
-
 
       # actually build an executable
       inherit (pkgs.haskell.lib) justStaticExecutables;
 
       # build an executable without local dependencies (notice empty args)
-      staticExecutableGHC = ghcVersion: name: path:
+      staticExecutableGHCOverride = ghcVersion: override: name: path:
         let
-          inherit (pkgs.haskell.packages."ghc${ghcVersion}") callCabal2nix;
-          inherit (gitignore.lib) gitignoreSource;
           exe = justStaticExecutables
-            (callCabal2nix name (gitignoreSource path) { });
+            (callCabalGHCOverride ghcVersion override name path { });
         in
         withAttrs exe { pname = name; };
 
@@ -88,19 +90,23 @@
       # https://haskell4nix.readthedocs.io/nixpkgs-users-guide.html#how-to-install-haskell-language-server
       hlsGHC = ghcVersion: pkgs.haskell-language-server.override { supportedGhcVersions = [ ghcVersion ]; };
 
-      # tools for a specific GHC version
+      # tools for a specific GHC version and overriden haskell packages for this GHC
       # see what you need to pass to your shell for GHC
       # https://docs.haskellstack.org/en/stable/nix_integration/#supporting-both-nix-and-non-nix-developers
-      toolsGHC = ghcVersion: {
+      toolsGHCOverride = ghcVersion: override: {
         hls = hlsGHC ghcVersion;
         stack = stackWithFlagsGHC ghcVersion;
         cabal = cabalWithFlagsGHC ghcVersion;
-        ghc = pkgs.haskell.compiler."ghc${ghcVersion}";
-        callCabal = callCabalGHC ghcVersion;
-        staticExecutable = staticExecutableGHC ghcVersion;
+        ghc = ghcGHC ghcVersion;
+        callCabal = callCabalGHCOverride ghcVersion override;
+        staticExecutable = staticExecutableGHCOverride ghcVersion override;
+        haskellPackages = haskellPackagesGHCOverride ghcVersion override;
         inherit justStaticExecutables;
         inherit (pkgs.haskellPackages) implicit-hie ghcid;
+        inherit (pkgs) hpack;
       };
+      
+      toolsGHC = ghcVersion: toolsGHCOverride ghcVersion { };
 
       ghcVersion_ = "90";
       inherit (toolsGHC ghcVersion_) stack cabal implicit-hie;
@@ -108,6 +114,7 @@
     {
       functions = {
         inherit
+          toolsGHCOverride
           toolsGHC
           ;
       };
