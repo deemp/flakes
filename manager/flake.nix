@@ -3,9 +3,7 @@
     nixpkgs.follows = "haskell-tools/nixpkgs";
     flake-utils.follows = "haskell-tools/flake-utils";
     haskell-tools.url = "github:deemp/flakes?dir=language-tools/haskell";
-    hpack_.url = "github:deemp/flakes?dir=source-flake/hpack";
     drv-tools.url = "github:deemp/flakes?dir=drv-tools";
-    hpack.follows = "hpack_/hpack";
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
@@ -15,7 +13,6 @@
     { self
     , flake-utils
     , nixpkgs
-    , hpack
     , haskell-tools
     , drv-tools
     , ...
@@ -26,41 +23,41 @@
         pkgs = nixpkgs.legacyPackages.${system};
         hsShellTools = haskell-tools.toolSets.${system}.shellTools;
         inherit (haskell-tools.functions.${system}) toolsGHC;
-        inherit (toolsGHC "90") staticExecutable;
-        inherit (drv-tools.functions.${system}) withDescription withMan;
+        inherit (toolsGHC "90") staticExecutable implicit-hie hpack;
+        inherit (drv-tools.functions.${system}) withDescription withMan withAttrs;
         inherit (drv-tools.configs.${system}) man;
         managerTools = [
-          hpack.packages.${system}.default
-          pkgs.haskellPackages.implicit-hie
           pkgs.coreutils
           pkgs.nix
           pkgs.git
+          implicit-hie
+          hpack
         ];
         manager =
           let
-            manager_ = "manager";
-            manager-exe = staticExecutable manager_ ./.;
+            name = "manager";
+            exe = staticExecutable name ./.;
           in
           withMan
-            (
-              withDescription
-                (
-                  pkgs.symlinkJoin {
-                    name = manager_;
-                    paths = [ manager-exe ];
-                    buildInputs = [ pkgs.makeBinaryWrapper ];
-                    postBuild = ''
-                      # wrapProgram $out/bin/${manager_} \
-                        # --set PATH ${
-                          pkgs.lib.makeBinPath managerTools
-                          }
-                      COMPLETIONS=$out/share/bash-completion/completions
-                      MANAGER=${manager-exe}/bin/${manager_}
-                      mkdir -p $COMPLETIONS
-                      cat <($MANAGER --bash-completion-script $MANAGER) > $COMPLETIONS/${manager_}
-                    '';
-                  }
-                ) "Manage repetitive Haskell modules. Run `manager -h`"
+            (withDescription
+              (withAttrs
+                (pkgs.symlinkJoin {
+                  name = name;
+                  paths = [ exe ];
+                  buildInputs = [ pkgs.makeBinaryWrapper ];
+                  postBuild = ''
+                    # wrapProgram $out/bin/${name} \
+                      # --set PATH ${
+                        pkgs.lib.makeBinPath managerTools
+                        }
+                    # COMPLETIONS=$out/share/bash-completion/completions
+                    # MANAGER=${exe}/bin/${name}
+                    # mkdir -p $COMPLETIONS
+                    # cat <($MANAGER --bash-completion-script $MANAGER) > $COMPLETIONS/${name}
+                  '';
+                })
+                { pname = name; }
+              ) "Manage repetitive Haskell modules. Run `manager -h`"
             )
             (
               x: ''
