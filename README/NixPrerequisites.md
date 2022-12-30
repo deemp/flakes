@@ -148,7 +148,7 @@ cp flake-2/file{2,3} flake-3
 
 1. Flake tutorials: [1](https://nix-tutorial.gitlabpages.inria.fr/nix-tutorial/flakes.html?highlight=flake), [2](https://yuanwang.ca/posts/getting-started-with-flakes.html), [3](https://ghedam.at/a-tour-of-nix-flakes), [4](https://xeiaso.net/blog/nix-flakes-2-2022-02-27)
 
-1. Flake inputs tip
+1. Flake inputs tip (perhaps flawed)
    - Store your flake inputs in a repo - [example](https://github.com/deemp/flakes/blob/2395f79740fdc5f14f91db10b1acd2892cdee28c/source-flake)
    - Use them in your projects with `follows` - [example](https://github.com/deemp/flakes/blob/2395f79740fdc5f14f91db10b1acd2892cdee28c/codium/flake.nix#L5)
    - Now, all your projects have the same dependencies since they come from the same source
@@ -164,6 +164,16 @@ cp flake-2/file{2,3} flake-3
 1. When should I use overlays over `nixpkgs`? - You [shouldn't](https://zimbatm.com/notes/1000-instances-of-nixpkgs)
 
 1. How to convert an exising project to flakes? - [tutorial](https://garnix.io/blog/converting-to-flakes)
+
+1. How to use a `.gitignore`d file inside a flake?
+
+   - build with `--impure`
+
+      ```console
+      zxcTest = prev.writeText "zxcTest" (builtins.readFile /home/name_snrl/nixos-configuration/<fileFromIgnore>);
+      ```
+
+   - Provide it in inputs. Inputs accept arbitrary files. Make links follow the format of [flake inputs](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake.html#flake-inputs)
 
 ## Nix
 
