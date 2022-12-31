@@ -26,6 +26,16 @@ codium .
 
 1. Wait until `Haskell Language Server` (`HLS`) starts giving you type info.
 
+## Cabal
+
+Incremental builds via `cabal` + `Nix`-provided packages via `pkgs.haskell.packages.ghc<version>.ghcWithPackages`. A devshell will run the app via `cabal run`.
+
+```console
+nix develop .#cabal
+```
+
+Disadvantage - not that reproducible builds.
+
 ## Nix
 
 `Nix` provides necessary packages, binaries and libraries to the app. So, you can build this app using `Nix` and run it.
@@ -33,6 +43,8 @@ codium .
 ```console
 nix develop
 ```
+
+Disadvantage - doesn't support incremental builds.
 
 ## Docker
 
@@ -42,21 +54,22 @@ Next, you can use `pkgs.dockerTools.buildLayeredImage` to build a Docker contain
 nix develop .#docker
 ```
 
+Disadvantage - doesn't support incremental builds.
+
 ## Cabal + Nix integration
 
-We can also start a shell where `cabal` will have `GHC` with necessary packages. This is what `pkgs.haskell.packages.ghc<version>.shellFor` is for.
+We can also start a shell where `cabal` will have `GHC` with necessary packages. This is what `pkgs.haskell.packages.ghc<version>.shellFor` is for. Also, in `buildInputs` of a `shellFor`, you can provide the executables that should be available to the app at runtime.
 
 ```console
-nix develop .#cabal
+nix develop .#cabalShellFor
 ```
-
-Also, you can supply other binaries that your app will be able to call. This is similar to `Stack` + `Nix` integration. Read the section below to learn how shell works in general.
 
 ## Stack + Nix integration
 
+Disadvantage - doesn't use Nix caches and takes packages from Stackage.
+
 ### Background
 
-Suppose you'd like `Nix` to supply a `C` library [liblzma](https://tukaani.org/xz/) to `stack` using [this integration](https://docs.haskellstack.org/en/stable/nix_integration/).
 Suppose you'd like `Nix` to supply a `C` library [liblzma](https://tukaani.org/xz/) to `stack` using [this integration](https://docs.haskellstack.org/en/stable/nix_integration/).
 You'd create a `stack-shell` (more on that below) in `flake.nix` and provide there a `Nix` package `pkgs.lzma`.
 Then, `stack` will create an isolated environment, where this library is present, and run your program in this environment.
@@ -119,15 +132,17 @@ Necessary components of `Stack` + `Nix` integration:
 
 ## Tools
 
+Available in the `devShells.default`.
+
 ### ghcid
 
 [ghcid](https://github.com/ndmitchell/ghcid) is a `Very low feature GHCi based IDE`.
-It can be used to rerun a function in a given file on changes in a given directory.
+It can be used to re-run a function in a given file on changes in a given directory.
 This template provides a sample configuration for this tool in the `.ghcid` file.
 
 ### GHC
 
-This template uses `GHC 9.2.4`. You can switch to `GHC 9.0.2`:
+This template uses `GHC 9.2`. You can switch to `GHC 9.0`:
 
 - in `flake.nix`, change `"92"` to `"90"`
 - in `stack.yaml`, change `resolver` to [lts-19.33](https://www.stackage.org/lts-19.33) or a later one from `stackage`
