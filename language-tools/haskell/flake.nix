@@ -85,7 +85,7 @@
 
       # see the possible values for ghcVersion here
       # https://haskell4nix.readthedocs.io/nixpkgs-users-guide.html#how-to-install-haskell-language-server
-      hlsGHC = ghcVersion: override: (haskellPackagesGHCOverride ghcVersion override).override { supportedGhcVersions = [ ghcVersion ]; };
+      hlsGHC = ghcVersion: override: (haskellPackagesGHCOverride ghcVersion override).haskell-language-server;
 
       # tools for a specific GHC version and overriden haskell packages for this GHC
       # see what you need to pass to your shell for GHC
@@ -122,7 +122,10 @@
         (ps: [ ps.haskell ]);
 
       ghcVersion_ = "92";
-      inherit (haskellTools_ ghcVersion_) cabal hpack stack;
+      tools = attrValues {
+        inherit (haskellTools_ ghcVersion_)
+          cabal stack hls ghc implicit-hie ghcid hpack;
+      };
     in
     {
       functions = {
@@ -133,10 +136,7 @@
       devShells =
         {
           default = pkgs.mkShell {
-            buildInputs = [
-              cabal
-              hpack
-            ];
+            buildInputs = tools;
             shellHook = ''cabal run'';
           };
         };
