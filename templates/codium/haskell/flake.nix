@@ -71,7 +71,7 @@
         stack hls cabal implicit-hie justStaticExecutable
         ghcid callCabal2nix haskellPackages;
 
-      cabalShellShellFor =
+      cabalShellFor =
         haskellPackages.shellFor {
           packages = ps: [ ps.myPackage ];
           nativeBuildInputs = myPackageDeps ++ [ cabal ];
@@ -163,9 +163,9 @@
         };
 
       stackShell = mkShell {
-        packages = [ stack ghcid ];
+        packages = [ stack ];
         bash.extra = framed "stack run";
-        commands = mkCommands "tools" [ stack ghcid ];
+        commands = mkCommands "tools" [ stack ];
       };
     in
     {
@@ -185,7 +185,7 @@
 
         # --- shell for cabal via shellFor ---
         # runs cabal
-        cabalShellFor = cabalShellShellFor;
+        cabalShellFor = cabalShellFor;
 
         # --- shell for docker ---
         # runs a container with myPackage
