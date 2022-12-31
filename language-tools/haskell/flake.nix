@@ -125,7 +125,10 @@
       haskellTools_ = ghcVersion: haskellTools ghcVersion
         {
           overrides = self: super: {
-            haskell = pkgs.haskell.lib.overrideCabal (super.callCabal2nix "haskell" ./. { })
+            haskell = pkgs.haskell.lib.overrideCabal (super.callCabal2nix "haskell" ./. { 
+              # you can put other packages here like
+              # lzma = super.lzma;
+            })
               (_: {
                 librarySystemDepends = [ pkgs.zlib ];
               });
