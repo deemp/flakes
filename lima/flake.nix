@@ -23,13 +23,13 @@
       inherit (drv-tools.functions.${system}) mkBinName withAttrs withMan withDescription;
       inherit (drv-tools.configs.${system}) man;
       inherit (devshell.functions.${system}) mkCommands mkShell;
-      inherit (haskell-tools.functions.${system}) toolsGHC;
-      inherit (toolsGHC "92") staticExecutable cabal;
+      inherit (haskell-tools.functions.${system}) haskellTools;
+      inherit (haskellTools "92" { } (_: [ ]) [ ]) justStaticExecutable cabal callCabal2nix;
 
       myPackage =
         let
           packageName = "lima";
-          packageExe = staticExecutable packageName ./.;
+          packageExe = justStaticExecutable packageName (callCabal2nix packageName ./. { });
         in
         withMan
           (withDescription packageExe "Convert between `Literate Haskell` (`.lhs`) and `Markdown` (`.md`)")
