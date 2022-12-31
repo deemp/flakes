@@ -27,13 +27,13 @@
           (ps: haskellDepsPackages (packages ps));
 
       # build tool with GHC of a specific version available on PATH
-      buildToolWithFlagsGHC = name: drv: flags: ghcVersion: override: packages:
+      buildToolWithFlagsGHC = name: drv: flags: ghcVersion: override: packages: deps_:
         assert builtins.isString name && builtins.isString ghcVersion
           && builtins.isAttrs drv && builtins.isList flags;
         let
           deps = [
             (ghcGHC ghcVersion override packages)
-          ];
+          ] ++ deps_;
           flags_ = concatMapStringsNewline (x: x + " \\") flags;
         in
         withAttrs
@@ -76,12 +76,32 @@
       inherit (pkgs.haskell.lib) justStaticExecutables;
 
       # build an executable without local dependencies (notice empty args)
-      staticExecutableGHCOverride = ghcVersion: override: name: path:
+      staticExecutableGHCOverride = ghcVersion: override: deps: name: package:
         let
-          inherit (haskellPackagesGHCOverride ghcVersion override) callCabal2nix;
-          exe = justStaticExecutables (callCabal2nix name path { });
+          exe = justStaticExecutables package;
         in
-        withAttrs exe { pname = name; };
+        withAttrs
+          (pkgs.runCommand exe
+            { buildInputs = [ pkgs.makeBinaryWrapper ]; }
+            ''
+              mkdir $out
+              ln -s ${exe}/* $out
+
+              rm $out/share
+              mkdir $out/share
+              cp -r ${exe}/share $out/share
+                        
+              rm $out/bin
+              mkdir $out/bin
+
+              makeWrapper ${exe}/bin/${package.pname} $out/bin/${name} \
+                --prefix PATH : ${
+                  pkgs.lib.makeBinPath deps
+                 }
+            ''
+          )
+          { pname = name; }
+      ;
 
       # see the possible values for ghcVersion here
       # https://haskell4nix.readthedocs.io/nixpkgs-users-guide.html#how-to-install-haskell-language-server
@@ -90,16 +110,16 @@
       # tools for a specific GHC version and overriden haskell packages for this GHC
       # see what you need to pass to your shell for GHC
       # https://docs.haskellstack.org/en/stable/nix_integration/#supporting-both-nix-and-non-nix-developers
-      haskellTools = ghcVersion: override: packages:
+      haskellTools = ghcVersion: override: packages: deps:
         let
           haskellPackages = haskellPackagesGHCOverride ghcVersion override;
         in
         {
           hls = hlsGHC ghcVersion override;
-          stack = stackWithFlagsGHCOverride ghcVersion override packages;
-          cabal = cabalWithFlagsGHCOverride ghcVersion override packages;
+          stack = stackWithFlagsGHCOverride ghcVersion override packages deps;
+          cabal = cabalWithFlagsGHCOverride ghcVersion override packages deps;
           ghc = ghcGHC ghcVersion override packages;
-          staticExecutable = staticExecutableGHCOverride ghcVersion override;
+          staticExecutable = staticExecutableGHCOverride ghcVersion override deps;
           inherit (haskellPackages)
             implicit-hie ghcid hpack
             callCabal2nix ghcWithPackages;
@@ -112,20 +132,23 @@
           overrides = self: super: {
             haskell = pkgs.haskell.lib.overrideCabal (super.callCabal2nix "haskell" ./. { })
               (_: {
-                librarySystemDepends = [
-                  pkgs.zlib
-                  super.implicit-hie
-                ];
+                librarySystemDepends = [ pkgs.zlib ];
               });
           };
         }
-        (ps: [ ps.haskell ]);
+        (ps: [ ps.haskell ])
+        [ pkgs.hello ]
+      ;
 
       ghcVersion_ = "92";
-      tools = attrValues {
-        inherit (haskellTools_ ghcVersion_)
-          cabal stack hls ghc implicit-hie ghcid hpack;
-      };
+
+      tools =
+        let hp = haskellTools_ ghcVersion_; in
+        {
+          inherit (haskellTools_ ghcVersion_)
+            cabal stack hls ghc implicit-hie ghcid hpack;
+          hello-world = hp.staticExecutable "hello-world" hp.haskellPackages.haskell;
+        };
     in
     {
       functions = {
@@ -136,8 +159,14 @@
       devShells =
         {
           default = pkgs.mkShell {
-            buildInputs = tools;
-            shellHook = ''cabal run'';
+            buildInputs = attrValues tools;
+            shellHook = ''
+              printf "\n--- cabal runs---\n"
+              cabal run
+
+              printf "\n--- exe runs ---\n"
+              ${tools.hello-world}/bin/${tools.hello-world.pname}
+            '';
           };
         };
     });
