@@ -37,20 +37,21 @@
           flags_ = concatMapStringsNewline (x: x + " \\") flags;
         in
         withAttrs
-          (pkgs.runCommand name
-            { buildInputs = [ pkgs.makeBinaryWrapper ]; }
-            ''
-              mkdir $out
-              ln -s ${drv}/* $out
-              rm $out/bin
-              mkdir $out/bin
-              
-              makeWrapper ${drv}/bin/${name} $out/bin/${name} \
-                --add-flags "\
-                  ${flags_}
-                " \
-                --prefix PATH : ${pkgs.lib.makeBinPath deps}
-            ''
+          (
+            pkgs.runCommand name
+              { buildInputs = [ pkgs.makeBinaryWrapper ]; }
+              ''
+                mkdir $out
+                ln -s ${drv}/* $out
+                rm $out/bin
+                mkdir $out/bin
+
+                makeWrapper ${drv}/bin/${name} $out/bin/${name} \
+                  --add-flags "\
+                    ${flags_}
+                  " \
+                  --prefix PATH : ${pkgs.lib.makeBinPath deps}
+              ''
           )
           {
             pname = name;
@@ -89,7 +90,7 @@
       # tools for a specific GHC version and overriden haskell packages for this GHC
       # see what you need to pass to your shell for GHC
       # https://docs.haskellstack.org/en/stable/nix_integration/#supporting-both-nix-and-non-nix-developers
-      toolsGHCOverridePackages = ghcVersion: override: packages:
+      haskellTools = ghcVersion: override: packages:
         let
           haskellPackages = haskellPackagesGHCOverride ghcVersion override;
         in
@@ -106,50 +107,38 @@
           inherit haskellDeps haskellDepsPackages justStaticExecutables;
         };
 
-      toolsGHC = ghcVersion: toolsGHCOverridePackages ghcVersion { } (_: [ ]);
+      haskellTools_ = ghcVersion: haskellTools ghcVersion
+        {
+          overrides = self: super: {
+            haskell = pkgs.haskell.lib.overrideCabal (super.callCabal2nix "haskell" ./. { })
+              (_: {
+                librarySystemDepends = [
+                  pkgs.zlib
+                  super.implicit-hie
+                ];
+              });
+          };
+        }
+        (ps: [ ps.haskell ]);
 
-      ghcVersion_ = "90";
-      inherit (toolsGHC ghcVersion_) stack cabal implicit-hie;
+      ghcVersion_ = "92";
+      inherit (haskellTools_ ghcVersion_) cabal hpack stack;
     in
     {
       functions = {
-        inherit
-          toolsGHCOverridePackages
-          toolsGHC
-          ;
-      };
-
-      test = {
-        inherit stack cabal;
+        inherit haskellTools;
       };
 
       # test stack has `hello` on PATH
-      devShells.default = pkgs.haskell.packages."ghc${ghcVersion_}".shellFor {
-        shellHook = ''
-          cat <<EOT > Ex.hs
-          {- cabal:
-          build-depends: base
-                      , process
-          -}
-
-          import System.Process
-          main = putStrLn =<< readProcess "gen-hie" ["--help"] ""
-          EOT
-          
-          printf "${framedBrackets "stack runs"}"
-          stack runghc -- Ex
-          
-          printf "${framedBrackets "cabal runs"}"
-          cabal run Ex.hs
-          
-          rm Ex.*
-        '';
-        packages = ps: [ ];
-        buildInputs = [
-          stack
-          cabal
-          implicit-hie
-        ];
-      };
+      devShells =
+        {
+          default = pkgs.mkShell {
+            buildInputs = [
+              cabal
+              hpack
+            ];
+            shellHook = ''cabal run'';
+          };
+        };
     });
 }
