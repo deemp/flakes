@@ -72,13 +72,10 @@
 
       haskellPackagesGHCOverride = ghcVersion: override: pkgs.haskell.packages."ghc${ghcVersion}".override override;
 
-      # actually build an executable
-      inherit (pkgs.haskell.lib) justStaticExecutables;
-
       # build an executable without local dependencies (notice empty args)
-      staticExecutableGHCOverride = ghcVersion: override: deps: name: package:
+      justStaticExecutableGHCOverrideDeps = ghcVersion: override: deps: name: package:
         let
-          exe = justStaticExecutables package;
+          exe = pkgs.haskell.lib.justStaticExecutables package;
         in
         withAttrs
           (pkgs.runCommand exe
@@ -119,12 +116,12 @@
           stack = stackWithFlagsGHCOverride ghcVersion override packages deps;
           cabal = cabalWithFlagsGHCOverride ghcVersion override packages deps;
           ghc = ghcGHC ghcVersion override packages;
-          staticExecutable = staticExecutableGHCOverride ghcVersion override deps;
+          justStaticExecutable = justStaticExecutableGHCOverrideDeps ghcVersion override deps;
           inherit (haskellPackages)
             implicit-hie ghcid hpack
             callCabal2nix ghcWithPackages;
           inherit haskellPackages;
-          inherit haskellDeps haskellDepsPackages justStaticExecutables;
+          inherit haskellDeps haskellDepsPackages;
         };
 
       haskellTools_ = ghcVersion: haskellTools ghcVersion
@@ -147,7 +144,7 @@
         {
           inherit (haskellTools_ ghcVersion_)
             cabal stack hls ghc implicit-hie ghcid hpack;
-          hello-world = hp.staticExecutable "hello-world" hp.haskellPackages.haskell;
+          hello-world = hp.justStaticExecutable "hello-world" hp.haskellPackages.haskell;
         };
     in
     {
