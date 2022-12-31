@@ -1,2 +1,2 @@
 import System.Process
-main = putStrLn =<< readProcess "gen-hie" ["--help"] ""
+main = putStrLn =<< readProcess "hello" [] ""
