@@ -36,88 +36,62 @@
       inherit (my-codium.configs.${system}) extensions settingsNix;
       inherit (flakes-tools.functions.${system}) mkFlakesTools;
       inherit (devshell.functions.${system}) mkCommands mkShell;
-      inherit (haskell-tools.functions.${system}) toolsGHC;
+      inherit (haskell-tools.functions.${system}) haskellTools;
 
       # set ghc version
       ghcVersion_ = "92";
-      inherit (toolsGHC ghcVersion_) stack hls cabal staticExecutable implicit-hie ghcid callCabal;
-
-      # my app
+      # my app name
       myPackageName = "nix-managed";
 
-      # --- non-haskell deps ---
-      myPackageDepsLibs = [
-        pkgs.lzma
-      ];
-      myPackageDepsBin = [
-        pkgs.hello
-      ];
-      myPackageDeps = myPackageDepsLibs ++ myPackageDepsBin;
+      # # --- non-haskell deps ---
+      myPackageDepsLib = [ pkgs.lzma ];
+      myPackageDepsBin = [ pkgs.hello ];
+      myPackageDeps = myPackageDepsLib ++ myPackageDepsBin;
 
 
       # --- cabal shell ---
-      inherit (builtins) concatLists attrValues;
       inherit (pkgs.haskell.lib)
         # doJailbreak - remove package bounds from .cabal
         doJailbreak
         # dontCheck - skip tests
         dontCheck;
 
-      # haskell packages with overrides
-      # see https://gutier.io/post/development-fixing-broken-haskell-packages-nixpkgs/
-      hp = pkgs.haskell.packages."ghc${ghcVersion_}".override {
+      override = {
         overrides = self: super: {
           lzma = dontCheck (doJailbreak super.lzma);
-          myPackage = callCabal myPackageName ./. { };
+          myPackage = pkgs.haskell.lib.overrideCabal
+            (super.callCabal2nix myPackageName ./. { })
+            (_: {
+              librarySystemDepends = myPackageDepsLib;
+            });
         };
       };
 
-      cabalShell =
-        hp.shellFor {
+      inherit (haskellTools ghcVersion_ override (ps: [ ps.myPackage ]) myPackageDepsBin)
+        stack hls cabal implicit-hie justStaticExecutable
+        ghcid callCabal2nix haskellPackages;
+
+      cabalShellShellFor =
+        haskellPackages.shellFor {
           packages = ps: [ ps.myPackage ];
-          nativeBuildInputs = myPackageDeps ++ [ pkgs.cabal-install ];
-          LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath myPackageDepsLibs;
+          nativeBuildInputs = myPackageDeps ++ [ cabal ];
           withHoogle = true;
           # get other tools with names
-          shellHook = ''
-            cabal update
-            cabal run
-          '';
+          shellHook = framed "cabal run";
         };
+
+      cabalShell = mkShell {
+        packages = [ cabal ];
+        bash.extra = framed "cabal run";
+        commands = mkCommands "tools" [ cabal ];
+      };
 
       # --- nix-packaged app ---
       # Turn app into a static executable
       myPackageExe =
-        let
-          exe = staticExecutable myPackageName ./.;
-        in
         withMan
           (withDescription
-            (withAttrs
-              (pkgs.runCommand myPackageName
-                { buildInputs = [ pkgs.makeBinaryWrapper ]; }
-                ''
-                  mkdir $out
-                  ln -s ${exe}/* $out
-
-                  rm $out/share
-                  mkdir $out/share
-                  cp -r ${exe}/share $out/share
-                        
-                  rm $out/bin
-                  mkdir $out/bin
-
-                  makeWrapper ${exe}/bin/${myPackageName} $out/bin/${myPackageName} \
-                    --prefix PATH : ${
-                      pkgs.lib.makeBinPath myPackageDepsBin
-                     } \
-                    --prefix LD_LIBRARY_PATH : ${
-                      pkgs.lib.makeLibraryPath myPackageDepsLibs
-                    }
-                ''
-              )
-              { pname = myPackageName; }
-            )
+            (justStaticExecutable myPackageName haskellPackages.myPackage)
             "Demo Nix-packaged `Haskell` program "
           )
           (
@@ -141,16 +115,19 @@
         packages = [ pkgs.docker ];
         bash.extra = ''
           docker load < ${myPackageImage}
-          docker run -it ${myPackageName}:${myPackageImageTag}
+          ${framed "docker run -it ${myPackageName}:${myPackageImageTag}"}
         '';
         commands = mkCommands "tools" [ pkgs.docker ];
       };
 
       # --- all dev tools ---
-      tools = codiumTools ++ [ codium ];
-
-      # --- flakes tools ---
-      flakesTools = mkFlakesTools [ "." ];
+      codiumTools = [
+        implicit-hie
+        ghcid
+        stack
+        writeSettings
+        cabal
+      ];
 
       # --- codium ---
       # what to write in settings.json
@@ -159,38 +136,37 @@
           git nix-ide workbench markdown-all-in-one markdown-language-features;
       };
 
-      # dev tools
-      codiumTools = [
-        implicit-hie
-        ghcid
-        stack
-        writeSettings
-        cabal
-        cabal
-      ];
-
       # VSCodium with dev tools
       codium = mkCodium {
         extensions = { inherit (extensions) nix haskell misc github markdown; };
         runtimeDependencies = codiumTools ++ [ hls ];
       };
 
+      tools = codiumTools ++ [ codium ];
+
+      # --- flakes tools ---
+      flakesTools = mkFlakesTools [ "." ];
+
       # --- stack shell ---
-      stackShell = mkShell {
-        packages = [ stack ghcid ];
-        bash.extra = ''
-          stack run
-        '';
-        commands = mkCommands "tools" [ stack ghcid ];
-      };
+      framed = command: ''
+        printf "====\n"
+        ${command}
+        printf "====\n"
+      '';
 
       # --- default shell ---
       defaultShell = mkShell
         {
           packages = tools;
-          bash.extra = mkBin myPackageExe;
+          bash.extra = framed (mkBin myPackageExe);
           commands = mkCommands "tools" tools;
         };
+
+      stackShell = mkShell {
+        packages = [ stack ghcid ];
+        bash.extra = framed "stack run";
+        commands = mkCommands "tools" [ stack ghcid ];
+      };
     in
     {
       packages = {
@@ -205,8 +181,11 @@
 
         # --- shell for cabal ---
         # runs cabal
-        # runs cabal
         cabal = cabalShell;
+
+        # --- shell for cabal via shellFor ---
+        # runs cabal
+        cabalShellFor = cabalShellShellFor;
 
         # --- shell for docker ---
         # runs a container with myPackage
