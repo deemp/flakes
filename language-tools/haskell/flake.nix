@@ -49,8 +49,7 @@
                 makeWrapper ${drv}/bin/${name} $out/bin/${name} \
                   --add-flags "\
                     ${flags_}
-                  " \
-                  --prefix PATH : ${pkgs.lib.makeBinPath deps}
+                  " ${addDeps deps}
               ''
           )
           {
@@ -72,6 +71,8 @@
 
       haskellPackagesGHCOverride = ghcVersion: override: pkgs.haskell.packages."ghc${ghcVersion}".override override;
 
+      addDeps = deps: if deps != [ ] then "--prefix PATH : ${pkgs.lib.makeBinPath deps}" else "";
+
       # build an executable without local dependencies (notice empty args)
       justStaticExecutableGHCOverrideDeps = ghcVersion: override: deps: name: package:
         let
@@ -91,10 +92,7 @@
               rm $out/bin
               mkdir $out/bin
 
-              makeWrapper ${exe}/bin/${package.pname} $out/bin/${name} \
-                --prefix PATH : ${
-                  pkgs.lib.makeBinPath deps
-                 }
+              makeWrapper ${exe}/bin/${package.pname} $out/bin/${name} ${addDeps deps}
             ''
           )
           { pname = name; }
