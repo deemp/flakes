@@ -21,7 +21,10 @@
       inherit (drv-tools.functions.${system}) withAttrs concatMapStringsNewline framedBrackets;
 
       # GHC of a specific version
-      ghcGHC = ghcVersion: override: packages: (haskellPackagesGHCOverride ghcVersion override).ghcWithPackages packages;
+      # With haskell packages that are dependencies of the given packages
+      ghcGHC = ghcVersion: override: packages:
+        (haskellPackagesGHCOverride ghcVersion override).ghcWithPackages
+          (ps: haskellDepsPackages (packages ps));
 
       # build tool with GHC of a specific version available on PATH
       buildToolWithFlagsGHC = name: drv: flags: ghcVersion: override: packages:
