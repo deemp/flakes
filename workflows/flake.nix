@@ -16,7 +16,8 @@
     flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-      inherit (drv-tools.functions.${system}) writeYAML;
+      inherit (drv-tools.functions.${system})
+        writeYAML genAttrsId mkAccessors mkAccessors_;
       inherit (builtins)
         mapAttrs toString attrValues attrNames map
         isAttrs;
@@ -24,9 +25,6 @@
       writeWorkflow = name: writeYAML name ".github/workflows/${name}.yaml";
 
       expr = expr_: "\${{ ${toString expr_} }}";
-      inherit (pkgs.lib.attrsets) genAttrs;
-      inherit (pkgs.lib.trivial) id;
-      genId = list: genAttrs list id;
 
       os = {
         ubuntu-20 = "ubuntu-20.04";
@@ -40,46 +38,32 @@
       # can omit ${{ }} - https://docs.github.com/en/actions/learn-github-actions/expressions#example-expression-in-an-if-conditional
       stepsIf = expr: steps: map (x: x // { "if" = expr; }) steps;
 
-      mkAccessors = attrs@{ ... }: mkAccessors_ attrs "";
-      mkAccessors_ = attrs@{ ... }: path:
-        (mapAttrs
-          (name: val:
-            let path_ = "${path}${if path == "" then "" else "."}${name}"; in
-            (
-              if isAttrs val
-              then mkAccessors_ val
-              # if it's not a set, the next attribute cannot be accessed via .
-              else x: {
-                __toString = self: "${x}";
-              }
-            ) path_
-          )
-          attrs
-        ) // { __toString = self: path; };
-
       # make stuff available as matrix.os instead of "matrix.os"
-      names = (
-        mkAccessors {
-          secrets = genId [
-            "CACHIX_CACHE"
-            "CACHIX_AUTH_TOKEN"
-            "SNYK_TOKEN"
-            "GITHUB_TOKEN"
-            "DOCKER_HUB_PAT"
-            "DOCKER_HUB_USERNAME"
-            "HACKAGE_TOKEN"
-          ];
-          github = genId [
-            "sha"
-          ];
-          matrix = genId [
-            "os"
-          ];
-        }
-      ) // (
-        # from flakes-tools - https://github.com/deemp/flakes/blob/9183df7c07abe9c1f5b4198ef6fb0b979c7af3a3/flakes-tools/flake.nix#L256
-        genId [ "pushToCachix" "updateLocks" ]
-      );
+      names =
+        mkAccessors
+          (
+            {
+              secrets = genAttrsId [
+                "CACHIX_CACHE"
+                "CACHIX_AUTH_TOKEN"
+                "SNYK_TOKEN"
+                "GITHUB_TOKEN"
+                "DOCKER_HUB_PAT"
+                "DOCKER_HUB_USERNAME"
+                "HACKAGE_TOKEN"
+              ];
+              github = genAttrsId [
+                "sha"
+              ];
+              matrix = genAttrsId [
+                "os"
+              ];
+            }
+            // (
+              # from flakes-tools - https://github.com/deemp/flakes/blob/9183df7c07abe9c1f5b4198ef6fb0b979c7af3a3/flakes-tools/flake.nix#L256
+              genAttrsId [ "pushToCachix" "updateLocks" ]
+            )
+          );
 
       on = {
         # https://crontab.guru/#30_5,17_*_*_*
@@ -154,18 +138,18 @@
             runs-on = expr names.matrix.os;
             steps =
               [
-                (steps.checkout)
-                (steps.installNix)
+                steps.checkout
+                steps.installNix
               ]
               ++
               (stepsIf ("${names.matrix.os} == '${os.ubuntu-20}'") [
-                (steps.configGitAsGHActions)
-                (steps.updateLocksAndCommit)
+                steps.configGitAsGHActions
+                steps.updateLocksAndCommit
               ])
               ++ steps_
               ++ [
-                (steps.logInToCachix)
-                (steps.pushFlakesToCachix)
+                steps.logInToCachix
+                steps.pushFlakesToCachix
               ]
             ;
           };
@@ -183,7 +167,7 @@
       };
       functions = {
         inherit
-          writeYAML writeWorkflow expr genId
+          writeYAML writeWorkflow expr genAttrsId
           stepsIf mkAccessors mkAccessors_ run nixCI_;
       };
       configs = {
