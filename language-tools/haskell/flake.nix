@@ -18,7 +18,9 @@
       pkgs = nixpkgs.legacyPackages.${system};
       inherit (builtins) map concatLists attrValues;
 
-      inherit (drv-tools.functions.${system}) withAttrs concatMapStringsNewline framedBrackets;
+      inherit (drv-tools.functions.${system})
+        withAttrs concatMapStringsNewline framedBrackets
+        genAttrsId;
 
       # GHC of a specific version
       # With haskell packages that are dependencies of the given packages
@@ -61,7 +63,11 @@
       haskellDeps = drv: concatLists (attrValues drv.getCabalDeps);
 
       # get packages-deps for a list of Haskell packages
-      haskellDepsPackages = packages: concatLists (map haskellDeps packages);
+      # filter out input packages
+      haskellDepsPackages = packages:
+        pkgs.lib.lists.subtractLists
+          packages
+          (concatLists (map (package: concatLists (attrValues package.getCabalDeps)) packages));
 
       # --system-ghc    # Use the existing GHC on PATH (will come from a Nix file)
       # --no-install-ghc  # Don't try to install GHC if no matching GHC found on PATH
@@ -125,10 +131,11 @@
       haskellTools_ = ghcVersion: haskellTools ghcVersion
         {
           overrides = self: super: {
-            haskell = pkgs.haskell.lib.overrideCabal (super.callCabal2nix "haskell" ./. { 
-              # you can put other packages here like
-              # lzma = super.lzma;
-            })
+            haskell = pkgs.haskell.lib.overrideCabal
+              (super.callCabal2nix "haskell" ./. {
+                # you can put other packages here like
+                # lzma = super.lzma;
+              })
               (_: {
                 librarySystemDepends = [ pkgs.zlib ];
               });
@@ -147,6 +154,9 @@
             cabal stack hls ghc implicit-hie ghcid hpack;
           hello-world = hp.justStaticExecutable "hello-world" hp.haskellPackages.haskell;
         };
+
+      # deps that can be overriden in a package
+      deps_ = (haskellTools_ ghcVersion_).haskellPackages.haskell.getCabalDeps;
     in
     {
       functions = {
@@ -167,5 +177,6 @@
             '';
           };
         };
+      inherit deps_;
     });
 }
