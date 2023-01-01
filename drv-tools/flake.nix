@@ -15,13 +15,13 @@
     let
       pkgs = nixpkgs.legacyPackages.${system};
       inherit (pkgs.lib.lists) flatten;
-      inherit (pkgs.lib.attrsets) recursiveUpdate filterAttrs;
+      inherit (pkgs.lib.attrsets) recursiveUpdate filterAttrs genAttrs;
       inherit (builtins) foldl' attrValues mapAttrs attrNames readDir map
-        isString isAttrs dirOf baseNameOf toJSON;
+        isString isAttrs dirOf baseNameOf toJSON hasAttr;
       inherit (pkgs.lib.strings)
         concatStringsSep concatMapStringsSep
         removePrefix removeSuffix;
-      inherit (pkgs.lib) escapeShellArg;
+      inherit (pkgs.lib) escapeShellArg id;
       # if a set's attribute values are all sets, merge these values recursively
       # Note that the precedence order is undefined, so it's better to 
       # have unique values at each set level
@@ -33,6 +33,9 @@
       # a convenience function that flattens a set with set attribute values
       # toList {a = {b = 1;}; c = {d = 2;};} => [1 2]
       toList = x: attrValues (mergeValues x);
+
+      # generate an attrset from a list of attrNames where attrName = attrValue
+      genId = list: genAttrs list (pkgs.lib.id);
 
       # make shell apps
       # arg should be a set of sets of inputs
@@ -143,7 +146,7 @@
       # add a man generated from longDescription
       # the function :: derivation with description -> long description
       withMan = drv: fLongDescription:
-        assert builtins.hasAttr "description" drv.meta;
+        assert hasAttr "description" drv.meta;
         let
           pname = drv.pname;
           longDescription = fLongDescription drv;
@@ -199,7 +202,7 @@
       # String -> String -> Any -> IO ()
       # make a script to write a nix expr to a file path
       writeYAML = name: path: dataNix:
-        assert builtins.isString name && isString path;
+        assert isString name && isString path;
         let
           name_ = "write-${name}-yaml";
           tmpJSON = "${path}.tmp";
@@ -269,7 +272,7 @@
               ${INITIAL_CWD}=$PWD
               printf "%s" '${preMessage}'
             '' +
-            builtins.concatStringsSep "\n"
+            concatStringsSep "\n"
               (map
                 (dir: ''
                   printf "${framedBrackets "${if message == "" then name else message} : %s"}" "${"$" + INITIAL_CWD}/${dir}"
@@ -299,6 +302,28 @@
       # apply an `op` `cnt` times to the initial value `ini` to get `res`
       # initially, `res` = `ini`
       applyN = cnt: op: res: (if cnt > 0 then applyN (cnt - 1) op (op res) else res);
+
+      # make accessors from an attrset so that a.b.c represents a string "a.b.c"
+      mkAccessors = mkAccessors_ "";
+      # make accessors with an initial path
+      mkAccessors_ = path: attrs@{ ... }:
+        assert isString path;
+        let common = arg: {
+          __toString = self: "${arg}";
+          __functor = self: path_: assert isString path_; mkAccessors_ "${arg}.${path_}" { };
+        }; in
+        (mapAttrs
+          (name: val:
+            let path_ = "${path}${if path == "" then "" else "."}${name}"; in
+            (
+              if isAttrs val
+              then x: mkAccessors_ x val
+              # if it's not a set, the next attribute cannot be accessed via .
+              else common
+            ) path_
+          )
+          attrs
+        ) // (common path);
     in
     {
       packages = {
@@ -319,6 +344,8 @@
           indentStrings4
           indentStrings8
           mergeValues
+          mkAccessors
+          mkAccessors_
           mkBin
           mkBinName
           mkShellApp
@@ -351,6 +378,9 @@
 
       tests = {
         t = readFiles ./.;
+        accessors = mkAccessors_ "pref" {
+          a.b.c = "";
+        };
       };
     });
 }
