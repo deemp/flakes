@@ -35,7 +35,7 @@
       toList = x: attrValues (mergeValues x);
 
       # generate an attrset from a list of attrNames where attrName = attrValue
-      genId = list: genAttrs list (pkgs.lib.id);
+      genAttrsId = list: genAttrs list pkgs.lib.id;
 
       # make shell apps
       # arg should be a set of sets of inputs
@@ -340,6 +340,7 @@
           framedBrackets
           framedBrackets_
           framedNewlines
+          genAttrsId
           indentStrings_
           indentStrings4
           indentStrings8
