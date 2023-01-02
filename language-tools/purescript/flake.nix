@@ -17,7 +17,7 @@
       shellTools = {
         inherit (pkgs) dhall-lsp-server nodejs-16_x purescript;
         inherit (pkgs.nodePackages) purescript-language-server purs-tidy;
-        spago = pkgs.lib.meta.addMetaAttrs { description = "PureScript compiler"; } pkgs.spago;
+        spago = pkgs.lib.meta.addMetaAttrs { description = "PureScript build tool and package manager"; } pkgs.spago;
       };
     in
     {
