@@ -1,8 +1,8 @@
 {
   inputs = {
     nixpkgs_.url = "github:deemp/flakes?dir=source-flake/nixpkgs";
-    flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     nixpkgs.follows = "nixpkgs_/nixpkgs";
+    flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
   };
   outputs =
@@ -17,14 +17,11 @@
       shellTools = {
         inherit (pkgs) dhall-lsp-server nodejs-16_x purescript;
         inherit (pkgs.nodePackages) purescript-language-server purs-tidy;
-      } // {
-        spago = pkgs.lib.meta.addMetaAttrs { description = "spago-${pkgs.spago.version}"; } pkgs.spago;
+        spago = pkgs.lib.meta.addMetaAttrs { description = "PureScript compiler"; } pkgs.spago;
       };
     in
     {
-      toolSets = {
-        inherit shellTools;
-      };
+      inherit shellTools;
     }
     );
 }
