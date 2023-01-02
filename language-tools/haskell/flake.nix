@@ -4,23 +4,23 @@
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
-    drv-tools.url = "github:deemp/flakes?dir=drv-tools";
   };
   outputs =
     { self
     , nixpkgs
     , flake-utils
-    , drv-tools
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
       inherit (builtins) map concatLists attrValues;
-
-      inherit (drv-tools.functions.${system})
-        withAttrs concatMapStringsNewline framedBrackets
-        genAttrsId;
+      inherit (pkgs.lib.lists) genAttrs;
+      inherit (pkgs.lib.strings) concatMapStringsSep;
+      inherit (pkgs.lib.attrsets) recursiveUpdate;
+      concatMapStringsNewline = concatMapStringsSep "\n";
+      genAttrsId = list: genAttrs list (x: x);
+      withAttrs = recursiveUpdate;
 
       # GHC of a specific version
       # With haskell packages that are dependencies of the given packages
@@ -75,7 +75,9 @@
       # --enable-nix - allow use a shell.nix if present
       cabalWithFlagsGHCOverride = buildToolWithFlagsGHC "cabal" pkgs.cabal-install [ "--enable-nix" ];
 
-      haskellPackagesGHCOverride = ghcVersion: override: pkgs.haskell.packages."ghc${ghcVersion}".override override;
+      haskellPackagesGHCOverride = ghcVersion: override: (haskellPackagesGHC ghcVersion).override override;
+
+      haskellPackagesGHC = ghcVersion: pkgs.haskell.packages."ghc${ghcVersion}";
 
       addDeps = deps: if deps != [ ] then "--prefix PATH : ${pkgs.lib.makeBinPath deps}" else "";
 
@@ -106,25 +108,22 @@
 
       # see the possible values for ghcVersion here
       # https://haskell4nix.readthedocs.io/nixpkgs-users-guide.html#how-to-install-haskell-language-server
-      hlsGHC = ghcVersion: override: (haskellPackagesGHCOverride ghcVersion override).haskell-language-server;
+      hlsGHC = ghcVersion: override: (haskellPackagesGHC ghcVersion).haskell-language-server;
 
       # tools for a specific GHC version and overriden haskell packages for this GHC
       # see what you need to pass to your shell for GHC
       # https://docs.haskellstack.org/en/stable/nix_integration/#supporting-both-nix-and-non-nix-developers
-      haskellTools = ghcVersion: override: packages: deps:
-        let
-          haskellPackages = haskellPackagesGHCOverride ghcVersion override;
-        in
+      haskellTools = ghcVersion: override: packages: depsBin:
         {
           hls = hlsGHC ghcVersion override;
-          stack = stackWithFlagsGHCOverride ghcVersion override packages deps;
-          cabal = cabalWithFlagsGHCOverride ghcVersion override packages deps;
+          stack = stackWithFlagsGHCOverride ghcVersion override packages depsBin;
+          cabal = cabalWithFlagsGHCOverride ghcVersion override packages depsBin;
           ghc = ghcGHC ghcVersion override packages;
-          justStaticExecutable = justStaticExecutableGHCOverrideDeps ghcVersion override deps;
-          inherit (haskellPackages)
+          justStaticExecutable = justStaticExecutableGHCOverrideDeps ghcVersion override depsBin;
+          inherit (haskellPackagesGHC ghcVersion)
             implicit-hie ghcid hpack
             callCabal2nix ghcWithPackages;
-          inherit haskellPackages;
+          haskellPackages = haskellPackagesGHCOverride ghcVersion override;
           inherit haskellDeps haskellDepsPackages;
         };
 
