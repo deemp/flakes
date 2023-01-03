@@ -18,7 +18,9 @@ Nix flakes for tools that I use
 - [json2md](./json2md/README.md) - convert `JSON` (or `Nix`) to `Markdown`
   - I use it to generate `.md` docs from Nix expressions - [example](https://github.com/deemp/devops-labs/blob/0ae9881ab58b99f114aaf21cb5cad85f2ce37e40/.nix/write-configs.nix#L26)
 - [language-tools](./flakes-tools) - tools for languages that I use
-- [lima](./lima) - convert between `Literate Haskell` (`.lhs`) and `Markdown` (`.md`) with [round-trip property](https://hedgehog.qa/article/haskell-round-trip) usually kept (a fork of [LiterateMarkdown](https://github.com/haskie-lambda/LiterateMarkdown))
+- [lima](./lima) - convert:
+  - between `Literate Haskell` (`.lhs`) and `Markdown` (`.md`) with [round-trip property](https://hedgehog.qa/article/haskell-round-trip) usually kept
+  - `Haskell` (`.hs`) to `Markdown` (`.md`)
 - [manager](./manager) - a `Haskell` CLI app for managing projects with multiple `Main.hs` modules
 - [source-flake](./source-flake/) - pinned flakes
   - I use them to sync flake inputs in my flakes
