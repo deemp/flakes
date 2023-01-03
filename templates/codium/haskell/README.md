@@ -4,8 +4,10 @@
 
 ## Prerequisites
 
+- [flake.nix](./flake.nix) - extensively commented code
 - [Prerequisites](https://github.com/deemp/flakes#prerequisites)
 - [Haskell](https://github.com/deemp/flakes/blob/main/README/Haskell.md)
+- [Troubleshooting](https://github.com/br4ch1st0chr0n3/flakes/blob/main/README/Troubleshooting.md) - see in case of problems with VSCodium, etc.
 
 ## Quick start
 
@@ -28,37 +30,47 @@ codium .
 
 ## Cabal
 
-Incremental builds via `cabal` + `Nix`-provided packages via `pkgs.haskell.packages.ghc<version>.ghcWithPackages`. A devshell will run the app via `cabal run`.
+**Advantages** - medium setup, can build incrementally
+
+**Disadvantages** - not that reproducible builds
+
+Incremental builds via `cabal` + `Nix`-provided packages. A devshell will run the app via `cabal run`.
 
 ```console
 nix develop .#cabal
 ```
 
-Disadvantage - not that reproducible builds.
-
 ## Nix
 
-`Nix` provides necessary packages, binaries and libraries to the app. So, you can build this app using `Nix` and run it.
+**Advantages** - medium setup, reproducible build, make a standalone executable from a package.
+
+**Disadvantages** - no incremental builds (rebuilds the whole project from scratch on slight code changes)
+
+`Nix` provides necessary packages, binaries and libraries to the app. A devshell will run the app
 
 ```console
-nix develop
+nix develop .#nixPackaged
 ```
-
-Disadvantage - doesn't support incremental builds.
 
 ## Docker
 
-Next, you can use `pkgs.dockerTools.buildLayeredImage` to build a Docker container with this app inside and run it:
+**Advantages** - medium setup, reproducible lightweight container from a package
+
+**Disadvantage** - no incremental builds
+
+Put an executable into a Docker image and run it:
 
 ```console
 nix develop .#docker
 ```
 
-Disadvantage - doesn't support incremental builds.
-
 ## Cabal + Nix integration
 
-We can also start a shell where `cabal` will have `GHC` with necessary packages. This is what `pkgs.haskell.packages.ghc<version>.shellFor` is for. Also, in `buildInputs` of a `shellFor`, you can provide the executables that should be available to the app at runtime.
+**Advantages** - easy setup, incremental builds
+
+**Disadvantage** - need to start a shell
+
+Make a shell with all deps available and build incrementalllt via `cabal`
 
 ```console
 nix develop .#cabalShellFor
@@ -66,7 +78,9 @@ nix develop .#cabalShellFor
 
 ## Stack + Nix integration
 
-Disadvantage - doesn't use Nix caches and takes packages from Stackage.
+**Advantage** - uses stack for incremental builds, very easy setup
+
+**Disadvantage** - doesn't use Nix caches and takes packages from Stackage
 
 ### Background
 
@@ -78,7 +92,7 @@ But what if your program needs to call the `rm` command?
 In this case, your `stack-shell` should contain the relevant package, `pkgs.coreutils`.
 This package will be turned into executables. Then, `rm` and some other commands will become available in that isolated environment.
 
-### This project
+### Stack guide
 
 This sample `Haskell` project demonstrates `Stack` + `Nix` integration.
 
@@ -108,7 +122,7 @@ ghci> :! hello
 Hello, world!
 ```
 
-Furthermore, as `ghcid` (see [ghcid](#ghcid)) uses a `stack ghci` command, you can run `ghcid` as follows:
+Furthermore, as `ghcid` uses a `stack ghci` command, you can run `ghcid` as follows:
 
 ```console
 ghcid
