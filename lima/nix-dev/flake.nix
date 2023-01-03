@@ -27,8 +27,21 @@
       inherit (my-codium.functions.${system}) writeSettingsJSON mkCodium;
       inherit (my-codium.configs.${system}) extensions settingsNix;
       inherit (devshell.functions.${system}) mkCommands mkShell;
-      inherit (haskell-tools.functions.${system}) toolsGHC;
-      inherit (toolsGHC "92") hls cabal;
+      inherit (haskell-tools.functions.${system}) haskellTools;
+
+      # Next, set the desired GHC version
+      ghcVersion = "92";
+
+      # and the name of the package
+      myPackageName = "nix-managed";
+
+      override = {
+        overrides = self: super: {
+          myPackage = super.callCabal2nix myPackageName ../. { };
+        };
+      };
+
+      inherit (haskellTools ghcVersion override (ps: [ ps.myPackage ]) [ ]) cabal hls;
 
       writeSettings = writeSettingsJSON {
         inherit (settingsNix) haskell todo-tree files editor gitlens yaml

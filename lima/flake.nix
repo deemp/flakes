@@ -39,15 +39,17 @@
               ${self.meta.description}
 
               ${man.SYNOPSYS}
-              `${packageName} (toLhs|toMd) file1 [file2] [...]`
+              `${packageName} (md2lhs|lhs2md|hs2md) file1 [file2] [...]`
 
               ${man.EXAMPLES}
-              `${packageName} toMd testdata/input0.lhs testdata/input1.lhs`
+              `${packageName} lhs2md testdata/input0.lhs testdata/input1.lhs`
               :   convert: `testdata/input0.lhs` ->  `testdata/input0.lhs.md` and `testdata/input1.lhs` -> `testdata/input1.lhs.md`
+              `${packageName} hs2md testdata/input2.hs`
+              :   convert: `testdata/input2.hs` ->  `testdata/input2.hs.md`
             ''
           );
 
-      tools = [ myPackage cabal ];
+      tools = [ cabal ];
     in
     {
       packages = {

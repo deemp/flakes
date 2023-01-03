@@ -32,6 +32,7 @@ when it comes up.
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE InstanceSigs #-}
 ```
 
 Next, let's import the needed modules:
