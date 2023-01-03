@@ -130,21 +130,9 @@ Necessary components of `Stack` + `Nix` integration:
   - The name `stack-shell` is chosen arbitrarily
   - The name should be the same as the one used in `stack.nix`
 
-## Tools
-
-Available in the `devShells.default`.
-
-### ghcid
-
-[ghcid](https://github.com/ndmitchell/ghcid) is a `Very low feature GHCi based IDE`.
-It can be used to re-run a function in a given file on changes in a given directory.
-This template provides a sample configuration for this tool in the `.ghcid` file.
-
 ### GHC
 
 This template uses `GHC 9.2`. You can switch to `GHC 9.0`:
 
-- in `flake.nix`, change `"92"` to `"90"`
-- in `stack.yaml`, change `resolver` to [lts-19.33](https://www.stackage.org/lts-19.33) or a later one from `stackage`
-
-After that, if you're working in `VSCodium`, you should repeat the [Quick Start](#quick-start)
+- If you're not using stack, in `flake.nix`, change `"92"` to `"90"`
+- Else in `stack.yaml`, change `resolver` to [lts-19.33](https://www.stackage.org/lts-19.33) or a later one from `stackage`
