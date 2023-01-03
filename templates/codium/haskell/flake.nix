@@ -245,6 +245,7 @@
         ghcid
         hpack
         implicit-hie
+        cabal
       ];
 
       # And compose VSCodium with dev tools and HLS
