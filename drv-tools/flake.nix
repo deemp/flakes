@@ -15,9 +15,11 @@
     let
       pkgs = nixpkgs.legacyPackages.${system};
       inherit (pkgs.lib.lists) flatten;
-      inherit (pkgs.lib.attrsets) recursiveUpdate filterAttrs genAttrs;
-      inherit (builtins) foldl' attrValues mapAttrs attrNames readDir map
-        isString isAttrs dirOf baseNameOf toJSON hasAttr;
+      inherit (pkgs.lib.attrsets)
+        recursiveUpdate filterAttrs genAttrs mapAttrsToList;
+      inherit (builtins)
+        foldl' attrValues mapAttrs attrNames readDir map toString
+        isString isAttrs dirOf baseNameOf toJSON hasAttr listToAttrs;
       inherit (pkgs.lib.strings)
         concatStringsSep concatMapStringsSep
         removePrefix removeSuffix;
@@ -36,6 +38,39 @@
 
       # generate an attrset from a list of attrNames where attrName = attrValue
       genAttrsId = list: genAttrs list pkgs.lib.id;
+
+      # List -> Set
+      # Generate a set from a list of sets with all keys renamed
+      # in the order they go in that list
+      ord_ = list:
+        let ordered =
+          builtins.foldl'
+            (x: y:
+              let
+                yAttrs = mapAttrsToList
+                  (name: value: {
+                    name = "_${toString x.cnt}_${name}";
+                    inherit value;
+                  })
+                  y;
+                yNew = listToAttrs yAttrs;
+                yKeys =
+                  mapAttrs
+                    (name: value: "_${toString x.cnt}_${name}")
+                    y;
+              in
+              {
+                cnt = x.cnt + 1;
+                acc = x.acc // yNew;
+                keys = x.keys // yKeys;
+              }
+            )
+            { cnt = 1; acc = { }; keys = { }; }
+            list;
+        in ordered;
+
+      # Get just the ordered set
+      ord = list: (ord_ list).acc;
 
       # make shell apps
       # arg should be a set of sets of inputs
@@ -351,6 +386,8 @@
           mkBinName
           mkShellApp
           mkShellApps
+          ord
+          ord_
           readDirectories
           readFiles
           readSymlinks
@@ -382,6 +419,11 @@
         accessors = mkAccessors_ "pref" {
           a.b.c = "";
         };
+        mkAttrs =
+          ord_ [
+            { a = 3; }
+            { b = 4; }
+          ];
       };
     });
 }
