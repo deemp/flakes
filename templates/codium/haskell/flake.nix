@@ -262,7 +262,7 @@
       };
 
       # --- flakes tools ---
-      # Also, we provide scripts that can be used CI
+      # Also, we provide scripts that can be used in CI
       flakesTools = mkFlakesTools [ "." ];
     in
     {
