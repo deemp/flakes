@@ -7,7 +7,7 @@
 - [flake.nix](./flake.nix) - extensively commented code
 - [Prerequisites](https://github.com/deemp/flakes#prerequisites)
 - [Haskell](https://github.com/deemp/flakes/blob/main/README/Haskell.md)
-- [Troubleshooting](https://github.com/br4ch1st0chr0n3/flakes/blob/main/README/Troubleshooting.md) - see in case of problems with VSCodium, etc.
+- [Troubleshooting](https://github.com/deemp/flakes/blob/main/README/Troubleshooting.md) - see in case of problems with VSCodium, etc.
 
 ## Quick start
 

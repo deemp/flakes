@@ -26,7 +26,7 @@ Still, some actions like writing the correct dependencies and language extension
 
 Goal: initialize a new project via `manager`. Start `VSCodium` with extensions and executables for `Haskell`.
 
-1. [Install Nix](https://github.com/br4ch1st0chr0n3/flakes/blob/main/README/InstallNix.md)
+1. [Install Nix](https://github.com/deemp/flakes/blob/main/README/InstallNix.md)
 
 1. Sometimes, Nix prints warnings and prompts in red color. Read them. Answer `y` if you agree or don't know. You'll be able to change the settings later.
 

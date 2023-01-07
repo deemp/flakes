@@ -4,7 +4,7 @@
 
 - See `VSCodium` for `Haskell` [template](https://github.com/deemp/flakes/tree/main/templates/codium/haskell#readme).
 It explains what's available in this project.
-- Next, see Haskell [Prerequisites](https://github.com/br4ch1st0chr0n3/flakes/blob/main/README/Haskell.md).
+- Next, see Haskell [Prerequisites](https://github.com/deemp/flakes/blob/main/README/Haskell.md).
 - Also, read [manager](https://github.com/deemp/flakes/tree/main/manager#readme) docs.
 - Recurse into `Prerequisites` to get even more info.
 
@@ -95,4 +95,4 @@ It explains what's available in this project.
 
 ## Troubleshooting
 
-See [Troubleshooting](https://github.com/br4ch1st0chr0n3/flakes/blob/main/README/Troubleshooting.md).
+See [Troubleshooting](https://github.com/deemp/flakes/blob/main/README/Troubleshooting.md).
