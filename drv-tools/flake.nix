@@ -249,7 +249,7 @@
           runtimeInputs = [ pkgs.yq-go ];
           text = ''
             mkdir -p ${dir}
-            ${mkBin writeJSON_}
+            ${mkBin writeJSON_} &>/dev/null
             cat ${tmpJSON} | yq e -MP - > ${path}
             rm ${tmpJSON}
             printf "${framedBrackets "ok %s"}" "${name_}"
@@ -419,6 +419,7 @@
         accessors = mkAccessors_ "pref" {
           a.b.c = "";
         };
+        writeYAML = writeYAML "hey" "tmp/test-yaml" { a = 3; };
         mkAttrs =
           ord_ [
             { a = 3; }
