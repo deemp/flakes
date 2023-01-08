@@ -110,11 +110,11 @@
       readDirectories = dir: readXs dir "directory";
       readSymlinks = dir: readXs dir "symlink";
 
-      # assuming that a `name` of a program coincides with its main executable's name
+      # assuming that a `pname` of a program coincides with its main executable's name
       mkBin = drv@{ pname, ... }: "${drv}/bin/${pname}";
 
-      # same as mkBin, but need to provide the necessary executable name
-      mkBinName = drv@{ pname, ... }: name_: "${drv}/bin/${name_}";
+      # same as `mkBin`, but need to provide the necessary executable name
+      mkBinName = drv@{ ... }: name_: "${drv}/bin/${name_}";
 
       # frame a text with newlines
       framedNewlines = framed_ "\n\n" "\n\n";
