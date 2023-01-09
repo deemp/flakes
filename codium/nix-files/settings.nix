@@ -91,13 +91,6 @@
         "workflows/**/*.yml";
       "https://json.schemastore.org/github-action.json" =
         "actions/**/action.yml";
-      "https://raw.githubusercontent.com/Onemind-Services-LLC/kubernetes-json-schema/master/schema/v1.10.0/configmap.json" = "**/{k8s,kubernetes}/**/ConfigMap.yaml";
-      "https://raw.githubusercontent.com/Onemind-Services-LLC/kubernetes-json-schema/master/schema/v1.10.0/deployment.json" = "**/{k8s,kubernetes}/**/Deployment.yaml";
-      "https://raw.githubusercontent.com/Onemind-Services-LLC/kubernetes-json-schema/master/schema/v1.10.0/persistentvolume.json" = "**/{k8s,kubernetes}/**/PersistentVolume.yaml";
-      "https://raw.githubusercontent.com/Onemind-Services-LLC/kubernetes-json-schema/master/schema/v1.10.0/persistentvolumeclaim.json" = "**/{k8s,kubernetes}/**/PersistentVolumeClaim.yaml";
-      "https://raw.githubusercontent.com/Onemind-Services-LLC/kubernetes-json-schema/master/schema/v1.10.0/secret.json" = "**/{k8s,kubernetes}/**/Secrets.yaml";
-      "https://raw.githubusercontent.com/Onemind-Services-LLC/kubernetes-json-schema/master/schema/v1.10.0/service.json" = "**/{k8s,kubernetes}/**/Service.yaml";
-      "https://raw.githubusercontent.com/Onemind-Services-LLC/kubernetes-json-schema/master/schema/v1.10.0/statefulset.json" = "**/{k8s,kubernetes}/**/StatefulSet.yaml";
     };
   };
 
