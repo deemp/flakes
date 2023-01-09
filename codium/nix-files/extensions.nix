@@ -74,6 +74,9 @@ in
   fish = {
     inherit (open-vsx.bmalehorn) vscode-fish;
   };
+  postgresql = {
+    inherit (vscode.cweijan) vscode-postgresql-client2;
+  };
   sql = {
     inherit (vscode.mtxr) sqltools;
   };
