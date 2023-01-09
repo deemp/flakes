@@ -8,6 +8,7 @@ in
     inherit (vscode.haskell) haskell;
     inherit (vscode.justusadam) language-haskell;
     inherit (vscode.visortelle) haskell-spotlight;
+    inherit (vscode.redhat) vscode-yaml;
   };
   yaml = {
     inherit (vscode.redhat) vscode-yaml;
@@ -27,6 +28,7 @@ in
     inherit (vscode.github) vscode-pull-request-github;
     inherit (vscode.eamodio) gitlens;
     inherit (vscode.cschleiden) vscode-github-actions;
+    inherit (vscode.redhat) vscode-yaml;
   };
   typescript = { inherit (open-vsx.ms-vscode) vscode-typescript-next; };
   markdown = {
@@ -61,6 +63,7 @@ in
   kubernetes = {
     inherit (vscode.ipedrazas) kubernetes-snippets;
     inherit (vscode.ms-kubernetes-tools) vscode-kubernetes-tools;
+    inherit (vscode.redhat) vscode-yaml;
   };
   toml = {
     inherit (open-vsx.tamasfe) even-better-toml;
