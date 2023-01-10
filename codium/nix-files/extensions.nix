@@ -41,6 +41,7 @@ in
   misc = {
     inherit (open-vsx.usernamehw) errorlens;
     inherit (vscode.gruntfuggly) todo-tree;
+    inherit (open-vsx.mkhl) direnv;
   };
   docker = {
     inherit (vscode.ms-vscode-remote) remote-containers;
