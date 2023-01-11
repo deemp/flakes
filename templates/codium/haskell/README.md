@@ -40,6 +40,8 @@ Incremental builds via `cabal` + `Nix`-provided packages. A devshell will run th
 nix develop .#cabal
 ```
 
+If you use `hpack` to generate `cabal`, see [here](https://github.com/sol/hpack) what can go into `package.yaml`.
+
 ## Nix
 
 **Advantages** - medium setup, reproducible build, make a standalone executable from a package.
