@@ -9,6 +9,7 @@
     haskell-tools.url = "github:deemp/flakes?dir=language-tools/haskell";
     devshell.url = "github:deemp/flakes?dir=devshell";
     flakes-tools.url = "github:deemp/flakes?dir=flakes-tools";
+    workflows.url = "github:deemp/flakes?dir=workflows";
     # necessary for stack-nix integration
     flake-compat = {
       url = "github:edolstra/flake-compat";
@@ -24,6 +25,7 @@
     , drv-tools
     , haskell-tools
     , devshell
+    , workflows
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -40,6 +42,8 @@
       inherit (flakes-tools.functions.${system}) mkFlakesTools;
       inherit (devshell.functions.${system}) mkCommands mkShell;
       inherit (haskell-tools.functions.${system}) haskellTools;
+      inherit (workflows.functions.${system}) writeWorkflow;
+      inherit (workflows.configs.${system}) nixCI;
 
       # Next, set the desired GHC version
       ghcVersion_ = "92";
@@ -233,15 +237,7 @@
       # There are other tools that we can provide
       # Some Haskell tools and VSCodium with extensions and settings
 
-
-      # We'll write settings.json
-      writeSettings = writeSettingsJSON {
-        inherit (settingsNix) haskell todo-tree files editor gitlens
-          git nix-ide workbench markdown-all-in-one markdown-language-features;
-      };
-      
       codiumTools = [
-        writeSettings
         ghcid
         hpack
         implicit-hie
@@ -254,7 +250,13 @@
         extensions = { inherit (extensions) nix haskell misc github markdown; };
         runtimeDependencies = codiumTools;
       };
-      
+
+      # a script to write .vscode/settings.json
+      writeSettings = writeSettingsJSON {
+        inherit (settingsNix) haskell todo-tree files editor gitlens
+          git nix-ide workbench markdown-all-in-one markdown-language-features;
+      };
+
       tools = codiumTools ++ [ codium ];
 
       defaultShell = mkShell {
@@ -265,10 +267,18 @@
       # --- flakes tools ---
       # Also, we provide scripts that can be used in CI
       flakesTools = mkFlakesTools [ "." ];
+
+      # write .github/ci.yaml to get a GitHub Actions workflow file
+      writeWorkflows = writeWorkflow "ci" nixCI;
     in
     {
       packages = {
-        inherit (flakesTools) updateLocks pushToCachix;
+        inherit (flakesTools)
+          updateLocks
+          pushToCachix;
+        inherit
+          writeSettings
+          writeWorkflows;
       };
 
       devShells = {

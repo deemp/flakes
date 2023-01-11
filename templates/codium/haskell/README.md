@@ -20,7 +20,7 @@ nix flake new my-project -t github:deemp/flakes#codium-haskell
 cd my-project
 git init && git add . && git commit -m "init"
 nix develop
-write-settings-json
+nix run .#writeSettings
 codium .
 ```
 
