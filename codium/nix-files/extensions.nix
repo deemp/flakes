@@ -77,8 +77,10 @@ in
   };
   postgresql = {
     inherit (vscode.cweijan) vscode-postgresql-client2;
+    inherit (vscode.inferrinizzard) prettier-sql-vscode;
   };
   sql = {
     inherit (vscode.mtxr) sqltools;
+    inherit (vscode.inferrinizzard) prettier-sql-vscode;
   };
 }
