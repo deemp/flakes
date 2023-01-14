@@ -37,3 +37,4 @@ This template uses `GHC 9.2`. You can switch to `GHC 9.0`:
 - [.markdownlint.jsonc](./.markdownlint.jsonc) - for `markdownlint` from the extension `davidanson.vscode-markdownlint`
 - [.ghcid](./.ghcid) - for [ghcid](https://github.com/ndmitchell/ghcid)
 - [.envrc](./.envrc) - for [direnv](https://github.com/direnv/direnv)
+- `nix run .#writeWorkflows` will write a workflow for `GitHub Actions`
