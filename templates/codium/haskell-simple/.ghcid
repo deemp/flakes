@@ -1,0 +1,6 @@
+-c stack ghci app/Main.hs
+-W
+-r=:main
+--reload=./
+--reverse-errors
+--allow-eval
