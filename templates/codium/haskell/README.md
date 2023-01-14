@@ -18,8 +18,10 @@
 ```console
 nix flake new my-project -t github:deemp/flakes#codium-haskell
 cd my-project
-git init && git add . && git commit -m "init"
+git init && git add
 nix develop
+cabal run
+-- optionally, write settings.json and start VSCodium
 nix run .#writeSettings
 codium .
 ```
@@ -150,5 +152,11 @@ Necessary components of `Stack` + `Nix` integration:
 
 This template uses `GHC 9.2`. You can switch to `GHC 9.0`:
 
-- If you're not using stack, in `flake.nix`, change `"92"` to `"90"`
-- Else in `stack.yaml`, change `resolver` to [lts-19.33](https://www.stackage.org/lts-19.33) or a later one from `stackage`
+- In `flake.nix`, change `"92"` to `"90"`
+- If using `stack`, in `stack.yaml`, change `resolver` to [lts-19.33](https://www.stackage.org/lts-19.33) or a later one from `stackage`
+
+### Configs
+
+- [.markdownlint.jsonc](./.markdownlint.jsonc) - for `markdownlint` from the extension `davidanson.vscode-markdownlint`
+- [.ghcid](./.ghcid) - for [ghcid](https://github.com/ndmitchell/ghcid)
+- [.envrc](./.envrc) - for [direnv](https://github.com/direnv/direnv)
