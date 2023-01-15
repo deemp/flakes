@@ -78,7 +78,7 @@
                       '';
                     })
                     { pname = "codium"; }
-                ) "`VSCodium` with extensions and executables on `PATH`."
+                ) "`VSCodium` with extensions and binaries on `PATH`"
             )
             (x: ''
               ${man.DESCRIPTION}
