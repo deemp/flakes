@@ -34,7 +34,9 @@ This template uses `GHC 9.2`. You can switch to `GHC 9.0`:
 
 ### Configs
 
+- [package.yaml] - used by `hpack` to generate a `.cabal`
 - [.markdownlint.jsonc](./.markdownlint.jsonc) - for `markdownlint` from the extension `davidanson.vscode-markdownlint`
 - [.ghcid](./.ghcid) - for [ghcid](https://github.com/ndmitchell/ghcid)
 - [.envrc](./.envrc) - for [direnv](https://github.com/direnv/direnv)
+- [fourmolu.yaml](./fourmolu.yaml) - for [fourmolu](https://github.com/fourmolu/fourmolu#configuration)
 - `nix run .#writeWorkflows` will write a workflow for `GitHub Actions`
