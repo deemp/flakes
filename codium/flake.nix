@@ -124,7 +124,10 @@
         # stuff for testing
 
         # codium with all extensions enabled
-        testCodium = mkCodium { inherit extensions; };
+        testCodium = mkCodium {
+          inherit extensions;
+          runtimeDependencies = [ pkgs.hello ];
+        };
 
         # test write settings
         testWriteSettings = writeSettingsJSON (
@@ -146,6 +149,9 @@
         };
         configs = {
           inherit extensions settingsNix;
+        };
+        packages = {
+          inherit testCodium;
         };
         devShells.default = mkShell {
           packages = tools;
