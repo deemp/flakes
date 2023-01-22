@@ -29,11 +29,11 @@
         inherit (my-codium.configs.${system}) extensions;
         inherit (my-codium.functions.${system}) mkCodium writeSettingsJSON;
         inherit (my-codium.configs.${system}) settingsNix;
-        inherit (drv-tools.functions.${system}) readDirectories;
+        inherit (drv-tools.functions.${system}) readDirectories withAttrs;
         inherit (flakes-tools.functions.${system}) mkFlakesTools;
         inherit (devshell.functions.${system}) mkCommands mkShell;
         inherit (workflows.functions.${system}) writeWorkflow;
-        inherit (workflows.configs.${system}) nixCI;
+        inherit (workflows.configs.${system}) nixCI on;
 
         flakesTools = (mkFlakesTools (
           let f = dir: (builtins.map (x: "${dir}/${x}") (readDirectories ./${dir})); in
@@ -77,7 +77,7 @@
           pushToCachix = flakesTools.pushToCachix;
           updateLocks = flakesTools.updateLocks;
           format = flakesTools.format;
-          writeWorkflows = writeWorkflow "ci" nixCI;
+          writeWorkflows = writeWorkflow "ci" (withAttrs nixCI { on.schedule = [{ cron = "* * 1 * *"; }]; });
         };
       })
     // {

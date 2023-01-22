@@ -1,5 +1,5 @@
 jobs:
-  nix-ci:
+  nixCI:
     name: Nix CI
     runs-on: ${{ matrix.os }}
     steps:
@@ -42,5 +42,5 @@ name: Nix CI
   pull_request: {}
   push: {}
   schedule:
-    - cron: 0 0 * * *
+    - cron: '* * 1 * *'
   workflow_dispatch: {}
