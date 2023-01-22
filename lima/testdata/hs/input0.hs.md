@@ -54,6 +54,13 @@ some text
 ### Third-level heading
 
 ```haskell
+-- Text one
+-- next comment should be ignored
+```
+
+```haskell
+-- Text three
+
 -- This comment will go into a Haskell snippet
 
 -- | This doc will be omitted
@@ -77,4 +84,18 @@ main :: IO ()
 main = print "hi!"
 ```
 
- <b name="fn_laws">1</b> <- Some html
+<b name="fn_laws">1</b> <- Some html
+
+{- LIMA_DISABLE -}
+
+in comments should read like {- LIMA_DISABLE -}
+
+```haskell
+-- shouldn't be ignored
+
+this LIMA_ENABLE reads like a comment because there's no corresponding
+preceding LIMA_DISABLE
+
+```haskell
+-- where's lorem ipsum blah?
+```

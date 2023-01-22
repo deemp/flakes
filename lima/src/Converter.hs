@@ -104,6 +104,12 @@ shiftIfHeader "" = [""]
 shiftIfHeader (' ' : '#' : x) = ['#' : x]
 shiftIfHeader x = [x]
 
+_LIMA_DISABLE :: String
+_LIMA_DISABLE = "LIMA_DISABLE"
+
+_LIMA_ENABLE :: String
+_LIMA_ENABLE = "LIMA_ENABLE"
+
 magicComments :: [String]
 magicComments = ["FOURMOLU_DISABLE", "FOURMOLU_ENABLE"]
 
@@ -130,41 +136,53 @@ backticksHs = backticks ++ "haskell"
 
 -- will prepend lines to an answer
 hsToMd :: String -> String
-hsToMd = unlines . reverse . (\x -> convert False False "" x []) . lines
+hsToMd = unlines . reverse . (\x -> convert True False False x []) . lines
  where
-  convert :: Bool -> Bool -> String -> [String] -> [String] -> [String]
-  convert inComments inSnippet prev (h : t) res
+  convert :: Bool -> Bool -> Bool -> [String] -> [String] -> [String]
+  convert inLimaEnable inComments inSnippet (h : hs) res
+    | -- disable
+      -- breaks a snippet
+      not inComments && h `startsWith` (mcOpen ++ " " ++ _LIMA_DISABLE) =
+        convert False False False hs ([backticks | inSnippet] ++ res)
+    | -- enable
+      -- breaks a snippet
+      not inComments && h `startsWith` (mcOpen ++ " " ++ _LIMA_ENABLE) =
+        convert True False False hs res
+    | -- if disabled
+      not inLimaEnable =
+        convert inLimaEnable False False hs res
     | -- a special comment
-      h `startsWithAnyOf` ((mcOpen ++) <$> mcSpecial) =
-        convert False True h t ([h] ++ [backticksHs | not inSnippet] ++ res)
-    | -- a magical comment
-      h `startsWithAnyOf` (((mcOpen ++ " ") ++) <$> magicComments) =
-        convert False False h t ([backticks | inSnippet] ++ res)
+      -- breaks a snippet
+      not inComments && h `startsWithAnyOf` ((mcOpen ++) <$> mcSpecial) =
+        convert inLimaEnable False True hs ([h] ++ [backticksHs | not inSnippet] ++ res)
+    | -- a magic comment should be ignored
+      -- breaks a snippet
+      not inComments && h `startsWithAnyOf` (((mcOpen ++ " ") ++) <$> magicComments) =
+        convert inLimaEnable False False hs ([backticks | inSnippet] ++ res)
     | -- start of a multi-line comment
-      h `startsWith` mcOpen =
+      not inComments && h `startsWith` mcOpen =
         let x' = drop 3 h
             pref = if inSnippet then ["", backticks] else []
             res' = if inSnippet then dropWhile (== "") res else res
-         in if h `endsWith` mcClose -- multiline comment ends on the same line
-              then convert False False h t ([dropEnd 3 x'] ++ pref ++ res')
-              else convert True False h t ([x' | not (null x')] ++ pref ++ res')
+         in -- if a multiline comment ends on the same line
+            if h `endsWith` mcClose
+              then convert inLimaEnable False False hs ([dropEnd 3 x'] ++ pref ++ res')
+              else convert inLimaEnable True False hs ([x' | not (null x')] ++ pref ++ res')
     | -- end of a multiline comment
-      h `startsWith` mcClose =
-        convert False False "" t ("" : res)
+      inComments && h `startsWith` mcClose =
+        convert inLimaEnable False False hs ("" : res)
     | -- copy everything from comments
       inComments =
-        convert True False h t (h : res)
+        convert inLimaEnable True False hs (h : res)
     -- not in comments
     | -- if not in snippet, collapse consequent empty lines
       not inSnippet && null h =
-        convert False False h t (["" | prev /= ""] ++ res)
-    | -- not empty line means the start of a Haskell snippet
+        convert inLimaEnable False False hs ("" : dropWhile (== "") res)
+    | -- non-empty line means the start of a Haskell snippet
       not inSnippet && not (null h) =
-        convert False True h t ([h, backticksHs] ++ ["" | prev /= ""] ++ res)
+        convert inLimaEnable False True hs ([h, backticksHs, ""] ++ dropWhile (== "") res)
     | -- lines in snippet are copied
       otherwise =
-        convert False True h t (h : res)
-  convert inComments inSnippet prev [] res =
-    if inSnippet
-      then backticks : res
-      else dropWhile (== "") res
+        convert inLimaEnable False True hs (h : res)
+  convert limaEnable inComments inSnippet [] res =
+    [backticks | inSnippet] ++ dropWhile (== "") res

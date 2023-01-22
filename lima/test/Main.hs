@@ -12,14 +12,14 @@ testDir = "testdata/"
 main :: IO ()
 main = do
     -- write a Haskell file
-    let pathsHs = (testDir ++) <$> ["input2.hs"]
+    let pathsHs = ((testDir ++ "/hs/") ++) <$> ["input0.hs"]
         pathsMd1 = (++ ".md") <$> pathsHs
     filesHs <- mapM readFile pathsHs
     let filesMd = hsToMd <$> filesHs
     zipWithM_ writeFile pathsMd1 filesMd
-    
+
     -- test round-trip btw lhs and md
-    let pathsLhs = (testDir ++) <$> ["input0.lhs", "input1.lhs"]
+    let pathsLhs = ((testDir ++ "/lhs/") ++) <$> ["input0.lhs", "input1.lhs"]
         pathsMd = (++ ".md") <$> pathsLhs
         pathsLhs' = (++ ".lhs") <$> pathsMd
     filesLhs <- mapM readFile pathsLhs

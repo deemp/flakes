@@ -11,7 +11,8 @@ This template provides a sample configuration for this tool in the `.ghcid` file
 ## Nix
 
 - [haskell4nix](https://haskell4nix.readthedocs.io/nixpkgs-users-guide.html)
-- [Haskell for all](https://www.haskellforall.com/2022/08/incrementally-package-haskell-program.html)
+- [Incrementally package a Haskell program](https://www.haskellforall.com/2022/08/incrementally-package-haskell-program.html)
+- [Nixpkgs support for incremental Haskell builds](https://www.haskellforall.com/2022/12/nixpkgs-support-for-incremental-haskell.html)
 
 ## package.yaml
 

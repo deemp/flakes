@@ -1,17 +1,17 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.7.
+-- This file has been generated from package.yaml by hpack version 0.35.0.
 --
 -- see: https://github.com/sol/hpack
 
 name:           lima
-version:        0.1.0.2
-synopsis:       Convert between Literate Haskell (.lhs) and Markdown (.md)
-description:    `lima` is a program to convert Literate Haskell files in the birdtick format to correctly rendered (git flavoured, html containing) markdown files and vice versa. .  type:                exitcode-stdio-1.0 It strips away the heading tags #, replacing them with the corresponding html tags, converts the `'''haskell [...]'''` to `> [...]` as recognised by the GHC literate prepocessor. `''' [...] '''` will be converted to `< [...]` and will be discarded by ghc but will still be displayed as code when rendered. (In both cases `'''` is actually the three md backticks, but its a pain to write md about md.) . Usage: . `lima (toLhs|toMd) file1 [file2] [...]`; The `toLhs` and `toMd` commands are not case sensitive. The program will convert each file from the other format to the specified one, creating the files `file1.md` `file2.md` ... or `file1.lhs` `file2.lhs` ... in the same directory respectively.
+version:        0.1.0.0
+synopsis:       Haskell -> Markdown and Literate Haskell <-> Markdown converter
+description:    See README here or on [GitHub](https://github.com/deemp/flakes/tree/main/lima#readme)
 category:       Productivity
-bug-reports:    https://github.com/faeblDevelopment/LiterateMarkdown/issues
+bug-reports:    https://github.com/deemp/flakes/issues
 author:         Fabian Schneider
-maintainer:     faebl.taylor@pm.me
+maintainer:     Danila Danko
 license:        MIT
 license-file:   LICENSE
 build-type:     Simple
@@ -21,7 +21,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/faeblDevelopment/LiterateMarkdown.git
+  location: https://github.com/deemp/flakes/tree/main/lima#readme
 
 library
   exposed-modules:
