@@ -1,15 +1,26 @@
 # lima
 
-> `li`terate Haskell and `ma`rkdown
+- Convert `Haskell` (`.hs`) files with `Markdown` comments to `Markdown` (`.md`)
+- Convert between `Literate Haskell` (`.lhs`) files  and `Markdown` (`.md`).
 
-- Convert between `.lhs` (`Literate Haskell` files) and `.md` (`Markdown`).
-- Convert `.hs` (`Haskell`) to `.md` (`Markdown`)
+For `lhs2md` -> `md2lhs` conversion, `lima` usually abides the `round-trip property`. In other words if its chain of conversions is `file.lhs` -> `file.lhs.md` -> `file.lhs.md.lhs`, then `file.lhs = file.lhs.md.lhs` in terms of their contents. Such naming is because `lima` creates a new file named same as the file to convert plus a relevant suffix.
 
-For `lhs2md` -> `md2lhs` conversion, `lima` abides the `round-trip property`. It converts `file.lhs` -> `file.lhs.md` -> `file.lhs.md.lhs` and usually guarantees `file.lhs = file.lhs.md.lhs` in terms of their contents.
+## Background
 
-## Disclaimer
+This is a fork of [LiterateMarkdown](https://github.com/haskie-lambda/LiterateMarkdown). Initially, I just wanted to fix some bugs, but then realized that I can't conveniently use Haskell Language Server with `.lhs` files so I added the `.hs` -> `.md` conversion.
 
-This is a fork of [LiterateMarkdown](https://github.com/haskie-lambda/LiterateMarkdown). I just wanted to fix some errors and change the app name.
+### file.hs -> file.hs.md
+
+Examples:
+
+- [input2.hs](./testdata/input2.hs) -> [input2.hs.md](./testdata/input2.hs.md)
+
+Rules:
+
+- Write comments in `GitHub`-flavoured `Markdown`
+- Magic comments like `{- FOURMOLU_ENABLE -}` will be ignored
+- You can ignore parts of a file via `{- LIMA_DISABLE -}` and `{- LIMA_ENABLE -}`
+- Magic comments can't be used in snippets
 
 ### file.lhs -> file.lhs.md -> file.lhs.md.lhs
 
@@ -23,18 +34,12 @@ As `.lhs` doesn't support `#` (heading) or `>` (quotation start) at a line begin
 - ` #` -> `#` -> ` #`
 - ` >` -> `>` -> ` >`
 
-If you'd like to provide some code in `.lhs`, follow these rules:
+If you'd like to provide some code in a `.lhs`, follow these rules:
 
 - `>` is for `Haskell` code, there should be an empty line before and after the block with `Haskell` code
 - `<` is for any other code. Such code will be converted into code blocks of type `console` in `.md`
 - The round-trip property is not guarranteed if you insert code snippets into `.lhs` using three backticks
   - Nevertheless, feel free to insert them into `.md`. In `.lhs`, they will just lose the language info
-
-### file.hs -> file.hs.md
-
-Examples and rules description:
-
-- [input2.hs](./testdata/input2.hs) -> [input2.hs.md](./testdata/input2.hs.md)
 
 ## Usage
 
@@ -49,10 +54,10 @@ To install the executable on Windows, if you can't convince cabal to use [`--bin
 1. Learn about `Nix` - [src](https://github.com/deemp/flakes#prerequisites)
 1. Open `VSCodium`:
 
-  ```sh
-  nix develop nix-dev/
-  write-settings-json
-  codium .
-  ```
+    ```sh
+    nix develop nix-dev/
+    write-settings-json
+    codium .
+    ```
 
 1. Open a Haskell file there, hower over a term and wait until `HLS` shows the hints
