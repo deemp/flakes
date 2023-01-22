@@ -5,7 +5,6 @@
     drv-tools.url = "github:deemp/flakes?dir=drv-tools";
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
-    devshell.url = "github:deemp/flakes?dir=devshell";
     haskell-tools.url = "github:deemp/flakes?dir=language-tools/haskell";
   };
   outputs =
@@ -14,7 +13,6 @@
     , nixpkgs
     , drv-tools
     , haskell-tools
-    , devshell
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -22,9 +20,8 @@
       pkgs = nixpkgs.legacyPackages.${system};
       inherit (drv-tools.functions.${system}) mkBinName withAttrs withMan withDescription;
       inherit (drv-tools.configs.${system}) man;
-      inherit (devshell.functions.${system}) mkCommands mkShell;
       inherit (haskell-tools.functions.${system}) haskellTools;
-      inherit (haskellTools "92" { } (_: [ ]) [ ]) justStaticExecutable cabal callCabal2nix;
+      inherit (haskellTools "92" { } (_: [ ]) [ ]) justStaticExecutable callCabal2nix;
 
       myPackage =
         let
@@ -48,20 +45,11 @@
               :   convert: `testdata/input2.hs` ->  `testdata/input2.hs.md`
             ''
           );
-
-      tools = [ cabal ];
     in
     {
       packages = {
         default = myPackage;
       };
-
-      devShells.default = mkShell
-        {
-          packages = tools;
-          bash.extra = '''';
-          commands = mkCommands "tools" tools;
-        };
     });
 
   nixConfig = {
