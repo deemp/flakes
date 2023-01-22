@@ -33,7 +33,7 @@
       ghcVersion = "92";
 
       # and the name of the package
-      myPackageName = "nix-managed";
+      myPackageName = "lima";
 
       override = {
         overrides = self: super: {
@@ -41,7 +41,7 @@
         };
       };
 
-      inherit (haskellTools ghcVersion override (ps: [ ps.myPackage ]) [ ]) cabal hls;
+      inherit (haskellTools ghcVersion override (ps: [ ps.myPackage ]) [ ]) cabal hls hpack;
 
       writeSettings = writeSettingsJSON {
         inherit (settingsNix) haskell todo-tree files editor gitlens yaml
@@ -51,11 +51,13 @@
       codiumTools = [
         writeSettings
         cabal
+        hls
+        hpack
       ];
 
       codium = mkCodium {
         extensions = { inherit (extensions) nix haskell misc github markdown; };
-        runtimeDependencies = codiumTools ++ [ hls ];
+        runtimeDependencies = codiumTools;
       };
 
       tools = codiumTools ++ [ codium ];
@@ -68,7 +70,7 @@
       devShells.default = mkShell
         {
           packages = tools;
-          bash.extra = ''printf "Hello, world!\n"'';
+          bash.extra = '''';
           commands = mkCommands "tools" tools;
         };
     });
