@@ -82,7 +82,7 @@
       addDeps = deps: if deps != [ ] then "--prefix PATH : ${pkgs.lib.makeBinPath deps}" else "";
 
       # build an executable without local dependencies (notice empty args)
-      justStaticExecutableGHCOverrideDeps = ghcVersion: override: deps: name: package:
+      justStaticExecutableGHCOverrideDeps = deps: name: package:
         let
           exe = pkgs.haskell.lib.justStaticExecutables package;
         in
@@ -108,18 +108,18 @@
 
       # see the possible values for ghcVersion here
       # https://haskell4nix.readthedocs.io/nixpkgs-users-guide.html#how-to-install-haskell-language-server
-      hlsGHC = ghcVersion: override: (haskellPackagesGHC ghcVersion).haskell-language-server;
+      hlsGHC = ghcVersion: (haskellPackagesGHC ghcVersion).haskell-language-server;
 
       # tools for a specific GHC version and overriden haskell packages for this GHC
       # see what you need to pass to your shell for GHC
       # https://docs.haskellstack.org/en/stable/nix_integration/#supporting-both-nix-and-non-nix-developers
       toolsGHC = ghcVersion: override: packages: depsBin:
         {
-          hls = hlsGHC ghcVersion override;
+          hls = hlsGHC ghcVersion;
           stack = stackWithFlagsGHCOverride ghcVersion override packages depsBin;
           cabal = cabalWithFlagsGHCOverride ghcVersion override packages depsBin;
           ghc = ghcGHC ghcVersion override packages;
-          justStaticExecutable = justStaticExecutableGHCOverrideDeps ghcVersion override depsBin;
+          justStaticExecutable = justStaticExecutableGHCOverrideDeps depsBin;
           inherit (haskellPackagesGHC ghcVersion)
             implicit-hie ghcid hpack
             callCabal2nix ghcWithPackages;
@@ -171,7 +171,7 @@
               printf "\n--- cabal runs---\n"
               cabal run
 
-              printf "\n--- exe runs ---\n"
+              printf "\n--- haskell executable runs ---\n"
               ${tools.hello-world}/bin/${tools.hello-world.pname}
             '';
           };
