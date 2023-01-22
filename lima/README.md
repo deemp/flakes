@@ -20,7 +20,7 @@ Rules:
 - Write comments in `GitHub`-flavoured `Markdown`
 - Magic comments like `{- FOURMOLU_ENABLE -}` will be ignored
 - You can ignore parts of a file via `{- LIMA_DISABLE -}` and `{- LIMA_ENABLE -}`
-- Magic comments can't be used in snippets
+- Magic comments split snippets
 
 ### file.lhs -> file.lhs.md -> file.lhs.md.lhs
 

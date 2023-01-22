@@ -27,7 +27,7 @@
       inherit (my-codium.functions.${system}) writeSettingsJSON mkCodium;
       inherit (my-codium.configs.${system}) extensions settingsNix;
       inherit (devshell.functions.${system}) mkCommands mkShell;
-      inherit (haskell-tools.functions.${system}) haskellTools;
+      inherit (haskell-tools.functions.${system}) toolsGHC;
 
       # Next, set the desired GHC version
       ghcVersion = "92";
@@ -41,7 +41,7 @@
         };
       };
 
-      inherit (haskellTools ghcVersion override (ps: [ ps.myPackage ]) [ ]) cabal hls hpack;
+      inherit (toolsGHC ghcVersion override (ps: [ ps.myPackage ]) [ ]) cabal hls hpack;
 
       writeSettings = writeSettingsJSON {
         inherit (settingsNix) haskell todo-tree files editor gitlens yaml

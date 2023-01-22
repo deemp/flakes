@@ -21,7 +21,6 @@
       (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        hsShellTools = haskell-tools.toolSets.${system}.shellTools;
         inherit (haskell-tools.functions.${system}) toolsGHC;
         inherit (toolsGHC "90") staticExecutable implicit-hie hpack;
         inherit (drv-tools.functions.${system}) withDescription withMan withAttrs;

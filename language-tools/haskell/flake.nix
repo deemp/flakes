@@ -113,7 +113,7 @@
       # tools for a specific GHC version and overriden haskell packages for this GHC
       # see what you need to pass to your shell for GHC
       # https://docs.haskellstack.org/en/stable/nix_integration/#supporting-both-nix-and-non-nix-developers
-      haskellTools = ghcVersion: override: packages: depsBin:
+      toolsGHC = ghcVersion: override: packages: depsBin:
         {
           hls = hlsGHC ghcVersion override;
           stack = stackWithFlagsGHCOverride ghcVersion override packages depsBin;
@@ -127,7 +127,7 @@
           inherit haskellDeps haskellDepsPackages;
         };
 
-      haskellTools_ = ghcVersion: haskellTools ghcVersion
+      toolsGHC_ = ghcVersion: toolsGHC ghcVersion
         {
           overrides = self: super: {
             haskell = pkgs.haskell.lib.overrideCabal
@@ -147,19 +147,19 @@
       ghcVersion_ = "92";
 
       tools =
-        let hp = haskellTools_ ghcVersion_; in
+        let hp = toolsGHC_ ghcVersion_; in
         {
-          inherit (haskellTools_ ghcVersion_)
+          inherit (toolsGHC_ ghcVersion_)
             cabal stack hls ghc implicit-hie ghcid hpack;
           hello-world = hp.justStaticExecutable "hello-world" hp.haskellPackages.haskell;
         };
 
       # deps that can be overriden in a package
-      deps_ = (haskellTools_ ghcVersion_).haskellPackages.haskell.getCabalDeps;
+      deps_ = (toolsGHC_ ghcVersion_).haskellPackages.haskell.getCabalDeps;
     in
     {
       functions = {
-        inherit haskellTools;
+        inherit toolsGHC;
       };
 
       # test stack has `hello` on PATH

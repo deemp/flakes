@@ -134,29 +134,29 @@ dropEnd n s
 backticksHs :: [Char]
 backticksHs = backticks ++ "haskell"
 
--- will prepend lines to an answer
+-- | Convert contents of a @Haskell@ file to @Markdown@
 hsToMd :: String -> String
 hsToMd = unlines . reverse . (\x -> convert True False False x []) . lines
  where
   convert :: Bool -> Bool -> Bool -> [String] -> [String] -> [String]
   convert inLimaEnable inComments inSnippet (h : hs) res
     | -- disable
-      -- breaks a snippet
+      -- split a snippet
       not inComments && h `startsWith` (mcOpen ++ " " ++ _LIMA_DISABLE) =
         convert False False False hs ([backticks | inSnippet] ++ res)
     | -- enable
-      -- breaks a snippet
+      -- split a snippet
       not inComments && h `startsWith` (mcOpen ++ " " ++ _LIMA_ENABLE) =
         convert True False False hs res
     | -- if disabled
       not inLimaEnable =
         convert inLimaEnable False False hs res
     | -- a special comment
-      -- breaks a snippet
+      -- split a snippet
       not inComments && h `startsWithAnyOf` ((mcOpen ++) <$> mcSpecial) =
         convert inLimaEnable False True hs ([h] ++ [backticksHs | not inSnippet] ++ res)
     | -- a magic comment should be ignored
-      -- breaks a snippet
+      -- split a snippet
       not inComments && h `startsWithAnyOf` (((mcOpen ++ " ") ++) <$> magicComments) =
         convert inLimaEnable False False hs ([backticks | inSnippet] ++ res)
     | -- start of a multi-line comment

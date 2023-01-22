@@ -41,7 +41,7 @@
       inherit (my-codium.configs.${system}) extensions settingsNix;
       inherit (flakes-tools.functions.${system}) mkFlakesTools;
       inherit (devshell.functions.${system}) mkCommands mkShell;
-      inherit (haskell-tools.functions.${system}) haskellTools;
+      inherit (haskell-tools.functions.${system}) toolsGHC;
       inherit (workflows.functions.${system}) writeWorkflow;
       inherit (workflows.configs.${system}) nixCI;
 
@@ -100,7 +100,7 @@
       # More specifically, if we're developing Haskell packages A and B and A depends on B, we need to supply both A and B
       # This will prevent nix from building B as a dev dependency of A
 
-      inherit (haskellTools ghcVersion_ override (ps: [ ps.myPackage ]) myPackageDepsBin)
+      inherit (toolsGHC ghcVersion_ override (ps: [ ps.myPackage ]) myPackageDepsBin)
         stack hls cabal implicit-hie justStaticExecutable
         ghcid callCabal2nix haskellPackages hpack;
 
@@ -132,7 +132,7 @@
       # we'll have to use shellHook = 'nix develop .#anotherShell', and that's not cool
 
       # --- smart cabal ---
-      # To overcome the disadvantage of shellFor, we inherited `cabal` from `haskellTools` above
+      # To overcome the disadvantage of shellFor, we inherited `cabal` from `toolsGHC` above
       # this is cabal-install that's aware of `GHC` and runtime deps of our Haskell app
       # moreover, that `GHC` is aware of the dev dependencies of our Haskell app
       # So, instead of a shell like in the case of `shellFor`, we now get a single `cabal` executable
