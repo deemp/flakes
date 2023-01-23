@@ -27,7 +27,11 @@
 
 - If there's a single line btw Haskell code and a comment, this line is removed
 
+the following two comments will be ignored due to a config
+
 ```haskell
+-- before a magic comment
+-- after a magic comment
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -55,7 +59,7 @@ some text
 
 ```haskell
 -- Text one
--- next comment should be ignored
+-- Text two should be ignored
 ```
 
 ```haskell
@@ -63,16 +67,15 @@ some text
 
 -- This comment will go into a Haskell snippet
 
--- | This doc will be omitted
--- and won't go into a Haskell snippet
+-- | This doc will go into a Haskell snippet
 class (Monoid (m a)) => Reducible m a where
-    op :: m a -> Char
+  op :: m a -> Char
 
-    -- | this too
-    constr :: m a -> a -> m a
+  -- | this too
+  constr :: m a -> a -> m a
 
-    -- | and this one
-    get :: m a -> m a -> a
+  -- | and this one
+  get :: m a -> m a -> a
 ```
 
 don't put anything outside and after this comment like in `{- -} -- hey`
@@ -80,6 +83,8 @@ don't put anything outside and after this comment like in `{- -} -- hey`
 ```haskell
 -- a comment that will go into a snippet
 
+{-| some 
+doc that will be in a snippet -}
 main :: IO ()
 main = print "hi!"
 ```
@@ -92,6 +97,7 @@ in comments should read like {- LIMA_DISABLE -}
 
 ```haskell
 -- shouldn't be ignored
+```
 
 this LIMA_ENABLE reads like a comment because there's no corresponding
 preceding LIMA_DISABLE

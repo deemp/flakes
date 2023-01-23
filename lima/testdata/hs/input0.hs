@@ -29,7 +29,14 @@
 - If there's a single line btw Haskell code and a comment, this line is removed
 -}
 
+{- the following two comments will be ignored due to a config -}
+
+{- first comment to ignore -}
+{- second comment to ignore -}
+
+-- before a magic comment
 {- FOURMOLU_DISABLE -}
+-- after a magic comment
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -54,7 +61,7 @@ some text
 -}
 {- LIMA_ENABLE -}
 -- Text one
--- next comment should be ignored
+-- Text two should be ignored
 {- LIMA_DISABLE -}
 -- Text two to ignore
 {- LIMA_ENABLE -}
@@ -62,22 +69,25 @@ some text
 
 -- This comment will go into a Haskell snippet
 
--- | This doc will be omitted
--- and won't go into a Haskell snippet
+-- | This doc will go into a Haskell snippet
 class (Monoid (m a)) => Reducible m a where
-    op :: m a -> Char
+  op :: m a -> Char
 
-    -- | this too
-    constr :: m a -> a -> m a
+  -- | this too
+  constr :: m a -> a -> m a
 
-    -- | and this one
-    get :: m a -> m a -> a
+  -- | and this one
+  get :: m a -> m a -> a
 
 {- don't put anything outside and after this comment like in `{- -} -- hey` -}
 -- a comment that will go into a snippet
 
+{- FOURMOLU_DISABLE -}
+{-| some 
+doc that will be in a snippet -}
 main :: IO ()
 main = print "hi!"
+{- FOURMOLU_ENABLE -}
 
 {-
 <b name="fn_laws">1</b> <- Some html

@@ -1,6 +1,28 @@
-module Converter (lhsToMd, mdToLhs, hsToMd) where
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 
+module Converter (lhsToMd, mdToLhs, hsToMd, Config (..), ConfigHS2MD (..)) where
+
+import Data.Default (Default)
 import Data.List (isPrefixOf, isSuffixOf)
+import Data.Yaml (FromJSON (..))
+import Data.Yaml.Aeson
+import GHC.Generics (Generic)
+
+newtype Config = Config {configHS2MD :: Maybe ConfigHS2MD} deriving (Generic, Default)
+
+instance FromJSON Config where
+  parseJSON = withObject "Configs" (\v -> Config <$> v .:? "hs2md")
+
+newtype ConfigHS2MD = ConfigHS2MD {ignoredComments :: [String]} deriving (Generic, Default)
+
+instance FromJSON ConfigHS2MD where
+  parseJSON =
+    withObject
+      "CommentsToIgnore"
+      (\v -> ConfigHS2MD <$> v .: "ignore-comments")
 
 backticks :: String
 backticks = "```"
@@ -110,8 +132,8 @@ _LIMA_DISABLE = "LIMA_DISABLE"
 _LIMA_ENABLE :: String
 _LIMA_ENABLE = "LIMA_ENABLE"
 
-magicComments :: [String]
-magicComments = ["FOURMOLU_DISABLE", "FOURMOLU_ENABLE"]
+defaultIgnoredComments :: [String]
+defaultIgnoredComments = ["FOURMOLU_DISABLE", "FOURMOLU_ENABLE"]
 
 endsWith :: String -> String -> Bool
 endsWith = flip isSuffixOf
@@ -120,54 +142,58 @@ endsWith = flip isSuffixOf
 mcOpen :: String
 mcOpen = "{-"
 
+mcOpenSpace :: String
+mcOpenSpace = mcOpen ++ " "
+
 mcClose :: String
 mcClose = "-}"
-
-mcSpecial :: [String]
-mcSpecial = ["@", "#"]
 
 dropEnd :: Int -> String -> String
 dropEnd n s
   | n > 0 && not (null s) = dropEnd (n - 1) (init s)
   | otherwise = s
 
-backticksHs :: [Char]
+backticksHs :: String
 backticksHs = backticks ++ "haskell"
 
+squashEmpties :: [String] -> [String]
+squashEmpties = dropWhile (== "")
+
 -- | Convert contents of a @Haskell@ file to @Markdown@
-hsToMd :: String -> String
-hsToMd = unlines . reverse . (\x -> convert True False False x []) . lines
+hsToMd :: ConfigHS2MD -> String -> String
+hsToMd ConfigHS2MD{..} = unlines . reverse . (\x -> convert True False False x []) . lines
  where
+  ignoredComments_ = defaultIgnoredComments ++ ignoredComments
   convert :: Bool -> Bool -> Bool -> [String] -> [String] -> [String]
   convert inLimaEnable inComments inSnippet (h : hs) res
     | -- disable
       -- split a snippet
-      not inComments && h `startsWith` (mcOpen ++ " " ++ _LIMA_DISABLE) =
+      not inComments && h `startsWith` (mcOpenSpace ++ _LIMA_DISABLE) =
         convert False False False hs ([backticks | inSnippet] ++ res)
     | -- enable
       -- split a snippet
-      not inComments && h `startsWith` (mcOpen ++ " " ++ _LIMA_ENABLE) =
-        convert True False False hs res
+      not inComments && h `startsWith` (mcOpenSpace ++ _LIMA_ENABLE) =
+        convert True False inSnippet hs res
     | -- if disabled
       not inLimaEnable =
         convert inLimaEnable False False hs res
-    | -- a special comment
-      -- split a snippet
-      not inComments && h `startsWithAnyOf` ((mcOpen ++) <$> mcSpecial) =
-        convert inLimaEnable False True hs ([h] ++ [backticksHs | not inSnippet] ++ res)
     | -- a magic comment should be ignored
-      -- split a snippet
-      not inComments && h `startsWithAnyOf` (((mcOpen ++ " ") ++) <$> magicComments) =
-        convert inLimaEnable False False hs ([backticks | inSnippet] ++ res)
+      -- does't split a snippet
+      not inComments && h `startsWithAnyOf` ((mcOpenSpace ++) <$> ignoredComments_) =
+        convert inLimaEnable False inSnippet hs res
     | -- start of a multi-line comment
-      not inComments && h `startsWith` mcOpen =
+      not inComments && (h `startsWith` mcOpenSpace || h == mcOpen) =
         let x' = drop 3 h
             pref = if inSnippet then ["", backticks] else []
-            res' = if inSnippet then dropWhile (== "") res else res
+            res' = if inSnippet then squashEmpties res else res
          in -- if a multiline comment ends on the same line
             if h `endsWith` mcClose
               then convert inLimaEnable False False hs ([dropEnd 3 x'] ++ pref ++ res')
               else convert inLimaEnable True False hs ([x' | not (null x')] ++ pref ++ res')
+    | -- a special comment
+      -- is a part of a snippet
+      not inComments && h `startsWith` mcOpen =
+        convert inLimaEnable False True hs ([h] ++ [backticksHs | not inSnippet] ++ res)
     | -- end of a multiline comment
       inComments && h `startsWith` mcClose =
         convert inLimaEnable False False hs ("" : res)
@@ -177,12 +203,12 @@ hsToMd = unlines . reverse . (\x -> convert True False False x []) . lines
     -- not in comments
     | -- if not in snippet, collapse consequent empty lines
       not inSnippet && null h =
-        convert inLimaEnable False False hs ("" : dropWhile (== "") res)
+        convert inLimaEnable False False hs ("" : squashEmpties res)
     | -- non-empty line means the start of a Haskell snippet
       not inSnippet && not (null h) =
-        convert inLimaEnable False True hs ([h, backticksHs, ""] ++ dropWhile (== "") res)
+        convert inLimaEnable False True hs ([h, backticksHs, ""] ++ squashEmpties res)
     | -- lines in snippet are copied
       otherwise =
         convert inLimaEnable False True hs (h : res)
   convert limaEnable inComments inSnippet [] res =
-    [backticks | inSnippet] ++ dropWhile (== "") res
+    [backticks | inSnippet] ++ squashEmpties res
