@@ -26,7 +26,7 @@ main = do
     decodeFileThrow (testDir ++ "/config/lima.yaml")
       `catch` (\(x :: SomeException) -> exitWith $ ExitFailure 1)
   filesHs <- mapM readFile pathsHs
-  let filesMd = hsToMd (fromMaybe def configHS2MD) <$> filesHs
+  let filesMd = hsToMd (fromMaybe def configHs2Md) <$> filesHs
   zipWithM_ writeFile pathsMd1 filesMd
 
   -- test round-trip btw lhs and md

@@ -8,7 +8,7 @@ module Main (main) where
 import Control.Exception (SomeException (SomeException), bracketOnError, catch, throwIO)
 import Control.Exception.Base (try)
 import Control.Monad (when, zipWithM_, (>=>))
-import Converter (Config (..), ConfigHS2MD (..), hsToMd, lhsToMd, mdToLhs)
+import Converter (Config (..), ConfigHs2Md (..), hsToMd, lhsToMd, mdToLhs)
 import Data.Aeson.Types (prependFailure)
 import Data.Char (toLower)
 import Data.Default (def)
@@ -132,7 +132,7 @@ main = do
     convert contents out =
       (\(f, ext) -> writeFile (out <> "." <> ext) (f contents)) $
         case commandType of
-          HS2MD -> maybe' configHS2MD (hsToMd def, "md") (\config_ -> (hsToMd config_, "md"))
+          HS2MD -> maybe' configHs2Md (hsToMd def, "md") (\config_ -> (hsToMd config_, "md"))
           MD2LHS -> (mdToLhs, "lhs")
           LHS2MD -> (lhsToMd, "md")
   zipWithM_ convert contents_ files

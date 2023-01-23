@@ -3,26 +3,29 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Converter (lhsToMd, mdToLhs, hsToMd, Config (..), ConfigHS2MD (..)) where
+-- | Functions to convert @Haskell@ to @Markdown@ and between @Literate Haskell@ (@.lhs@) and @Markdown@.
+module Converter (lhsToMd, mdToLhs, hsToMd, Config (..), ConfigHs2Md (..)) where
 
 import Data.Default (Default)
 import Data.List (isPrefixOf, isSuffixOf)
 import Data.Yaml (FromJSON (..))
-import Data.Yaml.Aeson
+import Data.Yaml.Aeson (FromJSON (..), withObject, (.:), (.:?))
 import GHC.Generics (Generic)
 
-newtype Config = Config {configHS2MD :: Maybe ConfigHS2MD} deriving (Generic, Default)
+-- | App config.
+newtype Config = Config {configHs2Md :: Maybe ConfigHs2Md} deriving (Generic, Default)
 
 instance FromJSON Config where
   parseJSON = withObject "Configs" (\v -> Config <$> v .:? "hs2md")
 
-newtype ConfigHS2MD = ConfigHS2MD {ignoredComments :: [String]} deriving (Generic, Default)
+-- | Config for @Haskell@ to @Markdown@ converter.
+newtype ConfigHs2Md = ConfigHs2Md {ignoredComments :: [String]} deriving (Generic, Default)
 
-instance FromJSON ConfigHS2MD where
+instance FromJSON ConfigHs2Md where
   parseJSON =
     withObject
       "CommentsToIgnore"
-      (\v -> ConfigHS2MD <$> v .: "ignore-comments")
+      (\v -> ConfigHs2Md <$> v .: "ignore-comments")
 
 backticks :: String
 backticks = "```"
@@ -47,8 +50,9 @@ reverseBirdTrack = "< "
 birdTracks :: [String]
 birdTracks = [birdTrack, reverseBirdTrack]
 
--- | convert a file's contents from the LHS birdtick style
--- to markdown, replacing the code marked by birdticks with ```haskell ... ```
+-- | Convert @Literate Haskell@ to @Markdown@.
+--
+-- Convert @LHS@ birdtick style to @Markdown@, replacing the code marked by birdticks with @```haskell ... ```@.
 lhsToMd :: String -> String
 lhsToMd = unlines . convert "" . lines
  where
@@ -76,10 +80,10 @@ lhsToMd = unlines . convert "" . lines
    where
     rest = convert h t
 
--- | convert a file's contents from git flavoured markdown
--- to literate haskell, replacing code marked with ```haskell ...``` with > birdticks
--- and  code marked with ``` ... ``` with < birdticks
--- quotes are converted to `NOTE:` marked lines.
+-- | Convert @Markdown@ file to @Literate Haskell@.
+--
+-- Replace code marked with @```haskell ...```@ with birdticks (@>@)
+-- and code marked with @``` ... ```@ with reverse birdticks (@<@).
 mdToLhs :: String -> String
 mdToLhs = unlines . convert False False "" . lines
  where
@@ -159,9 +163,11 @@ backticksHs = backticks ++ "haskell"
 squashEmpties :: [String] -> [String]
 squashEmpties = dropWhile (== "")
 
--- | Convert contents of a @Haskell@ file to @Markdown@
-hsToMd :: ConfigHS2MD -> String -> String
-hsToMd ConfigHS2MD{..} = unlines . reverse . (\x -> convert True False False x []) . lines
+-- | Convert @Haskell@ to @Markdown@.
+--
+-- Multi-line comments are copied as text blocks and @Haskell@ code is copied as @Haskell@ snippets.
+hsToMd :: ConfigHs2Md -> String -> String
+hsToMd ConfigHs2Md{..} = unlines . reverse . (\x -> convert True False False x []) . lines
  where
   ignoredComments_ = defaultIgnoredComments ++ ignoredComments
   convert :: Bool -> Bool -> Bool -> [String] -> [String] -> [String]
