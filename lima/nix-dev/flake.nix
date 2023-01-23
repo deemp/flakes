@@ -41,7 +41,7 @@
         };
       };
 
-      inherit (toolsGHC ghcVersion override (ps: [ ps.myPackage ]) [ ]) cabal hls hpack;
+      inherit (toolsGHC ghcVersion override (ps: [ ps.myPackage ]) [ ]) cabal hls hpack ghcid;
 
       writeSettings = writeSettingsJSON {
         inherit (settingsNix) haskell todo-tree files editor gitlens yaml
@@ -53,6 +53,7 @@
         cabal
         hls
         hpack
+        ghcid
       ];
 
       codium = mkCodium {
