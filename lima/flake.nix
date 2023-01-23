@@ -29,19 +29,19 @@
           packageExe = justStaticExecutable packageName (callCabal2nix packageName ./. { });
         in
         withMan
-          (withDescription packageExe "Convert between `Literate Haskell` (`.lhs`) and `Markdown` (`.md`)")
+          (withDescription packageExe "Convert `Haskell` (`.hs`) to `Markdown` (`.md`) or between `Literate Haskell` (`.lhs`) and `Markdown` (`.md`)")
           (
             self: ''
               ${man.DESCRIPTION}
               ${self.meta.description}
 
               ${man.SYNOPSYS}
-              `${packageName} (md2lhs|lhs2md|hs2md) file1 [file2] [...]`
+              `${packageName} <command> (-f file) [-c config]`
 
               ${man.EXAMPLES}
-              `${packageName} lhs2md testdata/input0.lhs testdata/input1.lhs`
+              `${packageName} lhs2md -f testdata/input0.lhs -f testdata/input1.lhs`
               :   convert: `testdata/input0.lhs` ->  `testdata/input0.lhs.md` and `testdata/input1.lhs` -> `testdata/input1.lhs.md`
-              `${packageName} hs2md testdata/input2.hs`
+              `${packageName} hs2md -f testdata/input2.hs -c testdata/config/lima.yaml`
               :   convert: `testdata/input2.hs` ->  `testdata/input2.hs.md`
             ''
           );
