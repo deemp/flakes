@@ -1,29 +1,31 @@
 # lima
 
-- Convert `Haskell` (`.hs`) files with `Markdown` comments to `Markdown` (`.md`)
-- Convert between `Literate Haskell` (`.lhs`) files  and `Markdown` (`.md`).
+Convert between
 
-For `lhs2md` -> `md2lhs` conversion, `lima` usually abides the `round-trip property`. In other words, if its chain of conversions is `file.lhs` -> `file.lhs.md` -> `file.lhs.md.lhs`, then `file.lhs = file.lhs.md.lhs` in terms of their contents. Such naming is because `lima` creates a new file named the same as the file to convert plus a relevant suffix.
+- `Haskell` (`.hs`) files with `GitHub`-flavoured `Markdown` comments and `Markdown` (`.md`)
+- `Literate Haskell` (`.lhs`) files and `GitHub`-flavoured `Markdown` (`.md`).
+
+It is possible to make conversion abide the [roundtrip property](https://jesper.sikanda.be/posts/quickcheck-intro.html). In other words, make conversions `file.lhs` -> `file.lhs.md` -> `file.lhs.md.lhs` or `file.hs` -> `file.hs.md` -> `file.hs.md.hs` and get `file.lhs = file.lhs.md.lhs` and `file.hs = file.hs.md.hs` in terms of their contents.
 
 ## Alternatives
 
-- [LiterateMarkdown](https://github.com/haskie-lambda/LiterateMarkdown). `lima` is a fork of this (abandoned?) project. Initially, I just wanted to fix some bugs, but then realized that I can't conveniently use Haskell Language Server with `.lhs` files so I added the `.hs` -> `.md` conversion.
+- [LiterateMarkdown](https://github.com/haskie-lambda/LiterateMarkdown). `lima` is a fork of this (abandoned?) project. Initially, I just wanted to fix some bugs, but then realized that I can't conveniently use `Haskell Language Server` with `.lhs` files so I added the `.hs` -> `.md` conversion.
 
-- [IHaskell](https://github.com/IHaskell/IHaskell) - create `Jupyter` notebooks with `Haskell` code cells and `GitHub`-flavoured `Markdown` text cells.
+- [IHaskell](https://github.com/IHaskell/IHaskell) - create `Jupyter` notebooks with `Haskell` code cells and `GitHub`-flavoured `Markdown` text cells and do much more!
 
 ## Conversion
 
 ### file.hs -> file.hs.md
 
-Examples:
+[Examples](./testdata/hs)
 
-- [input2.hs](./testdata/input2.hs) -> [input2.hs.md](./testdata/input2.hs.md)
+Rules for `.hs` -> `.md` conversion:
 
-Rules:
-
-- Write comments in `GitHub`-flavoured `Markdown`
-- Magic comments like `{- FOURMOLU_ENABLE -}` will be ignored. You can supply other comments in a config (`hs2md.ignore-comments`). See [example](./testdata/config/)
-- You can ignore parts of a file by enclosing them into `{- LIMA_DISABLE -}` and `{- LIMA_ENABLE -}`
+- To produce text blocks, write multiline comments in `GitHub`-flavoured `Markdown`
+- Such comments should start with `{- ` or `{-\n`
+- Multiline comments (even `{- -}`) split `Haskell` code into snippets
+- Special comments like `{- FOURMOLU_ENABLE -}` won't appear in a `.md`. You can supply other comments in a config (`hs-md.special-comments`). See the sample [config](./testdata/config/).
+- You can ignore parts of a `.hs` file by enclosing them into `{- LIMA_DISABLE -}` and `{- LIMA_ENABLE -}`. The lines between such comments will be commented out in the resulting `.md`.
 
 ### file.lhs -> file.lhs.md -> file.lhs.md.lhs
 

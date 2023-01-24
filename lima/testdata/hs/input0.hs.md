@@ -10,9 +10,9 @@
 
 - Console code snippet
 
-    ```console
-    "1*2*3*4"
-    ```
+```console
+"1*2*3*4"
+```
 
 1. what's in comments is written as is
 2. Haskell code becomes haskell code snippets
@@ -27,28 +27,41 @@
 
 - If there's a single line btw Haskell code and a comment, this line is removed
 
-the following two comments will be ignored due to a config
+the following two comments will be commented out due to a config
+<!-- first special comment -->
+<!-- second special comment -->
 
 ```haskell
 -- before a magic comment
+```
+
+<!-- FOURMOLU_DISABLE -->
+
+```haskell
 -- after a magic comment
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# OPTIONS_GHC -Wno-missing-kind-signatures #-}
 ```
 
-Some imports here
+<!-- FOURMOLU_ENABLE -->
 
 ```haskell
 -- this comment will go into the Haskell snippet
--- Imports
 module Main where -- a comment after
+
+a1 :: Integer
+a1 = 4
 ```
 
 This comment will divide Haskell snippets
 
 ```haskell
-import Data.Monoid (Product (..), Sum (..))
+-- Imports
+
+a2 :: Integer
+a2 = 2
 ```
 
 ## Second-level heading
@@ -59,8 +72,17 @@ some text
 
 ```haskell
 -- Text one
+-- this multiline comment should separate this line and the line after the comment
+{--}
 -- Text two should be ignored
+
 ```
+<!-- LIMA_DISABLE
+-- Text two to ignore
+some :: String
+some = "code to ignore"
+
+LIMA_ENABLE -->
 
 ```haskell
 -- Text three
@@ -82,18 +104,29 @@ don't put anything outside and after this comment like in `{- -} -- hey`
 
 ```haskell
 -- a comment that will go into a snippet
+```
 
+<!-- FOURMOLU_DISABLE -->
+
+```haskell
 {-| some 
 doc that will be in a snippet -}
 main :: IO ()
 main = print "hi!"
 ```
 
+<!-- FOURMOLU_ENABLE -->
+
 <b name="fn_laws">1</b> <- Some html
 
 {- LIMA_DISABLE -}
 
 in comments should read like {- LIMA_DISABLE -}
+<!-- LIMA_DISABLE
+
+-- Some text
+
+LIMA_ENABLE -->
 
 ```haskell
 -- shouldn't be ignored

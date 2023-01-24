@@ -1,31 +1,36 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# HLINT ignore "Redundant bracket" #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
+{-# HLINT ignore "Redundant multi-way if" #-}
 
 -- | Functions to convert @Haskell@ to @Markdown@ and between @Literate Haskell@ (@.lhs@) and @Markdown@.
-module Converter (lhsToMd, mdToLhs, hsToMd, Config (..), ConfigHs2Md (..)) where
+module Converter (hsToMd, mdToHs, lhsToMd, mdToLhs, Config (..), ConfigHsMd (..)) where
 
 import Data.Default (Default)
 import Data.List (isPrefixOf, isSuffixOf)
 import Data.Yaml (FromJSON (..))
-import Data.Yaml.Aeson (FromJSON (..), withObject, (.:), (.:?))
+import Data.Yaml.Aeson (withObject, (.:), (.:?))
 import GHC.Generics (Generic)
 
 -- | App config.
-newtype Config = Config {configHs2Md :: Maybe ConfigHs2Md} deriving (Generic, Default)
+newtype Config = Config {configHsMd :: Maybe ConfigHsMd} deriving (Generic, Default)
 
 instance FromJSON Config where
-  parseJSON = withObject "Configs" (\v -> Config <$> v .:? "hs2md")
+  parseJSON = withObject "Configs" (\v -> Config <$> v .:? "hs-md")
 
 -- | Config for @Haskell@ to @Markdown@ converter.
-newtype ConfigHs2Md = ConfigHs2Md {ignoredComments :: [String]} deriving (Generic, Default)
+newtype ConfigHsMd = ConfigHs2Md {specialComments :: [String]} deriving (Generic, Default)
 
-instance FromJSON ConfigHs2Md where
+instance FromJSON ConfigHsMd where
   parseJSON =
     withObject
       "CommentsToIgnore"
-      (\v -> ConfigHs2Md <$> v .: "ignore-comments")
+      (\v -> ConfigHs2Md <$> v .: "special-comments")
 
 backticks :: String
 backticks = "```"
@@ -136,8 +141,11 @@ _LIMA_DISABLE = "LIMA_DISABLE"
 _LIMA_ENABLE :: String
 _LIMA_ENABLE = "LIMA_ENABLE"
 
-defaultIgnoredComments :: [String]
-defaultIgnoredComments = ["FOURMOLU_DISABLE", "FOURMOLU_ENABLE"]
+-- | Comments that should be ignored for some reason
+--
+-- FOURMOLU_DISABLE is ignored because it's a special comment and shouldn't be visible in a `.md`
+specialCommentsDefault :: [String]
+specialCommentsDefault = ["FOURMOLU_DISABLE", "FOURMOLU_ENABLE"]
 
 endsWith :: String -> String -> Bool
 endsWith = flip isSuffixOf
@@ -152,69 +160,146 @@ mcOpenSpace = mcOpen ++ " "
 mcClose :: String
 mcClose = "-}"
 
+mcCloseSpace :: String
+mcCloseSpace = " -}"
+
 dropEnd :: Int -> String -> String
-dropEnd n s
-  | n > 0 && not (null s) = dropEnd (n - 1) (init s)
-  | otherwise = s
+dropEnd n s = reverse (drop n (reverse s))
 
 backticksHs :: String
 backticksHs = backticks ++ "haskell"
 
-squashEmpties :: [String] -> [String]
-squashEmpties = dropWhile (== "")
+dropEmpties :: [String] -> [String]
+dropEmpties = dropWhile (== "")
+
+-- Markdown comments
+
+-- | Open a @Markdown@ comment
+mdcOpen :: String
+mdcOpen = "<!--"
+
+-- | Close a @Markdown@ comment
+mdcClose :: String
+mdcClose = "-->"
+
+mdcOpenSpace :: String
+mdcOpenSpace = mdcOpen ++ " "
+
+mdcCloseSpace :: String
+mdcCloseSpace = " " ++ mdcClose
+
+stripMc :: String -> String
+stripMc x = dropEnd (length mcCloseSpace) (drop (length mcOpenSpace) x)
 
 -- | Convert @Haskell@ to @Markdown@.
 --
 -- Multi-line comments are copied as text blocks and @Haskell@ code is copied as @Haskell@ snippets.
-hsToMd :: ConfigHs2Md -> String -> String
-hsToMd ConfigHs2Md{..} = unlines . reverse . (\x -> convert True False False x []) . lines
+hsToMd :: ConfigHsMd -> String -> String
+hsToMd ConfigHs2Md{..} = unlines . dropWhile (== "") . reverse . (\x -> convert True False False x []) . lines
  where
-  ignoredComments_ = defaultIgnoredComments ++ ignoredComments
+  specialComments_ = specialCommentsDefault ++ specialComments
   convert :: Bool -> Bool -> Bool -> [String] -> [String] -> [String]
   convert inLimaEnable inComments inSnippet (h : hs) res
-    | -- disable
-      -- split a snippet
-      not inComments && h `startsWith` (mcOpenSpace ++ _LIMA_DISABLE) =
-        convert False False False hs ([backticks | inSnippet] ++ res)
-    | -- enable
-      -- split a snippet
-      not inComments && h `startsWith` (mcOpenSpace ++ _LIMA_ENABLE) =
-        convert True False inSnippet hs res
-    | -- if disabled
-      not inLimaEnable =
-        convert inLimaEnable False False hs res
-    | -- a magic comment should be ignored
-      -- does't split a snippet
-      not inComments && h `startsWithAnyOf` ((mcOpenSpace ++) <$> ignoredComments_) =
-        convert inLimaEnable False inSnippet hs res
-    | -- start of a multi-line comment
-      not inComments && (h `startsWith` mcOpenSpace || h == mcOpen) =
-        let x' = drop 3 h
-            pref = if inSnippet then ["", backticks] else []
-            res' = if inSnippet then squashEmpties res else res
-         in -- if a multiline comment ends on the same line
-            if h `endsWith` mcClose
-              then convert inLimaEnable False False hs ([dropEnd 3 x'] ++ pref ++ res')
-              else convert inLimaEnable True False hs ([x' | not (null x')] ++ pref ++ res')
-    | -- a special comment
-      -- is a part of a snippet
-      not inComments && h `startsWith` mcOpen =
-        convert inLimaEnable False True hs ([h] ++ [backticksHs | not inSnippet] ++ res)
-    | -- end of a multiline comment
-      inComments && h `startsWith` mcClose =
-        convert inLimaEnable False False hs ("" : res)
-    | -- copy everything from comments
-      inComments =
-        convert inLimaEnable True False hs (h : res)
-    -- not in comments
-    | -- if not in snippet, collapse consequent empty lines
-      not inSnippet && null h =
-        convert inLimaEnable False False hs ("" : squashEmpties res)
-    | -- non-empty line means the start of a Haskell snippet
-      not inSnippet && not (null h) =
-        convert inLimaEnable False True hs ([h, backticksHs, ""] ++ squashEmpties res)
-    | -- lines in snippet are copied
-      otherwise =
-        convert inLimaEnable False True hs (h : res)
-  convert limaEnable inComments inSnippet [] res =
-    [backticks | inSnippet] ++ squashEmpties res
+    | not inComments =
+        if
+            | -- disable
+              -- split a snippet
+              h `startsWith` (mcOpenSpace ++ _LIMA_DISABLE) ->
+                (convert False False False hs)
+                  ([mdcOpenSpace ++ _LIMA_DISABLE] ++ [backticks | inSnippet] ++ res)
+            | -- enable
+              h `startsWith` (mcOpenSpace ++ _LIMA_ENABLE) ->
+                convert True False inSnippet hs ((_LIMA_ENABLE ++ mdcCloseSpace) : res)
+            | -- if disabled
+              not inLimaEnable ->
+                convert inLimaEnable False False hs (h : res)
+            | -- a special comment
+              -- comment should be in multi-line style like '{- FOURMOLU_DISABLE -}'
+              -- splits a snippet
+              h `startsWithAnyOf` ((mcOpenSpace ++) <$> specialComments_) ->
+                (convert inLimaEnable False False hs)
+                  ([mdcOpenSpace ++ stripMc h ++ mdcCloseSpace] ++ ["" | inSnippet] ++ [backticks | inSnippet] ++ dropEmpties res)
+            | -- start of a multi-line comment
+              -- it should be either like '{- ...' or '{-\n'
+              (h `startsWith` mcOpenSpace || h == mcOpen) ->
+                let x' = drop 3 h
+                    pref = "" : [backticks | inSnippet]
+                    res' = if inSnippet then dropEmpties res else res
+                 in -- if a multiline comment ends on the same line
+                    -- it should end with '-}'
+                    if h `endsWith` mcClose
+                      then convert inLimaEnable False False hs ([dropEnd (length mcCloseSpace) x'] ++ pref ++ res')
+                      else convert inLimaEnable True False hs ([x' | not (null x')] ++ pref ++ res')
+            | -- non-empty line means the start of a Haskell snippet
+              not inSnippet ->
+                if not (null h)
+                  then -- non-empty line means the start of a Haskell snippet
+                    convert inLimaEnable False True hs ([h, backticksHs] ++ squashEmpties res)
+                  else -- if not in snippet, collapse consequent empty lines
+                    convert inLimaEnable False False hs res
+            | inSnippet ->
+                convert inLimaEnable False True hs (h : res)
+    | inComments =
+        if
+            | -- end of a multiline comment
+              h `startsWith` mcClose ->
+                convert inLimaEnable False False hs res
+            | -- copy everything from comments
+              otherwise ->
+                convert inLimaEnable True False hs (h : res)
+  convert _ _ inSnippet [] res =
+    [backticks | inSnippet] ++ dropEmpties res
+
+stripMdc :: String -> String
+stripMdc x = dropEnd (length mdcCloseSpace) (drop (length mdcOpenSpace) x)
+
+squashEmpties :: [String] -> [String]
+squashEmpties = ([""] ++) . dropEmpties
+
+-- | Convert @Markdown@ to @Haskell@.
+--
+-- Multi-line comments are copied as text blocks and @Haskell@ code is copied as @Haskell@ snippets.
+mdToHs :: ConfigHsMd -> String -> String
+mdToHs ConfigHs2Md{..} = unlines . dropWhile (== "") . reverse . (\x -> convert False False False x []) . lines
+ where
+  specialComments_ = specialCommentsDefault ++ specialComments
+  closeTextIf x = [mcClose | x]
+  convert :: Bool -> Bool -> Bool -> [String] -> [String] -> [String]
+  convert inText inSnippet inComments (h : hs) res
+    | inComments =
+        if
+            | -- enable
+              h `startsWith` (_LIMA_ENABLE ++ mdcCloseSpace) ->
+                -- split text
+                (convert inText inSnippet False hs)
+                  ([mcOpenSpace ++ _LIMA_ENABLE ++ mcCloseSpace] ++ ["" | inText] ++ closeTextIf inText ++ res)
+            | -- in a comment
+              otherwise ->
+                convert False False True hs (h : res)
+    | not inSnippet =
+        if
+            | -- found comments
+              h `startsWith` (mdcOpenSpace ++ _LIMA_DISABLE) ->
+                (convert False False True hs)
+                  ([mcOpenSpace ++ _LIMA_DISABLE ++ mcCloseSpace] ++ ["" | inText] ++ closeTextIf inText ++ res)
+            | -- found a special comment
+              h `startsWithAnyOf` ((mdcOpenSpace ++) <$> specialComments_) ->
+                (convert False False False hs)
+                  ([mcOpenSpace ++ stripMdc h ++ mcCloseSpace] ++ ["" | inText] ++ closeTextIf inText ++ res)
+            | -- start of a haskell snippet
+              h `startsWith` backticksHs ->
+                convert False True False hs (closeTextIf inText ++ squashEmpties res)
+            | not inText ->
+                if
+                    | null h -> convert inText False False hs res
+                    | otherwise -> convert True False False hs ([h, mcOpen, ""] ++ res)
+            | -- copy text line by line
+              otherwise ->
+                convert True False False hs (h : res)
+    | otherwise =
+        if h == backticks
+          then -- end of a snippet
+            convert False False False hs res
+          else -- in a snippet
+            convert False True False hs (h : res)
+  convert inText _ _ [] res = [mcClose | inText] ++ res

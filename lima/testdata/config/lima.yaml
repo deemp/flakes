@@ -1,4 +1,4 @@
-hs2md:
-  ignore-comments:
-    - "first comment to ignore"
-    - "second comment to ignore"
+hs-md:
+  special-comments:
+    - "first special comment"
+    - "second special comment"
