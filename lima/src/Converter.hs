@@ -3,10 +3,9 @@
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# HLINT ignore "Redundant bracket" #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
-{-# HLINT ignore "Redundant multi-way if" #-}
+{-# HLINT ignore "Redundant bracket" #-}
 
 -- | Functions to convert @Haskell@ to @Markdown@ and between @Literate Haskell@ (@.lhs@) and @Markdown@.
 module Converter (hsToMd, mdToHs, lhsToMd, mdToLhs, Config (..), ConfigHsMd (..)) where
@@ -240,13 +239,11 @@ hsToMd ConfigHs2Md{..} = unlines . dropWhile (== "") . reverse . (\x -> convert 
             | inSnippet ->
                 convert inLimaEnable False True hs (h : res)
     | inComments =
-        if
-            | -- end of a multiline comment
-              h `startsWith` mcClose ->
-                convert inLimaEnable False False hs res
-            | -- copy everything from comments
-              otherwise ->
-                convert inLimaEnable True False hs (h : res)
+        if -- end of a multiline comment
+        h `startsWith` mcClose
+          then convert inLimaEnable False False hs res
+          else -- copy everything from comments
+            convert inLimaEnable True False hs (h : res)
   convert _ _ inSnippet [] res =
     [backticks | inSnippet] ++ dropEmpties res
 
@@ -267,15 +264,14 @@ mdToHs ConfigHs2Md{..} = unlines . dropWhile (== "") . reverse . (\x -> convert 
   convert :: Bool -> Bool -> Bool -> [String] -> [String] -> [String]
   convert inText inSnippet inComments (h : hs) res
     | inComments =
-        if
-            | -- enable
-              h `startsWith` (_LIMA_ENABLE ++ mdcCloseSpace) ->
-                -- split text
-                (convert inText inSnippet False hs)
-                  ([mcOpenSpace ++ _LIMA_ENABLE ++ mcCloseSpace] ++ ["" | inText] ++ closeTextIf inText ++ res)
-            | -- in a comment
-              otherwise ->
-                convert False False True hs (h : res)
+        if -- enable
+        h `startsWith` (_LIMA_ENABLE ++ mdcCloseSpace)
+          then -- split text
+
+            (convert inText inSnippet False hs)
+              ([mcOpenSpace ++ _LIMA_ENABLE ++ mcCloseSpace] ++ ["" | inText] ++ closeTextIf inText ++ res)
+          else -- in a comment
+            convert False False True hs (h : res)
     | not inSnippet =
         if
             | -- found comments
@@ -290,9 +286,11 @@ mdToHs ConfigHs2Md{..} = unlines . dropWhile (== "") . reverse . (\x -> convert 
               h `startsWith` backticksHs ->
                 convert False True False hs (closeTextIf inText ++ squashEmpties res)
             | not inText ->
-                if
-                    | null h -> convert inText False False hs res
-                    | otherwise -> convert True False False hs ([h, mcOpen, ""] ++ res)
+                if null h
+                  then -- just a blank line
+                    convert inText False False hs res
+                  else -- start of text
+                    convert True False False hs ([h, mcOpen, ""] ++ res)
             | -- copy text line by line
               otherwise ->
                 convert True False False hs (h : res)
