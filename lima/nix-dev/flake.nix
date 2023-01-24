@@ -49,7 +49,6 @@
       };
 
       codiumTools = [
-        writeSettings
         cabal
         hls
         hpack
@@ -61,18 +60,29 @@
         runtimeDependencies = codiumTools;
       };
 
-      tools = codiumTools ++ [ codium ];
+      tools = codiumTools;
     in
     {
       packages = {
-        default = codium;
+        inherit codium writeSettings;
       };
 
       devShells.default = mkShell
         {
           packages = tools;
-          bash.extra = '''';
-          commands = mkCommands "tools" tools;
+          bash.extra = "";
+          commands = (mkCommands "tools" tools) ++ [
+            {
+              name = "nix run nix-dev/#writeSettings";
+              category = "other tools";
+              help = writeSettings.meta.description;
+            }
+            {
+              name = "nix run nix-dev/#codium .";
+              category = "other tools";
+              help = codium.meta.description;
+            }
+          ];
         };
     });
 
