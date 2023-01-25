@@ -32,7 +32,7 @@ library
       src
   build-depends:
       aeson
-    , base >=4.14 && <5
+    , base ==4.*
     , data-default
     , optparse-applicative
     , yaml
@@ -44,7 +44,7 @@ executable lima
       Paths_lima
   build-depends:
       aeson
-    , base >=4.14 && <5
+    , base ==4.*
     , data-default
     , lima
     , optparse-applicative
@@ -60,7 +60,7 @@ test-suite lima-test
       test
   build-depends:
       aeson
-    , base >=4.14 && <5
+    , base ==4.*
     , data-default
     , lima
     , optparse-applicative
