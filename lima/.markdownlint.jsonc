@@ -1,4 +1,5 @@
 {
     "no-space-in-code": false,
-    "line-length": false
+    "line-length": false,
+    "no-duplicate-header": false
 }

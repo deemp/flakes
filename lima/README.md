@@ -46,18 +46,58 @@ If you'd like to provide some code in a `.lhs`, follow these rules:
 - The round-trip property is not guarranteed if you insert code snippets into `.lhs` using three backticks
   - Nevertheless, feel free to insert them into `.md`. In `.lhs`, they will just lose the language info
 
-## Usage
+## Command-line tool
 
-`lima (md2lhs|lhs2md|hs2md) (-f file) [-c config]`
-The tool will convert each file from one format to the specified one, creating the files `(file.md)` in the same directory as the initial files.
+### cabal
 
-To install the executable on Windows, if you can't convince cabal to use [`--bindir-method=copy`](https://github.com/haskell/cabal/issues/5748) you can build the project locally and copy the built executeable to `C:/Users/username/AppData/Roaming/cabal/bin` and ensure that this directory is in your `PATH`.
+1. Clone this repo and install `lima`.
+
+    ```console
+    git clone https://github.com/deemp/flakes
+    cd flakes/lima
+    cabal update
+    cabal install .
+    ```
+
+### nix
+
+1. [Install Nix](https://github.com/deemp/flakes/blob/main/README/InstallNix.md)
+
+1. Get `lima` on `PATH`.
+
+    ```console
+    nix flake lock github:deemp/flakes
+    nix shell github:deemp/flakes?dir=lima
+    lima --help
+    ```
+
+### Windows
+
+To install the executable on `Windows`, if you can't convince cabal to use [`--bindir-method=copy`](https://github.com/haskell/cabal/issues/5748) you can build the project locally and copy the built executeable to `C:/Users/username/AppData/Roaming/cabal/bin` and ensure that this directory is in your `PATH`.
 
 ## Contribute
 
-1. [Learn](https://github.com/deemp/flakes#prerequisites) about `Nix`.
+Clone this repo and enter `lima`
 
-1. Run a devshell:
+```console
+git clone https://github.com/deemp/flakes
+cd flakes/lima
+```
+
+### cabal
+
+Build as usually
+
+```console
+cabal update
+cabal build
+```
+
+### nix
+
+1. [Install](https://github.com/deemp/flakes/blob/main/README/InstallNix.md) `Nix`. Optionally, [learn](https://github.com/deemp/flakes#prerequisites) more about `Nix`.
+
+1. Run a devshell and build `lima`:
 
     ```console
     nix develop nix-dev/
