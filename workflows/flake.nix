@@ -76,10 +76,10 @@
       };
 
       run = {
-        runExecutableAndCommit = executable: commitMessage:
+        nixRunAndCommit = installable: commitMessage:
           ''
             git pull --rebase --autostash
-            nix run .#${executable}
+            nix run .#${installable}
             git commit -a -m "action: ${commitMessage}" && git push || echo ""
           '';
       };
@@ -126,7 +126,7 @@
         updateLocksAndCommit = let name = "Update flake locks"; in
           {
             inherit name;
-            run = run.runExecutableAndCommit names.updateLocks name;
+            run = run.nixRunAndCommit names.updateLocks name;
           };
       };
 
