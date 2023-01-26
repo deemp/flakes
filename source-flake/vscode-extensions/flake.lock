@@ -1,5 +1,21 @@
 {
   "nodes": {
+    "flake-compat": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1673956053,
+        "narHash": "sha256-4gtG9iQuiKITOjNQQeQIpoIB6b16fm+504Ch3sNKLd8=",
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "rev": "35bb57c0c8d8b62bbfd284272c928ceb64ddbde9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "type": "github"
+      }
+    },
     "flake-utils": {
       "locked": {
         "lastModified": 1667395993,
@@ -38,21 +54,22 @@
     },
     "vscode-extensions": {
       "inputs": {
+        "flake-compat": "flake-compat",
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1671213981,
-        "narHash": "sha256-AhOrmx7Z5uHJi4vf+Q4p1EtxHOKDsnmNI42R2Bln3P8=",
-        "owner": "deemp",
+        "lastModified": 1674721854,
+        "narHash": "sha256-mIKFXzQPmw9atsfeli18BOiGeCiyH9cmstD7ji+PaOw=",
+        "owner": "nix-community",
         "repo": "nix-vscode-extensions",
-        "rev": "6ba9f5d130f0c26dbfb832a7b8e8d5662cd49b3f",
+        "rev": "02da98d3bba90f21cbc2471fc429b559b66f8cd7",
         "type": "github"
       },
       "original": {
-        "owner": "deemp",
+        "owner": "nix-community",
         "repo": "nix-vscode-extensions",
-        "rev": "6ba9f5d130f0c26dbfb832a7b8e8d5662cd49b3f",
+        "rev": "02da98d3bba90f21cbc2471fc429b559b66f8cd7",
         "type": "github"
       }
     }
