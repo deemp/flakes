@@ -99,7 +99,7 @@ mkExtensions
     tamasfe = "even-better-toml";
   };
   terraform = {
-    #   hashicorp = "terraform";
+      hashicorp = "terraform";
   };
   fish = {
     bmalehorn = "vscode-fish";
