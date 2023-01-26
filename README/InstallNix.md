@@ -3,9 +3,9 @@
 ## Nix
 
 1. Edit [nix.conf](https://nixos.org/manual/nix/unstable/command-ref/conf-file.html#description)
-    - Create file if missing
-    - [Enable](https://nixos.wiki/wiki/Flakes#Permanent) flakes
-    - Set [show-trace](https://nixos.org/manual/nix/unstable/command-ref/conf-file.html#conf-show-trace) = true
+    1. Create file if missing
+    1. [Enable](https://nixos.wiki/wiki/Flakes#Permanent) flakes in it
+    1. Set `show-trace = true` ([doc](https://nixos.org/manual/nix/unstable/command-ref/conf-file.html#conf-show-trace))
 
 1. Install [Nix](https://nixos.org/download.html) (Single-user installation)
 
