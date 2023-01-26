@@ -52,6 +52,7 @@
               pkgs.bashInteractive
               pkgs.rnix-lsp
               pkgs.nixpkgs-fmt
+              pkgs.direnv
               runtimeDependencies
             ];
           in
