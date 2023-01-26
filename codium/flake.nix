@@ -6,8 +6,6 @@
     flake-utils.follows = "flake-utils_/flake-utils";
     vscode-extensions_.url = "github:deemp/flakes?dir=source-flake/vscode-extensions";
     vscode-extensions.follows = "vscode-extensions_/vscode-extensions";
-    vscode-extensions-selected_.url = "github:deemp/flakes?dir=source-flake/vscode-extensions-selected";
-    vscode-extensions-selected.follows = "vscode-extensions-selected_/vscode-extensions-selected";
     drv-tools.url = "github:deemp/flakes?dir=drv-tools";
     devshell.url = "github:deemp/flakes?dir=devshell";
   };
@@ -18,7 +16,6 @@
     , nixpkgs
     , drv-tools
     , vscode-extensions
-    , vscode-extensions-selected
     , devshell
     , ...
     }:
@@ -35,12 +32,7 @@
         inherit (devshell.functions.${system}) mkCommands mkShell;
 
         # A set of VSCodium extensions
-        extensions = import ./nix-files/extensions.nix {
-          inherit
-            system
-            vscode-extensions
-            vscode-extensions-selected;
-        };
+        extensions = import ./nix-files/extensions.nix { inherit system vscode-extensions pkgs; };
 
         # nixified and restructured settings.json
         settingsNix = import ./nix-files/settings.nix;

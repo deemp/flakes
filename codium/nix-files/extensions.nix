@@ -1,86 +1,115 @@
 # A set of VSCodium extensions
-{ system, vscode-extensions, vscode-extensions-selected }:
+{ system, pkgs, vscode-extensions }:
 let
-  inherit (vscode-extensions.packages.${system}) vscode open-vsx;
+  inherit (vscode-extensions.extensions.${system}) vscode;
+  inherit (pkgs.lib.attrsets) mapAttrs' mapAttrsToList recursiveUpdate;
+  mkExtensionsGroup = exts@{ ... }: builtins.foldl' recursiveUpdate { } (
+    pkgs.lib.lists.flatten (
+      mapAttrsToList
+        (name: value:
+          let value_ = if builtins.isList value then value else [ value ]; in
+          map (ext: { ${ext} = vscode.${name}.${ext}; }) value_
+        )
+        exts));
+  mkExtensions = mapAttrs' (x: y: { name = x; value = mkExtensionsGroup y; });
 in
+mkExtensions
 {
   haskell = {
-    inherit (vscode.haskell) haskell;
-    inherit (vscode.justusadam) language-haskell;
-    inherit (vscode.visortelle) haskell-spotlight;
-    inherit (vscode.redhat) vscode-yaml;
+    haskell = "haskell";
+    justusadam = "language-haskell";
+    visortelle = "haskell-spotlight";
+    redhat = "vscode-yaml";
   };
   yaml = {
-    inherit (vscode.redhat) vscode-yaml;
+    redhat = "vscode-yaml";
   };
   purescript = {
-    inherit (open-vsx.nwolverson) ide-purescript language-purescript;
-    inherit (open-vsx.dhall) dhall-lang vscode-dhall-lsp-server;
-    inherit (vscode.br4ch1st0chr0n3) purs-keybindings;
-    inherit (vscode.ryuta46) multi-command;
-    inherit (vscode.chunsen) bracket-select;
+    nwolverson = [
+      "ide-purescript"
+      "language-purescript"
+    ];
+    dhall = [
+      "dhall-lang"
+      "vscode-dhall-lsp-server"
+    ];
+    br4ch1st0chr0n3 = "purs-keybindings";
+    ryuta46 = "multi-command";
+    chunsen = "bracket-select";
   };
   nix = {
-    inherit (open-vsx.mkhl) direnv;
-    inherit (open-vsx.jnoortheen) nix-ide;
+    mkhl = "direnv";
+    jnoortheen = "nix-ide";
   };
   github = {
-    inherit (vscode.github) vscode-pull-request-github;
-    inherit (vscode.eamodio) gitlens;
-    inherit (vscode.cschleiden) vscode-github-actions;
-    inherit (vscode.redhat) vscode-yaml;
+    github = "vscode-pull-request-github";
+    eamodio = "gitlens";
+    cschleiden = "vscode-github-actions";
+    redhat = "vscode-yaml";
   };
-  typescript = { inherit (open-vsx.ms-vscode) vscode-typescript-next; };
+  typescript = {
+    ms-vscode = "vscode-typescript-next";
+  };
   markdown = {
-    inherit (vscode.bierner)
-      github-markdown-preview markdown-emoji markdown-checkbox
-      markdown-yaml-preamble markdown-footnotes markdown-preview-github-styles;
-    inherit (open-vsx.davidanson) vscode-markdownlint;
-    inherit (open-vsx.yzhang) markdown-all-in-one;
+    bierner =
+      [
+        "github-markdown-preview"
+        "markdown-emoji"
+        "markdown-checkbox"
+        "markdown-yaml-preamble"
+        "markdown-footnotes"
+        "markdown-preview-github-styles"
+      ];
+    davidanson = "vscode-markdownlint";
+    yzhang = "markdown-all-in-one";
   };
   misc = {
-    inherit (open-vsx.usernamehw) errorlens;
-    inherit (vscode.gruntfuggly) todo-tree;
-    inherit (open-vsx.mkhl) direnv;
+    usernamehw = "errorlens";
+    gruntfuggly = "todo-tree";
+    mkhl = "direnv";
   };
   docker = {
-    inherit (vscode.ms-vscode-remote) remote-containers;
-    inherit (open-vsx.ms-azuretools) vscode-docker;
-    inherit (open-vsx.exiasr) hadolint;
+    ms-vscode-remote = "remote-containers";
+    ms-azuretools = "vscode-docker";
+    exiasr = "hadolint";
   };
-  # c-cpp = {
-  #   inherit (vscode.ms-vscode) cpptools-themes cmake-tools cpptools;
-  # };
+  c-cpp = {
+    ms-vscode = [
+      "cpptools-themes"
+      "cmake-tools"
+      "cpptools"
+    ];
+  };
   python = {
-    inherit (vscode.donjayamanne) python-extension-pack;
-    inherit (vscode.njpwerner) autodocstring;
-    inherit (vscode.ms-python) python;
-    inherit (open-vsx.samuelcolvin) jinjahtml;
-    inherit (vscode.monosans) djlint;
-    inherit (vscode.batisteo) vscode-django;
-    inherit (vscode.kevinrose) vsc-python-indent;
-    inherit (vscode.visualstudioexptteam) vscodeintellicode;
+    donjayamanne = "python-extension-pack";
+    njpwerner = "autodocstring";
+    ms-python = "python";
+    samuelcolvin = "jinjahtml";
+    monosans = "djlint";
+    batisteo = "vscode-django";
+    kevinrose = "vsc-python-indent";
+    visualstudioexptteam = "vscodeintellicode";
   };
   kubernetes = {
-    inherit (vscode.ipedrazas) kubernetes-snippets;
-    inherit (vscode.ms-kubernetes-tools) vscode-kubernetes-tools;
-    inherit (vscode.redhat) vscode-yaml;
+    ipedrazas = "kubernetes-snippets";
+    ms-kubernetes-tools = "vscode-kubernetes-tools";
+    redhat = "vscode-yaml";
   };
   toml = {
-    inherit (open-vsx.tamasfe) even-better-toml;
+    tamasfe = "even-better-toml";
   };
   terraform = {
-    inherit (vscode.hashicorp) terraform;
+    #   hashicorp = "terraform";
   };
   fish = {
-    inherit (open-vsx.bmalehorn) vscode-fish;
+    bmalehorn = "vscode-fish";
   };
   postgresql = {
-    inherit (vscode.cweijan) vscode-postgresql-client2;
-    inherit (vscode.inferrinizzard) prettier-sql-vscode;
+    cweijan = "vscode-postgresql-client2";
+    inferrinizzard = "prettier-sql-vscode";
   };
   sql = {
-    inherit (vscode.mtxr) sqltools;
-    inherit (vscode.inferrinizzard) prettier-sql-vscode;
+    mtxr = "sqltools";
+    inferrinizzard = "prettier-sql-vscode";
   };
 }
