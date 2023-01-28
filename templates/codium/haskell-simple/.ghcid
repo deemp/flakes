@@ -1,4 +1,4 @@
--c stack ghci app/Main.hs
+-c cabal repl app/Main.hs
 -W
 -r=:main
 --reload=./
