@@ -111,6 +111,7 @@
       readSymlinks = dir: readXs dir "symlink";
 
       # assuming that a `pname` of a program coincides with its main executable's name
+      # !unsafe to use with packages whose pname may change!
       mkBin = drv@{ pname, ... }: "${drv}/bin/${pname}";
 
       # same as `mkBin`, but need to provide the necessary executable name
