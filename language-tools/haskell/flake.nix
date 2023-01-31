@@ -25,8 +25,8 @@
       # GHC of a specific version
       # With haskell packages that are dependencies of the given packages
       ghcGHC = ghcVersion: override: packages:
-        (haskellPackagesGHCOverride ghcVersion override).ghcWithPackages
-          (ps: haskellDepsPackages (packages ps));
+        ((haskellPackagesGHCOverride ghcVersion override).ghcWithPackages
+          (ps: haskellDepsPackages (packages ps))) // { pname = "ghc"; };
 
       # build tool with GHC of a specific version available on PATH
       buildToolWithFlagsGHC = name: drv: flags: ghcVersion: override: packages: deps_:
@@ -136,6 +136,7 @@
                 # lzma = super.lzma;
               })
               (_: {
+                # see what can be overriden - https://github.com/NixOS/nixpkgs/blob/0ba44a03f620806a2558a699dba143e6cf9858db/pkgs/development/haskell-modules/generic-builder.nix#L13
                 librarySystemDepends = [ pkgs.zlib ];
               });
           };
@@ -176,6 +177,6 @@
             '';
           };
         };
-      inherit deps_;
+      inherit deps_ tools;
     });
 }
