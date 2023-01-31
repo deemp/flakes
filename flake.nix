@@ -48,8 +48,6 @@
               "codium"
               "json2md"
               "devshell"
-              "manager"
-              "manager/nix-dev"
               "lima"
               "lima/nix-dev"
               "terrafix"

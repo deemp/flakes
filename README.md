@@ -20,7 +20,6 @@ Nix flakes for tools that I use
 - [language-tools](./flakes-tools) - tools for languages that I use
   - `Haskell`, `Python`, `PureScript`, `nix`
 - [lima](./lima) - convert between `Literate Haskell` (`.lhs`) or `Haskell` (`.hs`) and `Markdown` (`.md`) with [round-trip property](https://hedgehog.qa/article/haskell-round-trip) usually kept
-- [manager](./manager) - a `Haskell` CLI app for managing projects with multiple `Main.hs` modules
 - [source-flake](./source-flake/) - pinned flakes
   - I use them to sync flake inputs in my flakes
 - [templates](./templates/) - Nix flake templates
