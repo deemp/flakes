@@ -52,7 +52,7 @@
       in
       {
         packages = {
-          inherit writeSettings;
+          inherit writeSettings codium;
         };
         devShells.default = mkShell
           {
