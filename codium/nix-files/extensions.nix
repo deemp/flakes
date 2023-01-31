@@ -8,7 +8,7 @@ let
       mapAttrsToList
         (name: value:
           let value_ = if builtins.isList value then value else [ value ]; in
-          map (ext: { ${ext} = vscode.${name}.${ext}; }) value_
+          map (ext: { ${ext} = vscode-marketplace.${name}.${ext}; }) value_
         )
         exts));
   mkExtensions = mapAttrs' (x: y: { name = x; value = mkExtensionsGroup y; });

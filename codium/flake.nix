@@ -4,7 +4,7 @@
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
-    vscode-extensions_.url = "github:deemp/flakes?dir=source-flake/vscode-extensions";
+    vscode-extensions_.url = "github:deemp/flakes?dir=source-flake/nix-vscode-extensions";
     vscode-extensions.follows = "vscode-extensions_/vscode-extensions";
     drv-tools.url = "github:deemp/flakes?dir=drv-tools";
     devshell.url = "github:deemp/flakes?dir=devshell";
@@ -142,9 +142,6 @@
         };
         configs = {
           inherit extensions settingsNix;
-        };
-        packages = {
-          inherit testCodium;
         };
         devShells.default = mkShell {
           packages = tools;
