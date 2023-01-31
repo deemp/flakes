@@ -5,7 +5,7 @@ Convert between
 - `Haskell` (`.hs`) files with `GitHub`-flavoured `Markdown` comments and `Markdown` (`.md`)
 - `Literate Haskell` (`.lhs`) files and `GitHub`-flavoured `Markdown` (`.md`).
 
-It is possible to make conversion abide the [roundtrip property](https://jesper.sikanda.be/posts/quickcheck-intro.html). In other words, make conversions `file.lhs` -> `file.lhs.md` -> `file.lhs.md.lhs` or `file.hs` -> `file.hs.md` -> `file.hs.md.hs` and get `file.lhs = file.lhs.md.lhs` and `file.hs = file.hs.md.hs` in terms of their contents.
+It is usually possible to make conversion abide the [roundtrip property](https://jesper.sikanda.be/posts/quickcheck-intro.html). In other words, make conversions `file.lhs` -> `file.lhs.md` -> `file.lhs.md.lhs` or `file.hs` -> `file.hs.md` -> `file.hs.md.hs` and get `file.lhs = file.lhs.md.lhs` and `file.hs = file.hs.md.hs` in terms of their contents.
 
 ## Alternatives
 
@@ -15,7 +15,7 @@ It is possible to make conversion abide the [roundtrip property](https://jesper.
 
 ## Conversion
 
-### file.hs -> file.hs.md
+### hs <-> md
 
 [Examples](./testdata/hs)
 
@@ -27,7 +27,7 @@ Rules for `.hs` -> `.md` conversion:
 - Special comments like `{- FOURMOLU_ENABLE -}` won't appear in a `.md`. You can supply other comments in a config (`hs-md.special-comments`). See the sample [config](./testdata/config/).
 - You can ignore parts of a `.hs` file by enclosing them into `{- LIMA_DISABLE -}` and `{- LIMA_ENABLE -}`. The lines between such comments will be commented out in the resulting `.md`.
 
-### file.lhs -> file.lhs.md -> file.lhs.md.lhs
+### lhs <-> md
 
 Examples:
 
@@ -111,6 +111,6 @@ cabal build
     nix run nix-dev/#codium .
     ```
 
-1. Open a `Haskell` file there, hower over a term and wait until `HLS` shows the hints.
+1. Open a `Haskell` file there, hover over a term and wait until `HLS` shows the hints.
 
 1. [Troubleshoot](https://github.com/deemp/flakes/blob/main/README/Troubleshooting.md) if necessary.

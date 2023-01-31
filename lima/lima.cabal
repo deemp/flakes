@@ -1,13 +1,13 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.0.
+-- This file has been generated from package.yaml by hpack version 0.35.1.
 --
 -- see: https://github.com/sol/hpack
 
 name:           lima
-version:        0.1.0.0
-synopsis:       Haskell -> Markdown and Literate Haskell <-> Markdown converter
-description:    See README here or on [GitHub](https://github.com/deemp/flakes/tree/main/lima#readme)
+version:        0.1.0.1
+synopsis:       (Haskell or Literate Haskell) <-> Markdown converter
+description:    See the [README.md](https://github.com/deemp/flakes/tree/main/lima#readme)
 category:       Productivity
 bug-reports:    https://github.com/deemp/flakes/issues
 author:         Fabian Schneider

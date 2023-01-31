@@ -3,7 +3,7 @@
 # # -- http://haskell.org/cabal/users-guide/
 
 # # -- The name of the package.
-name:                lima
+name: lima
 
 # -- The package version.  See the Haskell package versioning policy (PVP)
 # -- for standards guiding when and how versions should be incremented.
@@ -11,23 +11,23 @@ name:                lima
 # -- PVP summary:      +-+# --# --# --- breaking API changes
 # --                   | | +# --# --- non-breaking API additions
 # --                   | | | +# --- code changes with no API change
-version:               0.1.0.0
+version: 0.1.0.1
 
 # -- A short (one-line) description of the package.
-synopsis: Haskell -> Markdown and Literate Haskell <-> Markdown converter
+synopsis: (Haskell or Literate Haskell) <-> Markdown converter
 
 # # -- A longer description of the package.
-description: "See README here or on [GitHub](https://github.com/deemp/flakes/tree/main/lima#readme)"
+description: "See the [README.md](https://github.com/deemp/flakes/tree/main/lima#readme)"
 
 bug-reports: https://github.com/deemp/flakes/issues
-license:             MIT
-license-file:        LICENSE
-author:              Fabian Schneider
-maintainer:          Danila Danko
-category:            Productivity
+license: MIT
+license-file: LICENSE
+author: Fabian Schneider
+maintainer: Danila Danko
+category: Productivity
 extra-source-files:
-- CHANGELOG.md
-- README.md
+  - CHANGELOG.md
+  - README.md
 
 git: https://github.com/deemp/flakes/tree/main/lima#readme
 
@@ -35,21 +35,21 @@ library:
   source-dirs: src
 
 dependencies:
-- base >=4 && < 5
-- optparse-applicative
-- yaml
-- aeson
-- data-default
+  - base >=4 && < 5
+  - optparse-applicative
+  - yaml
+  - aeson
+  - data-default
 
 executables:
   lima:
     main: app/Main.hs
     dependencies:
-    - lima
+      - lima
 
 tests:
   lima-test:
     main: Main.hs
     source-dirs: test
     dependencies:
-    - lima
+      - lima
