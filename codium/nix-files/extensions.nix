@@ -1,7 +1,7 @@
 # A set of VSCodium extensions
 { system, pkgs, vscode-extensions }:
 let
-  inherit (vscode-extensions.extensions.${system}) vscode;
+  inherit (vscode-extensions.extensions.${system}) vscode-marketplace;
   inherit (pkgs.lib.attrsets) mapAttrs' mapAttrsToList recursiveUpdate;
   mkExtensionsGroup = exts@{ ... }: builtins.foldl' recursiveUpdate { } (
     pkgs.lib.lists.flatten (
@@ -99,7 +99,7 @@ mkExtensions
     tamasfe = "even-better-toml";
   };
   terraform = {
-      hashicorp = "terraform";
+    hashicorp = "terraform";
   };
   fish = {
     bmalehorn = "vscode-fish";
