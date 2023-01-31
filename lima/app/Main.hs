@@ -86,21 +86,20 @@ fill' = fill 100 $ text ""
 header_ :: Doc
 header_ =
   descriptionBlock
-    [ bold "lima" <-> "converts between" <-> bold "Haskell" <> lparen <> bold ".hs" <> rparen
-    , "and" <-> bold "Markdown" <> lparen <> bold ".md" <> rparen
-    , "and between" <-> bold "Literate Haskell" <> lparen <> bold ".lhs" <> rparen
-    , "and" <-> bold "Markdown" <> lparen <> bold ".md" <> rparen <> dot
+    [ bold "lima" <-> "converts between" <-> lparen <> bold "Haskell" <-> lparen <> bold ".hs" <> rparen
+    , "or" <-> bold "Literate Haskell" <> lparen <> bold ".lhs" <> rparen <> rparen
+    , "and" <-> bold "Markdown" <-> lparen <> bold ".md" <> rparen
     , fill'
     , "Learn more about a command by running:" <-> bold "lima COMMAND"
     , fill'
     , "Example usage:" <> fill'
     , fill'
     , bold "lima hs2md -f file.hs -c config.yaml" <> fill'
-    , indent 2 $ "Convert" <+> bold "HS" <+> "to" <+> bold "Markdown" <+> "using the config" <+> bold "config.yaml" <> colon <> fill'
+    , indent 2 $ "Convert" <+> bold "HS" <+> "to" <+> bold "MD" <+> "using the config" <+> bold "config.yaml" <> colon <> fill'
     , indent 2 "file1.hs -> file1.hs.md"
     , fill'
     , bold "lima lhs2md -f file1.lhs -f file2.lhs" <> fill'
-    , indent 2 $ "Convert" <+> bold "LHS" <+> "to" <+> bold "Markdown" <> colon <> fill'
+    , indent 2 $ "Convert" <+> bold "LHS" <+> "to" <+> bold "MD" <> colon <> fill'
     , indent 2 $ "file1.lhs -> file1.lhs.md" <> comma <-> "file2.lhs -> file2.lhs.md"
     ]
 
