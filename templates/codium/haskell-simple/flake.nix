@@ -119,12 +119,6 @@
 
       tools = codiumTools ++ [ codium ];
 
-      defaultShell = mkShell {
-        packages = tools;
-        bash.extra = "export LANG=C.utf8";
-        commands = mkCommands "tools" tools;
-      };
-
       # --- flakes tools ---
       # Also, we provide scripts that can be used in CI
       flakesTools = mkFlakesTools [ "." ];
@@ -139,11 +133,17 @@
           pushToCachix;
         inherit
           writeSettings
-          writeWorkflows;
+          writeWorkflows
+          codium;
       };
 
       devShells = {
-        default = defaultShell;
+        default = mkShell {
+          packages = tools;
+          # sometimes necessary for programs that work with files
+          bash.extra = "export LANG=C.utf8";
+          commands = mkCommands "tools" tools;
+        };
       };
     });
 

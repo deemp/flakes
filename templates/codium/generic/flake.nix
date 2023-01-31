@@ -23,34 +23,44 @@
         pkgs = nixpkgs.legacyPackages.${system};
         inherit (my-codium.functions.${system}) mkCodium writeSettingsJSON;
         inherit (my-codium.configs.${system}) extensions settingsNix;
-        inherit (vscode-extensions.packages.${system}) vscode open-vsx;
+        inherit (vscode-extensions.packages.${system}) vscode-marketplace open-vsx;
+        inherit (devshell.functions.${system}) mkCommands mkShell;
+
+        codiumTools = [ pkgs.hello ];
+
+        # We construct `VSCodium` with ready attrsets of extensions like `nix`
+        # Also, we take some extensions from `extensions` and put them into the `haskell` attrset
         codium = mkCodium {
           extensions = {
             inherit (extensions) nix misc;
             haskell = {
               inherit (open-vsx.haskell) haskell;
-              inherit (vscode.visortelle) haskell-spotlight;
+              inherit (vscode-marketplace.visortelle) haskell-spotlight;
             };
           };
-          runtimeDependencies = [ pkgs.hello ];
+          runtimeDependencies = codiumTools;
         };
+
+        tools = codiumTools ++ [ codium ];
+        # This is a script to write a `settings.json`
+        # It uses attrsets of settings like `nix-ide`
         writeSettings = writeSettingsJSON {
           inherit (settingsNix)
             nix-ide git gitlens editor workbench
             files markdown-language-features todo-tree;
         };
-        inherit (devshell.functions.${system}) mkCommands mkShell;
       in
       {
+        packages = {
+          inherit writeSettings;
+        };
         devShells.default = mkShell
           {
-            packages = [ codium ];
+            packages = tools;
             bash = {
-              extra = ''
-                printf "Hello!\n"
-              '';
+              extra = ''hello'';
             };
-            commands = mkCommands "ide" [ codium writeSettings ];
+            commands = mkCommands "tools" tools;
           };
       });
 

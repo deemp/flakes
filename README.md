@@ -18,9 +18,8 @@ Nix flakes for tools that I use
 - [json2md](./json2md/README.md) - convert `JSON` (or `Nix`) to `Markdown`
   - I use it to generate `.md` docs from Nix expressions - [example](https://github.com/deemp/devops-labs/blob/0ae9881ab58b99f114aaf21cb5cad85f2ce37e40/.nix/write-configs.nix#L26)
 - [language-tools](./flakes-tools) - tools for languages that I use
-- [lima](./lima) - convert:
-  - between `Literate Haskell` (`.lhs`) and `Markdown` (`.md`) with [round-trip property](https://hedgehog.qa/article/haskell-round-trip) usually kept
-  - `Haskell` (`.hs`) to `Markdown` (`.md`)
+  - `Haskell`, `Python`, `PureScript`, `nix`
+- [lima](./lima) - convert between `Literate Haskell` (`.lhs`) or `Haskell` (`.hs`) and `Markdown` (`.md`) with [round-trip property](https://hedgehog.qa/article/haskell-round-trip) usually kept
 - [manager](./manager) - a `Haskell` CLI app for managing projects with multiple `Main.hs` modules
 - [source-flake](./source-flake/) - pinned flakes
   - I use them to sync flake inputs in my flakes
@@ -46,7 +45,15 @@ Nix-packaged:
 
 ## Templates
 
-This repo provides several templates. Learn how you can use them.
+### Prerequsites
+
+This repo provides several templates. Learn how you can use them:
 
 - Templates [Prerequisites](./README/NixPrerequisites.md#templates)
 - Dev tools [Conventions](./README/Conventions.md#dev-tools) - decide where to put flakes generated from templates
+
+### Available templates
+
+- [codium-generic](./templates/codium/generic/README.md) - `VSCodium` with extensions and executables on `PATH`.
+- [codium-haskell](./templates/codium/codium-haskell/README.md) - `VSCodium` with extensions and executables on `PATH` for `Haskell` (see ). Demonstrates several ways to run a `Haskell` app.
+- see [codium-haskell-simple](./templates/codium/codium-haskell/README.md) - `VSCodium` with extensions and executables on `PATH` for `Haskell`. A simplified version of `codium-haskell`.

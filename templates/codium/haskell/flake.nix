@@ -261,6 +261,7 @@
 
       defaultShell = mkShell {
         packages = tools;
+        # sometimes necessary for programs that work with files
         bash.extra = "export LANG=C.utf8";
         commands = mkCommands "tools" tools;
       };

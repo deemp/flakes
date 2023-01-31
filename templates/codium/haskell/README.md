@@ -1,19 +1,21 @@
 # Haskell
 
-`VSCodium` with extensions and executables for `Haskell`
+`VSCodium` with extensions and executables for `Haskell`.
 
 ## Prerequisites
 
+- [codium-generic](https://github.com/deemp/flakes/tree/main/templates/codium/generic#readme) - info just about `VSCodium`
+- [codium-haskell-simple](https://github.com/deemp/flakes/tree/main/templates/codium/haskell-simple#readme) - a simplified version of this flake
 - [flake.nix](./flake.nix) - extensively commented code
-- [Prerequisites](https://github.com/deemp/flakes#prerequisites)
 - [Haskell](https://github.com/deemp/flakes/blob/main/README/Haskell.md)
-- [Troubleshooting](https://github.com/deemp/flakes/blob/main/README/Troubleshooting.md) - see in case of problems with VSCodium, etc.
+- [Troubleshooting](https://github.com/deemp/flakes/blob/main/README/Troubleshooting.md)
+- [Prerequisites](https://github.com/deemp/flakes#prerequisites)
 
 ## Quick start
 
 1. Install Nix - see [how](https://github.com/deemp/flakes/blob/main/README/InstallNix.md).
 
-1. In a new terminal, run `VSCodium` from a devshell:
+1. In a new terminal, start a devshell and run the app:
 
 ```console
 nix flake new my-project -t github:deemp/flakes#codium-haskell
@@ -21,16 +23,24 @@ cd my-project
 git init && git add
 nix develop
 cabal run
--- optionally, write settings.json and start VSCodium
+```
+
+1. Write `settings.json` and start `VSCodium`:
+
+```console
 nix run .#writeSettings
-codium .
+nix run .#codium .
 ```
 
 1. Open a `Haskell` file `app/Main.hs` and hover over a function.
 
 1. Wait until `Haskell Language Server` (`HLS`) starts giving you type info.
 
-## Cabal
+## Run a Haskell app
+
+Below is the comparison of ways to run a `Haskell` app. I prefer to use everything apart from `stack` and `shellFor`.
+
+### Cabal
 
 **Advantages** - medium setup, can build incrementally
 
@@ -42,9 +52,9 @@ Incremental builds via `cabal` + `Nix`-provided packages. A devshell will run th
 nix develop .#cabal
 ```
 
-If you use `hpack` to generate `cabal`, see [here](https://github.com/sol/hpack) what can go into `package.yaml`.
+If you use `hpack` to generate `cabal`, see [here](https://github.com/sol/hpack) what can go into a `package.yaml`.
 
-## Nix
+### Nix
 
 **Advantages** - medium setup, reproducible build, make a standalone executable from a package.
 
@@ -56,7 +66,7 @@ If you use `hpack` to generate `cabal`, see [here](https://github.com/sol/hpack)
 nix develop .#nixPackaged
 ```
 
-## Docker
+### Docker
 
 **Advantages** - medium setup, reproducible lightweight container from a package
 
@@ -68,7 +78,7 @@ Put an executable into a Docker image and run it:
 nix develop .#docker
 ```
 
-## Cabal + Nix integration
+### Cabal + Nix integration
 
 **Advantages** - easy setup, incremental builds
 
@@ -80,13 +90,13 @@ Make a shell with all deps available and build incrementalllt via `cabal`
 nix develop .#cabalShellFor
 ```
 
-## Stack + Nix integration
+### Stack + Nix integration
 
 **Advantage** - uses stack for incremental builds, very easy setup
 
 **Disadvantage** - doesn't use Nix caches and takes packages from Stackage
 
-### Background
+#### Background
 
 Suppose you'd like `Nix` to supply a `C` library [liblzma](https://tukaani.org/xz/) to `stack` using [this integration](https://docs.haskellstack.org/en/stable/nix_integration/).
 You'd create a `stack-shell` (more on that below) in `flake.nix` and provide there a `Nix` package `pkgs.lzma`.
@@ -96,7 +106,7 @@ But what if your program needs to call the `rm` command?
 In this case, your `stack-shell` should contain the relevant package, `pkgs.coreutils`.
 This package will be turned into executables. Then, `rm` and some other commands will become available in that isolated environment.
 
-### Stack guide
+#### Stack guide
 
 This sample `Haskell` project demonstrates `Stack` + `Nix` integration.
 
@@ -134,7 +144,7 @@ ghcid
 
 Additionally, `ghcid` will run the code in magic comments (See `app/Main.hs`).
 
-### Setup
+#### Setup
 
 Necessary components of `Stack` + `Nix` integration:
 
@@ -148,18 +158,19 @@ Necessary components of `Stack` + `Nix` integration:
   - The name `stack-shell` is chosen arbitrarily
   - The name should be the same as the one used in `stack.nix`
 
-### GHC
+## GHC
 
 This template uses `GHC 9.2`. You can switch to `GHC 9.0`:
 
 - In `flake.nix`, change `"92"` to `"90"`
 - If using `stack`, in `stack.yaml`, change `resolver` to [lts-19.33](https://www.stackage.org/lts-19.33) or a later one from `stackage`
 
-### Configs
+## Configs
 
 - [package.yaml] - used by `stack` or `hpack` to generate a `.cabal`
 - [.markdownlint.jsonc](./.markdownlint.jsonc) - for `markdownlint` from the extension `davidanson.vscode-markdownlint`
 - [.ghcid](./.ghcid) - for [ghcid](https://github.com/ndmitchell/ghcid)
 - [.envrc](./.envrc) - for [direnv](https://github.com/direnv/direnv)
 - [fourmolu.yaml](./fourmolu.yaml) - for [fourmolu](https://github.com/fourmolu/fourmolu#configuration)
-- `nix run .#writeWorkflows` will write a workflow for `GitHub Actions`
+- [.github/workflows/ci.yaml] - a generated `GitHub Actions` workflow. See [workflows](https://github.com/deemp/flakes/tree/main/workflows). Generate a workflow via `nix run .#writeWorkflows`.
+- `hie.yaml` - not present, but can be generated via [implicit-hie](https://github.com/Avi-D-coder/implicit-hie) (available on devshell) to verify the `Haskell Language Server` setup.

@@ -1,20 +1,35 @@
 # VSCodium generic
 
+This flake provides a devshell with `VSCodium` a `hello` executable on `PATH` and with a couple of extensions.
+
 ## Prerequisites
 
-See [Prerequisites](https://github.com/deemp/flakes#prerequisites)
+See these for additional info:
 
-## Description
+- [codium-generic](https://github.com/deemp/flakes/tree/main/templates/codium/generic#readme) - info just about `VSCodium` and extensions.
+- [nix-vscode-extensions](https://github.com/nix-community/nix-vscode-extensions) (pinned [here](https://github.com/deemp/flakes/blob/main/source-flake/vscode-extensions/flake.nix)).
+- [Prerequisites](https://github.com/deemp/flakes#prerequisites).
+- [Troubleshooting](https://github.com/deemp/flakes/blob/main/README/Troubleshooting.md)
 
-This flake is based on the [codium](https://github.com/deemp/flakes/blob/main/codium#readme) flake.
+## Example
 
-This flake demonstrates how to enable specific extensions and make the `hello` executable available on `PATH` in `VSCodium`.
+1. Install Nix - see [how](https://github.com/deemp/flakes/blob/main/README/InstallNix.md).
 
-## Devshell
+1. In a new terminal, run `VSCodium` from a devshell:
 
 ```console
+nix flake new my-project -t github:deemp/flakes#codium-generic
+cd my-project
+git init && git add
 nix develop
+hello
+```
+
+1. Write `settings.json` and start `VSCodium`
+
+```console
+nix run .#writeSettings
 codium .
 ```
 
-In VSCodium's terminal, run `hello`
+1. If necessary, add other extensions like
