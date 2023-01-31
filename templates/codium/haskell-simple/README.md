@@ -7,7 +7,7 @@
 See these for additional info:
 
 - [codium-generic](https://github.com/deemp/flakes/tree/main/templates/codium/generic#readme) - info just about `VSCodium` and extensions.
-- [codium-haskell](https://github.com/deemp/flakes/tree/main/templates/codium/haskell#readme) - a more advanced version of this flake.
+- [codium-haskell](https://github.com/deemp/flakes/tree/main/templates/codium/haskell#readme) - an advanced version of this flake.
 - [flake.nix](./flake.nix) - extensively commented code.
 - [Haskell](https://github.com/deemp/flakes/blob/main/README/Haskell.md)
 - [Troubleshooting](https://github.com/deemp/flakes/blob/main/README/Troubleshooting.md)
