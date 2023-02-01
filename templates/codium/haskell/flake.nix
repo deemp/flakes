@@ -10,6 +10,7 @@
     devshell.url = "github:deemp/flakes?dir=devshell";
     flakes-tools.url = "github:deemp/flakes?dir=flakes-tools";
     workflows.url = "github:deemp/flakes?dir=workflows";
+    lima.url = "github:deemp/flakes?dir=lima";
     # necessary for stack-nix integration
     flake-compat = {
       url = "github:edolstra/flake-compat";
@@ -26,6 +27,7 @@
     , haskell-tools
     , devshell
     , workflows
+    , lima
     , ...
     }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -82,12 +84,19 @@
       override = {
         overrides = self: super: {
           lzma = dontCheck (doJailbreak super.lzma);
-          myPackage = pkgs.haskell.lib.overrideCabal
+          myPackage = overrideCabal
             (super.callCabal2nix myPackageName ./. { })
-            (_: {
+            (x: {
+              # we can combine the existing deps and new deps
               # these deps will be in haskellPackages.myPackage.getCabalDeps.librarySystemDepends
-              librarySystemDepends = myPackageDepsLib;
+              librarySystemDepends = (x.librarySystemDepends or [ ]) ++ myPackageDepsLib;
+              # if we want to override the existing deps, we just don't include them
               executableSystemDepends = myPackageDepsBin;
+              # here's how we can add a package built from sources
+              # then, we may use this package in .cabal in a test-suite
+              testHaskellDepends = [
+                (super.callCabal2nix "lima" "${lima.outPath}/lima" { }) 
+              ];
             });
         };
       };
