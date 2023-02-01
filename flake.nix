@@ -75,7 +75,7 @@
           pushToCachix = flakesTools.pushToCachix;
           updateLocks = flakesTools.updateLocks;
           format = flakesTools.format;
-          writeWorkflows = writeWorkflow "ci" (withAttrs nixCI { on.schedule = [{ cron = "0 * 1 * *"; }]; });
+          writeWorkflows = writeWorkflow "ci" (withAttrs nixCI { on.schedule = [{ cron = "0 0 1 * *"; }]; });
         };
       })
     // {
