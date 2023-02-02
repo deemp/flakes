@@ -3,9 +3,9 @@
 
 - Only multi-line comments are supported for Markdown
 
-- Haskell code snippet
+- Haskell code snippet (use `hs`)
 
-    ```haskell
+    ```hs
     "1+4+2+3"
     ```
 
@@ -32,9 +32,11 @@ the following two comments will be commented out due to a config
 -}
 
 {- first special comment -}
+
 {- second special comment -}
 
 -- before a magic comment
+
 {- FOURMOLU_DISABLE -}
 
 -- after a magic comment
@@ -42,6 +44,7 @@ the following two comments will be commented out due to a config
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# OPTIONS_GHC -Wno-missing-kind-signatures #-}
+
 {- FOURMOLU_ENABLE -}
 
 -- this comment will go into the Haskell snippet
@@ -52,8 +55,8 @@ a1 = 4
 
 {-
 This comment will divide Haskell snippets
-
 -}
+
 -- Imports
 
 a2 :: Integer
@@ -65,8 +68,8 @@ a2 = 2
 some text
 
 ### Third-level heading
-
 -}
+
 -- Text one
 -- this multiline comment should separate this line and the line after the comment
 {--}
@@ -95,15 +98,17 @@ class (Monoid (m a)) => Reducible m a where
 
 {-
 don't put anything outside and after this comment like in `{- -} -- hey`
-
 -}
+
 -- a comment that will go into a snippet
+
 {- FOURMOLU_DISABLE -}
 
 {-| some 
 doc that will be in a snippet -}
 main :: IO ()
 main = print "hi!"
+
 {- FOURMOLU_ENABLE -}
 
 {-
@@ -125,6 +130,16 @@ in comments should read like {- LIMA_DISABLE -}
 {-
 this LIMA_ENABLE reads like a comment because there's no corresponding
 preceding LIMA_DISABLE
-
 -}
+
+{- LIMA_INDENT 4 -}
+
+{-
+1. listing
+-}
+
 -- where's lorem ipsum blah?
+
+{- LIMA_DEDENT -}
+
+-- final comment

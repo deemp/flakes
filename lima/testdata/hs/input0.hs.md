@@ -2,9 +2,9 @@
 
 - Only multi-line comments are supported for Markdown
 
-- Haskell code snippet
+- Haskell code snippet (use `hs`)
 
-    ```haskell
+    ```hs
     "1+4+2+3"
     ```
 
@@ -75,7 +75,6 @@ some text
 -- this multiline comment should separate this line and the line after the comment
 {--}
 -- Text two should be ignored
-
 ```
 <!-- LIMA_DISABLE
 -- Text two to ignore
@@ -135,6 +134,16 @@ LIMA_ENABLE -->
 this LIMA_ENABLE reads like a comment because there's no corresponding
 preceding LIMA_DISABLE
 
+<!-- LIMA_INDENT 4 -->
+
+1. listing
+
+    ```haskell
+    -- where's lorem ipsum blah?
+    ```
+
+<!-- LIMA_DEDENT -->
+
 ```haskell
--- where's lorem ipsum blah?
+-- final comment
 ```

@@ -19,13 +19,15 @@ It is usually possible to make conversion abide the [roundtrip property](https:/
 
 [Examples](./testdata/hs)
 
-Rules for `.hs` -> `.md` conversion:
+Rules:
 
 - To produce text blocks, write multiline comments in `GitHub`-flavoured `Markdown`
 - Such comments should start with `{- ` or `{-\n`
 - Multiline comments (even `{- -}`) split `Haskell` code into snippets
 - Special comments like `{- FOURMOLU_ENABLE -}` won't appear in a `.md`. You can supply other comments in a config (`hs-md.special-comments`). See the sample [config](./testdata/config/).
 - You can ignore parts of a `.hs` file by enclosing them into `{- LIMA_DISABLE -}` and `{- LIMA_ENABLE -}`. The lines between such comments will be commented out in the resulting `.md`.
+- You can indent a Haskell snippet by writing a magic comment `{- LIMA_INDENT N -}`, where `N` is an integer denoting the new indentation level. Reset the indentation by writing `{- LIMA_DEDENT -}`.
+  - If your snippet relates to some text, put the magic comment before that text
 
 ### lhs <-> md
 
@@ -34,17 +36,19 @@ Examples:
 - [input0.lhs](./testdata/input0.lhs) -> [input0.lhs.md](./testdata/input0.lhs.md)
 - [input1.lhs](./testdata/input1.lhs) -> [input1.lhs.md](./testdata/input1.lhs.md)
 
-As `.lhs` doesn't support `#` (heading) or `>` (quotation start) at a line beginning, one should write ` #` and ` >` instead.
+Rules:
 
-- ` #` -> `#` -> ` #`
-- ` >` -> `>` -> ` >`
+- As `.lhs` doesn't support `#` (heading) or `>` (quotation start) at a line beginning, one should write ` #` and ` >` instead.
 
-If you'd like to provide some code in a `.lhs`, follow these rules:
+  - ` #` -> `#` -> ` #`
+  - ` >` -> `>` -> ` >`
 
-- `>` is for `Haskell` code, there should be an empty line before and after the block with `Haskell` code
-- `<` is for any other code. Such code will be converted into code blocks of type `console` in `.md`
-- The round-trip property is not guarranteed if you insert code snippets into `.lhs` using three backticks
-  - Nevertheless, feel free to insert them into `.md`. In `.lhs`, they will just lose the language info
+- If you'd like to provide some code snippet in a `.lhs`, follow these rules:
+
+  - `>` is for `Haskell` code, there should be an empty line before and after the block with `Haskell` code
+  - `<` is for any other code. Such code will be converted into code blocks of type `console` in `.md`
+  - The round-trip property is not guarranteed if you insert code snippets into `.lhs` using three backticks
+    - Nevertheless, feel free to insert them into `.md`. In `.lhs`, they will just lose the language info
 
 ## Command-line tool
 

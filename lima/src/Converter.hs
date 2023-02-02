@@ -3,14 +3,16 @@
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
-
 {-# HLINT ignore "Redundant bracket" #-}
+{-# LANGUAGE TypeApplications #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
 -- | Functions to convert @Haskell@ to @Markdown@ and between @Literate Haskell@ (@.lhs@) and @Markdown@.
 module Converter (hsToMd, mdToHs, lhsToMd, mdToLhs, Config (..), ConfigHsMd (..)) where
 
 import Data.Default (Default)
+import Data.Foldable (Foldable (..))
+import Data.Function ((&))
 import Data.List (isPrefixOf, isSuffixOf)
 import Data.Yaml (FromJSON (..))
 import Data.Yaml.Aeson (withObject, (.:), (.:?))
@@ -30,6 +32,9 @@ instance FromJSON ConfigHsMd where
     withObject
       "CommentsToIgnore"
       (\v -> ConfigHs2Md <$> v .: "special-comments")
+
+backticks_ :: Int -> String
+backticks_ n = indentN n backticks
 
 backticks :: String
 backticks = "```"
@@ -140,11 +145,17 @@ _LIMA_DISABLE = "LIMA_DISABLE"
 _LIMA_ENABLE :: String
 _LIMA_ENABLE = "LIMA_ENABLE"
 
+_LIMA_INDENT :: String
+_LIMA_INDENT = "LIMA_INDENT"
+
+_LIMA_DEDENT :: String
+_LIMA_DEDENT = "LIMA_DEDENT"
+
 -- | Comments that should be ignored for some reason
 --
 -- FOURMOLU_DISABLE is ignored because it's a special comment and shouldn't be visible in a `.md`
 specialCommentsDefault :: [String]
-specialCommentsDefault = ["FOURMOLU_DISABLE", "FOURMOLU_ENABLE"]
+specialCommentsDefault = ["FOURMOLU_DISABLE", "FOURMOLU_ENABLE", _LIMA_INDENT, _LIMA_DEDENT]
 
 endsWith :: String -> String -> Bool
 endsWith = flip isSuffixOf
@@ -156,6 +167,7 @@ mcOpen = "{-"
 mcOpenSpace :: String
 mcOpenSpace = mcOpen ++ " "
 
+-- | multiline comment closing symbols
 mcClose :: String
 mcClose = "-}"
 
@@ -168,8 +180,11 @@ dropEnd n s = reverse (drop n (reverse s))
 backticksHs :: String
 backticksHs = backticks ++ "haskell"
 
+backticksHs_ :: Int -> String
+backticksHs_ n = indentN n backticksHs
+
 dropEmpties :: [String] -> [String]
-dropEmpties = dropWhile (== "")
+dropEmpties = dropWhile (\x -> dropSpaces x == "")
 
 -- Markdown comments
 
@@ -187,65 +202,83 @@ mdcOpenSpace = mdcOpen ++ " "
 mdcCloseSpace :: String
 mdcCloseSpace = " " ++ mdcClose
 
-stripMc :: String -> String
-stripMc x = dropEnd (length mcCloseSpace) (drop (length mcOpenSpace) x)
+-- | Remove multiline comment marks from the beginning and end of a string
+stripMC :: String -> String
+stripMC x = dropEnd (length mcCloseSpace) (drop (length mcOpenSpace) x)
+
+indentN :: Int -> String -> String
+indentN x s = concat (replicate x " ") ++ s
 
 -- | Convert @Haskell@ to @Markdown@.
 --
 -- Multi-line comments are copied as text blocks and @Haskell@ code is copied as @Haskell@ snippets.
 hsToMd :: ConfigHsMd -> String -> String
-hsToMd ConfigHs2Md{..} = unlines . dropWhile (== "") . reverse . (\x -> convert True False False x []) . lines
+hsToMd ConfigHs2Md{..} = unlines . dropWhile (== "") . reverse . (\x -> convert True False False 0 x []) . lines
  where
   specialComments_ = specialCommentsDefault ++ specialComments
-  convert :: Bool -> Bool -> Bool -> [String] -> [String] -> [String]
-  convert inLimaEnable inComments inSnippet (h : hs) res
+  convert :: Bool -> Bool -> Bool -> Int -> [String] -> [String] -> [String]
+  convert inLimaEnable inComments inSnippet indent_ (h : hs) res
     | not inComments =
         if
             | -- disable
               -- split a snippet
-              h `startsWith` (mcOpenSpace ++ _LIMA_DISABLE) ->
-                (convert False False False hs)
-                  ([mdcOpenSpace ++ _LIMA_DISABLE] ++ [backticks | inSnippet] ++ res)
+              h == mcOpenSpace ++ _LIMA_DISABLE ++ mcCloseSpace ->
+                (convert False False False indent_ hs)
+                  ([mdcOpenSpace ++ _LIMA_DISABLE] ++ [backticks_ indent_ | inSnippet] ++ dropEmpties res)
             | -- enable
-              h `startsWith` (mcOpenSpace ++ _LIMA_ENABLE) ->
-                convert True False inSnippet hs ((_LIMA_ENABLE ++ mdcCloseSpace) : res)
-            | -- if disabled
+              h == mcOpenSpace ++ _LIMA_ENABLE ++ mcCloseSpace ->
+                convert True False inSnippet indent_ hs ((_LIMA_ENABLE ++ mdcCloseSpace) : res)
+            | -- disabled
               not inLimaEnable ->
-                convert inLimaEnable False False hs (h : res)
+                convert inLimaEnable False False indent_ hs (h : res)
+            | -- indentation comment
+              -- splits a snippet
+              h `startsWithAnyOf` ((mcOpenSpace ++) <$> [_LIMA_INDENT, _LIMA_DEDENT]) ->
+                let h_ = stripMC h
+                    isIndent = h_ `startsWith` _LIMA_INDENT
+                    newIndent_ = if isIndent then indent_ + (read @Int $ drop (length _LIMA_INDENT) h_) else 0
+                 in (convert inLimaEnable False False newIndent_ hs)
+                      ( [mdcOpenSpace ++ stripMC h ++ mdcCloseSpace]
+                          ++ ["" | inSnippet]
+                          ++ [backticks_ indent_ | inSnippet]
+                          ++ (if isIndent then squashEmpties else dropEmpties) res
+                      )
             | -- a special comment
-              -- comment should be in multi-line style like '{- FOURMOLU_DISABLE -}'
+              -- a comment should be in multi-line style like '{- FOURMOLU_DISABLE -}'
+              -- it should occupy a single line
+              -- it may be followed by arbitrary text in that line
               -- splits a snippet
               h `startsWithAnyOf` ((mcOpenSpace ++) <$> specialComments_) ->
-                (convert inLimaEnable False False hs)
-                  ([mdcOpenSpace ++ stripMc h ++ mdcCloseSpace] ++ ["" | inSnippet] ++ [backticks | inSnippet] ++ dropEmpties res)
+                (convert inLimaEnable False False indent_ hs)
+                  ([mdcOpenSpace ++ stripMC h ++ mdcCloseSpace] ++ ["" | inSnippet] ++ [backticks_ indent_ | inSnippet] ++ dropEmpties res)
             | -- start of a multi-line comment
               -- it should be either like '{- ...' or '{-\n'
               (h `startsWith` mcOpenSpace || h == mcOpen) ->
                 let x' = drop 3 h
-                    pref = "" : [backticks | inSnippet]
+                    pref = "" : [backticks_ indent_ | inSnippet]
                     res' = if inSnippet then dropEmpties res else res
                  in -- if a multiline comment ends on the same line
                     -- it should end with '-}'
                     if h `endsWith` mcClose
-                      then convert inLimaEnable False False hs ([dropEnd (length mcCloseSpace) x'] ++ pref ++ res')
-                      else convert inLimaEnable True False hs ([x' | not (null x')] ++ pref ++ res')
+                      then convert inLimaEnable False False indent_ hs ([dropEnd (length mcCloseSpace) x'] ++ pref ++ res')
+                      else convert inLimaEnable True False indent_ hs ([x' | not (null x')] ++ pref ++ res')
             | -- non-empty line means the start of a Haskell snippet
               not inSnippet ->
                 if not (null h)
                   then -- non-empty line means the start of a Haskell snippet
-                    convert inLimaEnable False True hs ([h, backticksHs] ++ squashEmpties res)
+                    convert inLimaEnable False True indent_ hs ([indentN indent_ h, backticksHs_ indent_] ++ squashEmpties res)
                   else -- if not in snippet, collapse consequent empty lines
-                    convert inLimaEnable False False hs res
+                    convert inLimaEnable False False indent_ hs res
             | inSnippet ->
-                convert inLimaEnable False True hs (h : res)
+                convert inLimaEnable False True indent_ hs ((indentN indent_ h) : res)
     | inComments =
-        if -- end of a multiline comment
-        h `startsWith` mcClose
-          then convert inLimaEnable False False hs res
+        if h `startsWith` mcClose
+          then -- end of a multiline comment
+            convert inLimaEnable False False indent_ hs (res)
           else -- copy everything from comments
-            convert inLimaEnable True False hs (h : res)
-  convert _ _ inSnippet [] res =
-    [backticks | inSnippet] ++ dropEmpties res
+            convert inLimaEnable True False indent_ hs (h : res)
+  convert _ _ inSnippet indent_ [] res =
+    [backticks_ indent_ | inSnippet] ++ dropEmpties res
 
 stripMdc :: String -> String
 stripMdc x = dropEnd (length mdcCloseSpace) (drop (length mdcOpenSpace) x)
@@ -253,51 +286,57 @@ stripMdc x = dropEnd (length mdcCloseSpace) (drop (length mdcOpenSpace) x)
 squashEmpties :: [String] -> [String]
 squashEmpties = ([""] ++) . dropEmpties
 
+dropSpaces :: String -> String
+dropSpaces = dropWhile (== ' ')
+
+countSpaces :: String -> Int
+countSpaces x = length $ takeWhile (== ' ') x
+
 -- | Convert @Markdown@ to @Haskell@.
 --
 -- Multi-line comments are copied as text blocks and @Haskell@ code is copied as @Haskell@ snippets.
 mdToHs :: ConfigHsMd -> String -> String
-mdToHs ConfigHs2Md{..} = unlines . dropWhile (== "") . reverse . (\x -> convert False False False x []) . lines
+mdToHs ConfigHs2Md{..} = unlines . dropWhile (== "") . reverse . (\x -> convert False False False 0 x []) . lines
  where
   specialComments_ = specialCommentsDefault ++ specialComments
   closeTextIf x = [mcClose | x]
-  convert :: Bool -> Bool -> Bool -> [String] -> [String] -> [String]
-  convert inText inSnippet inComments (h : hs) res
+  convert :: Bool -> Bool -> Bool -> Int -> [String] -> [String] -> [String]
+  convert inText inSnippet inComments dedent_ (h : hs) res
     | inComments =
-        if -- enable
-        h `startsWith` (_LIMA_ENABLE ++ mdcCloseSpace)
+        -- enable
+        if h `startsWith` (_LIMA_ENABLE ++ mdcCloseSpace)
           then -- split text
 
-            (convert inText inSnippet False hs)
+            (convert inText inSnippet False dedent_ hs)
               ([mcOpenSpace ++ _LIMA_ENABLE ++ mcCloseSpace] ++ ["" | inText] ++ closeTextIf inText ++ res)
-          else -- in a comment
-            convert False False True hs (h : res)
+          else -- copy lines
+            convert False False True dedent_ hs (h : res)
     | not inSnippet =
         if
             | -- found comments
               h `startsWith` (mdcOpenSpace ++ _LIMA_DISABLE) ->
-                (convert False False True hs)
-                  ([mcOpenSpace ++ _LIMA_DISABLE ++ mcCloseSpace] ++ ["" | inText] ++ closeTextIf inText ++ res)
+                (convert False False True dedent_ hs)
+                  ([mcOpenSpace ++ _LIMA_DISABLE ++ mcCloseSpace, ""] ++ closeTextIf inText ++ res)
             | -- found a special comment
               h `startsWithAnyOf` ((mdcOpenSpace ++) <$> specialComments_) ->
-                (convert False False False hs)
-                  ([mcOpenSpace ++ stripMdc h ++ mcCloseSpace] ++ ["" | inText] ++ closeTextIf inText ++ res)
+                (convert False False False dedent_ hs)
+                  ([mcOpenSpace ++ stripMdc h ++ mcCloseSpace] ++ [""] ++ closeTextIf inText ++ dropEmpties res)
             | -- start of a haskell snippet
-              h `startsWith` backticksHs ->
-                convert False True False hs (closeTextIf inText ++ squashEmpties res)
+              (dropSpaces h) `startsWith` backticksHs ->
+                convert False True False (countSpaces h) hs ([""] ++ closeTextIf inText ++ dropEmpties res)
             | not inText ->
                 if null h
                   then -- just a blank line
-                    convert inText False False hs res
+                    convert inText False False dedent_ hs res
                   else -- start of text
-                    convert True False False hs ([h, mcOpen, ""] ++ res)
+                    convert True False False dedent_ hs ([h, mcOpen, ""] ++ res)
             | -- copy text line by line
               otherwise ->
-                convert True False False hs (h : res)
+                convert True False False dedent_ hs (h : res)
     | otherwise =
-        if h == backticks
+        if (dropSpaces h) == backticks
           then -- end of a snippet
-            convert False False False hs res
+            convert False False False 0 hs res
           else -- in a snippet
-            convert False True False hs (h : res)
-  convert inText _ _ [] res = [mcClose | inText] ++ res
+            convert False True False dedent_ hs ((drop dedent_ h) : res)
+  convert inText _ _ dedent_ [] res = [mcClose | inText] ++ res
