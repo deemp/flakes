@@ -17,20 +17,20 @@
 
 1. In a new terminal, start a devshell and run the app:
 
-```console
-nix flake new my-project -t github:deemp/flakes#codium-haskell
-cd my-project
-git init && git add
-nix develop
-cabal run
-```
+    ```console
+    nix flake new my-project -t github:deemp/flakes#codium-haskell
+    cd my-project
+    git init && git add
+    nix develop
+    cabal run
+    ```
 
 1. Write `settings.json` and start `VSCodium`:
 
-```console
-nix run .#writeSettings
-nix run .#codium .
-```
+    ```console
+    nix run .#writeSettings
+    nix run .#codium .
+    ```
 
 1. Open a `Haskell` file `app/Main.hs` and hover over a function.
 
