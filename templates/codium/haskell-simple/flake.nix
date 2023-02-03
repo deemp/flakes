@@ -81,15 +81,16 @@
             (super.callCabal2nix myPackageName ./. { })
             (x: {
               # we can combine the existing deps and new deps
+              # we should write the new deps before the existing deps to override them
               # these deps will be in haskellPackages.myPackage.getCabalDeps.librarySystemDepends
-              librarySystemDepends = (x.librarySystemDepends or [ ]) ++ myPackageDepsLib;
-              # if we want to override the existing deps, we just don't include them
+              librarySystemDepends = myPackageDepsLib ++ (x.librarySystemDepends or [ ]);
+              # we may skip the old deps if we'd like to
               executableSystemDepends = myPackageDepsBin;
               # here's how we can add a package built from sources
               # then, we may use this package in .cabal in a test-suite
               testHaskellDepends = [
-                (super.callCabal2nix "lima" "${lima.outPath}/lima" { }) 
-              ];
+                (super.callCabal2nix "lima" "${lima.outPath}/lima" { })
+              ] ++ x.testHaskellDepends;
             });
         };
       };
