@@ -22,25 +22,25 @@
               mkShell = configuration: devshell_.mkShell (
                 configuration // {
                   # bashInteractive - for VSCodium
-                  packages = pkgs.lib.lists.flatten (configuration.packages ++ [ pkgs.bashInteractive ]);
+                  packages = pkgs.lib.lists.flatten ((configuration.packages or [ ]) ++ [ pkgs.bashInteractive ]);
                   commands = (
                     builtins.map
                       (c:
                         {
-                          category = "standalone executables";
+                          category = "programs";
                           help = "listed in `packages` of this devshell";
                           command = ''
                             printf "${framedNewlines ''
                               This is a dummy command just to let help text for this entry
                               to be present in this devshell's message
-                              ''}"
+                            ''}"
                           '';
                         } // c // {
                           # append a space to have no name clashes with original executables
                           name = c.name + (if builtins.hasAttr "command" c then "" else " ");
                         })
                       (
-                        configuration.commands
+                        (configuration.commands or [ ])
                         ++ [
                           {
                             name = "exit";
