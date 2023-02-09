@@ -237,8 +237,9 @@ hsToMd ConfigHs2Md{..} = unlines . dropWhile (== "") . reverse . (\x -> convert 
                 let h_ = stripMC h
                     isIndent = h_ `startsWith` _LIMA_INDENT
                     newIndent_ = if isIndent then indent_ + (read @Int $ drop (length _LIMA_INDENT) h_) else 0
+                    curIndent_ = if isIndent then newIndent_ else indent_
                  in (convert inLimaEnable False False newIndent_ hs)
-                      ( [mdcOpenSpace ++ stripMC h ++ mdcCloseSpace]
+                      ( [indentN curIndent_ $ mdcOpenSpace ++ stripMC h ++ mdcCloseSpace]
                           ++ ["" | inSnippet]
                           ++ [backticks_ indent_ | inSnippet]
                           ++ (if isIndent then squashEmpties else dropEmpties) res
@@ -281,7 +282,7 @@ hsToMd ConfigHs2Md{..} = unlines . dropWhile (== "") . reverse . (\x -> convert 
     [backticks_ indent_ | inSnippet] ++ dropEmpties res
 
 stripMdc :: String -> String
-stripMdc x = dropEnd (length mdcCloseSpace) (drop (length mdcOpenSpace) x)
+stripMdc x = dropEnd (length mdcCloseSpace) (drop (length mdcOpenSpace) (dropSpaces x))
 
 squashEmpties :: [String] -> [String]
 squashEmpties = ([""] ++) . dropEmpties
@@ -313,12 +314,12 @@ mdToHs ConfigHs2Md{..} = unlines . dropWhile (== "") . reverse . (\x -> convert 
             convert False False True dedent_ hs (h : res)
     | not inSnippet =
         if
-            | -- found comments
+            | -- found a disable comment
               h `startsWith` (mdcOpenSpace ++ _LIMA_DISABLE) ->
                 (convert False False True dedent_ hs)
                   ([mcOpenSpace ++ _LIMA_DISABLE ++ mcCloseSpace, ""] ++ closeTextIf inText ++ res)
             | -- found a special comment
-              h `startsWithAnyOf` ((mdcOpenSpace ++) <$> specialComments_) ->
+              (dropSpaces h) `startsWithAnyOf` ((mdcOpenSpace ++) <$> specialComments_) ->
                 (convert False False False dedent_ hs)
                   ([mcOpenSpace ++ stripMdc h ++ mcCloseSpace] ++ [""] ++ closeTextIf inText ++ dropEmpties res)
             | -- start of a haskell snippet

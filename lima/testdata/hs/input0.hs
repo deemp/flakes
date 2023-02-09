@@ -82,6 +82,12 @@ some = "code to ignore"
 
 {- LIMA_ENABLE -}
 
+{-
+- Indented block
+-}
+
+{- LIMA_INDENT 2 -}
+
 -- Text three
 
 -- This comment will go into a Haskell snippet
@@ -101,6 +107,8 @@ don't put anything outside and after this comment like in `{- -} -- hey`
 -}
 
 -- a comment that will go into a snippet
+
+{- LIMA_DEDENT -}
 
 {- FOURMOLU_DISABLE -}
 
@@ -130,13 +138,11 @@ in comments should read like {- LIMA_DISABLE -}
 {-
 this LIMA_ENABLE reads like a comment because there's no corresponding
 preceding LIMA_DISABLE
+
+1. listing
 -}
 
 {- LIMA_INDENT 4 -}
-
-{-
-1. listing
--}
 
 -- where's lorem ipsum blah?
 

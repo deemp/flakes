@@ -83,28 +83,33 @@ some = "code to ignore"
 
 LIMA_ENABLE -->
 
-```haskell
--- Text three
+- Indented block
 
--- This comment will go into a Haskell snippet
+  <!-- LIMA_INDENT 2 -->
 
--- | This doc will go into a Haskell snippet
-class (Monoid (m a)) => Reducible m a where
-  op :: m a -> Char
-
-  -- | this too
-  constr :: m a -> a -> m a
-
-  -- | and this one
-  get :: m a -> m a -> a
-```
+  ```haskell
+  -- Text three
+  
+  -- This comment will go into a Haskell snippet
+  
+  -- | This doc will go into a Haskell snippet
+  class (Monoid (m a)) => Reducible m a where
+    op :: m a -> Char
+  
+    -- | this too
+    constr :: m a -> a -> m a
+  
+    -- | and this one
+    get :: m a -> m a -> a
+  ```
 
 don't put anything outside and after this comment like in `{- -} -- hey`
 
-```haskell
--- a comment that will go into a snippet
-```
+  ```haskell
+  -- a comment that will go into a snippet
+  ```
 
+  <!-- LIMA_DEDENT -->
 <!-- FOURMOLU_DISABLE -->
 
 ```haskell
@@ -134,15 +139,15 @@ LIMA_ENABLE -->
 this LIMA_ENABLE reads like a comment because there's no corresponding
 preceding LIMA_DISABLE
 
-<!-- LIMA_INDENT 4 -->
-
 1. listing
+
+    <!-- LIMA_INDENT 4 -->
 
     ```haskell
     -- where's lorem ipsum blah?
     ```
 
-<!-- LIMA_DEDENT -->
+    <!-- LIMA_DEDENT -->
 
 ```haskell
 -- final comment

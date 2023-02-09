@@ -26,8 +26,7 @@ Rules:
 - Multiline comments (even `{- -}`) split `Haskell` code into snippets
 - Special comments like `{- FOURMOLU_ENABLE -}` won't appear in a `.md`. You can supply other comments in a config (`hs-md.special-comments`). See the sample [config](./testdata/config/).
 - You can ignore parts of a `.hs` file by enclosing them into `{- LIMA_DISABLE -}` and `{- LIMA_ENABLE -}`. The lines between such comments will be commented out in the resulting `.md`.
-- You can indent a Haskell snippet by writing a magic comment `{- LIMA_INDENT N -}`, where `N` is an integer denoting the new indentation level. Reset the indentation by writing `{- LIMA_DEDENT -}`.
-  - If your snippet relates to some text, put the magic comment before that text
+- You can indent a Haskell snippet by writing before it a magic comment `{- LIMA_INDENT N -}`, where `N` is an integer denoting the new indentation level. Reset the indentation by writing `{- LIMA_DEDENT -}`.
 
 ### lhs <-> md
 

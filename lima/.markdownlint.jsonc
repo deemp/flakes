@@ -1,5 +1,6 @@
 {
     "no-space-in-code": false,
     "line-length": false,
-    "no-duplicate-header": false
+    "no-duplicate-header": false,
+    "no-inline-html": false
 }
