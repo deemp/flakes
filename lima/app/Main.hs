@@ -132,7 +132,7 @@ main = do
     convert contents out =
       (\(f, ext) -> writeFile (out <> "." <> ext) (f contents)) $
         case commandType of
-          Md2Hs -> (mdToHs (fromMaybe def configHsMd), "md")
+          Md2Hs -> (mdToHs (fromMaybe def configHsMd), "hs")
           Hs2Md -> (hsToMd (fromMaybe def configHsMd), "md")
           Md2Lhs -> (mdToLhs, "lhs")
           Lhs2Md -> (lhsToMd, "md")

@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           lima
-version:        0.1.0.3
+version:        0.1.0.4
 synopsis:       (Haskell or Literate Haskell) <-> Markdown converter
 description:    See the [README.md](https://github.com/deemp/flakes/tree/main/lima#readme)
 category:       Productivity
