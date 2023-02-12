@@ -81,6 +81,7 @@
         ;
 
       # Here's our override
+      # We should use `cabal v1-*` commands with it - https://github.com/NixOS/nixpkgs/issues/130556#issuecomment-1114239002
       override = {
         overrides = self: super: {
           lzma = dontCheck (doJailbreak super.lzma);
@@ -90,7 +91,7 @@
               # we can combine the existing deps and new deps
               # we should write the new deps before the existing deps to override them
               # these deps will be in haskellPackages.myPackage.getCabalDeps.librarySystemDepends
-              librarySystemDepends = (x.librarySystemDepends or [ ]) ++ myPackageDepsLib;
+              librarySystemDepends = myPackageDepsLib ++ (x.librarySystemDepends or [ ]);
               # if we want to override the existing deps, we just don't include them
               executableSystemDepends = myPackageDepsBin;
               # here's how we can add a package built from sources

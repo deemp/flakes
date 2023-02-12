@@ -74,6 +74,7 @@
         ;
 
       # Here's our override
+      # We should use `cabal v1-*` commands with it - https://github.com/NixOS/nixpkgs/issues/130556#issuecomment-1114239002
       override = {
         overrides = self: super: {
           lzma = dontCheck (doJailbreak super.lzma);
