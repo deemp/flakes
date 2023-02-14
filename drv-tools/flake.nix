@@ -321,7 +321,7 @@
             ''
               printf "%s" '${postMessage}'
             '';
-          description = "run ${name} in each given directory";
+          description = "run `${name}` in each given directory";
           longDescription = ''
             ${man.NAME}
             `${name_}` - ${description}
