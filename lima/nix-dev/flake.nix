@@ -74,18 +74,26 @@
           commands = (mkCommands "tools" tools) ++ [
             {
               name = "nix run nix-dev/#writeSettings";
-              category = "other tools";
+              category = "ide";
               help = writeSettings.meta.description;
             }
             {
               name = "nix run nix-dev/#codium .";
-              category = "other tools";
+              category = "ide";
               help = codium.meta.description;
+            }
+            {
+              name = "cabal-test";
+              category = "test";
+              help = "Test via `cabal`";
+              # just in case we need to override some Haskell packages
+              # and don't want cabal to load them from Hackage
+              # we need to use the `cabal v1-*` commands
+              command = "cabal v1-test";
             }
           ];
         };
     });
-
   nixConfig = {
     extra-substituters = [
       "https://haskell-language-server.cachix.org"

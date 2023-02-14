@@ -1,3 +1,4 @@
+{-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
@@ -10,21 +11,22 @@ import Converter (Config (..), hsToMd, lhsToMd, mdToHs, mdToLhs)
 import Data.Char (toLower)
 import Data.Default (Default (..))
 import Data.Maybe (fromMaybe)
+import Data.String.Interpolate (i)
 import Data.Yaml (decodeFileEither, decodeFileThrow)
 import System.Environment (getArgs)
 import System.Exit (ExitCode (..), exitWith)
 
 testDir :: String
-testDir = "testdata/"
+testDir = "testdata"
 
 main :: IO ()
 main = do
   -- test round-trip btw hs and md
-  let pathsHs1 = ((testDir ++ "/hs/") ++) <$> ["input0.hs"]
+  let pathsHs1 = (\x -> [i|#{testDir}/hs/input#{x}.hs|]) <$> [0 :: Int]
       pathsMd1 = (++ ".md") <$> pathsHs1
       pathsHs2 = (++ ".hs") <$> pathsMd1
   Config{..} <-
-    decodeFileThrow (testDir ++ "/config/lima.yaml")
+    decodeFileThrow [i|#{testDir}/config/lima.yaml|]
       `catch` (\(x :: SomeException) -> exitWith $ ExitFailure 1)
   contentsHs1 <- mapM readFile pathsHs1
   let contentsMd1 = hsToMd (fromMaybe def configHsMd) <$> contentsHs1
@@ -33,7 +35,7 @@ main = do
   zipWithM_ writeFile pathsHs2 contentsHs2
 
   -- test round-trip btw lhs and md
-  let pathsLhs1 = ((testDir ++ "/lhs/") ++) <$> ["input0.lhs", "input1.lhs"]
+  let pathsLhs1 = (\x -> [i|#{testDir}/lhs/input#{x}.lhs|]) <$> [0 :: Int, 1]
       pathsMd1 = (++ ".md") <$> pathsLhs1
       pathsLhs2 = (++ ".lhs") <$> pathsMd1
   contentsLhs1 <- mapM readFile pathsLhs1

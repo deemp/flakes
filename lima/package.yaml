@@ -53,3 +53,4 @@ tests:
     source-dirs: test
     dependencies:
       - lima
+      - string-interpolate

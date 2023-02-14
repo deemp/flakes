@@ -64,5 +64,6 @@ test-suite lima-test
     , data-default
     , lima
     , optparse-applicative
+    , string-interpolate
     , yaml
   default-language: Haskell2010
