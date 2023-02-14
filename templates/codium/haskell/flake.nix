@@ -274,7 +274,33 @@
         packages = tools;
         # sometimes necessary for programs that work with files
         bash.extra = "export LANG=C.utf8";
-        commands = mkCommands "tools" tools;
+        commands = mkCommands "tools" tools ++ [
+          {
+            name = "nix run .#codium .";
+            category = "ide";
+            help = "Run " + codium.meta.description + " in the current directory";
+          }
+          {
+            name = "nix run .#writeSettings";
+            category = "ide";
+            help = writeSettings.meta.description;
+          }
+          {
+            name = "nix run .#writeWorkflows";
+            category = "ide";
+            help = writeWorkflows.meta.description;
+          }
+          {
+            name = "nix run .#updateLocks";
+            category = "infra";
+            help = flakesTools.updateLocks.meta.description;
+          }
+          {
+            name = "nix run .#pushToCachix";
+            category = "infra";
+            help = flakesTools.pushToCachix.meta.description;
+          }
+        ];
       };
 
       # --- flakes tools ---
@@ -291,7 +317,8 @@
           pushToCachix;
         inherit
           writeSettings
-          writeWorkflows;
+          writeWorkflows
+          codium;
       };
 
       devShells = {
