@@ -15,21 +15,21 @@ See these for additional info:
 
 1. Install Nix - see [how](https://github.com/deemp/flakes/blob/main/README/InstallNix.md).
 
-1. In a new terminal, run `VSCodium` from a devshell:
+1. In a new terminal, start a devshell:
 
-```console
-nix flake new my-project -t github:deemp/flakes#codium-generic
-cd my-project
-git init && git add
-nix develop
-hello
-```
+    ```console
+    nix flake new my-project -t github:deemp/flakes#codium-generic
+    cd my-project
+    git init && git add
+    nix develop
+    hello
+    ```
 
-1. Write `settings.json` and start `VSCodium`
+1. Write `settings.json` and start `VSCodium`:
 
-```console
-nix run .#writeSettings
-codium .
-```
+    ```console
+    nix run .#writeSettings
+    codium .
+    ```
 
 1. If necessary, add other extensions
