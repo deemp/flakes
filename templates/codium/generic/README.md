@@ -32,4 +32,4 @@ nix run .#writeSettings
 codium .
 ```
 
-1. If necessary, add other extensions like
+1. If necessary, add other extensions

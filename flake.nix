@@ -7,33 +7,21 @@
     flakes-tools.url = "github:deemp/flakes?dir=flakes-tools";
     drv-tools.url = "github:deemp/flakes?dir=drv-tools";
     formatter.url = "github:deemp/flakes?dir=source-flake/formatter";
-    my-codium.url = "github:deemp/flakes?dir=codium";
+    codium.url = "github:deemp/flakes?dir=codium";
     devshell.url = "github:deemp/flakes?dir=devshell";
     workflows.url = "github:deemp/flakes?dir=workflows";
   };
-  outputs =
-    { self
-    , nixpkgs
-    , flake-utils
-    , flakes-tools
-    , drv-tools
-    , my-codium
-    , formatter
-    , devshell
-    , workflows
-    , ...
-    }: flake-utils.lib.eachDefaultSystem
-      (system:
+  outputs = inputs: inputs.flake-utils.lib.eachDefaultSystem
+    (system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
-        inherit (my-codium.configs.${system}) extensions;
-        inherit (my-codium.functions.${system}) mkCodium writeSettingsJSON;
-        inherit (my-codium.configs.${system}) settingsNix;
-        inherit (drv-tools.functions.${system}) readDirectories withAttrs;
-        inherit (flakes-tools.functions.${system}) mkFlakesTools;
-        inherit (devshell.functions.${system}) mkCommands mkShell;
-        inherit (workflows.functions.${system}) writeWorkflow;
-        inherit (workflows.configs.${system}) nixCI on;
+        inherit (inputs.codium.configs.${system}) extensions;
+        inherit (inputs.codium.functions.${system}) mkCodium writeSettingsJSON;
+        inherit (inputs.codium.configs.${system}) settingsNix;
+        inherit (inputs.drv-tools.functions.${system}) readDirectories withAttrs;
+        inherit (inputs.flakes-tools.functions.${system}) mkFlakesTools;
+        inherit (inputs.devshell.functions.${system}) mkCommands mkShell;
+        inherit (inputs.workflows.functions.${system}) writeWorkflow;
+        inherit (inputs.workflows.configs.${system}) nixCI;
 
         flakesTools = (mkFlakesTools (
           let f = dir: (builtins.map (x: "${dir}/${x}") (readDirectories ./${dir})); in
@@ -78,23 +66,23 @@
           writeWorkflows = writeWorkflow "CI" (withAttrs nixCI { on.schedule = [{ cron = "0 0 1 * *"; }]; });
         };
       })
-    // {
-      inherit (formatter) formatter;
-      templates = rec {
-        codium-generic = {
-          path = ./templates/codium/generic;
-          description = "`VSCodium` with extensions and executables";
-        };
-        codium-haskell = {
-          path = ./templates/codium/haskell;
-          description = "${codium-generic.description} for `Haskell`. Shows 5 ways to run a `Haskell` app";
-        };
-        codium-haskell-simple = {
-          path = ./templates/codium/haskell-simple;
-          description = "${codium-generic.description} for `Haskell`";
-        };
+  // {
+    inherit (inputs.formatter) formatter;
+    templates = rec {
+      codium-generic = {
+        path = ./templates/codium/generic;
+        description = "`VSCodium` with extensions and executables";
+      };
+      codium-haskell = {
+        path = ./templates/codium/haskell;
+        description = "${codium-generic.description} for `Haskell`. Shows 5 ways to run a `Haskell` app";
+      };
+      codium-haskell-simple = {
+        path = ./templates/codium/haskell-simple;
+        description = "${codium-generic.description} for `Haskell`";
       };
     };
+  };
 
   nixConfig = {
     extra-trusted-substituters = [

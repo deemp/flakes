@@ -2,7 +2,7 @@
   inputs = {
     nixpkgs_.url = "github:deemp/flakes?dir=source-flake/nixpkgs";
     nixpkgs.follows = "nixpkgs_/nixpkgs";
-    my-codium.url = "github:deemp/flakes?dir=codium";
+    codium.url = "github:deemp/flakes?dir=codium";
     drv-tools.url = "github:deemp/flakes?dir=drv-tools";
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
@@ -12,33 +12,21 @@
     workflows.url = "github:deemp/flakes?dir=workflows";
     lima.url = "github:deemp/flakes?dir=lima";
   };
-  outputs =
-    { self
-    , flake-utils
-    , flakes-tools
-    , nixpkgs
-    , my-codium
-    , drv-tools
-    , haskell-tools
-    , devshell
-    , workflows
-    , lima
-    , ...
-    }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs = inputs: inputs.flake-utils.lib.eachDefaultSystem (system:
     let
       # We're going to make some dev tools for our Haskell package
       # See NixOS wiki for more info - https://nixos.wiki/wiki/Haskell
 
       # First, we import stuff
-      pkgs = nixpkgs.legacyPackages.${system};
-      inherit (my-codium.functions.${system}) writeSettingsJSON mkCodium;
-      inherit (my-codium.configs.${system}) extensions settingsNix;
-      inherit (flakes-tools.functions.${system}) mkFlakesTools;
-      inherit (devshell.functions.${system}) mkCommands mkShell;
-      inherit (haskell-tools.functions.${system}) toolsGHC;
-      inherit (workflows.functions.${system}) writeWorkflow;
-      inherit (workflows.configs.${system}) nixCI;
+      pkgs = inputs.nixpkgs.legacyPackages.${system};
+      inherit (inputs.codium.functions.${system}) writeSettingsJSON mkCodium;
+      inherit (inputs.codium.configs.${system}) extensions settingsNix;
+      inherit (inputs.flakes-tools.functions.${system}) mkFlakesTools;
+      inherit (inputs.devshell.functions.${system}) mkCommands mkShell;
+      inherit (inputs.haskell-tools.functions.${system}) toolsGHC;
+      inherit (inputs.workflows.functions.${system}) writeWorkflow;
+      inherit (inputs.workflows.configs.${system}) nixCI;
+      inherit (inputs) lima;
 
       # Next, set the desired GHC version
       ghcVersion_ = "92";

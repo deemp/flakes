@@ -2,7 +2,7 @@
   inputs = {
     nixpkgs_.url = "github:deemp/flakes?dir=source-flake/nixpkgs";
     nixpkgs.follows = "nixpkgs_/nixpkgs";
-    my-codium.url = "github:deemp/flakes?dir=codium";
+    codium.url = "github:deemp/flakes?dir=codium";
     drv-tools.url = "github:deemp/flakes?dir=drv-tools";
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
@@ -10,24 +10,13 @@
     devshell.url = "github:deemp/flakes?dir=devshell";
     flakes-tools.url = "github:deemp/flakes?dir=flakes-tools";
   };
-  outputs =
-    { self
-    , flake-utils
-    , flakes-tools
-    , nixpkgs
-    , my-codium
-    , drv-tools
-    , haskell-tools
-    , devshell
-    , ...
-    }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs = inputs: inputs.flake-utils.lib.eachDefaultSystem (system:
     let
-      pkgs = nixpkgs.legacyPackages.${system};
-      inherit (my-codium.functions.${system}) writeSettingsJSON mkCodium;
-      inherit (my-codium.configs.${system}) extensions settingsNix;
-      inherit (devshell.functions.${system}) mkCommands mkShell;
-      inherit (haskell-tools.functions.${system}) toolsGHC;
+      pkgs = inputs.nixpkgs.legacyPackages.${system};
+      inherit (inputs.codium.functions.${system}) writeSettingsJSON mkCodium;
+      inherit (inputs.codium.configs.${system}) extensions settingsNix;
+      inherit (inputs.devshell.functions.${system}) mkCommands mkShell;
+      inherit (inputs.haskell-tools.functions.${system}) toolsGHC;
 
       # Next, set the desired GHC version
       ghcVersion = "92";

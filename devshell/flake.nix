@@ -4,20 +4,20 @@
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
-    my-devshell_.url = "github:deemp/flakes?dir=source-flake/devshell";
-    my-devshell.follows = "my-devshell_/devshell";
+    devshell_.url = "github:deemp/flakes?dir=source-flake/devshell";
+    devshell.follows = "devshell_/devshell";
   };
-  outputs = { self, nixpkgs, flake-utils, my-devshell, ... }:
-    flake-utils.lib.eachDefaultSystem
+  outputs = inputs:
+    inputs.flake-utils.lib.eachDefaultSystem
       (system:
         let
-          pkgs = nixpkgs.legacyPackages.${system};
+          pkgs = inputs.nixpkgs.legacyPackages.${system};
 
           # frame a text with newlines
           framedNewlines = framed_ "\n\n" "\n\n";
           framed_ = pref: suff: txt: ''${pref}${txt}${suff}'';
 
-          devshell = let devshell_ = ((pkgs.extend my-devshell.overlay).devshell); in
+          devshell = let devshell_ = ((pkgs.extend inputs.devshell.overlay).devshell); in
             devshell_ // {
               mkShell = configuration: devshell_.mkShell (
                 configuration // {

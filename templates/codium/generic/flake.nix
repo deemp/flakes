@@ -2,37 +2,29 @@
   inputs = {
     nixpkgs_.url = "github:deemp/flakes?dir=source-flake/nixpkgs";
     nixpkgs.follows = "nixpkgs_/nixpkgs";
-    my-codium.url = "github:deemp/flakes?dir=codium";
+    codium.url = "github:deemp/flakes?dir=codium";
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
     vscode-extensions_.url = "github:deemp/flakes?dir=source-flake/nix-vscode-extensions";
     vscode-extensions.follows = "vscode-extensions_/vscode-extensions";
     devshell.url = "github:deemp/flakes?dir=devshell";
   };
-  outputs =
-    { self
-    , nixpkgs
-    , my-codium
-    , flake-utils
-    , vscode-extensions
-    , devshell
-    , ...
-    }: flake-utils.lib.eachDefaultSystem
-      (system:
+  outputs = inputs: inputs.flake-utils.lib.eachDefaultSystem
+    (system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
-        inherit (my-codium.functions.${system}) mkCodium writeSettingsJSON;
-        inherit (my-codium.configs.${system}) extensions settingsNix;
-        inherit (vscode-extensions.packages.${system}) vscode-marketplace open-vsx;
-        inherit (devshell.functions.${system}) mkCommands mkShell;
+        pkgs = inputs.nixpkgs.legacyPackages.${system};
+        inherit (inputs.codium.functions.${system}) mkCodium writeSettingsJSON;
+        inherit (inputs.codium.configs.${system}) extensions settingsNix;
+        inherit (inputs.vscode-extensions.extensions.${system}) vscode-marketplace open-vsx;
+        inherit (inputs.devshell.functions.${system}) mkCommands mkShell;
 
         codiumTools = [ pkgs.hello ];
 
         # We construct `VSCodium` with ready attrsets of extensions like `nix`
-        # Also, we take some extensions from `extensions` and put them into the `haskell` attrset
         codium = mkCodium {
           extensions = {
             inherit (extensions) nix misc;
+            # Also, we take some extensions from `extensions` and put them into the `haskell` attrset
             haskell = {
               inherit (open-vsx.haskell) haskell;
               inherit (vscode-marketplace.visortelle) haskell-spotlight;

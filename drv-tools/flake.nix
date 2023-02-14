@@ -43,31 +43,33 @@
       # Generate a set from a list of sets with all keys renamed
       # in the order they go in that list
       ord_ = list:
-        let ordered =
-          builtins.foldl'
-            (x: y:
-              let
-                yAttrs = mapAttrsToList
-                  (name: value: {
-                    name = "_${toString x.cnt}_${name}";
-                    inherit value;
-                  })
-                  y;
-                yNew = listToAttrs yAttrs;
-                yKeys =
-                  mapAttrs
-                    (name: value: "_${toString x.cnt}_${name}")
+        let
+          ordered =
+            builtins.foldl'
+              (x: y:
+                let
+                  yAttrs = mapAttrsToList
+                    (name: value: {
+                      name = "_${toString x.cnt}_${name}";
+                      inherit value;
+                    })
                     y;
-              in
-              {
-                cnt = x.cnt + 1;
-                acc = x.acc // yNew;
-                keys = x.keys // yKeys;
-              }
-            )
-            { cnt = 1; acc = { }; keys = { }; }
-            list;
-        in ordered;
+                  yNew = listToAttrs yAttrs;
+                  yKeys =
+                    mapAttrs
+                      (name: value: "_${toString x.cnt}_${name}")
+                      y;
+                in
+                {
+                  cnt = x.cnt + 1;
+                  acc = x.acc // yNew;
+                  keys = x.keys // yKeys;
+                }
+              )
+              { cnt = 1; acc = { }; keys = { }; }
+              list;
+        in
+        ordered;
 
       # Get just the ordered set
       ord = list: (ord_ list).acc;
@@ -311,9 +313,9 @@
             concatStringsSep "\n"
               (map
                 (dir: ''
-                  printf "${framedBrackets "${if message == "" then name else message} : %s"}" "${"$" + INITIAL_CWD}/${dir}"
+                  printf "${framedBrackets "${if message == "" then name else message} : %s"}" "''$${INITIAL_CWD}/${dir}"
 
-                  cd ${"$" + INITIAL_CWD}/${dir}
+                  cd ''$${INITIAL_CWD}/${dir}
             
                   ${command}
                 '')
@@ -344,10 +346,12 @@
       # make accessors with an initial path
       mkAccessors_ = path: attrs@{ ... }:
         assert isString path;
-        let common = arg: {
-          __toString = self: "${arg}";
-          __functor = self: path_: assert isString path_; mkAccessors_ "${arg}.${path_}" { };
-        }; in
+        let
+          common = arg: {
+            __toString = self: "${arg}";
+            __functor = self: path_: assert isString path_; mkAccessors_ "${arg}.${path_}" { };
+          };
+        in
         (mapAttrs
           (name: val:
             let path_ = "${path}${if path == "" then "" else "."}${name}"; in
@@ -410,7 +414,9 @@
 
       # tests 
       devShells.default = pkgs.mkShell {
-        shellHook = "man ${mkBin json2nix}";
+        shellHook = ''
+          man ${mkBin json2nix}
+        '';
         name = "default";
         buildInputs = [ pkgs.tree json2nix pkgs.fish ];
       };
