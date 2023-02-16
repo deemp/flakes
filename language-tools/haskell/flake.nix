@@ -26,7 +26,7 @@
       # With haskell packages that are dependencies of the given packages
       ghcGHC = ghcVersion: override: packages:
         ((haskellPackagesGHCOverride ghcVersion override).ghcWithPackages
-          (ps: haskellDepsPackages (packages ps))) // { pname = "ghc${ghcVersion}"; };
+          (ps: haskellDepsPackages (packages ps))) // { pname = "ghc"; };
 
       # build tool with GHC of a specific version available on PATH
       buildToolWithFlagsGHC = name: drv: flags: ghcVersion: override: packages: runtimeDependencies:
