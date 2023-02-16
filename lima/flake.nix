@@ -21,7 +21,7 @@
       inherit (drv-tools.functions.${system}) mkBinName withAttrs withMan withDescription;
       inherit (drv-tools.configs.${system}) man;
       inherit (haskell-tools.functions.${system}) toolsGHC;
-      inherit (toolsGHC "92" { } (_: [ ]) [ ]) justStaticExecutable callCabal2nix;
+      inherit (toolsGHC { version = "92"; }) justStaticExecutable callCabal2nix;
 
       myPackage =
         let

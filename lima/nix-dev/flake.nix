@@ -30,7 +30,12 @@
         };
       };
 
-      inherit (toolsGHC ghcVersion override (ps: [ ps.myPackage ]) [ ]) cabal hls hpack ghcid;
+      inherit (toolsGHC {
+        version = ghcVersion;
+        inherit override;
+        packages = (ps: [ ps.myPackage ]);
+      })
+        cabal hls hpack ghcid;
 
       writeSettings = writeSettingsJSON {
         inherit (settingsNix) haskell todo-tree files editor gitlens yaml
