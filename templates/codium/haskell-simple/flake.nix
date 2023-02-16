@@ -57,7 +57,6 @@
         # dontCheck - skip tests
         dontCheck
         # override deps of a package
-        # see what can be overriden - https://github.com/NixOS/nixpkgs/blob/0ba44a03f620806a2558a699dba143e6cf9858db/pkgs/development/haskell-modules/generic-builder.nix#L13
         overrideCabal
         ;
 
@@ -66,6 +65,7 @@
       override = {
         overrides = self: super: {
           lzma = dontCheck (doJailbreak super.lzma);
+          # see what can be overriden - https://github.com/NixOS/nixpkgs/blob/0ba44a03f620806a2558a699dba143e6cf9858db/pkgs/development/haskell-modules/generic-builder.nix#L13
           myPackage = overrideCabal
             (super.callCabal2nix myPackageName ./. { })
             (x: {
@@ -106,6 +106,7 @@
       ];
 
       # And compose VSCodium with dev tools and HLS
+      # This is to let VSCodium run on its own, outside of a devshell
       codium = mkCodium {
         extensions = { inherit (extensions) nix haskell misc github markdown; };
         runtimeDependencies = codiumTools;
@@ -117,7 +118,8 @@
           git nix-ide workbench markdown-all-in-one markdown-language-features;
       };
 
-      tools = codiumTools ++ [ codium ];
+      # These tools will be available in a devshell
+      tools = codiumTools;
 
       # --- flakes tools ---
       # Also, we provide scripts that can be used in CI
@@ -125,6 +127,8 @@
 
       # write .github/ci.yaml to get a GitHub Actions workflow file
       writeWorkflows = writeWorkflow "ci" nixCI;
+
+      # Feel free to remove the unnecessary stuff, e.g. VSCodium - related
     in
     {
       packages = {

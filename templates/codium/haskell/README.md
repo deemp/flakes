@@ -1,6 +1,10 @@
 # Haskell
 
-`VSCodium` with extensions and executables for `Haskell`.
+- `VSCodium` with extensions and executables for `Haskell`
+- A sample `Haskell` project
+- Several ways to run a `Haskell` app
+
+Feel free to remove the `VSCodium`-related `Nix` code and whatever you want!
 
 ## Prerequisites
 
