@@ -8,10 +8,11 @@ Feel free to remove the `VSCodium`-related `Nix` code and whatever you want!
 
 ## Prerequisites
 
+- [flake.nix](./flake.nix) - code in this flake is extensively commented. Read it to understand how this flake works
+- [language-tools/haskell](https://github.com/deemp/flakes/blob/main/language-tools/haskell/flake.nix) - this flake provides the `Haskell` tools in a convenient (IMHO) way
 - [codium-generic](https://github.com/deemp/flakes/tree/main/templates/codium/generic#readme) - info just about `VSCodium`
 - [codium-haskell-simple](https://github.com/deemp/flakes/tree/main/templates/codium/haskell-simple#readme) - a simplified version of this flake
-- [flake.nix](./flake.nix) - extensively commented code
-- [Haskell](https://github.com/deemp/flakes/blob/main/README/Haskell.md)
+- [Haskell](https://github.com/deemp/flakes/blob/main/README/Haskell.md) - general info about `Haskell` tools
 - [Troubleshooting](https://github.com/deemp/flakes/blob/main/README/Troubleshooting.md)
 - [Prerequisites](https://github.com/deemp/flakes#prerequisites)
 
@@ -40,6 +41,65 @@ Feel free to remove the `VSCodium`-related `Nix` code and whatever you want!
 
 1. Wait until `Haskell Language Server` (`HLS`) starts giving you type info.
 
+## Default devshell
+
+The `devShells.default` here is similar to the [cabal](#cabal) version (`devshells.cabalShell`).
+
+The `nix-managed` package that we provide the `devShells.default` for has several non-`Haskell` dependencies.
+
+First, as `nix-managed` uses an `lzma` package, it needs a `C` library `liblzma`. This library is delivered via `Nix` as `pkgs.lzma`.
+
+Second, `nix-managed` calls the `hello` command at runtime (see `someFunc` in `src/Lib.hs`). This command comes from a `hello` executable which is delivered via `Nix` as `pkgs.hello`.
+
+1. We now enter a `devShell`.
+
+    ```console
+    nix develop
+    ```
+
+1. And run the app.
+
+    ```console
+    cabal run
+    ```
+
+1. Next, we can access the `hello` executable in a repl as this executable is on `PATH` of `cabal`.
+
+    ```console
+    cabal repl
+    ghci> :?
+    ...
+    :!<command> run the shell command <command>
+    ...
+    ghci> :! hello
+    Hello, world!
+    ```
+
+1. Furthermore, as `ghcid` uses a `cabal repl` command, when running `ghcid`, `hello` will still be available to the app.
+
+    ```console
+    ghcid
+    ```
+
+1. `ghcid` will run not only the `main` function, but also the code in magic comments (See `app/Main.hs`).
+
+## GHC
+
+This template uses `GHC 9.2.5`. To switch to `GHC 9.0`,
+
+1. In `flake.nix`, change GHC version from `"925"` to `"90"`.
+1. If using `stack`, in `stack.yaml`, change `resolver` to [lts-19.33](https://www.stackage.org/lts-19.33) or a later one from `stackage`.
+
+## Configs
+
+- [package.yaml] - used by `stack` or `hpack` to generate a `.cabal`
+- [.markdownlint.jsonc](./.markdownlint.jsonc) - for `markdownlint` from the extension `davidanson.vscode-markdownlint`
+- [.ghcid](./.ghcid) - for [ghcid](https://github.com/ndmitchell/ghcid)
+- [.envrc](./.envrc) - for [direnv](https://github.com/direnv/direnv)
+- [fourmolu.yaml](./fourmolu.yaml) - for [fourmolu](https://github.com/fourmolu/fourmolu#configuration)
+- [ci.yaml](.github/workflows/ci.yaml) - a generated `GitHub Actions` workflow. See [workflows](https://github.com/deemp/flakes/tree/main/workflows). Generate a workflow via `nix run .#writeWorkflows`.
+- `hie.yaml` - not present, but can be generated via [implicit-hie](https://github.com/Avi-D-coder/implicit-hie) (available on devshell) to verify the `Haskell Language Server` setup.
+
 ## Run a Haskell app
 
 Below is the comparison of ways to run a `Haskell` app. I prefer to use everything apart from `stack` and `shellFor`.
@@ -55,8 +115,6 @@ Incremental builds via `cabal` + `Nix`-provided packages. A devshell will run th
 ```console
 nix develop .#cabal
 ```
-
-If you use `hpack` to generate `cabal`, see [here](https://github.com/sol/hpack) what can go into a `package.yaml`.
 
 ### Nix
 
@@ -161,20 +219,3 @@ Necessary components of `Stack` + `Nix` integration:
 - `stack-shell` with necessary derivations in `flake.nix`
   - The name `stack-shell` is chosen arbitrarily
   - The name should be the same as the one used in `stack.nix`
-
-## GHC
-
-This template uses `GHC 9.2`. You can switch to `GHC 9.0`:
-
-- In `flake.nix`, change `"92"` to `"90"`
-- If using `stack`, in `stack.yaml`, change `resolver` to [lts-19.33](https://www.stackage.org/lts-19.33) or a later one from `stackage`
-
-## Configs
-
-- [package.yaml] - used by `stack` or `hpack` to generate a `.cabal`
-- [.markdownlint.jsonc](./.markdownlint.jsonc) - for `markdownlint` from the extension `davidanson.vscode-markdownlint`
-- [.ghcid](./.ghcid) - for [ghcid](https://github.com/ndmitchell/ghcid)
-- [.envrc](./.envrc) - for [direnv](https://github.com/direnv/direnv)
-- [fourmolu.yaml](./fourmolu.yaml) - for [fourmolu](https://github.com/fourmolu/fourmolu#configuration)
-- [ci.yaml](.github/workflows/ci.yaml) - a generated `GitHub Actions` workflow. See [workflows](https://github.com/deemp/flakes/tree/main/workflows). Generate a workflow via `nix run .#writeWorkflows`.
-- `hie.yaml` - not present, but can be generated via [implicit-hie](https://github.com/Avi-D-coder/implicit-hie) (available on devshell) to verify the `Haskell Language Server` setup.

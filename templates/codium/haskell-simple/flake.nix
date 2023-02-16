@@ -15,7 +15,7 @@
   outputs = inputs: inputs.flake-utils.lib.eachDefaultSystem (system:
     let
       # We're going to make some dev tools for our Haskell package
-      # See NixOS wiki for more info - https://nixos.wiki/wiki/Haskell
+      # The NixOS wiki has more info - https://nixos.wiki/wiki/Haskell
 
       # First, we import stuff
       pkgs = inputs.nixpkgs.legacyPackages.${system};
@@ -28,8 +28,8 @@
       inherit (inputs.workflows.configs.${system}) nixCI;
       inherit (inputs) lima;
 
-      # Next, set the desired GHC version
-      ghcVersion_ = "92";
+      # Next, we set the desired GHC version
+      ghcVersion_ = "925";
 
       # and the name of the package
       myPackageName = "nix-managed";
@@ -43,13 +43,15 @@
 
       # --- shells ---
 
-      # First of all, we need to prepare the haskellPackages attrset
-      # So, we define the overrides - https://nixos.wiki/wiki/Haskell#Overrides
+      # First of all, we need to prepare an attrset of Haskell packages
+      # and include our packages into it
+      # So, we define an override - https://nixos.wiki/wiki/Haskell#Overrides
       # This is to supply the necessary libraries and executables to our packages
       # Sometimes, we need to fix the broken packages - https://gutier.io/post/development-fixing-broken-haskell-packages-nixpkgs/
-      # That's why, inherit several helper functions
-      # Note that overriding the packages from haskellPackages will require their rebuilds
-      # So, override as few packages as possible and consider making a PR when haskellPackages.somePackage doesn't build
+      # That's why, we use several helper functions
+      # Overriding the packages may trigger multiple rebuilds
+      # So, we override as few packages as possible
+      # If some package doesn't build, we can make a PR with a fix
 
       inherit (pkgs.haskell.lib)
         # doJailbreak - remove package bounds from build-depends of a package
@@ -73,29 +75,37 @@
               # we should write the new deps before the existing deps to override them
               # these deps will be in haskellPackages.myPackage.getCabalDeps.librarySystemDepends
               librarySystemDepends = myPackageDepsLib ++ (x.librarySystemDepends or [ ]);
+              # these executables will be available to our package at runtime
               # we may skip the old deps if we'd like to
               executableSystemDepends = myPackageDepsBin;
               # here's how we can add a package built from sources
               # then, we may use this package in .cabal in a test-suite
+              # (uncomment to try)
               testHaskellDepends = [
-                (super.callCabal2nix "lima" "${lima.outPath}/lima" { })
+                # (super.callCabal2nix "lima" "${lima.outPath}/lima" { })
               ] ++ x.testHaskellDepends;
             });
         };
       };
 
 
-      # We supply it to a helper function that will give us haskell tools for given 
-      # compiler version, override, packages we're going to develop, and their binary runtime dependencies
+      # We supply it to a helper function that will give us Haskell tools 
+      # for a given compiler version, override, packages we're going to develop, 
+      # and apps' runtime dependencies
 
-      # Our devShells should only be aware of the dev dependencies of the Haskell packages that we're going to develop
-      # So, we need to supply all Haskell packages that we'd like to develop so that they're excluded from the dev dependencies
-      # More specifically, if we're developing Haskell packages A and B and A depends on B, we need to supply both A and B
-      # This will prevent nix from building B as a dev dependency of A
-
-      inherit (toolsGHC ghcVersion_ override (ps: [ ps.myPackage ]) myPackageDepsBin)
+      inherit (toolsGHC {
+        version = ghcVersion_;
+        inherit override;
+        # If we work on multiple packages, we need to supply all of them.
+        # Suppose we develop packages A and B, where B is in deps of A.
+        # GHC will be given dependencies of both A and B.
+        # However, we don't want B to be in the list of deps of GHC
+        # because build of GHC may fail due to errors in B.
+        packages = (ps: [ ps.myPackage ]);
+        runtimeDependencies = myPackageDepsBin;
+      })
         hls cabal implicit-hie justStaticExecutable
-        ghcid callCabal2nix haskellPackages hpack;
+        ghcid callCabal2nix haskellPackages hpack ghc;
 
       codiumTools = [
         ghcid
@@ -103,6 +113,9 @@
         implicit-hie
         cabal
         hls
+        # `cabal` already has a ghc on its PATH,
+        # so you may remove `ghc` from this list
+        ghc
       ];
 
       # And compose VSCodium with dev tools and HLS
@@ -125,10 +138,8 @@
       # Also, we provide scripts that can be used in CI
       flakesTools = mkFlakesTools [ "." ];
 
-      # write .github/ci.yaml to get a GitHub Actions workflow file
+      # and a script to write GitHub Actions workflow file into `.github/ci.yaml`
       writeWorkflows = writeWorkflow "ci" nixCI;
-
-      # Feel free to remove the unnecessary stuff, e.g. VSCodium - related
     in
     {
       packages = {
