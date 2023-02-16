@@ -72,7 +72,14 @@
     "workbench.colorTheme" = "Monokai";
   };
 
-  editor = { "editor.formatOnSave" = true; };
+  editor = {
+    "editor.formatOnSave" = true;
+    "editor.tabSize" = 2;
+  };
+
+  terminal = {
+    "terminal.integrated.scrollback" = 100000;
+  };
 
   gitlens = {
     "gitlens.codeLens.authors.enabled" = false;
