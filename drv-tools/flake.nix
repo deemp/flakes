@@ -203,9 +203,15 @@
               (pkgs.runCommand executableName { nativeBuildInputs = [ pkgs.pandoc ]; }
                 ''
                   mkdir $out
-                  cp -rs ${drv} $out
-                  rm -rf ${manPath}
-                  mkdir -p ${manPath}
+                  ln -s ${drv}/* $out
+                  rm -rf $out/share
+                  mkdir $out/share
+                  ln -s ${drv}/share/* $out/share
+                  rm -rf $out/share/man
+                  mkdir $out/share/man
+                  ln -s ${drv}/share/man/* $out/share/man
+                  rm -rf $out/share/man/man1
+                  mkdir $out/share/man/man1
                   printf '%s' ${escapeShellArg man} > ${md}
                   pandoc ${md} -st man -o ${manPath}/${executableName}.1
                   rm ${md}
