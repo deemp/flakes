@@ -44,7 +44,7 @@
               { buildInputs = [ pkgs.makeBinaryWrapper ]; }
               ''
                 mkdir $out
-                cp -rs ${drv} $out
+                cp -rs --no-preserve=mode,ownership ${drv}/* $out
                 rm -rf $out/bin
                 mkdir $out/bin
 
@@ -105,7 +105,7 @@
             { buildInputs = [ pkgs.makeBinaryWrapper ]; }
             ''
               mkdir $out
-              cp -rs ${exe} $out
+              cp -rs --no-preserve=mode,ownership ${exe}/* $out/
               rm -rf $out/bin
               mkdir $out/bin
               makeWrapper ${exe}/bin/${executableName} $out/bin/${binaryName} ${addDeps runtimeDependencies}
