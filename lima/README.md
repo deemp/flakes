@@ -7,6 +7,10 @@ Convert between
 
 It is usually possible to make conversion abide the [roundtrip property](https://jesper.sikanda.be/posts/quickcheck-intro.html). In other words, make conversions `file.lhs` -> `file.lhs.md` -> `file.lhs.md.lhs` or `file.hs` -> `file.hs.md` -> `file.hs.md.hs` and get `file.lhs = file.lhs.md.lhs` and `file.hs = file.hs.md.hs` in terms of their contents.
 
+## Demo
+
+![demo](https://github.com/deemp/flakes/blob/main/lima/README/demo.png?raw=true)
+
 ## Alternatives
 
 - [LiterateMarkdown](https://github.com/haskie-lambda/LiterateMarkdown). `lima` is a fork of this (abandoned?) project. Initially, I just wanted to fix some bugs, but then realized that I can't conveniently use `Haskell Language Server` with `.lhs` files so I added the `.hs` -> `.md` conversion.
