@@ -180,39 +180,42 @@
       indentStrings8 = indentStrings_ 8;
       indentStrings_ = n: y: "\n" + (concatMapStringsSep "\n" (x: (applyN n (s: " " + s) "") + x) y) + "\n";
 
+
       # add a longDescription to a derivation
       # add a man generated from longDescription
       # the function :: derivation with description -> long description
-      withMan = drv: fLongDescription:
+      withMan_ = executableName: drv: fLongDescription:
         assert hasAttr "description" drv.meta;
         let
-          pname = drv.pname;
           longDescription = fLongDescription drv;
           man = ''
             ---
-            title: ${pname}
+            title: ${executableName}
             section: 1
             header: User Manual
             ---
             ${longDescription}
           '';
+          md = "$out/${executableName}.1.md";
           manPath = "$out/share/man/man1";
-          drv_ = pkgs.symlinkJoin {
-            name = pname;
-            inherit pname;
-            paths = [ drv ];
-            nativeBuildInputs = [ pkgs.pandoc ];
-            postBuild = ''
-              mkdir -p ${manPath}
-              printf '%s' ${escapeShellArg man} > $out/${pname}.1.md
-              rm -rf ${manPath}
-              mkdir -p ${manPath}
-              ${mkBinName pkgs.pandoc "pandoc"} $out/${pname}.1.md -st man -o ${manPath}/${pname}.1
-              rm $out/${pname}.1.md
-            '';
-          };
+          drv_ =
+            withAttrs
+              (pkgs.runCommand executableName { nativeBuildInputs = [ pkgs.pandoc ]; }
+                ''
+                  mkdir $out
+                  cp -rs ${drv} $out
+                  rm -rf ${manPath}
+                  mkdir -p ${manPath}
+                  printf '%s' ${escapeShellArg man} > ${md}
+                  pandoc ${md} -st man -o ${manPath}/${executableName}.1
+                  rm ${md}
+                ''
+              )
+              { pname = drv.pname; };
         in
         withLongDescription (withMeta drv_ drv.meta) longDescription;
+
+      withMan = drv: withMan_ drv.pname drv;
 
       # String -> String -> Any -> IO ()
       # make a script to write a nix expr to a file path
@@ -260,7 +263,7 @@
           description = "Write a `Nix` expression for `${name}` as `YAML` into `${path}`";
         };
 
-      # use when need to generate settings.json etc.
+      # Convert JSON to Nix
       json2nix =
         withMan
           (mkShellApp {
@@ -401,9 +404,10 @@
           runInEachDir
           toList
           withAttrs
-          withLongDescription
           withDescription
+          withLongDescription
           withMan
+          withMan_
           withMeta
           writeJSON
           writeYAML
@@ -415,10 +419,11 @@
       # tests 
       devShells.default = pkgs.mkShell {
         shellHook = ''
-          man ${mkBin json2nix}
+          printf 'Run `man ${json2nix.pname}`\n'
         '';
         name = "default";
         buildInputs = [ pkgs.tree json2nix pkgs.fish ];
+        LC_ALL = "C.utf8";
       };
 
       tests = {
