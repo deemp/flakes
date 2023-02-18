@@ -26,7 +26,7 @@
       # With haskell packages that are dependencies of the given packages
       ghcGHC = ghcVersion: override: packages:
         ((haskellPackagesGHCOverride ghcVersion override).ghcWithPackages
-          (ps: haskellDepsPackages (packages ps))) // { pname = "ghc"; };
+          (ps: getHaskellPackagesDeps (packages ps))) // { pname = "ghc"; };
 
       # build tool with GHC of a specific version available on PATH
       buildToolWithFlagsGHC = name: drv: flags: ghcVersion: override: packages: runtimeDependencies:
@@ -44,8 +44,8 @@
               { buildInputs = [ pkgs.makeBinaryWrapper ]; }
               ''
                 mkdir $out
-                ln -s ${drv}/* $out
-                rm $out/bin
+                cp -rs ${drv} $out
+                rm -rf $out/bin
                 mkdir $out/bin
 
                 makeWrapper ${drv}/bin/${name} $out/bin/${name} \
@@ -60,7 +60,7 @@
           };
 
       # get deps for a Haskell package
-      haskellDeps = drv: concatLists (attrValues drv.getCabalDeps);
+      getHaskellPackageDeps = drv: concatLists (attrValues drv.getCabalDeps);
 
       # get deps for a list of Haskell packages
       # Example. We develop packages A and B, where B is in deps of A.
@@ -68,7 +68,7 @@
       # because `ghcWithPackages` may fail due to errors in B.
       # That's why, we remove the supplied packages (A and B in this example).
       # from the final list of deps
-      haskellDepsPackages = packages:
+      getHaskellPackagesDeps = packages:
         pkgs.lib.lists.subtractLists
           packages
           (concatLists (map (package: concatLists (attrValues package.getCabalDeps)) packages));
@@ -85,38 +85,36 @@
 
       addDeps = deps: if deps != [ ] then "--prefix PATH : ${pkgs.lib.makeBinPath deps}" else "";
 
-      # build an executable without local dependencies (notice empty args)
-      justStaticExecutableGHCOverrideDeps = deps: name: package:
-        let
-          exe = pkgs.haskell.lib.justStaticExecutables package;
-        in
+      # Build an executable from a Haskell package
+      # Provide it with given runtime dependencies
+      justStaticExecutable =
+        {
+          # package that contains an executable
+          package
+        , # name of the executable
+          executableName ? package.pname
+        , # new name of the executable
+          binaryName ? executableName
+        , # runtime dependencies of the executable
+          # that should be available to it on `PATH`
+          runtimeDependencies ? [ ]
+        }:
+        let exe = pkgs.haskell.lib.justStaticExecutables package; in
         withAttrs
-          (pkgs.runCommand exe
+          (pkgs.runCommand binaryName
             { buildInputs = [ pkgs.makeBinaryWrapper ]; }
             ''
               mkdir $out
-              ln -s ${exe}/* $out
-
-              rm $out/share
-              mkdir $out/share
-              cp -r ${exe}/share $out/share
-                        
-              rm $out/bin
+              cp -rs ${exe} $out
+              rm -rf $out/bin
               mkdir $out/bin
-
-              makeWrapper ${exe}/bin/${package.pname} $out/bin/${name} ${addDeps deps}
+              makeWrapper ${exe}/bin/${executableName} $out/bin/${binaryName} ${addDeps runtimeDependencies}
             ''
           )
-          { pname = name; }
+          { pname = binaryName; }
       ;
 
-      # see the possible values for ghcVersion here
-      # https://haskell4nix.readthedocs.io/nixpkgs-users-guide.html#how-to-install-haskell-language-server
-      hlsGHC = ghcVersion: (haskellPackagesGHC ghcVersion).haskell-language-server;
-
-      # tools for a specific GHC version and overriden haskell packages for this GHC
-      # see what you need to pass to your shell for GHC
-      # https://docs.haskellstack.org/en/stable/nix_integration/#supporting-both-nix-and-non-nix-developers
+      # Tools for a specific GHC version and overriden haskell packages for this GHC
       toolsGHC =
         {
           # GHC version as it's set in nixpkgs
@@ -127,18 +125,20 @@
         , # a function from an attrset Haskell packages to a list of packages that you develop
           # packages that you develop should be provided in the override
           packages ? (_: [ ])
-        , # what should be available on PATH to a Haskell app at runtime
+        , # what should be available on PATH
+          # this lists lists necessary non-Haskell executables for all Haskell packages
+          # These non-Haskell packages will be available to a build tool
           runtimeDependencies ? [ ]
         }:
         {
-          hls = hlsGHC version;
+          hls = (haskellPackagesGHC version).haskell-language-server;
+          # https://docs.haskellstack.org/en/stable/nix_integration/#supporting-both-nix-and-non-nix-developers
           stack = stackWithFlagsGHCOverride version override packages runtimeDependencies;
           cabal = cabalWithFlagsGHCOverride version override packages runtimeDependencies;
           ghc = ghcGHC version override packages;
-          justStaticExecutable = justStaticExecutableGHCOverrideDeps runtimeDependencies;
           inherit (haskellPackagesGHC version) implicit-hie ghcid hpack callCabal2nix;
           haskellPackages = haskellPackagesGHCOverride version override;
-          inherit haskellDeps haskellDepsPackages;
+          inherit justStaticExecutable getHaskellPackageDeps getHaskellPackagesDeps;
         };
     in
     {
@@ -149,55 +149,68 @@
     # Tests
     // (
       let
+        packageName = "hello-world";
         toolsGHC_ = version: toolsGHC {
           inherit version;
+          # docs on overrides - https://nixos.org/manual/nixpkgs/unstable/#haskell-overriding-haskell-packages
           override = {
             overrides = self: super: {
-              haskell = pkgs.haskell.lib.overrideCabal
-                (super.callCabal2nix "haskell" ./. {
-                  # here can be the local packages that 
-                  # `haskell` package depends on
+              ${packageName} = pkgs.haskell.lib.overrideCabal
+                (super.callCabal2nix packageName ./. {
+                  # here can be the local packages that our package depends on
                 })
                 (x: {
                   # see what can be overriden - https://github.com/NixOS/nixpkgs/blob/0ba44a03f620806a2558a699dba143e6cf9858db/pkgs/development/haskell-modules/generic-builder.nix#L13
-                  # include the previous deps
-                  librarySystemDepends = [ pkgs.zlib ] ++ (x.librarySystemDepends or [ ]);
+                  # deps explanation - https://nixos.org/manual/nixpkgs/unstable/#haskell-derivation-deps
+
+                  # The dependencies of the library
+                  # Newer deps listed before the existing deps override the existing ones
+                  libraryToolDepends = [ pkgs.zlib ] ++ (x.libraryToolDepends or [ ]);
                 });
             };
           };
-          packages = (ps: [ ps.haskell ]);
+          # Packages that we develop
+          packages = (ps: [ ps.${packageName} ]);
+          # What our packages need at runtime
+          # We have a single `cabal` and puth these deps on its `PATH`
           runtimeDependencies = [ pkgs.hello ];
         };
 
         ghcVersion_ = "925";
-
-        tools =
-          let hp = toolsGHC_ ghcVersion_; in
+        executableName = "hello-world";
+        binaryName = "hello";
+        test =
+          let
+            tools = toolsGHC_ ghcVersion_;
+            hello-world = tools.justStaticExecutable {
+              package = tools.haskellPackages.${packageName};
+              inherit binaryName;
+              runtimeDependencies = [ pkgs.hello ];
+            };
+          in
           {
-            inherit (toolsGHC_ ghcVersion_)
-              cabal stack hls ghc implicit-hie ghcid hpack;
-            hello-world = hp.justStaticExecutable "hello-world" hp.haskellPackages.haskell;
+            inherit (tools) cabal stack hls ghc implicit-hie
+              ghcid hpack haskellPackages;
+            inherit hello-world;
+            deps = "${packageName}".getCabalDeps;
           };
-
-        # deps that can be overriden in a package
-        deps_ = (toolsGHC_ ghcVersion_).haskellPackages.haskell.getCabalDeps;
       in
       {
-        # test stack has `hello` on PATH
-        devShells =
-          {
-            default = pkgs.mkShell {
-              buildInputs = attrValues tools;
-              shellHook = ''
-                printf "\n--- cabal runs ---\n"
-                cabal run
+        packages.default = test.${packageName};
+        # test cabal has `hello` on PATH
+        devShells = {
+          default = pkgs.mkShell {
+            shellHook = ''
+              printf "\n--- cabal runs ---\n"
+              ${test.cabal}/bin/cabal v1-run ${executableName}
 
-                printf "\n--- Haskell executable runs ---\n"
-                ${tools.hello-world}/bin/${tools.hello-world.pname}
-              '';
-            };
+              printf "\n--- Haskell executable runs ---\n"
+              ${test.${packageName}}/bin/${binaryName}
+            '';
+            buildInputs = [ test.cabal test.hpack ];
           };
-        inherit deps_ tools;
+        };
+        inherit test;
       }
     )
     );

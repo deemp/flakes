@@ -1,14 +1,14 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.0.
+-- This file has been generated from package.yaml by hpack version 0.35.1.
 --
 -- see: https://github.com/sol/hpack
 
-name:           haskell
+name:           hello-world
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/value/haskell#readme>
-homepage:       https://github.com/value/haskell#readme
-bug-reports:    https://github.com/value/haskell/issues
+description:    Please see the README on GitHub at <https://github.com/value/hello-world#readme>
+homepage:       https://github.com/value/hello-world#readme
+bug-reports:    https://github.com/value/hello-world/issues
 author:         value
 maintainer:     value
 copyright:      value
@@ -21,12 +21,12 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/value/haskell
+  location: https://github.com/value/hello-world
 
-executable haskell
+executable hello-world
   main-is: Main.hs
   other-modules:
-      Paths_haskell
+      Paths_hello_world
   hs-source-dirs:
       ./
   default-extensions:
