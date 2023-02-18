@@ -18,6 +18,16 @@ build-type:     Simple
 extra-source-files:
     CHANGELOG.md
     README.md
+    testdata/config/lima.yaml
+    testdata/hs/input0.hs
+    testdata/hs/input0.hs.md
+    testdata/hs/input0.hs.md.hs
+    testdata/lhs/input0.lhs
+    testdata/lhs/input0.lhs.md
+    testdata/lhs/input0.lhs.md.lhs
+    testdata/lhs/input1.lhs
+    testdata/lhs/input1.lhs.md
+    testdata/lhs/input1.lhs.md.lhs
 
 source-repository head
   type: git

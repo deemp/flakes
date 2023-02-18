@@ -21,12 +21,13 @@
       inherit (drv-tools.functions.${system}) mkBinName withAttrs withMan withDescription;
       inherit (drv-tools.configs.${system}) man;
       inherit (haskell-tools.functions.${system}) toolsGHC;
-      inherit (toolsGHC { version = "92"; }) justStaticExecutable callCabal2nix;
+      inherit (toolsGHC { version = "925"; }) justStaticExecutable callCabal2nix haskellPackages;
 
-      myPackage =
+      packageName = "lima";
+      myPackage = callCabal2nix packageName ./. { };
+      myPackageExe =
         let
-          packageName = "lima";
-          packageExe = justStaticExecutable { package = callCabal2nix packageName ./. { }; };
+          packageExe = justStaticExecutable { package = myPackage; };
         in
         withMan
           (withDescription packageExe "Convert `Haskell` (`.hs`) to `Markdown` (`.md`) or between `Literate Haskell` (`.lhs`) and `Markdown` (`.md`)")
@@ -48,7 +49,8 @@
     in
     {
       packages = {
-        default = myPackage;
+        default = myPackageExe;
+        test = pkgs.haskell.packages."ghc925".buildFromCabalSdist myPackage;
       };
     });
 
