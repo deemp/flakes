@@ -26,14 +26,14 @@
       myPackage =
         let
           packageName = "lima";
-          packageExe = justStaticExecutable packageName (callCabal2nix packageName ./. { });
+          packageExe = justStaticExecutable { package = callCabal2nix packageName ./. { }; };
         in
         withMan
           (withDescription packageExe "Convert `Haskell` (`.hs`) to `Markdown` (`.md`) or between `Literate Haskell` (`.lhs`) and `Markdown` (`.md`)")
-          (
-            self: ''
+          (x:
+            ''
               ${man.DESCRIPTION}
-              ${self.meta.description}
+              ${x.meta.description}
 
               ${man.SYNOPSYS}
               `${packageName} <command> (-f file) [-c config]`
