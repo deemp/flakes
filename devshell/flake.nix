@@ -61,18 +61,22 @@
 
           inherit (devshell) mkShell;
 
-          # Case: we have several scripts available in `packages`
+          # Case: we have several scripts available in `packages` of a flake
           # And we'd like to present them in a `devShell`
-          mkRunCommands = category: drvs@{ ... }:
+          mkRunCommands_ = dir: category: drvs@{ ... }:
             pkgs.lib.attrsets.mapAttrsToList
               (
                 name: value: {
-                  name = "nix run .#${name}";
+                  name = "nix run ${dir}#${name}";
                   inherit category;
                   help = value.meta.description or "dummy description";
                 }
               )
               drvs;
+
+          # Case: we have several scripts available in `packages` of the current flake
+          # And we'd like to present them in a `devShell`
+          mkRunCommands = mkRunCommands_ ".";
 
           # Case: we have several programs available in a `devShell`
           # And we'd like to present them in that `devShell`
@@ -127,6 +131,6 @@
         in
         {
           inherit devShells packages devshell;
-          functions = { inherit mkCommands mkRunCommands mkShell; };
+          functions = { inherit mkCommands mkRunCommands_ mkRunCommands mkShell; };
         });
 }
