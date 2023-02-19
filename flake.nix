@@ -19,7 +19,7 @@
         inherit (inputs.codium.configs.${system}) settingsNix;
         inherit (inputs.drv-tools.functions.${system}) readDirectories withAttrs;
         inherit (inputs.flakes-tools.functions.${system}) mkFlakesTools;
-        inherit (inputs.devshell.functions.${system}) mkCommands mkShell;
+        inherit (inputs.devshell.functions.${system}) mkCommands mkRunCommands mkShell;
         inherit (inputs.workflows.functions.${system}) writeWorkflow;
         inherit (inputs.workflows.configs.${system}) nixCI;
 
@@ -44,27 +44,23 @@
             ]
           ]
         ));
-        writeSettings = writeSettingsJSON settingsNix;
-        codiumTools = [ writeSettings ];
-        codium = mkCodium {
-          extensions = { inherit (extensions) nix misc github markdown yaml; };
-          runtimeDependencies = codiumTools;
-        };
-        tools = [ codium writeSettings ];
-      in
-      {
-        devShells.default = mkShell
-          {
-            packages = tools;
-            commands = mkCommands "tools" tools;
-          };
 
         packages = {
-          pushToCachix = flakesTools.pushToCachix;
-          updateLocks = flakesTools.updateLocks;
-          format = flakesTools.format;
+          inherit (flakesTools) pushToCachix updateLocks format;
+          writeSettings = writeSettingsJSON settingsNix;
+          codium = mkCodium { extensions = { inherit (extensions) nix misc github markdown yaml; }; };
           writeWorkflows = writeWorkflow "CI" (withAttrs nixCI { on.schedule = [{ cron = "0 0 1 * *"; }]; });
         };
+      in
+      {
+        devShells.default = mkShell {
+          commands = mkRunCommands "ide" {
+            inherit (packages) writeSettings;
+            "codium ." = packages.codium;
+          };
+        };
+
+        inherit packages;
       })
   // {
     inherit (inputs.formatter) formatter;
