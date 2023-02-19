@@ -39,8 +39,11 @@
       # generate an attrset from a list of attrNames where attrName = attrValue
       genAttrsId = list: genAttrs list pkgs.lib.id;
 
-      # map attributes to attrsets and merge them
+      # map values to attrsets and merge them
       mapGenAttrs = f: list: foldl' recursiveUpdate { } (builtins.map f list);
+
+      # map values to strings and to attrsets and merge them
+      mapStrGenAttrs = f: list: foldl' recursiveUpdate { } (builtins.map (x: f (toString x)) list);
 
       # List -> Set
       # Generate a set from a list of sets with all keys renamed
@@ -390,6 +393,7 @@
           indentStrings_
           indentStrings4
           indentStrings8
+          mapStrGenAttrs
           mapGenAttrs
           mergeValues
           mkAccessors
@@ -442,6 +446,7 @@
             { b = 4; }
           ];
         mg = mapGenAttrs (x: { "a${toString x}" = { "b${toString x}" = x; }; }) [ 1 2 ];
+        msg = mapStrGenAttrs (x: { "a${x}" = { "b${x}" = x; }; }) [ 1 2 ];
       };
     });
 }
