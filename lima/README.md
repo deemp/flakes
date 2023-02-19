@@ -29,19 +29,21 @@ It is usually possible to make conversion abide the [roundtrip property](https:/
 
 - **Multiline comments**:
   - Become text blocks.
-  - Should be written in `GitHub Flavored Markdown`.
-  - Should start with `{- ` or `{-\n`.
-  - Split `Haskell` code into parts above a comment and below a comment.
+  - Should be written:
+    - in `GitHub Flavored Markdown`;
+    - on one line: `{- <COMMENTS> -}`;
+    - on many lines: `{-\n<COMMENTS>\n-}`.
+  - Split `Haskell` code in `.md`.
 - **Special comments**:
-  - Become comments
+  - Become comments in `.md`.
   - Can be supplied in a config via `lima --config <your config path>` ([sample config](./testdata/config/))
-  - Should be written in a single line
+  - Should be written on a single line: `{- <COMMENTS> -}`
   - `{- LIMA_INDENT N -}` increases the indentation of snippets by `N`
   - `{- LIMA_DEDENT -}` sets the indentation of snippets to `0`
   - `{- LIMA_DISABLE -}` starts copying the following lines verbatim
   - `{- LIMA_ENABLE -}` stops copying the following lines verbatim
 - **Code and single-line comments**:
-  - Become `hs` snippets
+  - Become `hs` snippets in `.md`
 
 ### .lhs -> .md
 
@@ -100,11 +102,13 @@ It is usually possible to make conversion abide the [roundtrip property](https:/
 
 ### Windows
 
-To install the executable on `Windows`, if you can't convince cabal to use [`--bindir-method=copy`](https://github.com/haskell/cabal/issues/5748) you can build the project locally and copy the built executeable to `C:/Users/username/AppData/Roaming/cabal/bin` and ensure that this directory is in your `PATH`.
+Warning: took it from [LiterateMarkdown](https://github.com/haskie-lambda/LiterateMarkdown).
+
+To install the executable on `Windows`, if you can't convince cabal to use [`--bindir-method=copy`](https://github.com/haskell/cabal/issues/5748) you can build the project locally and copy the built executable to `C:/Users/username/AppData/Roaming/cabal/bin` and ensure that this directory is in your `PATH`.
 
 ## build-tool-depends
 
-You can use `lima` to generate your docs, e.g., via `cabal test:docs`. Just provide such a test with a script that converts (and, possibly, combines) files. As you'll use `lima` in a script, you should add it to that test's `build-tool-depends`:
+You can use `lima` to generate your docs, e.g., via `cabal test docs`. Just provide such a test with a script that converts (and, possibly, combines) files. As you'll use `lima` in a script, you should add it to that test's [build-tool-depends](https://cabal.readthedocs.io/en/3.8/cabal-package.html#pkg-field-build-tool-depends):
 
   ```cabal
   build-tool-depends:
