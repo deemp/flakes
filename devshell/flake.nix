@@ -63,7 +63,7 @@
 
           # Case: we have several scripts available in `packages` of a flake
           # And we'd like to present them in a `devShell`
-          mkRunCommands_ = dir: category: drvs@{ ... }:
+          mkRunCommandsDir = dir: category: drvs@{ ... }:
             pkgs.lib.attrsets.mapAttrsToList
               (
                 name: value: {
@@ -76,7 +76,7 @@
 
           # Case: we have several scripts available in `packages` of the current flake
           # And we'd like to present them in a `devShell`
-          mkRunCommands = mkRunCommands_ ".";
+          mkRunCommands = mkRunCommandsDir ".";
 
           # Case: we have several programs available in a `devShell`
           # And we'd like to present them in that `devShell`
@@ -131,6 +131,6 @@
         in
         {
           inherit devShells packages devshell;
-          functions = { inherit mkCommands mkRunCommands_ mkRunCommands mkShell; };
+          functions = { inherit mkCommands mkRunCommandsDir mkRunCommands mkShell; };
         });
 }
