@@ -59,22 +59,40 @@
               );
             };
 
-          mkCommands = category: drvs: map
-            (
-              x: {
-                name = x.pname or x.name;
-                category = category;
-                help = x.meta.description;
-              }
-            )
-            drvs;
-          mkShell = devshell.mkShell;
-        in
-        {
-          inherit devshell;
-          functions = {
-            inherit mkCommands mkShell;
+          inherit (devshell) mkShell;
+
+          # Case: we have several scripts available in `packages`
+          # And we'd like to present them in a `devShell`
+          mkRunCommands = category: drvs@{ ... }:
+            pkgs.lib.attrsets.mapAttrsToList
+              (
+                name: value: {
+                  name = "nix run .#${name}";
+                  inherit category;
+                  help = value.meta.description or "dummy description";
+                }
+              )
+              drvs;
+
+          # Case: we have several programs available in a `devShell`
+          # And we'd like to present them in that `devShell`
+          mkCommands = category: drvs:
+            map
+              (
+                x: {
+                  name = x.pname or x.name;
+                  help = x.meta.description or "dummy description";
+                  inherit category;
+                }
+              )
+              drvs;
+
+          packages = {
+            awk = pkgs.gawk;
+            myScript = pkgs.writeScript ''printf "hi from my script!"'';
+            testHello = pkgs.hello;
           };
+
           devShells.default = mkShell {
             packages = [ pkgs.gawk pkgs.hello ];
             bash = {
@@ -82,29 +100,33 @@
                 printf "Hello, World!\n"
               '';
             };
-            commands = [
-              {
-                name = "awk";
-              }
-              {
-                name = "hello";
-              }
-              {
-                name = "awk, hello";
-              }
-              {
-                name = "run-hello";
-                category = "scripts";
-                help = "commands having the same category";
-                command = "hello";
-              }
-              {
-                name = "run-awk-help";
-                category = "scripts";
-                help = "commands having the same category";
-                command = "awk --help";
-              }
-            ];
+            commands =
+              mkCommands "pkgs" [ pkgs.gawk pkgs.hello ]
+              ++
+              mkRunCommands "run" { inherit (packages) awk testHello; }
+              ++
+              [
+                {
+                  name = "awk, hello";
+                }
+                {
+                  name = "run-hello";
+                  category = "scripts";
+                  help = "commands having the same category";
+                  command = "${pkgs.hello}/bin/hello";
+                }
+                {
+                  name = "run-awk";
+                  category = "scripts";
+                  help = "commands having the same category";
+                  command = "${pkgs.gawk}/bin/awk";
+                }
+              ]
+            ;
           };
+        in
+        {
+          inherit devShells packages devshell;
+          functions = { inherit mkCommands mkRunCommands mkShell; };
         });
 }
