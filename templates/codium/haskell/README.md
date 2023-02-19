@@ -9,12 +9,18 @@ Feel free to remove the `VSCodium`-related `Nix` code and whatever you want!
 ## Prerequisites
 
 - [flake.nix](./flake.nix) - code in this flake is extensively commented. Read it to understand how this flake works
-- [language-tools/haskell](https://github.com/deemp/flakes/blob/main/language-tools/haskell/flake.nix) - this flake provides the `Haskell` tools in a convenient (IMHO) way
-- [codium-generic](https://github.com/deemp/flakes/tree/main/templates/codium/generic#readme) - info just about `VSCodium`
+- [language-tools/haskell](https://github.com/deemp/flakes/blob/main/language-tools/haskell/flake.nix) - this flake provides the `Haskell` tools in a convenient way (IMHO).
+- [Conventions](https://github.com/deemp/flakes/blob/main/README/Conventions.md#dev-tools) - you may want to use this flake just for development.
+
+See these for additional info:
+
+- [codium-generic](https://github.com/deemp/flakes/tree/main/templates/codium/generic#readme) - info just about `VSCodium` and extensions.
 - [codium-haskell-simple](https://github.com/deemp/flakes/tree/main/templates/codium/haskell-simple#readme) - a simplified version of this flake
-- [Haskell](https://github.com/deemp/flakes/blob/main/README/Haskell.md) - general info about `Haskell` tools
+- [Haskell](https://github.com/deemp/flakes/blob/main/README/Haskell.md) - general info about `Haskell` tools.
 - [Troubleshooting](https://github.com/deemp/flakes/blob/main/README/Troubleshooting.md)
 - [Prerequisites](https://github.com/deemp/flakes#prerequisites)
+- [Nixpkgs support for incremental Haskell builds](https://www.haskellforall.com/2022/12/nixpkgs-support-for-incremental-haskell.html)
+- [flakes](https://github.com/deemp/flakes#readme) - my Nix flakes that may be useful for you too.
 
 ## Quick start
 
@@ -44,6 +50,8 @@ Feel free to remove the `VSCodium`-related `Nix` code and whatever you want!
 ## Default devshell
 
 The `devShells.default` here is similar to the [cabal](#cabal) version (`devshells.cabalShell`).
+
+Sometimes, `cabal` doesn't use the `Nix`-supplied packages ([issue](https://github.com/NixOS/nixpkgs/issues/130556#issuecomment-1114239002)). In this case, use `cabal v1-*` - commands.
 
 The `nix-managed` package that we provide the `devShells.default` for has several non-`Haskell` dependencies.
 
@@ -85,9 +93,18 @@ Second, `nix-managed` calls the `hello` command at runtime (see `someFunc` in `s
 
 ## GHC
 
-This template uses `GHC 9.2.5`. To switch to `GHC 9.0`,
+This template uses `GHC 9.2.5`. See the available `GHC` versions:
 
-1. In `flake.nix`, change GHC version from `"925"` to `"90"`.
+```console
+nix repl
+:lf .
+-- use your system
+ghcVersions.x86_64-linux
+```
+
+To switch to `GHC 9.0.2`:
+
+1. In `flake.nix`, change GHC version from `"925"` to `"902"`.
 1. If using `stack`, in `stack.yaml`, change `resolver` to [lts-19.33](https://www.stackage.org/lts-19.33) or a later one from `stackage`.
 
 ## Configs
@@ -102,7 +119,19 @@ This template uses `GHC 9.2.5`. To switch to `GHC 9.0`,
 
 ## Run a Haskell app
 
-Below is the comparison of ways to run a `Haskell` app. I prefer to use everything apart from `stack` and `shellFor`.
+Below is the comparison of ways to run a `Haskell` app. I prefer to use everything apart from `shellFor` and `stack`.
+
+### shellFor
+
+**Advantages** - easy setup, incremental builds
+
+**Disadvantage** - need to start `shellFor` and run other shells (e.g., `devshell`) inside it (or vice versa).
+
+Make a shell with all deps available and build incrementally via `cabal`.
+
+```console
+nix develop .#shellFor
+```
 
 ### Cabal
 
@@ -118,14 +147,14 @@ nix develop .#cabal
 
 ### Nix
 
-**Advantages** - medium setup, reproducible build, make a standalone executable from a package.
+**Advantages** - medium setup, reproducible build, make an executable binary app from a Haskell executable.
 
 **Disadvantages** - no incremental builds (rebuilds the whole project from scratch on slight code changes)
 
 `Nix` provides necessary packages, binaries and libraries to the app. A devshell will run the app
 
 ```console
-nix develop .#nixPackaged
+nix develop .#binary
 ```
 
 ### Docker
@@ -140,23 +169,15 @@ Put an executable into a Docker image and run it:
 nix develop .#docker
 ```
 
-### Cabal + Nix integration
-
-**Advantages** - easy setup, incremental builds
-
-**Disadvantage** - need to start a shell
-
-Make a shell with all deps available and build incrementalllt via `cabal`
-
-```console
-nix develop .#cabalShellFor
-```
-
 ### Stack + Nix integration
 
 **Advantage** - uses stack for incremental builds, very easy setup
 
 **Disadvantage** - doesn't use Nix caches and takes packages from Stackage
+
+```console
+nix develop .#stack
+```
 
 #### Background
 

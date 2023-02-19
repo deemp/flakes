@@ -7,15 +7,19 @@ Feel free to remove the `VSCodium`-related `Nix` code and whatever you want!
 
 ## Prerequisites
 
+- [flake.nix](./flake.nix) - code in this flake is extensively commented. Read it to understand how this flake works
+- [language-tools/haskell](https://github.com/deemp/flakes/blob/main/language-tools/haskell/flake.nix) - this flake provides the `Haskell` tools in a convenient way (IMHO)
+- [Conventions](https://github.com/deemp/flakes/blob/main/README/Conventions.md#dev-tools) - you may want to use this flake just for development.
+
 See these for additional info:
 
-- [flake.nix](./flake.nix) - extensively commented code. Read it to understand how this flake works
-- [language-tools/haskell](https://github.com/deemp/flakes/blob/main/language-tools/haskell/flake.nix) - this flake provides the `Haskell` tools in a convenient (IMHO) way
 - [codium-generic](https://github.com/deemp/flakes/tree/main/templates/codium/generic#readme) - info just about `VSCodium` and extensions.
 - [codium-haskell](https://github.com/deemp/flakes/tree/main/templates/codium/haskell#readme) - an advanced version of this flake.
-- [Haskell](https://github.com/deemp/flakes/blob/main/README/Haskell.md) - general info about `Haskell` tools
+  - Shows how to build a static binary from your package and how to make a Docker image with it.
+- [Haskell](https://github.com/deemp/flakes/blob/main/README/Haskell.md) - general info about `Haskell` tools.
 - [Troubleshooting](https://github.com/deemp/flakes/blob/main/README/Troubleshooting.md)
 - [Prerequisites](https://github.com/deemp/flakes#prerequisites)
+- [Nixpkgs support for incremental Haskell builds](https://www.haskellforall.com/2022/12/nixpkgs-support-for-incremental-haskell.html)
 
 ## Quick start
 
@@ -84,14 +88,20 @@ Second, `nix-managed` calls the `hello` command at runtime (see `someFunc` in `s
 
 1. `ghcid` will run not only the `main` function, but also the code in magic comments (See `app/Main.hs`).
 
-### Tools
-
 ## GHC
 
-This template uses `GHC 9.2.5`. To switch to `GHC 9.0`,
+This template uses `GHC 9.2.5`. See the available `GHC` versions:
 
-1. In `flake.nix`, change GHC version from `"925"` to `"90"`.
-1. If using `stack`, in `stack.yaml`, change `resolver` to [lts-19.33](https://www.stackage.org/lts-19.33) or a later one from `stackage`.
+```console
+nix repl
+:lf .
+-- use your system
+ghcVersions.x86_64-linux
+```
+
+To switch to `GHC 9.0.2`:
+
+1. In `flake.nix`, change GHC version from `"925"` to `"902"`.
 
 ## Configs
 

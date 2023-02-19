@@ -22,43 +22,43 @@
       # We're going to make some dev tools for our Haskell package
       # The NixOS wiki has more info - https://nixos.wiki/wiki/Haskell
 
-      # First, we import stuff
+      # --- Imports ---
+
       pkgs = inputs.nixpkgs.legacyPackages.${system};
       inherit (inputs.codium.functions.${system}) writeSettingsJSON mkCodium;
       inherit (inputs.drv-tools.functions.${system}) mkBin withAttrs withMan withDescription mkShellApp;
       inherit (inputs.drv-tools.configs.${system}) man;
       inherit (inputs.codium.configs.${system}) extensions settingsNix;
       inherit (inputs.flakes-tools.functions.${system}) mkFlakesTools;
-      inherit (inputs.devshell.functions.${system}) mkCommands mkShell;
+      inherit (inputs.devshell.functions.${system}) mkCommands mkRunCommands mkShell;
       inherit (inputs.haskell-tools.functions.${system}) toolsGHC;
       inherit (inputs.workflows.functions.${system}) writeWorkflow;
       inherit (inputs.workflows.configs.${system}) nixCI;
       inherit (inputs) lima;
 
-      # Next, we set the desired GHC version
-      ghcVersion_ = "925";
+      # --- Parameters ---
 
-      # and the name of the package
+      # The desired GHC version
+      ghcVersion = "925";
+
+      # The name of a package
       myPackageName = "nix-managed";
 
-      # Then, we list separately the libraries that our package needs
-      myPackageDepsLib = [ pkgs.lzma ];
+      # The libraries that the package needs during a build
+      myPackageLibraryDependencies = [ pkgs.lzma ];
 
-      # And the binaries. 
-      # In our case, the Haskell app will call the `hello` command
-      myPackageDepsBin = [ pkgs.hello ];
+      # The packages that provide the binaries that the package uses at runtime
+      myPackageRuntimeDependencies = [ pkgs.hello ];
 
-      # --- shells ---
+      # --- Override ---
 
-      # First of all, we need to prepare an attrset of Haskell packages
-      # and include our packages into it
-      # So, we define an override - https://nixos.wiki/wiki/Haskell#Overrides
-      # This is to supply the necessary libraries and executables to our packages
-      # Sometimes, we need to fix the broken packages - https://gutier.io/post/development-fixing-broken-haskell-packages-nixpkgs/
-      # That's why, we use several helper functions
-      # Overriding the packages may trigger multiple rebuilds
-      # So, we override as few packages as possible
-      # If some package doesn't build, we can make a PR with a fix
+      # We need to prepare an attrset of Haskell packages and include our packages into it,
+      # so we define an override - https://nixos.wiki/wiki/Haskell#Overrides.
+      # We'll supply the necessary dependencies to our packages.
+      # Sometimes, we need to fix the broken packages - https://gutier.io/post/development-fixing-broken-haskell-packages-nixpkgs/.
+      # For doing that, we use several helper functions.
+      # Overriding the packages may trigger multiple rebuilds,
+      # so we override as few packages as possible.
 
       inherit (pkgs.haskell.lib)
         # doJailbreak - remove package bounds from build-depends of a package
@@ -70,49 +70,53 @@
         ;
 
       # Here's our override
-      # We should use `cabal v1-*` commands with it - https://github.com/NixOS/nixpkgs/issues/130556#issuecomment-1114239002
+      # Haskell overrides are described here: https://nixos.org/manual/nixpkgs/unstable/#haskell
       override = {
         overrides = self: super: {
           lzma = dontCheck (doJailbreak super.lzma);
-          # see what can be overriden - https://github.com/NixOS/nixpkgs/blob/0ba44a03f620806a2558a699dba143e6cf9858db/pkgs/development/haskell-modules/generic-builder.nix#L13
           myPackage = overrideCabal
             (super.callCabal2nix myPackageName ./. { })
             (x: {
-              # we can combine the existing deps and new deps
-              # we should write the new deps before the existing deps to override them
-              # these deps will be in haskellPackages.myPackage.getCabalDeps.librarySystemDepends
-              librarySystemDepends = myPackageDepsLib ++ (x.librarySystemDepends or [ ]);
-              # these executables will be available to our package at runtime
-              # if we want to override the existing deps, we just don't include them
-              executableSystemDepends = myPackageDepsBin;
-              # here's how we can add a package built from sources
-              # then, we may use this package in .cabal in a test-suite
-              # (uncomment to try)
+              # See what can be overriden - https://github.com/NixOS/nixpkgs/blob/0ba44a03f620806a2558a699dba143e6cf9858db/pkgs/development/haskell-modules/generic-builder.nix#L13
+              # And the explanation of the deps - https://nixos.org/manual/nixpkgs/unstable/#haskell-derivation-deps
+
+              # Dependencies of the library in our package
+              # New deps go before the existing deps and override them
+              librarySystemDepends = myPackageLibraryDependencies ++ (x.librarySystemDepends or [ ]);
+
+              # These are non-Haskell dependencies of our package's executables
+              executableSystemDepends = myPackageLibraryDependencies ++ (x.executableSystemDepends or [ ]);
+
+              # Here's how we can add a package built from sources
+              # Later, we may use this package in `.cabal` in a test-suite
+              # We should use `cabal v1-*` commands with it - https://github.com/NixOS/nixpkgs/issues/130556#issuecomment-1114239002
+              # Uncomment the text in parentheses to try `lima`
               testHaskellDepends = [
                 # (super.callCabal2nix "lima" "${lima.outPath}/lima" { })
-              ] ++ x.testHaskellDepends;
+              ] ++ (x.testHaskellDepends or [ ]);
             });
         };
       };
 
-      # We supply it to a helper function that will give us Haskell tools 
-      # for a given compiler version, override, packages we're going to develop, 
-      # and apps' runtime dependencies
+      # --- Haskell tools ---
 
+      # We call a helper function that will give us tools for Haskell
       inherit (toolsGHC {
-        version = ghcVersion_;
+        version = ghcVersion;
         inherit override;
+        runtimeDependencies = myPackageRuntimeDependencies;
         # If we work on multiple packages, we need to supply all of them.
         # Suppose we develop packages A and B, where B is in deps of A.
         # GHC will be given dependencies of both A and B.
         # However, we don't want B to be in the list of deps of GHC
         # because build of GHC may fail due to errors in B.
         packages = (ps: [ ps.myPackage ]);
-        runtimeDependencies = myPackageDepsBin;
       })
         stack hls cabal implicit-hie justStaticExecutable
         ghcid callCabal2nix haskellPackages hpack ghc;
 
+
+      # --- all devShells ---
 
       # wrap a command output
       framed = command: ''
@@ -122,49 +126,53 @@
       '';
 
       # --- shellFor ---
-      # Now, we can use shellFor with overriden haskellPackages
-      # We'll use an ordinary cabal-install as we want to take it from Nix cache
-      # In this shell, we'll get some Haskell packages from cache
-      # Some other we'll be able to build incrementally via cabal-install
+
+      # docs - https://nixos.wiki/wiki/Haskell#Using_shellFor_.28multiple_packages.29
+      # We use `shellFor` with overriden `haskellPackages` to get the correct dependencies
+      # We'll be able to incrementally build our local packages via `cabal`
       # Incremental build means that only necessary rebuilds will be made on changes in a package
-      cabalShellFor =
+      shellFor =
         haskellPackages.shellFor {
           packages = ps: [ ps.myPackage ];
-          nativeBuildInputs = myPackageDepsBin ++ [ pkgs.cabal-install ];
+          nativeBuildInputs = myPackageRuntimeDependencies ++ [ pkgs.cabal-install ];
           withHoogle = true;
           # get other tools with names
           shellHook = framed "cabal run";
         };
 
-      # The disadvantage of such a shellFor is that we have to run this shell before we can start development
-      # If we also would like to start another shell with another toolset (like `devshell` - https://github.com/numtide/devshell)
-      # we'll have to use shellHook = 'nix develop .#anotherShell', and that's not cool
+      # The disadvantage of such a `shellFor` is that we have to run this shell before we can start development
+      # If we'd like to start another shell with another toolset (like `devshell` - https://github.com/numtide/devshell)
+      # we'll have to use some way to start the first shell inside the second one.
 
-      # --- smart cabal ---
-      # To overcome the disadvantage of shellFor, we inherited `cabal` from `toolsGHC` above
-      # this is cabal-install that's aware of `GHC` and runtime deps of our Haskell app
-      # moreover, that `GHC` is aware of the dev dependencies of our Haskell app
-      # So, instead of a shell like in the case of `shellFor`, we now get a single `cabal` executable
-      # This is the best dev way, IMO
+      # --- Cabal shell ---
 
-      cabalShell = mkShell {
-        packages = [ cabal ];
-        bash.extra = framed "cabal run";
-        commands = mkCommands "tools" [ cabal ];
+      # To overcome the disadvantages of  `shellFor`, we use a `cabal` from `toolsGHC` above
+      # This is `cabal-install` that's aware of `GHC` and deps of our Haskell app
+      # So, instead of a shell like in the case of `shellFor`, we now get a single `cabal` binary
+
+      cabalShell = pkgs.mkShell {
+        buildInputs = [ cabal ];
+        shellHook = framed "cabal run";
       };
 
-      # --- build an executable ---
+      # --- Binary shell ---
+
       # We can take one step further and make our app builds reproducible
-      # We'll take the haskellPackages.myPackage and turn it into an executable
-      # At this moment, we can set a name of our executable
+      # We'll take the `haskellPackages.myPackage` and turn its Haskell executable into a static binary
 
-      myPackageExeName = "my-package";
+      myPackageExecutableName = "my-package";
 
-      # We'll also add a description and a man page
-      myPackageExe =
+      myPackageBinaryName = "my-package-bin";
+
+      myPackageBinary =
+        # We'll also add a description and a man page
         withMan
           (withDescription
-            (justStaticExecutable myPackageExeName haskellPackages.myPackage)
+            (justStaticExecutable {
+              package = haskellPackages.myPackage;
+              binaryName = myPackageBinaryName;
+              runtimeDependencies = [ pkgs.hello ];
+            })
             "Demo Nix-packaged `Haskell` program "
           )
           (
@@ -174,24 +182,24 @@
             ''
           )
       ;
-      # A disadvantage of this approach is that the package and all its local dependencies
-      # will be rebuilt even if only that package changes
+      # A disadvantage of this approach is that all local packages will be rebuilt if any local dependency changes
       # So, the builds aren't incremental
+      # There's an unofficial solution to this problem - https://www.haskellforall.com/2022/12/nixpkgs-support-for-incremental-haskell.html
 
-      # In this shell, we'll run the obtained executable
-      nixPackagedShell = mkShell
+      # In this shell, we'll run the obtained binary
+      binaryShell = pkgs.mkShell
         {
-          packages = [ myPackageExe ];
-          bash.extra = framed (mkBin myPackageExe);
-          commands = mkCommands "tools" [ myPackageExe ];
+          buildInputs = [ myPackageBinary ];
+          shellHook = framed "${myPackageBinary}/bin/${myPackageBinaryName}";
         };
 
 
-      # --- docker image ---
+      # --- Docker shell ---
+
       # What if we'd like to share our Haskell app?
-      # In this case, we can easily make a Docker image with it
-      # We'll take an executable from the previous step and put it into an image
-      # At this moment, we can set a name and a tag of our image
+      # In this case, we can easily make a Docker image with it!
+      # We'll take the binary from the previous step and put it into an image
+      # Also, we'll set the name and the tag of our image
 
       myPackageImageName = "my-package-image";
       myPackageImageTag = "latest";
@@ -199,22 +207,21 @@
       myPackageImage = pkgs.dockerTools.buildLayeredImage {
         name = myPackageImageName;
         tag = myPackageImageTag;
-        config.Entrypoint = [ "bash" "-c" myPackageExe.name ];
-        contents = [ pkgs.bash myPackageExe ];
+        config.Entrypoint = [ "bash" "-c" myPackageBinaryName ];
+        contents = [ pkgs.bash myPackageBinary ];
       };
 
       # The image is ready. We can run it in a devshell
-      dockerShell = mkShell {
-        packages = [ pkgs.docker ];
-        bash.extra = ''
+      dockerShell = pkgs.mkShell {
+        buildInputs = [ pkgs.docker ];
+        shellHook = ''
           docker load < ${myPackageImage}
           ${framed "docker run -it ${myPackageImageName}:${myPackageImageTag}"}
         '';
-        commands = mkCommands "tools" [ pkgs.docker ];
       };
 
+      # --- Stack shell ---
 
-      # --- stack ---
       # One more way to run our app is to use Stack - Nix integration - https://docs.haskellstack.org/en/stable/nix_integration/#external-c-libraries-through-a-shellnix-file
       # First, we need to set in `stack.yaml`:
       # nix: 
@@ -222,124 +229,109 @@
       #   shell-file: stack.nix
       # Next, we need to say in `stack.nix` that it should take from this flakes the output called `stack-shell`
       # For `stack.nix` to be able to do that, we have to include `flake-compat` into inputs of this flake
-      # Of course, we can select a name that differs from `stack-shell`
+      # Note that we can select a name that differs from `stack-shell`
       # We just have to make sure that we use the same name in this flake's outputs and in `stack.nix`
-      stack-shell = { ghcVersion }:
+      stack-shell = { version }:
         pkgs.haskell.lib.buildStackProject {
           name = "stack-shell";
 
-          ghc = pkgs.haskell.compiler.${ghcVersion};
+          ghc = pkgs.haskell.compiler.${version};
 
-          buildInputs = myPackageDepsLib ++ myPackageDepsBin;
+          buildInputs = myPackageLibraryDependencies ++ myPackageRuntimeDependencies;
         };
 
-      # When everything is set up, we can run stack in a shell
-      stackShell = mkShell {
-        packages = [ pkgs.stack ];
-        bash.extra = framed "stack run";
-        commands = mkCommands "tools" [ pkgs.stack ];
+      # When everything is set up, we can run `stack` in a shell
+      stackShell = pkgs.mkShell {
+        buildInputs = [ pkgs.stack ];
+        shellHook = framed "stack run";
       };
-      # The disadvantage of this way is that we depend on stack's resolver, 
-      # while smart cabal depends just on GHC and the packages from haskellPackages
+      # The disadvantage of this way is that we depend on `stack`'s resolver, 
+      # while `cabal` depends just on `ghc` and the packages from `haskellPackages`
 
-      # --- dev tools ---
-      # There are other tools that we can provide
-      # Some Haskell tools and VSCodium with extensions and settings
+      # --- Tools ---
 
-      codiumTools = [
+      # We list the tools that we'd like to use
+      tools = [
         ghcid
         hpack
         implicit-hie
         cabal
         hls
-        # `cabal` already has a ghc on its PATH,
+        # `cabal` already has a `ghc` on its `PATH`,
         # so you may remove `ghc` from this list
+        # Then, you can access `ghc` via `cabal repl` -> `ghci>:! ghc`
         ghc
       ];
 
-      # And compose VSCodium with dev tools and HLS
-      # This is to let VSCodium run on its own, outside of a devshell
-      codium = mkCodium {
-        extensions = { inherit (extensions) nix haskell misc github markdown; };
-        runtimeDependencies = codiumTools;
-      };
+      # --- Packages ---
 
-      # a script to write .vscode/settings.json
-      writeSettings = writeSettingsJSON {
-        inherit (settingsNix) haskell todo-tree files editor gitlens
-          git nix-ide workbench markdown-all-in-one markdown-language-features;
-      };
-
-      # These tools will be available in a devshell
-      tools = codiumTools;
-
-      # We add more entries into our devshell
-      defaultShell = mkShell {
-        packages = tools;
-        # sometimes necessary for programs that work with files
-        bash.extra = "export LANG=C.utf8";
-        commands = mkCommands "tools" tools ++ [
-          {
-            name = "nix run .#codium .";
-            category = "ide";
-            help = "Run " + codium.meta.description + " in the current directory";
-          }
-          {
-            name = "nix run .#writeSettings";
-            category = "ide";
-            help = writeSettings.meta.description;
-          }
-          {
-            name = "nix run .#writeWorkflows";
-            category = "ide";
-            help = writeWorkflows.meta.description;
-          }
-          {
-            name = "nix run .#updateLocks";
-            category = "infra";
-            help = flakesTools.updateLocks.meta.description;
-          }
-          {
-            name = "nix run .#pushToCachix";
-            category = "infra";
-            help = flakesTools.pushToCachix.meta.description;
-          }
-        ];
-      };
-
-      # --- flakes tools ---
-      # Also, we provide scripts that can be used in CI
-      flakesTools = mkFlakesTools [ "." ];
-
-      # and a script to write GitHub Actions workflow file into `.github/ci.yaml`
-      writeWorkflows = writeWorkflow "ci" nixCI;
-    in
-    {
       packages = {
-        inherit (flakesTools)
-          updateLocks
-          pushToCachix;
-        inherit
-          writeSettings
-          writeWorkflows
-          codium;
+        # --- IDE ---
+
+        # This part can be removed if you don't use `VSCodium`
+        # We compose `VSCodium` with dev tools and `HLS`
+        # This is to let `VSCodium` run on its own, outside of a devshell
+        codium = mkCodium {
+          extensions = { inherit (extensions) nix haskell misc github markdown; };
+          runtimeDependencies = tools;
+        };
+
+        # a script to write `.vscode/settings.json`
+        writeSettings = writeSettingsJSON {
+          inherit (settingsNix) haskell todo-tree files editor gitlens
+            git nix-ide workbench markdown-all-in-one markdown-language-features;
+        };
+
+        # --- Flakes ---
+
+        # Scripts that can be used in CI
+        inherit (mkFlakesTools [ "." ]) updateLocks pushToCachix;
+
+        # --- GH Actions
+
+        # A script to write GitHub Actions workflow file into `.github/ci.yaml`
+        writeWorkflows = writeWorkflow "ci" nixCI;
       };
+
+      # --- devShells ---
 
       devShells = {
-        default = defaultShell;
 
-        nixPackaged = nixPackagedShell;
+        binary = binaryShell;
 
         cabal = cabalShell;
 
-        cabalShellFor = cabalShellFor;
+        shellFor = shellFor;
 
         docker = dockerShell;
 
         stack = stackShell;
+
+        default = mkShell {
+          packages = tools;
+          # sometimes necessary for programs that work with files
+          bash.extra = "export LANG=C.utf8";
+          commands =
+            mkCommands "tools" tools
+            ++ mkRunCommands "ide" { "codium ." = packages.codium; inherit (packages) writeSettings; }
+            ++ mkRunCommands "infra" { inherit (packages) writeWorkflows updateLocks pushToCachix; }
+            ++
+            [
+              {
+                name = "cabal v1-run";
+                category = "scripts";
+                help = "Run app via cabal";
+              }
+            ];
+        };
       };
+    in
+    {
+      inherit packages devShells;
 
       inherit stack-shell;
+
+      ghcVersions = pkgs.lib.attrsets.mapAttrsToList (name: _: pkgs.lib.strings.removePrefix "ghc" name) pkgs.haskell.compiler;
     });
 
   nixConfig = {

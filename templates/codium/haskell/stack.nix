@@ -9,4 +9,4 @@
     )
     { src = ./.; }
   ).defaultNix
-).outputs.stack-shell.${builtins.currentSystem} { inherit ghcVersion; }
+).outputs.stack-shell.${builtins.currentSystem} { version = ghcVersion; }
