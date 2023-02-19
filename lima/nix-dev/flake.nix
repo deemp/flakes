@@ -15,11 +15,11 @@
       pkgs = inputs.nixpkgs.legacyPackages.${system};
       inherit (inputs.codium.functions.${system}) writeSettingsJSON mkCodium;
       inherit (inputs.codium.configs.${system}) extensions settingsNix;
-      inherit (inputs.devshell.functions.${system}) mkCommands mkShell;
+      inherit (inputs.devshell.functions.${system}) mkCommands mkRunCommandsDir mkShell;
       inherit (inputs.haskell-tools.functions.${system}) toolsGHC;
 
       # Next, set the desired GHC version
-      ghcVersion = "92";
+      ghcVersion = "925";
 
       # and the name of the package
       myPackageName = "lima";
@@ -37,56 +37,46 @@
       })
         cabal hls hpack ghcid;
 
-      writeSettings = writeSettingsJSON {
-        inherit (settingsNix) haskell todo-tree files editor gitlens yaml
-          git nix-ide workbench markdown-all-in-one markdown-language-features;
-      };
-
-      codiumTools = [
+      tools = [
         cabal
         hls
         hpack
         ghcid
       ];
 
-      codium = mkCodium {
-        extensions = { inherit (extensions) nix haskell misc github markdown; };
-        runtimeDependencies = codiumTools;
-      };
-
-      tools = codiumTools;
-    in
-    {
       packages = {
-        inherit codium writeSettings;
+        codium = mkCodium {
+          extensions = { inherit (extensions) nix haskell misc github markdown; };
+          runtimeDependencies = tools;
+        };
+        writeSettings = writeSettingsJSON {
+          inherit (settingsNix) haskell todo-tree files editor gitlens yaml
+            git nix-ide workbench markdown-all-in-one markdown-language-features;
+        };
       };
 
       devShells.default = mkShell
         {
           packages = tools;
           bash.extra = "";
-          commands = (mkCommands "tools" tools) ++ [
-            {
-              name = "nix run nix-dev/#writeSettings";
-              category = "ide";
-              help = writeSettings.meta.description;
-            }
-            {
-              name = "nix run nix-dev/#codium .";
-              category = "ide";
-              help = codium.meta.description;
-            }
-            {
-              name = "cabal-test";
-              category = "test";
-              help = "Test via `cabal`";
-              # just in case we need to override some Haskell packages
-              # and don't want cabal to load them from Hackage
-              # we need to use the `cabal v1-*` commands
-              command = "cabal v1-test";
-            }
-          ];
+          commands =
+            mkCommands "tools" tools ++
+            mkRunCommandsDir "nix-dev" "ide" {
+              "codium ." = packages.codium;
+              inherit (packages) writeSettings;
+            } ++
+            [
+              {
+                name = "cabal-test";
+                category = "test";
+                help = "Test via `cabal`";
+                command = "cabal v1-test";
+              }
+            ];
         };
+    in
+    {
+      inherit packages devShells;
     });
   nixConfig = {
     extra-substituters = [
