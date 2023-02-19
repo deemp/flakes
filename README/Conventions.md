@@ -33,11 +33,13 @@ nix develop nix-dev/
 
 ## Pushing to a remote repo
 
-All flakes in this repo access some other flakes in this repo via `GitHub` URLs.
-That's why, if a change in a flake `A` here should be propagated into a flake `B`, it's necessary to update `B`'s `flake.lock`.
+All flakes in this repo access some other flakes from this repo via `GitHub` URLs.
+Let's consider two flakes from this repo, `A` and `B`, where `A` is in `inputs` of `B`.
+If I change the flake `A`, I should propagate that change into the flake `B`.
+In other words, it's necessary to update `B`'s `flake.lock`.
 One can update `B`'s `flake.lock` this way iff `A`'s changes are pushed to `GitHub`.
 Whenever there's a push to the remote `GitHub` repo, `B`'s `flake.lock` is updated by a `GitHub Action`.
-That's why, there's no need to commit and push `flake.lock` changes.
+That's why, if that action works, there's no need to commit and push `flake.lock` changes.
 After an update is completed, it's necessary to rebase the local changes onto remote changes.
 However, sometimes, there are local uncommitted changes already.
 These changes should be `git stash`ed before doing `git rebase`.
@@ -46,24 +48,23 @@ After rebasing, they can be `git stash pop`ped to continue the work.
 Thus, the process is as follows:
 
 ```sh
-git add some-file
-git commit -m "some message"
 git stash
 # can be omitted in case of automatic fetches
 git fetch
 git rebase
-git push
 git stash pop
 ```
 
 ## Docs
 
-Each derivation that evaluates to an executable should have:
+Each derivation that evaluates to an executable should have these attributes:
 
-- `meta.description` attribute written in `CommonMark`
+- `meta.description`
+  - string written in `CommonMark`
   - This description will be rendered in devshells
   - It should be a single-line brief description of this executable
-- `meta.longDescription` attribute written in `Markdown`
+- `meta.longDescription`
+  - string written in `CommonMark`
   - This description is used to generate `man` pages for executables
   - The format of a `longDescription` should be recognizable by `pandoc`
     - Here's a sample [input](https://pandoc.org/demo/pandoc.1.md)
