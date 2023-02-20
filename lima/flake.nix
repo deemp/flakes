@@ -24,7 +24,24 @@
       inherit (toolsGHC { version = "925"; }) justStaticExecutable callCabal2nix haskellPackages;
 
       packageName = "lima";
-      myPackage = callCabal2nix packageName ./. { };
+
+      myPackage =
+        let
+          package =
+            haskellPackages.generateOptparseApplicativeCompletions [ packageName ]
+              (callCabal2nix packageName ./. { });
+        in
+        # package;
+        package.overrideAttrs
+          (drv:
+            {
+              nativeBuildInputs = [ pkgs.installShellFiles ] ++ (drv.nativeBuildInputs or [ ]);
+              postInstall = ''
+                installShellCompletion --bash ${package}/share/bash-completion/completions/${packageName}
+              '';
+            }
+          );
+
       myPackageExe =
         let
           packageExe = justStaticExecutable { package = myPackage; };
@@ -46,12 +63,14 @@
               :   convert: `testdata/input2.hs` ->  `testdata/input2.hs.md`
             ''
           );
+
+      packages = {
+        # default = myPackageExe;
+        default = myPackage;
+      };
     in
     {
-      packages = {
-        default = myPackageExe;
-        test = pkgs.haskell.packages."ghc925".buildFromCabalSdist myPackage;
-      };
+      inherit packages;
     });
 
   nixConfig = {
