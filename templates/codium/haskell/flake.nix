@@ -11,7 +11,6 @@
     flakes-tools.url = "github:deemp/flakes?dir=flakes-tools";
     workflows.url = "github:deemp/flakes?dir=workflows";
     lima.url = "github:deemp/flakes?dir=lima";
-    # necessary for stack-nix integration
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
