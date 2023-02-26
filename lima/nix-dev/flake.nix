@@ -55,25 +55,24 @@
         };
       };
 
-      devShells.default = mkShell
-        {
-          packages = tools;
-          bash.extra = "";
-          commands =
-            mkCommands "tools" tools ++
-            mkRunCommandsDir "nix-dev" "ide" {
-              "codium ." = packages.codium;
-              inherit (packages) writeSettings;
-            } ++
-            [
-              {
-                name = "cabal-test";
-                category = "test";
-                help = "Test via `cabal`";
-                command = "cabal v1-test";
-              }
-            ];
-        };
+      devShells.default = mkShell {
+        packages = tools;
+        bash.extra = "";
+        commands =
+          mkCommands "tools" tools ++
+          mkRunCommandsDir "nix-dev" "ide" {
+            "codium ." = packages.codium;
+            inherit (packages) writeSettings;
+          } ++
+          [
+            {
+              name = "cabal-test";
+              category = "test";
+              help = "Test via `cabal`";
+              command = "cabal v1-test";
+            }
+          ];
+      };
     in
     {
       inherit packages devShells;
