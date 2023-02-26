@@ -25,26 +25,13 @@
 
       packageName = "lima";
 
-      myPackage =
-        let
-          package =
-            haskellPackages.generateOptparseApplicativeCompletions [ packageName ]
-              (callCabal2nix packageName ./. { });
-        in
-        # package;
-        package.overrideAttrs
-          (drv:
-            {
-              nativeBuildInputs = [ pkgs.installShellFiles ] ++ (drv.nativeBuildInputs or [ ]);
-              postInstall = ''
-                installShellCompletion --bash ${package}/share/bash-completion/completions/${packageName}
-              '';
-            }
-          );
-
+      myPackage = callCabal2nix packageName ./. { };
       myPackageExe =
         let
-          packageExe = justStaticExecutable { package = myPackage; };
+          package = haskellPackages.generateOptparseApplicativeCompletions [ packageName ] myPackage;
+          packageExe = justStaticExecutable {
+            package = package;
+          };
         in
         withMan
           (withDescription packageExe "Convert `Haskell` (`.hs`) to `Markdown` (`.md`) or between `Literate Haskell` (`.lhs`) and `Markdown` (`.md`)")
@@ -65,12 +52,19 @@
           );
 
       packages = {
-        # default = myPackageExe;
         default = myPackage;
+        exe = myPackageExe;
+      };
+
+      devShells.default = pkgs.mkShell {
+        buildInputs = [ myPackageExe ];
+        shellHook = ''
+          source ${myPackageExe}/share/bash-completion/completions/lima
+        '';
       };
     in
     {
-      inherit packages;
+      inherit packages devShells;
     });
 
   nixConfig = {

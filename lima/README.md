@@ -70,7 +70,7 @@ It is usually possible to make conversion abide the [roundtrip property](https:/
 
 ### From Hackage
 
-1. Install via cabal
+1. Install via `cabal`.
 
     ```console
     cabal update
@@ -79,7 +79,7 @@ It is usually possible to make conversion abide the [roundtrip property](https:/
 
 ### From sources
 
-1. Clone this repo and install `lima`.
+1. Clone this repo and install via `cabal`.
 
     ```console
     git clone https://github.com/deemp/flakes
@@ -96,8 +96,10 @@ It is usually possible to make conversion abide the [roundtrip property](https:/
 
     ```console
     nix flake lock github:deemp/flakes?dir=lima
-    nix shell github:deemp/flakes?dir=lima
-    lima --help
+    nix develop github:deemp/flakes?dir=lima
+    lima hs<TAB>
+    lima hs2md
+    man lima
     ```
 
 ### Windows
