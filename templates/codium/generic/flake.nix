@@ -8,6 +8,8 @@
     vscode-extensions_.url = "github:deemp/flakes?dir=source-flake/nix-vscode-extensions";
     vscode-extensions.follows = "vscode-extensions_/vscode-extensions";
     devshell.url = "github:deemp/flakes?dir=devshell";
+    flakes-tools.url = "github:deemp/flakes?dir=flakes-tools";
+    workflows.url = "github:deemp/flakes?dir=workflows";
   };
   outputs = inputs: inputs.flake-utils.lib.eachDefaultSystem
     (system:
@@ -16,44 +18,58 @@
         inherit (inputs.codium.functions.${system}) mkCodium writeSettingsJSON;
         inherit (inputs.codium.configs.${system}) extensions settingsNix;
         inherit (inputs.vscode-extensions.extensions.${system}) vscode-marketplace open-vsx;
-        inherit (inputs.devshell.functions.${system}) mkCommands mkShell;
+        inherit (inputs.devshell.functions.${system}) mkCommands mkRunCommands mkShell;
+        inherit (inputs.workflows.functions.${system}) writeWorkflow;
+        inherit (inputs.workflows.configs.${system}) nixCI;
+        inherit (inputs.flakes-tools.functions.${system}) mkFlakesTools;
 
-        codiumTools = [ pkgs.hello ];
+        tools = [ pkgs.hello ];
 
-        # We construct `VSCodium` with ready attrsets of extensions like `nix`
-        codium = mkCodium {
-          extensions = {
-            inherit (extensions) nix misc;
-            # Also, we take some extensions from `extensions` and put them into the `haskell` attrset
-            haskell = {
-              inherit (open-vsx.haskell) haskell;
-              inherit (vscode-marketplace.visortelle) haskell-spotlight;
+        packages = {
+          # --- IDE ---
+
+          # This part can be removed if you don't use `VSCodium`
+          # We compose `VSCodium` with dev tools
+          # This is to let `VSCodium` run on its own, outside of a devshell
+          codium = mkCodium {
+            extensions = {
+              inherit (extensions) nix haskell misc github markdown;
+              # we can include more extensions by providing them in an attrset here
+              custom = {
+                inherit (vscode-marketplace.golang) go;
+              };
             };
+            runtimeDependencies = tools;
           };
-          runtimeDependencies = codiumTools;
+
+          # a script to write `.vscode/settings.json`
+          writeSettings = writeSettingsJSON {
+            inherit (settingsNix) haskell todo-tree files editor gitlens
+              git nix-ide workbench markdown-all-in-one markdown-language-features;
+          };
+
+          # --- Flakes ---
+
+          # Scripts that can be used in CI
+          inherit (mkFlakesTools [ "." ]) updateLocks pushToCachix;
+
+          # --- GH Actions
+
+          # A script to write GitHub Actions workflow file into `.github/ci.yaml`
+          writeWorkflows = writeWorkflow "ci" nixCI;
         };
 
-        tools = codiumTools ++ [ codium ];
-        # This is a script to write a `settings.json`
-        # It uses attrsets of settings like `nix-ide`
-        writeSettings = writeSettingsJSON {
-          inherit (settingsNix)
-            nix-ide git gitlens editor workbench
-            files markdown-language-features todo-tree;
+        devShells.default = mkShell {
+          packages = tools;
+          bash.extra = "hello";
+          commands = mkCommands "tools" tools ++ mkRunCommands "ide" {
+            "codium ." = packages.codium;
+            inherit (packages) writeSettings;
+          };
         };
       in
       {
-        packages = {
-          inherit writeSettings codium;
-        };
-        devShells.default = mkShell
-          {
-            packages = tools;
-            bash = {
-              extra = ''hello'';
-            };
-            commands = mkCommands "tools" tools;
-          };
+        inherit packages devShells;
       });
 
   nixConfig = {
