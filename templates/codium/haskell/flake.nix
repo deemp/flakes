@@ -41,13 +41,13 @@
       ghcVersion = "925";
 
       # The name of a package
-      myPackageName = "nix-managed";
+      packageName = "nix-managed";
 
       # The libraries that the package needs during a build
-      myPackageLibraryDependencies = [ pkgs.lzma ];
+      packageLibraryDependencies = [ pkgs.lzma ];
 
-      # The packages that provide the binaries that the package uses at runtime
-      myPackageRuntimeDependencies = [ pkgs.hello ];
+      # The packages that provide the binaries that our package uses at runtime
+      packageRuntimeDependencies = [ pkgs.hello ];
 
       # --- Override ---
 
@@ -73,18 +73,18 @@
       override = {
         overrides = self: super: {
           lzma = dontCheck (doJailbreak super.lzma);
-          myPackage = overrideCabal
-            (super.callCabal2nix myPackageName ./. { })
+          "${packageName}" = overrideCabal
+            (super.callCabal2nix packageName ./. { })
             (x: {
               # See what can be overriden - https://github.com/NixOS/nixpkgs/blob/0ba44a03f620806a2558a699dba143e6cf9858db/pkgs/development/haskell-modules/generic-builder.nix#L13
               # And the explanation of the deps - https://nixos.org/manual/nixpkgs/unstable/#haskell-derivation-deps
 
-              # Dependencies of the library in our package
+              # Dependencies of the our package library
               # New deps go before the existing deps and override them
-              librarySystemDepends = myPackageLibraryDependencies ++ (x.librarySystemDepends or [ ]);
+              librarySystemDepends = packageLibraryDependencies ++ (x.librarySystemDepends or [ ]);
 
-              # These are non-Haskell dependencies of our package's executables
-              executableSystemDepends = myPackageLibraryDependencies ++ (x.executableSystemDepends or [ ]);
+              # Dependencies of our package executables
+              executableSystemDepends = packageLibraryDependencies ++ (x.executableSystemDepends or [ ]);
 
               # Here's how we can add a package built from sources
               # Later, we may use this package in `.cabal` in a test-suite
@@ -103,13 +103,13 @@
       inherit (toolsGHC {
         version = ghcVersion;
         inherit override;
-        runtimeDependencies = myPackageRuntimeDependencies;
+        runtimeDependencies = packageRuntimeDependencies;
         # If we work on multiple packages, we need to supply all of them.
         # Suppose we develop packages A and B, where B is in deps of A.
         # GHC will be given dependencies of both A and B.
         # However, we don't want B to be in the list of deps of GHC
         # because build of GHC may fail due to errors in B.
-        packages = (ps: [ ps.myPackage ]);
+        packages = (ps: [ ps.${packageName} ]);
       })
         stack hls cabal implicit-hie justStaticExecutable
         ghcid callCabal2nix haskellPackages hpack ghc;
@@ -132,8 +132,8 @@
       # Incremental build means that only necessary rebuilds will be made on changes in a package
       shellFor =
         haskellPackages.shellFor {
-          packages = ps: [ ps.myPackage ];
-          nativeBuildInputs = myPackageRuntimeDependencies ++ [ pkgs.cabal-install ];
+          packages = ps: [ ps.${packageName} ];
+          nativeBuildInputs = packageRuntimeDependencies ++ [ pkgs.cabal-install ];
           withHoogle = true;
           # get other tools with names
           shellHook = framed "cabal run";
@@ -157,19 +157,19 @@
       # --- Binary shell ---
 
       # We can take one step further and make our app builds reproducible
-      # We'll take the `haskellPackages.myPackage` and turn its Haskell executable into a static binary
+      # We'll take the `haskellPackages.${packageName}` and turn its Haskell executable into a static binary executable
 
-      myPackageExecutableName = "my-package";
+      packageExecutableName = "my-package";
 
-      myPackageBinaryName = "my-package-bin";
+      binaryName = "my-package-bin";
 
-      myPackageBinary =
+      binary =
         # We'll also add a description and a man page
         withMan
           (withDescription
             (justStaticExecutable {
-              package = haskellPackages.myPackage;
-              binaryName = myPackageBinaryName;
+              package = haskellPackages.${packageName};
+              inherit binaryName;
               runtimeDependencies = [ pkgs.hello ];
             })
             "Demo Nix-packaged `Haskell` program "
@@ -186,11 +186,10 @@
       # There's an unofficial solution to this problem - https://www.haskellforall.com/2022/12/nixpkgs-support-for-incremental-haskell.html
 
       # In this shell, we'll run the obtained binary
-      binaryShell = pkgs.mkShell
-        {
-          buildInputs = [ myPackageBinary ];
-          shellHook = framed "${myPackageBinary}/bin/${myPackageBinaryName}";
-        };
+      binaryShell = pkgs.mkShell {
+        buildInputs = [ binary ];
+        shellHook = framed "${binary}/bin/${binaryName}";
+      };
 
 
       # --- Docker shell ---
@@ -200,22 +199,22 @@
       # We'll take the binary from the previous step and put it into an image
       # Also, we'll set the name and the tag of our image
 
-      myPackageImageName = "my-package-image";
-      myPackageImageTag = "latest";
+      packageImageName = "my-package-image";
+      packageImageTag = "latest";
 
-      myPackageImage = pkgs.dockerTools.buildLayeredImage {
-        name = myPackageImageName;
-        tag = myPackageImageTag;
-        config.Entrypoint = [ "bash" "-c" myPackageBinaryName ];
-        contents = [ pkgs.bash myPackageBinary ];
+      packageImage = pkgs.dockerTools.buildLayeredImage {
+        name = packageImageName;
+        tag = packageImageTag;
+        config.Entrypoint = [ "bash" "-c" binaryName ];
+        contents = [ pkgs.bash binary ];
       };
 
       # The image is ready. We can run it in a devshell
       dockerShell = pkgs.mkShell {
         buildInputs = [ pkgs.docker ];
         shellHook = ''
-          docker load < ${myPackageImage}
-          ${framed "docker run -it ${myPackageImageName}:${myPackageImageTag}"}
+          docker load < ${packageImage}
+          ${framed "docker run -it ${packageImageName}:${packageImageTag}"}
         '';
       };
 
@@ -236,7 +235,7 @@
 
           ghc = pkgs.haskell.compiler.${version};
 
-          buildInputs = myPackageLibraryDependencies ++ myPackageRuntimeDependencies;
+          buildInputs = packageLibraryDependencies ++ packageRuntimeDependencies;
         };
 
       # When everything is set up, we can run `stack` in a shell
