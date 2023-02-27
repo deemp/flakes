@@ -15,101 +15,101 @@ let
 in
 mkExtensions
 {
-  haskell = {
-    haskell = "haskell";
-    justusadam = "language-haskell";
-    visortelle = "haskell-spotlight";
-    redhat = "vscode-yaml";
-  };
-  yaml = {
-    redhat = "vscode-yaml";
-  };
-  purescript = {
-    nwolverson = [
-      "ide-purescript"
-      "language-purescript"
-    ];
-    dhall = [
-      "dhall-lang"
-      "vscode-dhall-lsp-server"
-    ];
-    br4ch1st0chr0n3 = "purs-keybindings";
-    ryuta46 = "multi-command";
-    chunsen = "bracket-select";
-  };
-  nix = {
-    mkhl = "direnv";
-    jnoortheen = "nix-ide";
-  };
-  github = {
-    github = "vscode-pull-request-github";
-    eamodio = "gitlens";
-    cschleiden = "vscode-github-actions";
-    redhat = "vscode-yaml";
-  };
-  typescript = {
-    ms-vscode = "vscode-typescript-next";
-  };
-  markdown = {
-    bierner =
-      [
-        "github-markdown-preview"
-        "markdown-emoji"
-        "markdown-checkbox"
-        "markdown-yaml-preamble"
-        "markdown-footnotes"
-        "markdown-preview-github-styles"
-      ];
-    davidanson = "vscode-markdownlint";
-    yzhang = "markdown-all-in-one";
-  };
-  misc = {
-    usernamehw = "errorlens";
-    gruntfuggly = "todo-tree";
-    mkhl = "direnv";
-  };
-  docker = {
-    ms-vscode-remote = "remote-containers";
-    ms-azuretools = "vscode-docker";
-    exiasr = "hadolint";
-  };
   c-cpp = {
     ms-vscode = [
-      "cpptools-themes"
       "cmake-tools"
+      "cpptools-themes"
       "cpptools"
     ];
   };
-  python = {
-    donjayamanne = "python-extension-pack";
-    njpwerner = "autodocstring";
-    ms-python = "python";
-    samuelcolvin = "jinjahtml";
-    monosans = "djlint";
-    batisteo = "vscode-django";
-    kevinrose = "vsc-python-indent";
-    visualstudioexptteam = "vscodeintellicode";
+  docker = {
+    exiasr = "hadolint";
+    ms-azuretools = "vscode-docker";
+    ms-vscode-remote = "remote-containers";
+  };
+  fish = {
+    bmalehorn = "vscode-fish";
+  };
+  github = {
+    cschleiden = "vscode-github-actions";
+    eamodio = "gitlens";
+    github = "vscode-pull-request-github";
+    redhat = "vscode-yaml";
+  };
+  haskell = {
+    haskell = "haskell";
+    justusadam = "language-haskell";
+    redhat = "vscode-yaml";
+    visortelle = "haskell-spotlight";
   };
   kubernetes = {
     ipedrazas = "kubernetes-snippets";
     ms-kubernetes-tools = "vscode-kubernetes-tools";
     redhat = "vscode-yaml";
   };
-  toml = {
-    tamasfe = "even-better-toml";
+  markdown = {
+    bierner =
+      [
+        "github-markdown-preview"
+        "markdown-checkbox"
+        "markdown-emoji"
+        "markdown-footnotes"
+        "markdown-preview-github-styles"
+        "markdown-yaml-preamble"
+      ];
+    davidanson = "vscode-markdownlint";
+    yzhang = "markdown-all-in-one";
   };
-  terraform = {
-    hashicorp = "terraform";
+  misc = {
+    gruntfuggly = "todo-tree";
+    mkhl = "direnv";
+    usernamehw = "errorlens";
   };
-  fish = {
-    bmalehorn = "vscode-fish";
+  nix = {
+    jnoortheen = "nix-ide";
+    mkhl = "direnv";
   };
   postgresql = {
     cweijan = "vscode-postgresql-client2";
     inferrinizzard = "prettier-sql-vscode";
   };
+  purescript = {
+    br4ch1st0chr0n3 = "purs-keybindings";
+    chunsen = "bracket-select";
+    dhall = [
+      "dhall-lang"
+      "vscode-dhall-lsp-server"
+    ];
+    nwolverson = [
+      "ide-purescript"
+      "language-purescript"
+    ];
+    ryuta46 = "multi-command";
+  };
+  python = {
+    batisteo = "vscode-django";
+    donjayamanne = "python-extension-pack";
+    kevinrose = "vsc-python-indent";
+    monosans = "djlint";
+    ms-python = "python";
+    njpwerner = "autodocstring";
+    samuelcolvin = "jinjahtml";
+    visualstudioexptteam = "vscodeintellicode";
+  };
   sql = {
-    mtxr = "sqltools";
     inferrinizzard = "prettier-sql-vscode";
+    mtxr = "sqltools";
+  };
+  terraform = {
+    hashicorp = "terraform";
+  };
+  toml = {
+    tamasfe = "even-better-toml";
+  };
+  typescript = {
+    ms-vscode = "vscode-typescript-next";
+  };
+  yaml = {
+    redhat = "vscode-yaml";
   };
 }
