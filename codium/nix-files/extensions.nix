@@ -42,6 +42,14 @@ mkExtensions
     redhat = "vscode-yaml";
     visortelle = "haskell-spotlight";
   };
+  jupyter = {
+    ms-toolsai = [
+      "jupyter"
+      "jupyter-keymap"
+      "vscode-jupyter-slideshow"
+      "vscode-jupyter-cell-tags"
+    ];
+  };
   kubernetes = {
     ipedrazas = "kubernetes-snippets";
     ms-kubernetes-tools = "vscode-kubernetes-tools";
