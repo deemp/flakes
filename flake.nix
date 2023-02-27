@@ -71,11 +71,15 @@
       };
       codium-haskell = {
         path = ./templates/codium/haskell;
-        description = "${codium-generic.description} for `Haskell`. Shows 5 ways to run a `Haskell` app";
+        description = "${codium-generic.description} for `Haskell`. Shows 5 ways to run a `Haskell` app.";
       };
       codium-haskell-simple = {
         path = ./templates/codium/haskell-simple;
-        description = "${codium-generic.description} for `Haskell`";
+        description = "${codium-generic.description} for `Haskell`.";
+      };
+      codium-python = {
+        path = ./templates/codium/python;
+        description = "${codium-generic.description} for `Python`.";
       };
     };
   };
