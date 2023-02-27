@@ -7,7 +7,6 @@
     vscode-extensions_.url = "github:deemp/flakes?dir=source-flake/nix-vscode-extensions";
     vscode-extensions.follows = "vscode-extensions_/vscode-extensions";
     drv-tools.url = "github:deemp/flakes?dir=drv-tools";
-    devshell.url = "github:deemp/flakes?dir=devshell";
   };
 
   outputs =
@@ -16,7 +15,6 @@
     , nixpkgs
     , drv-tools
     , vscode-extensions
-    , devshell
     , ...
     }:
     flake-utils.lib.eachDefaultSystem
@@ -29,7 +27,6 @@
           mkBin indentStrings4 withDescription
           withAttrs;
         man = drv-tools.configs.${system}.man;
-        inherit (devshell.functions.${system}) mkCommands mkShell;
 
         # A set of VSCodium extensions
         extensions = import ./nix-files/extensions.nix { inherit system vscode-extensions pkgs; };
@@ -143,9 +140,11 @@
         configs = {
           inherit extensions settingsNix;
         };
-        devShells.default = mkShell {
-          packages = tools;
-          commands = mkCommands "ide" tools;
+        devShells.default = pkgs.mkShell {
+          buildInputs = tools;
+          shellHook = ''
+            codium --list-extensions
+          '';
         };
       });
 
