@@ -49,6 +49,8 @@
     "files.associations" = {
       "*.html" = "html";
       "*.jinja" = "jinja-html";
+      "*.nix" = "nix";
+      "*.py" = "python";
     };
   };
 
@@ -122,10 +124,12 @@
   };
 
   python = {
+    "python.defaultInterpreterPath" = "python";
+    "python.formatting.blackPath" = "black";
     "python.formatting.provider" = "black";
     "python.linting.mypyCategorySeverity.error" = "Error";
     "python.linting.mypyEnabled" = true;
-    "python.defaultInterpreterPath" = "\${workspaceFolder}/.venv/bin/python3";
+    "python.linting.mypyPath" = "mypy";
   };
 
   errorlens = {
