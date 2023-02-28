@@ -34,7 +34,7 @@
           staticExecutable = justStaticExecutable { package = packageWithCompletion; };
         in
         withMan
-          (withDescription staticExecutable "Convert `Haskell` (`.hs`) to `Markdown` (`.md`) or between `Literate Haskell` (`.lhs`) and `Markdown` (`.md`)")
+          (withDescription staticExecutable (_: "Convert `Haskell` (`.hs`) to `Markdown` (`.md`) or between `Literate Haskell` (`.lhs`) and `Markdown` (`.md`)"))
           (x:
             ''
               ${man.DESCRIPTION}
