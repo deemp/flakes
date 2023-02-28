@@ -150,12 +150,11 @@
 
       # ignore shellcheck when writing a shell application
       mkShellApp =
-        args@{ name
+        { name
         , text
         , runtimeInputs ? [ ]
         , description ? "no description provided"
         , longDescription ? ''
-            ${man.DESCRIPTION}
             ${description}
           ''
         }:
@@ -171,15 +170,18 @@
                 )
                 { pname = name; }
             )
-            { inherit longDescription description; }
+            (_: { inherit longDescription description; })
           )
-          (_: longDescription)
+          (_: ''
+            ${man.DESCRIPTION}
+            ${longDescription}
+          '')
       ;
 
       withAttrs = attrSet1: attrSet2: recursiveUpdate attrSet1 attrSet2;
-      withMeta = drv: meta: withAttrs drv { inherit meta; };
-      withLongDescription = drv: longDescription: withAttrs drv { meta = { inherit longDescription; }; };
-      withDescription = drv: description: withAttrs drv { meta = { inherit description; }; };
+      withMeta = drv: fMeta: withAttrs drv { meta = fMeta drv; };
+      withDescription = drv: fDescription: withAttrs drv { meta.description = fDescription drv; };
+      withLongDescription = drv: fLongDescription: withAttrs drv { meta.longDescription = fLongDescription drv; };
 
       # for code blocks in man
       indentStrings4 = indentStrings_ 4;
@@ -219,7 +221,7 @@
               )
               { pname = drv.pname; };
         in
-        withLongDescription (withMeta drv_ drv.meta) longDescription;
+        withLongDescription (withMeta drv_ (_: drv.meta)) (_: longDescription);
 
       withMan = drv: withMan_ drv.pname drv;
 
@@ -295,7 +297,7 @@
           '');
 
       runInEachDir =
-        args@{ dirs
+        { dirs
         , command
         , name
         , preMessage ? ""
