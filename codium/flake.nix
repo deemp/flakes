@@ -38,9 +38,8 @@
         # bashInteractive is necessary for correct work
         mkCodium = { extensions ? { }, runtimeDependencies ? [ ] }:
           let
+            inherit (pkgs) vscode-with-extensions vscodium;
             codium =
-              let inherit (pkgs) vscode-with-extensions vscodium;
-              in
               (vscode-with-extensions.override {
                 vscode = vscodium;
                 vscodeExtensions = toList extensions;
@@ -52,28 +51,30 @@
               pkgs.direnv
               runtimeDependencies
             ];
+            exeName = "codium";
           in
           withMan
-            (
-              withDescription
-                (
-                  withAttrs
-                    (pkgs.symlinkJoin {
-                      name = "codium";
-                      paths = [ codium ];
-                      buildInputs = [ pkgs.makeBinaryWrapper ];
-                      postBuild = ''
-                        wrapProgram $out/bin/codium \
-                          --prefix PATH : ${pkgs.lib.makeBinPath deps}
-                      '';
-                    })
-                    { pname = "codium"; }
-                ) "`VSCodium` with extensions and binaries on `PATH`"
-            )
+            (withAttrs
+              (pkgs.runCommand exeName
+                { buildInputs = [ pkgs.makeBinaryWrapper ]; }
+                ''
+                  mkdir $out
+                  cp -rs --no-preserve=mode,ownership ${codium}/* $out/
+                  rm -rf $out/bin
+                  mkdir $out/bin
+                  makeWrapper ${codium}/bin/${exeName} $out/bin/${exeName} --prefix PATH : ${pkgs.lib.makeBinPath deps}
+                ''
+              )
+              {
+                inherit (vscodium) version;
+                pname = exeName;
+                name = "${exeName}-${vscodium.version}";
+                meta = codium.meta // { description = "`VSCodium` with extensions and binaries on `PATH`"; };
+              })
             (x: ''
               ${man.DESCRIPTION}
               ${x.meta.description}
-              Its default runtime dependencies include `bashInteractive`, `rnix-lsp`, `nixpkgs-fmt`.
+              Its default runtime dependencies include `bashInteractive`, `rnix-lsp`, `nixpkgs-fmt`, `direnv`.
 
               Verify executables are on `PATH`: 
                   
@@ -94,7 +95,7 @@
         writeSettingsJSON = settings:
           withMan
             (withDescription (writeJSON "settings" "./.vscode/settings.json" (mergeValues settings))
-              "Write `.vscode/settings.json`")
+              (_: "Write `.vscode/settings.json`"))
             (x: ''
               ${man.DESCRIPTION}
               ${x.meta.description}
@@ -104,7 +105,7 @@
           withMan
             (withDescription
               (writeJSON "tasks" "./.vscode/tasks.json" tasks)
-              "Write `.vscode/tasks.json`"
+              (_: "Write `.vscode/tasks.json`")
             )
             (x: ''
               ${man.DESCRIPTION}
