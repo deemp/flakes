@@ -44,7 +44,7 @@
 
           # a script to write `.vscode/settings.json`
           writeSettings = writeSettingsJSON {
-            inherit (settingsNix) haskell todo-tree files editor gitlens
+            inherit (settingsNix) todo-tree files editor gitlens
               git nix-ide workbench markdown-all-in-one markdown-language-features;
           };
 
@@ -62,10 +62,12 @@
         devShells.default = mkShell {
           packages = tools;
           bash.extra = "hello";
-          commands = mkCommands "tools" tools ++ mkRunCommands "ide" {
-            "codium ." = packages.codium;
-            inherit (packages) writeSettings;
-          };
+          commands =
+            mkCommands "tools" tools
+            ++ mkRunCommands "ide" {
+              "codium ." = packages.codium;
+              inherit (packages) writeSettings;
+            };
         };
       in
       {
