@@ -51,6 +51,7 @@
       "*.jinja" = "jinja-html";
       "*.nix" = "nix";
       "*.py" = "python";
+      "*.md" = "markdown";
     };
   };
 
@@ -124,12 +125,9 @@
   };
 
   python = {
-    "python.defaultInterpreterPath" = "python";
-    "python.formatting.blackPath" = "black";
     "python.formatting.provider" = "black";
     "python.linting.mypyCategorySeverity.error" = "Error";
     "python.linting.mypyEnabled" = true;
-    "python.linting.mypyPath" = "mypy";
   };
 
   errorlens = {
