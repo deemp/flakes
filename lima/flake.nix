@@ -25,41 +25,41 @@
 
       packageName = "lima";
 
-      myPackage = callCabal2nix packageName ./. { };
-      myPackageExe =
+      package = callCabal2nix packageName ./. { };
+
+      packageExecutableName = "lima";
+      packageExe =
         let
-          package = haskellPackages.generateOptparseApplicativeCompletions [ packageName ] myPackage;
-          packageExe = justStaticExecutable {
-            package = package;
-          };
+          packageWithCompletion = haskellPackages.generateOptparseApplicativeCompletions [ packageExecutableName ] package;
+          staticExecutable = justStaticExecutable { package = packageWithCompletion; };
         in
         withMan
-          (withDescription packageExe "Convert `Haskell` (`.hs`) to `Markdown` (`.md`) or between `Literate Haskell` (`.lhs`) and `Markdown` (`.md`)")
+          (withDescription staticExecutable "Convert `Haskell` (`.hs`) to `Markdown` (`.md`) or between `Literate Haskell` (`.lhs`) and `Markdown` (`.md`)")
           (x:
             ''
               ${man.DESCRIPTION}
               ${x.meta.description}
 
               ${man.SYNOPSYS}
-              `${packageName} <command> (-f file) [-c config]`
+              `${packageExecutableName} <command> (-f file) [-c config]`
 
               ${man.EXAMPLES}
-              `${packageName} lhs2md -f testdata/input0.lhs -f testdata/input1.lhs`
+              `${packageExecutableName} lhs2md -f testdata/input0.lhs -f testdata/input1.lhs`
               :   convert: `testdata/input0.lhs` ->  `testdata/input0.lhs.md` and `testdata/input1.lhs` -> `testdata/input1.lhs.md`
-              `${packageName} hs2md -f testdata/input2.hs -c testdata/config/lima.yaml`
+              `${packageExecutableName} hs2md -f testdata/input2.hs -c testdata/config/lima.yaml`
               :   convert: `testdata/input2.hs` ->  `testdata/input2.hs.md`
             ''
           );
 
       packages = {
-        default = myPackage;
-        exe = myPackageExe;
+        default = packageExe;
+        inherit package;
       };
 
       devShells.default = pkgs.mkShell {
-        buildInputs = [ myPackageExe ];
+        buildInputs = [ packageExe ];
         shellHook = ''
-          source ${myPackageExe}/share/bash-completion/completions/lima
+          source ${packageExe}/share/bash-completion/completions/${packageExecutableName}
         '';
       };
     in
