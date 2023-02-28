@@ -31,15 +31,16 @@
       packages = {
         codium = mkCodium {
           extensions = {
-            inherit (extensions)
-              nix misc github markdown
-              python jupyter;
+            inherit (extensions) nix misc github markdown python jupyter;
           };
           runtimeDependencies = tools;
         };
         writeSettings = writeSettingsJSON {
-          inherit (settingsNix) python todo-tree files editor gitlens
+          inherit (settingsNix) todo-tree files editor gitlens
             git nix-ide workbench markdown-all-in-one markdown-language-features;
+          extra = settingsNix.python // {
+            "python.defaultInterpreterPath" = "${python}/bin/python";
+          };
         };
       };
 
