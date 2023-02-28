@@ -34,8 +34,8 @@
           codium = mkCodium {
             extensions = {
               inherit (extensions) nix haskell misc github markdown;
-              # we can include more extensions by providing them in an attrset here
-              custom = {
+              # We can include more extensions by providing them in an attrset here
+              extra = {
                 inherit (vscode-marketplace.golang) go;
               };
             };
