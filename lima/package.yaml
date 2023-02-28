@@ -32,21 +32,22 @@ extra-source-files:
 
 git: https://github.com/deemp/flakes
 
-library:
-  source-dirs: src
-
 dependencies:
   - base >=4 && < 5
-  - optparse-applicative
-  - yaml
-  - aeson
   - data-default
+  - aeson
+  - yaml
+
+library:
+  source-dirs: src
 
 executables:
   lima:
     main: app/Main.hs
     dependencies:
       - lima
+      - optparse-applicative
+      - string-interpolate
 
 tests:
   lima-test:

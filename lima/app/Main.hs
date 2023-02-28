@@ -19,7 +19,7 @@ import Data.Maybe (fromJust, fromMaybe, isNothing)
 import Data.String (IsString)
 import Data.Traversable (forM)
 import Data.Yaml (FromJSON (..), ParseException, Value (..), withObject, (.:), (.:?))
-import Data.Yaml.Aeson (decodeFileEither, withArray)
+import Data.Yaml.Aeson (decodeFileEither, withArray, withObject, (.:), (.:?))
 import Data.Yaml.Parser (typeMismatch)
 import GHC.Generics (Generic)
 import Options.Applicative
@@ -37,7 +37,6 @@ data Options = Options
   }
   deriving (Show)
 
--- TODO make config and --file arguments mutually exclusive
 
 parseConfig :: Parser ([FilePath], Maybe FilePath)
 parseConfig = do

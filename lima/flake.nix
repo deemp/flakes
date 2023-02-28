@@ -54,6 +54,7 @@
       packages = {
         default = packageExe;
         inherit package;
+        test = haskellPackages.buildFromCabalSdist package;
       };
 
       devShells.default = pkgs.mkShell {

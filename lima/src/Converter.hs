@@ -3,29 +3,28 @@
 {-# LANGUAGE MultiWayIf #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# HLINT ignore "Redundant bracket" #-}
 {-# LANGUAGE TypeApplications #-}
+{-# HLINT ignore "Redundant bracket" #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
 -- | Functions to convert @Haskell@ to @Markdown@ and between @Literate Haskell@ (@.lhs@) and @Markdown@.
-module Converter (hsToMd, mdToHs, lhsToMd, mdToLhs, Config (..), ConfigHsMd (..)) where
+module Converter (hsToMd, mdToHs, lhsToMd, mdToLhs, Config (..), ConfigHsMd (..), def) where
 
-import Data.Default (Default)
+import Data.Default (Default (def))
 import Data.Foldable (Foldable (..))
 import Data.Function ((&))
 import Data.List (isPrefixOf, isSuffixOf)
-import Data.Yaml (FromJSON (..))
-import Data.Yaml.Aeson (withObject, (.:), (.:?))
+import Data.Yaml.Aeson
 import GHC.Generics (Generic)
+
+-- | Config for @Haskell@ to @Markdown@ converter.
+newtype ConfigHsMd = ConfigHs2Md {specialComments :: [String]} deriving (Generic, Default)
 
 -- | App config.
 newtype Config = Config {configHsMd :: Maybe ConfigHsMd} deriving (Generic, Default)
 
 instance FromJSON Config where
   parseJSON = withObject "Configs" (\v -> Config <$> v .:? "hs-md")
-
--- | Config for @Haskell@ to @Markdown@ converter.
-newtype ConfigHsMd = ConfigHs2Md {specialComments :: [String]} deriving (Generic, Default)
 
 instance FromJSON ConfigHsMd where
   parseJSON =
