@@ -172,7 +172,7 @@
               inherit binaryName;
               runtimeDependencies = [ pkgs.hello ];
             })
-            "Demo Nix-packaged `Haskell` program "
+            (_: "Demo Nix-packaged `Haskell` program ")
           )
           (
             x: ''
@@ -264,6 +264,16 @@
       # --- Packages ---
 
       packages = {
+        # --- Haskell package ---
+
+        # This is a static executable with given runtime dependencies.
+        # In this case, its name is the same as the package name.
+        default = justStaticExecutable {
+          package = haskellPackages.${packageName};
+          runtimeDependencies = packageRuntimeDependencies;
+          description = "A Haskell `hello-world` script";
+        };
+
         # --- IDE ---
 
         # This part can be removed if you don't use `VSCodium`
@@ -291,7 +301,7 @@
         writeWorkflows = writeWorkflow "ci" nixCI;
       };
 
-      # --- devShells ---
+      # --- Devshells ---
 
       devShells = {
 
@@ -311,6 +321,7 @@
           bash.extra = "export LANG=C.utf8";
           commands =
             mkCommands "tools" tools
+            ++ mkCommands "packages" [ packages.default ]
             ++ mkRunCommands "ide" { "codium ." = packages.codium; inherit (packages) writeSettings; }
             ++ mkRunCommands "infra" { inherit (packages) writeWorkflows updateLocks pushToCachix; }
             ++

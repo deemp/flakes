@@ -1,14 +1,14 @@
 # Haskell
 
-- `VSCodium` with extensions and executables for `Haskell`
-- A sample `Haskell` project
-- Several ways to run a `Haskell` app
+- `VSCodium` with extensions and executables for `Haskell`.
+- A sample `Haskell` project.
+- Several ways to run a `Haskell` app.
 
 Feel free to remove the `VSCodium`-related `Nix` code and whatever you want!
 
 ## Prerequisites
 
-- [flake.nix](./flake.nix) - code in this flake is extensively commented. Read it to understand how this flake works
+- [flake.nix](./flake.nix) - code in this flake is extensively commented. Read it to understand how this flake works.
 - [language-tools/haskell](https://github.com/deemp/flakes/blob/main/language-tools/haskell/flake.nix) - this flake provides the `Haskell` tools in a convenient way (IMHO).
 - [Conventions](https://github.com/deemp/flakes/blob/main/README/Conventions.md#dev-tools) - you may want to use this flake just for development.
 
@@ -20,13 +20,13 @@ See these for additional info:
 - [Troubleshooting](https://github.com/deemp/flakes/blob/main/README/Troubleshooting.md)
 - [Prerequisites](https://github.com/deemp/flakes#prerequisites)
 - [Nixpkgs support for incremental Haskell builds](https://www.haskellforall.com/2022/12/nixpkgs-support-for-incremental-haskell.html)
-- [flakes](https://github.com/deemp/flakes#readme) - my Nix flakes that may be useful for you too.
+- [flakes](https://github.com/deemp/flakes#readme) - my Nix flakes that may be useful for you.
 
 ## Quick start
 
 1. Install Nix - see [how](https://github.com/deemp/flakes/blob/main/README/InstallNix.md).
 
-1. In a new terminal, start a devshell and run the app:
+1. In a new terminal, start a devshell and run the app.
 
     ```console
     nix flake new my-project -t github:deemp/flakes#codium-haskell
@@ -36,7 +36,7 @@ See these for additional info:
     cabal run
     ```
 
-1. Write `settings.json` and start `VSCodium`:
+1. Write `settings.json` and start `VSCodium`.
 
     ```console
     nix run .#writeSettings
@@ -51,13 +51,11 @@ See these for additional info:
 
 The `devShells.default` here is similar to the [cabal](#cabal) version (`devshells.cabalShell`).
 
-Sometimes, `cabal` doesn't use the `Nix`-supplied packages ([issue](https://github.com/NixOS/nixpkgs/issues/130556#issuecomment-1114239002)). In this case, use `cabal v1-*` - commands.
+The `nix-managed` package (package in this flake) has several non-`Haskell` dependencies.
 
-The `nix-managed` package that we provide the `devShells.default` for has several non-`Haskell` dependencies.
+One of them is `pkgs.hello`. `nix-managed` calls the `hello` command at runtime (see `someFunc` in `src/Lib.hs`). 
 
-First, as `nix-managed` uses an `lzma` package, it needs a `C` library `liblzma`. This library is delivered via `Nix` as `pkgs.lzma`.
-
-Second, `nix-managed` calls the `hello` command at runtime (see `someFunc` in `src/Lib.hs`). This command comes from a `hello` executable which is delivered via `Nix` as `pkgs.hello`.
+This command is available in 
 
 1. We now enter a `devShell`.
 
@@ -90,6 +88,8 @@ Second, `nix-managed` calls the `hello` command at runtime (see `someFunc` in `s
     ```
 
 1. `ghcid` will run not only the `main` function, but also the code in magic comments (See `app/Main.hs`).
+
+1. Sometimes, `cabal` doesn't use the `Nix`-supplied packages ([issue](https://github.com/NixOS/nixpkgs/issues/130556#issuecomment-1114239002)). In this case, use `cabal v1-*` - commands.
 
 ## GHC
 
