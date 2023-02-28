@@ -98,6 +98,8 @@
         , # runtime dependencies of the executable
           # that should be available to it on `PATH`
           runtimeDependencies ? [ ]
+        , # derivation description
+          description ? "no description provided :("
         }:
         let exe = pkgs.haskell.lib.justStaticExecutables package; in
         withAttrs
@@ -111,7 +113,11 @@
               makeWrapper ${exe}/bin/${executableName} $out/bin/${binaryName} ${addDeps runtimeDependencies}
             ''
           )
-          { pname = binaryName; }
+          {
+            pname = binaryName;
+            name = "${binaryName}-${package.version}";
+            meta = { inherit description; };
+          }
       ;
 
       # Tools for a specific GHC version and overriden haskell packages for this GHC
@@ -186,6 +192,7 @@
               package = tools.haskellPackages.${packageName};
               inherit binaryName;
               runtimeDependencies = [ pkgs.hello ];
+              description = "A Haskell `hello-world` script";
             };
           in
           {
