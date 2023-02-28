@@ -2,6 +2,12 @@
   # keys are extension IDs (see https://code.visualstudio.com/docs/editor/extension-marketplace)
   # or pre-defined names (workbench, editor)
   # in case of ID clashes, an extension setting should have a full name
+  csv = {
+    "files.associations" = {
+      "*.dat" = "csv (pipe)";
+      "*.csv" = "csv (semicolon)";
+    };
+  };
 
   haskell = {
     "haskell.manageHLS" = "PATH";

@@ -22,6 +22,9 @@ mkExtensions
       "cpptools"
     ];
   };
+  csv = {
+    "mechatroner" = "rainbow-csv";
+  };
   docker = {
     exiasr = "hadolint";
     ms-azuretools = "vscode-docker";
