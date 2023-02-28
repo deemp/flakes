@@ -153,7 +153,7 @@
         { name
         , text
         , runtimeInputs ? [ ]
-        , description ? "no description provided"
+        , description ? "no description provided :("
         , longDescription ? ''
             ${description}
           ''
