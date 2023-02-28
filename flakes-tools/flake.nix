@@ -73,7 +73,7 @@
         withMan
           (withDescription
             (pushXToCachix { name = "devshells"; fishScriptPath = ./scripts/cache-devshells.fish; })
-            "Push full closures (build and runtime dependencies) of all flake's devshells to `cachix`"
+            (_: "Push full closures (build and runtime dependencies) of all flake's devshells to `cachix`")
           )
           (x:
             ''
@@ -92,7 +92,7 @@
       pushInputsToCachix =
         withMan
           (withDescription (pushXToCachix { name = "flake-inputs"; fishScriptPath = ./scripts/cache-inputs.fish; })
-            "Push all flake inputs to `cachix`"
+            (_: "Push all flake inputs to `cachix`")
           )
           (x:
             ''
