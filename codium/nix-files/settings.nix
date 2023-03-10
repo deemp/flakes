@@ -9,12 +9,107 @@
     };
   };
 
+  editor = {
+    "editor.formatOnSave" = true;
+    "editor.tabSize" = 2;
+  };
+
+  # enable IntelliSense (but not yet info on hover :( ) in jinja files
+  emmet = { "emmet.includeLanguages" = { "jinja-html" = "html"; }; };
+
+  errorlens = {
+    "errorLens.enabledDiagnosticLevels" = [
+      "info"
+      "warning"
+      "hint"
+      "error"
+    ];
+    "errorLens.enabled" = true;
+  };
+
+  files = {
+    "files.watcherExclude" = { "**/.spago/**" = true; };
+    "files.refactoring.autoSave" = true;
+    "files.autoSave" = "afterDelay";
+    "files.associations" = {
+      "*.html" = "html";
+      "*.jinja" = "jinja-html";
+      "*.nix" = "nix";
+      "*.py" = "python";
+      "*.md" = "markdown";
+    };
+  };
+
+  git = {
+    "git.autofetch" = true;
+    "git.autofetchPeriod" = 5;
+  };
+
+  gitlens = {
+    "gitlens.codeLens.authors.enabled" = false;
+    "gitlens.codeLens.enabled" = false;
+    "gitlens.codeLens.recentChange.enabled" = false;
+    "gitlens.currentLine.enabled" = false;
+    "gitlens.currentLine.pullRequests.enabled" = false;
+    "gitlens.hovers.currentLine.over" = "line";
+    "gitlens.hovers.enabled" = false;
+    "gitlens.statusBar.enabled" = false;
+  };
+
   haskell = {
     "haskell.manageHLS" = "PATH";
     "[haskell]" = {
       "editor.defaultFormatter" = "haskell.haskell";
     };
     "haskell.formattingProvider" = "fourmolu";
+  };
+
+  # set your path instead of `front`
+  ide-purescript = {
+    "purescript.outputDirectory" = "./front/output/";
+    "purescript.packagePath" = "./front";
+    "purescript.sourcePath" = "./front/src";
+    "purescript.formatter" = "purs-tidy";
+  };
+
+  json-language-features = {
+    "[jsonc]" = {
+      "editor.defaultFormatter" = "vscode.json-language-features";
+    };
+    "[json]" = {
+      "editor.defaultFormatter" = "vscode.json-language-features";
+    };
+  };
+
+  jupyter = {
+    "jupyter.notebookFileRoot" = ''''${workspaceFolder}'';
+  };
+
+
+  markdown-all-in-one = {
+    "markdown.extension.orderedList.autoRenumber" = false;
+  };
+
+  markdown-language-features = {
+    "[markdown]" = {
+      "editor.defaultFormatter" = "DavidAnson.vscode-markdownlint";
+    };
+  };
+
+  nix-ide = {
+    "nix.enableLanguageServer" = true;
+    "nix.serverPath" = "rnix-lsp";
+    "nix.formatterPath" = "nixpkgs-fmt";
+  };
+
+  python = {
+    "python.formatting.provider" = "black";
+    "python.linting.mypyCategorySeverity.error" = "Error";
+    "python.linting.mypyEnabled" = true;
+  };
+
+  terminal = {
+    "terminal.integrated.scrollback" = 100000;
   };
 
   todo-tree = {
@@ -38,67 +133,17 @@
     ];
   };
 
-  markdown-language-features = {
-    "[markdown]" = {
-      "editor.defaultFormatter" = "DavidAnson.vscode-markdownlint";
-    };
-  };
-
-  markdown-all-in-one = {
-    "markdown.extension.orderedList.autoRenumber" = false;
-  };
-
-  files = {
-    "files.watcherExclude" = { "**/.spago/**" = true; };
-    "files.refactoring.autoSave" = true;
-    "files.autoSave" = "afterDelay";
-    "files.associations" = {
-      "*.html" = "html";
-      "*.jinja" = "jinja-html";
-      "*.nix" = "nix";
-      "*.py" = "python";
-      "*.md" = "markdown";
-    };
-  };
-
-  # enable IntelliSense (but not yet info on hover :( ) in jinja files
-  emmet = { "emmet.includeLanguages" = { "jinja-html" = "html"; }; };
-
-  # set your path instead of `front`
-  ide-purescript = {
-    "purescript.outputDirectory" = "./front/output/";
-    "purescript.packagePath" = "./front";
-    "purescript.sourcePath" = "./front/src";
-    "purescript.formatter" = "purs-tidy";
-  };
-
   vscode-dhall-lsp-server = {
     "vscode-dhall-lsp-server.executable" = "dhall-lsp-server";
+  };
+
+  window = {
+    "window.restoreWindows" = "none";
   };
 
   workbench = {
     "workbench.sideBar.location" = "right";
     "workbench.colorTheme" = "Monokai";
-  };
-
-  editor = {
-    "editor.formatOnSave" = true;
-    "editor.tabSize" = 2;
-  };
-
-  terminal = {
-    "terminal.integrated.scrollback" = 100000;
-  };
-
-  gitlens = {
-    "gitlens.codeLens.authors.enabled" = false;
-    "gitlens.codeLens.enabled" = false;
-    "gitlens.codeLens.recentChange.enabled" = false;
-    "gitlens.currentLine.enabled" = false;
-    "gitlens.currentLine.pullRequests.enabled" = false;
-    "gitlens.hovers.currentLine.over" = "line";
-    "gitlens.hovers.enabled" = false;
-    "gitlens.statusBar.enabled" = false;
   };
 
   yaml = {
@@ -108,45 +153,5 @@
       "https://json.schemastore.org/github-action.json" =
         "actions/**/action.yml";
     };
-  };
-
-  json-language-features = {
-    "[jsonc]" = {
-      "editor.defaultFormatter" = "vscode.json-language-features";
-    };
-    "[json]" = {
-      "editor.defaultFormatter" = "vscode.json-language-features";
-    };
-  };
-
-  git = {
-    "git.autofetch" = true;
-    "git.autofetchPeriod" = 5;
-  };
-
-  nix-ide = {
-    "nix.enableLanguageServer" = true;
-    "nix.serverPath" = "rnix-lsp";
-    "nix.formatterPath" = "nixpkgs-fmt";
-  };
-
-  python = {
-    "python.formatting.provider" = "black";
-    "python.linting.mypyCategorySeverity.error" = "Error";
-    "python.linting.mypyEnabled" = true;
-  };
-
-  errorlens = {
-    "errorLens.enabledDiagnosticLevels" = [
-      "info"
-      "warning"
-      "hint"
-      "error"
-    ];
-    "errorLens.enabled" = true;
-  };
-
-  window = {
-    "window.restoreWindows" = "none";
   };
 }
