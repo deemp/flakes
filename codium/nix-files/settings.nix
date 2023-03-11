@@ -102,6 +102,16 @@
     "nix.formatterPath" = "nixpkgs-fmt";
   };
 
+  prettier-sql-vscode = {
+    "Prettier-SQL.SQLFlavourOverride" = "postgresql";
+    "Prettier-SQL.indentStyle" = "tabularLeft";
+    "Prettier-SQL.keywordCase" = "upper";
+    "Prettier-SQL.expressionWidth" = 42;
+    "[sql]" = {
+      "editor.defaultFormatter" = "inferrinizzard.prettier-sql-vscode";
+    };
+  };
+
   python = {
     "python.formatting.provider" = "black";
     "python.linting.mypyCategorySeverity.error" = "Error";
