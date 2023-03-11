@@ -90,8 +90,7 @@
               # Later, we may use this package in `.cabal` in a test-suite
               # We should use `cabal v1-*` commands with it - https://github.com/NixOS/nixpkgs/issues/130556#issuecomment-1114239002
               testHaskellDepends = [
-                # Uncomment the text in parentheses to enable `lima`
-                # (super.callCabal2nix "lima" "${lima.outPath}/lima" { })
+                (super.callCabal2nix "lima" "${lima.outPath}/lima" { })
               ] ++ (x.testHaskellDepends or [ ]);
             });
         };
