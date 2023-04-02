@@ -71,11 +71,11 @@ some text
 -}
 
 -- Text one
--- this multiline comment should separate this line and the line after the comment
-{--}
+
 -- Text two should be ignored
 
 {- LIMA_DISABLE -}
+
 -- Text two to ignore
 some :: String
 some = "code to ignore"

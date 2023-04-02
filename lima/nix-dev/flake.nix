@@ -3,12 +3,12 @@
     nixpkgs_.url = "github:deemp/flakes?dir=source-flake/nixpkgs";
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     codium.url = "github:deemp/flakes?dir=codium";
-    drv-tools.url = "github:deemp/flakes?dir=drv-tools";
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
     haskell-tools.url = "github:deemp/flakes?dir=language-tools/haskell";
     devshell.url = "github:deemp/flakes?dir=devshell";
-    flakes-tools.url = "github:deemp/flakes?dir=flakes-tools";
+    haskell-language-server_.url = "github:deemp/flakes?dir=source-flake/haskell-language-server";
+    haskell-language-server.follows = "haskell-language-server_/haskell-language-server";
   };
   outputs = inputs: inputs.flake-utils.lib.eachDefaultSystem (system:
     let
@@ -17,29 +17,44 @@
       inherit (inputs.codium.configs.${system}) extensions settingsNix;
       inherit (inputs.devshell.functions.${system}) mkCommands mkRunCommandsDir mkShell;
       inherit (inputs.haskell-tools.functions.${system}) toolsGHC;
-
+      hls = inputs.haskell-language-server.packages.${system}.default;
       # Next, set the desired GHC version
-      ghcVersion = "925";
+      ghcVersion = "926";
 
       # and the name of the package
       myPackageName = "lima";
 
-      override = {
-        overrides = self: super: {
-          myPackage = super.callCabal2nix myPackageName ../. { };
+      inherit (pkgs.haskell.lib)
+        dontCheck
+        dontStrip
+        dontHaddock
+        overrideCabal
+        ;
+
+      override =
+        let donts = drv: pkgs.lib.trivial.pipe drv [ dontStrip dontCheck dontHaddock ]; in
+        {
+          overrides = self: super: {
+            myPackage = overrideCabal (super.callCabal2nix myPackageName ../. { }) (
+              x: {
+                testHaskellDepends = [
+                  (donts super.doctest-parallel_0_3_0)
+                ] ++ x.testHaskellDepends;
+              }
+            );
+          };
         };
-      };
 
       inherit (toolsGHC {
         version = ghcVersion;
         inherit override;
         packages = (ps: [ ps.myPackage ]);
       })
-        cabal hls hpack ghcid;
+        cabal hpack ghcid;
 
       tools = [
-        cabal
         hls
+        cabal
         hpack
         ghcid
       ];
@@ -57,7 +72,7 @@
 
       devShells.default = mkShell {
         packages = tools;
-        bash.extra = "";
+        bash.extra = "export LC_ALL=C.UTF-8";
         commands =
           mkCommands "tools" tools ++
           mkRunCommandsDir "nix-dev" "ide" {

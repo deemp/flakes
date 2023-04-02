@@ -19,6 +19,9 @@ It is usually possible to make conversion abide the [roundtrip property](https:/
 
 ## Conversion
 
+`lima` reads text line by line and acts depending on a current line contents.
+E.g., it interprets multiline comments of a particular form as tags.
+
 ### .hs -> .md
 
 #### Examples

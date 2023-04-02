@@ -5,7 +5,7 @@ cabal-version: 1.12
 -- see: https://github.com/sol/hpack
 
 name:           lima
-version:        0.1.0.6
+version:        0.2.0.0
 synopsis:       (Haskell or Literate Haskell) <-> Markdown converter
 description:    See the [README.md](https://github.com/deemp/flakes/tree/main/lima#readme)
 category:       Productivity
@@ -18,16 +18,17 @@ build-type:     Simple
 extra-source-files:
     CHANGELOG.md
     README.md
-    testdata/config/lima.yaml
     testdata/hs/input0.hs
-    testdata/hs/input0.hs.md
-    testdata/hs/input0.hs.md.hs
-    testdata/lhs/input0.lhs
-    testdata/lhs/input0.lhs.md
-    testdata/lhs/input0.lhs.md.lhs
-    testdata/lhs/input1.lhs
-    testdata/lhs/input1.lhs.md
-    testdata/lhs/input1.lhs.md.lhs
+    testdata/md/test.hs
+    testdata/md/test.lhs
+    testdata/md/test.md
+    testdata/md/test.tex
+    testdata/md/tokens.hs
+    testdata/tex/test.hs
+    testdata/tex/test.lhs
+    testdata/tex/test.md
+    testdata/tex/test.tex
+    testdata/tex/tokens.hs
 
 source-repository head
   type: git
@@ -40,39 +41,80 @@ library
       Paths_lima
   hs-source-dirs:
       src
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      aeson
-    , base ==4.*
+      base ==4.*
     , data-default
-    , yaml
+    , microlens
+    , microlens-th
+  default-language: Haskell2010
+
+executable lhs-input-1
+  main-is: testdata/lhs/input1.lhs
+  other-modules:
+      Paths_lima
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      base ==4.*
+    , data-default
+    , microlens
+    , microlens-th
   default-language: Haskell2010
 
 executable lima
   main-is: app/Main.hs
   other-modules:
       Paths_lima
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       aeson
     , base ==4.*
+    , bytestring
     , data-default
     , lima
+    , microlens
+    , microlens-th
     , optparse-applicative
-    , string-interpolate
     , yaml
   default-language: Haskell2010
 
-test-suite lima-test
+test-suite conversions
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
       Paths_lima
   hs-source-dirs:
-      test
+      test/Conversions
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      aeson
-    , base ==4.*
+      base ==4.*
+    , breakpoint
     , data-default
+    , directory
+    , hedgehog
     , lima
+    , microlens
+    , microlens-th
+    , pretty-simple
     , string-interpolate
-    , yaml
+    , tasty
+    , tasty-hedgehog
+    , tasty-hunit
+  default-language: Haskell2010
+
+test-suite doctests
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules:
+      Paths_lima
+  hs-source-dirs:
+      test/Doctests
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      base ==4.*
+    , data-default
+    , doctest-parallel
+    , lima
+    , microlens
+    , microlens-th
   default-language: Haskell2010

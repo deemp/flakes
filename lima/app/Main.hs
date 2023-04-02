@@ -1,142 +1,232 @@
 {-# LANGUAGE ApplicativeDo #-}
+{-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TupleSections #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE ViewPatterns #-}
 
 module Main (main) where
 
-import Control.Exception (SomeException (SomeException), bracketOnError, catch, throwIO)
-import Control.Exception.Base (try)
-import Control.Monad (when, zipWithM_, (>=>))
-import Converter (Config (..), ConfigHsMd (..), hsToMd, lhsToMd, mdToHs, mdToLhs)
-import Data.Aeson.Types (prependFailure)
-import Data.Char (toLower)
-import Data.Default (def)
-import Data.Either (isLeft)
-import Data.Foldable (Foldable (..))
-import Data.List (intersperse)
-import Data.Maybe (fromJust, fromMaybe, isNothing)
-import Data.String (IsString)
-import Data.Traversable (forM)
-import Data.Yaml (FromJSON (..), ParseException, Value (..), withObject, (.:), (.:?))
-import Data.Yaml.Aeson (decodeFileEither, withArray, withObject, (.:), (.:?))
-import Data.Yaml.Parser (typeMismatch)
-import GHC.Generics (Generic)
-import Options.Applicative
-import Options.Applicative.Help (Doc, bold, colon, comma, dot, fill, indent, lparen, nest, rparen, softline, text, (<+>))
-import Options.Applicative.Help.Pretty (hardline)
-import System.Environment (getArgs)
-import System.Exit (ExitCode (..), exitWith)
+main = print "hi"
 
-data CommandType = Hs2Md | Md2Hs | Lhs2Md | Md2Lhs deriving (Show)
+-- import Control.Exception (SomeException, catch)
+-- import Control.Monad (zipWithM_)
+-- import Converter (
+--   Config (..),
+--   ConfigHsMd,
+--   Dialect (..),
+--   User,
+--   demoConfig,
+--   demoConfigHsMd,
+--   translateTo,
+--   -- hsToMd,
+--   -- lhsToMd,
+--   -- mdToHs,
+--   -- mdToLhs,
+--  )
+-- import qualified Data.ByteString.Char8 as BSL
+-- import Data.Default (def)
+-- import Data.Foldable (Foldable (..))
+-- import Data.List (intersperse)
+-- import Data.Maybe (fromMaybe)
+-- import Data.Traversable (forM)
+-- import Data.Yaml (decodeFileThrow, encode)
+-- import Options.Applicative
+-- import Options.Applicative.Help (Doc, bold, comma, dot, fill, indent, lparen, rparen, softline, string, text, (<+>))
+-- import Options.Applicative.Help.Pretty (hardline)
 
-data Options = Options
-  { commandType :: CommandType
-  , config :: Maybe FilePath
-  , files :: [FilePath]
-  }
-  deriving (Show)
+-- -- data FromTo = FromTo Dialect Dialect deriving (Show)
 
+-- class ShowCommand a where
+--   showCommand :: a -> String
 
-parseConfig :: Parser ([FilePath], Maybe FilePath)
-parseConfig = do
-  file <- some $ strOption (long "file" <> short 'f' <> metavar "FILE" <> help "Path to a file to convert")
-  config <- optional (strOption (long "config" <> short 'c' <> metavar "FILE" <> help "Path to a config"))
-  return (file, config)
+-- -- instance ShowCommand CommandType where
+-- --   showCommand :: CommandType -> String
+-- --   showCommand = \case
+-- --     Hs2Md -> "hs-md"
+-- --     Md2Hs -> "md-hs"
+-- --     Lhs2Md -> "lhs-md"
+-- --     Md2Lhs -> "md-lhs"
 
-mkConfigParser :: String -> CommandType -> Doc -> Mod CommandFields Options
-mkConfigParser command_ commandType progDesc_ =
-  command
-    command_
-    ( info
-        ((\(files, config) -> Options{..}) <$> parseConfig)
-        (progDescDoc $ Just progDesc_)
-    )
+-- data Lima = Lima
 
-uncurry3 :: (a -> b -> c -> d) -> (a, b, c) -> d
-uncurry3 f (a, b, c) = f a b c
+-- instance ShowCommand Lima where
+--   showCommand :: Lima -> String
+--   showCommand _ = "lima"
 
-lima :: Parser Options
-lima =
-  subparser $
-    foldMap
-      (uncurry3 mkConfigParser)
-      [ ("hs2md", Hs2Md, "Convert" <-> bold "Haskell" <-> "to" <-> bold "Markdown")
-      , ("md2hs", Md2Hs, "Convert" <-> bold "Markdown" <-> "to" <-> bold "Haskell")
-      , ("md2lhs", Md2Lhs, "Convert" <-> bold "Markdown" <-> "to" <-> bold "Literate Haskell")
-      , ("lhs2md", Lhs2Md, "Convert" <-> bold "Literate Haskell" <-> "to" <-> bold "Markdown")
-      ]
+-- -- data Source = Hs | Md | Lhs
 
-maybe' :: Maybe a -> b -> (a -> b) -> b
-maybe' x f g = maybe f g x
+-- showSourceExtension :: Dialect -> String
+-- showSourceExtension = \case
+--   Hs -> "hs"
+--   Md -> "md"
+--   Lhs -> "lhs"
+--   TeX -> "tex"
 
-either' :: Either a b -> (a -> c) -> (b -> c) -> c
-either' x f g = either f g x
+-- limaCommand :: Doc
+-- limaCommand = string $ showCommand Lima
 
-descriptionBlock :: [Doc] -> Doc
-descriptionBlock desc = fold (intersperse softline desc) <> hardline
+-- showToExtension :: FromTo -> String
+-- showToExtension = showSourceExtension . to . commandToFromTo
 
-(<->) :: Doc -> Doc -> Doc
-x <-> y = x <> softline <> y
+-- data FromTo = FromTo {from :: Dialect, to :: Dialect}
 
-fill' :: Doc
-fill' = fill 100 $ text ""
+-- -- commandToFromTo :: CommandType -> FromTo
+-- -- commandToFromTo = \case
+-- --   Hs2Md -> FromTo Hs Md
+-- --   Md2Hs -> FromTo Md Hs
+-- --   Lhs2Md -> FromTo Lhs Md
+-- --   Md2Lhs -> FromTo Md Lhs
 
-header_ :: Doc
-header_ =
-  descriptionBlock
-    [ bold "lima" <-> "converts between" <-> lparen <> bold "Haskell" <-> lparen <> bold ".hs" <> rparen
-    , "or" <-> bold "Literate Haskell" <> lparen <> bold ".lhs" <> rparen <> rparen
-    , "and" <-> bold "Markdown" <-> lparen <> bold ".md" <> rparen
-    , fill'
-    , "Learn more about a command by running:" <-> bold "lima COMMAND"
-    , fill'
-    , "Example usage:" <> fill'
-    , fill'
-    , bold "lima hs2md -f file.hs -c config.yaml" <> fill'
-    , indent 2 $ "Convert" <+> bold "HS" <+> "to" <+> bold "MD" <+> "using the config" <+> bold "config.yaml" <> colon <> fill'
-    , indent 2 "file1.hs -> file1.hs.md"
-    , fill'
-    , bold "lima lhs2md -f file1.lhs -f file2.lhs" <> fill'
-    , indent 2 $ "Convert" <+> bold "LHS" <+> "to" <+> bold "MD" <> colon <> fill'
-    , indent 2 $ "file1.lhs -> file1.lhs.md" <> comma <-> "file2.lhs -> file2.lhs.md"
-    ]
+-- ppSource :: Dialect -> Doc
+-- ppSource = \case
+--   Hs -> "Haskell"
+--   Md -> "Markdown"
+--   Lhs -> "Literate Haskell"
+--   TeX -> "TeX"
 
-runLima :: IO Options
-runLima =
-  customExecParser
-    (prefs (showHelpOnError <> disambiguate))
-    ( info
-        (helper <*> lima)
-        ( fullDesc <> headerDoc (Just header_)
-        )
-    )
+-- ppSourceBold :: Dialect -> Doc
+-- ppSourceBold = bold . ppSource
 
-main :: IO ()
-main = do
-  Options{..} <- runLima
-  Config{..} <-
-    maybe'
-      config
-      def
-      ( \c ->
-          decodeFileEither c
-            >>= ( \(x :: Either ParseException Config) ->
-                    either' x (const $ error $ "Could not parse the config file at " <> c) pure
-                )
-      )
-  contents_ <- forM files (\file -> readFile file `catch` (\(x :: SomeException) -> error $ "Could not read file at " <> file))
-  let
-    convert :: String -> FilePath -> IO ()
-    convert contents out =
-      (\(f, ext) -> writeFile (out <> "." <> ext) (f contents)) $
-        case commandType of
-          Md2Hs -> (mdToHs (fromMaybe def configHsMd), "hs")
-          Hs2Md -> (hsToMd (fromMaybe def configHsMd), "md")
-          Md2Lhs -> (mdToLhs, "lhs")
-          Lhs2Md -> (lhsToMd, "md")
-  zipWithM_ convert contents_ files
-  putStrLn "Converted!"
- where
-  opts = info (lima <**> helper) mempty
-  p = prefs (disambiguate <> showHelpOnError)
+-- data Options = Options
+--   { fromDialect :: Dialect
+--   , toDialect :: Dialect
+--   , config :: Maybe FilePath
+--   , files :: [FilePath]
+--   }
+--   deriving (Show)
+
+-- parseConvertCommand :: Parser ([FilePath], Maybe FilePath)
+-- parseConvertCommand = do
+--   file <- some $ strOption (long "file" <> short 'f' <> metavar "FILE" <> help "Path to a file to convert")
+--   config <- optional (strOption (long "config" <> short 'c' <> metavar "FILE" <> help "Path to a config"))
+--   return (file, config)
+
+-- data Parsed
+--   = ParsedOptions Options
+--   | ParsedConfig (Config User)
+--   | ParsedConfigHsMd (ConfigHsMd User)
+
+-- mkConvertCommands :: FromTo -> Mod CommandFields Parsed
+-- mkConvertCommands commandType =
+--   command
+--     (showCommand commandType)
+--     ( info
+--         ((\(files, config) -> ParsedOptions Options{..}) <$> parseConvertCommand)
+--         (progDescDoc $ Just progDesc_)
+--     )
+--  where
+--   fromLang = from . commandToFromTo $ commandType
+--   toLang = to . commandToFromTo $ commandType
+--   progDesc_ = "Convert" <-> bold (ppSource fromLang) <-> "to" <-> bold (ppSource toLang)
+
+-- mkConfigCommand :: Mod CommandFields Parsed
+-- mkConfigCommand =
+--   command
+--     "gen-config"
+--     ( info
+--         (pure $ ParsedConfig demoConfig)
+--         (progDescDoc $ Just "Print a sample configuration.")
+--     )
+
+-- mkConfigHsMdCommand :: Mod CommandFields Parsed
+-- mkConfigHsMdCommand =
+--   command
+--     "gen-config-hsMd"
+--     ( info
+--         (pure $ ParsedConfigHsMd demoConfigHsMd)
+--         (progDescDoc $ Just $ "Print a sample" <-> bold "Haskell <-> Markdown" <-> "configuration.")
+--     )
+
+-- -- lima :: Parser (Maybe Options)
+-- lima :: Parser Parsed
+-- lima =
+--   (subparser $ foldMap mkConvertCommands [Hs2Md, Md2Hs, Md2Lhs, Lhs2Md])
+--     <|> (subparser $ mkConfigCommand)
+--     <|> (subparser $ mkConfigHsMdCommand)
+
+-- maybe' :: Maybe a -> b -> (a -> b) -> b
+-- maybe' x f g = maybe f g x
+
+-- descriptionBlock :: [Doc] -> Doc
+-- descriptionBlock desc = fold (intersperse softline desc) <> hardline
+
+-- (<->) :: Doc -> Doc -> Doc
+-- x <-> y = x <> softline <> y
+
+-- fill' :: Doc
+-- fill' = fill 100 $ text ""
+
+-- header_ :: Doc
+-- header_ =
+--   descriptionBlock
+--     [ bold limaCommand <-> "converts between" <-> lparen <> boldHs <-> lparen <> bold ".hs" <> rparen
+--     , "or" <-> boldLhs <> lparen <> bold ".lhs" <> rparen <> rparen
+--     , "and" <-> boldMd <-> lparen <> bold ".md" <> rparen
+--     , fill'
+--     , "Learn more about a command by running:" <-> bold (limaCommand <+> "COMMAND")
+--     , fill'
+--     , "Example usage:" <> fill'
+--     , fill'
+--     , bold (limaCommand <+> command_ Hs2Md <+> "-f file.hs -c config.yaml") <> fill'
+--     , indent 2 $ "Convert" <+> boldHs <+> "to" <+> boldMd <+> "using the config" <+> bold "config.yaml" <> dot <> fill'
+--     , indent 2 $ "Result:" <> fill'
+--     , indent 4 "file1.hs -> file1.hs.md"
+--     , fill'
+--     , bold (limaCommand <+> command_ Lhs2Md <+> "-f file1.lhs -f file2.lhs") <> fill'
+--     , indent 2 $ "Convert" <+> boldLhs <+> "to" <+> boldMd <> dot <> fill'
+--     , indent 2 $ "Result:" <> fill'
+--     , indent 4 $ "file1.lhs -> file1.lhs.md" <> comma <-> "file2.lhs -> file2.lhs.md"
+--     ]
+--  where
+--   boldHs = ppSourceBold Hs
+--   boldMd = ppSourceBold Md
+--   boldLhs = ppSourceBold Lhs
+--   command_ = string . showCommand
+
+-- runLima :: IO Parsed
+-- runLima =
+--   customExecParser
+--     (prefs (showHelpOnError <> disambiguate))
+--     ( info
+--         (helper <*> lima)
+--         ( fullDesc <> headerDoc (Just header_)
+--         )
+--     )
+
+-- main :: IO ()
+-- main = do
+--   opts <- runLima
+--   case opts of
+--     ParsedConfig c -> BSL.putStrLn $ encode c
+--     ParsedConfigHsMd c -> BSL.putStrLn $ encode c
+--     ParsedOptions Options{..} -> do
+--       Config{..} <-
+--         maybe' config (pure $ def @(Config User)) $
+--           \c ->
+--             decodeFileThrow c
+--               `catch` \(_ :: SomeException) ->
+--                 error $ "Could not parse the config file at " <> c
+--       contents_ <-
+--         forM
+--           files
+--           ( \file ->
+--               readFile file
+--                 `catch` \(_ :: SomeException) ->
+--                   error $ "Could not read file at " <> file
+--           )
+--       let
+--         convert :: String -> FilePath -> IO ()
+--         convert contents out =
+--           (\(f, ext) -> writeFile (out <> "." <> ext) (f contents))
+--             $ case commandType of
+--               Md2Hs -> (mdToHs (fromMaybe def _hsMd),)
+--               Hs2Md -> (hsToMd (fromMaybe def _hsMd),)
+--               Md2Lhs -> (mdToLhs,)
+--               Lhs2Md -> (lhsToMd,)
+--             $ showToExtension commandType
+--       zipWithM_ convert contents_ files
+--       putStrLn "Converted!"

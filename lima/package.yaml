@@ -11,7 +11,7 @@ name: lima
 # -- PVP summary:      +-+# --# --# --- breaking API changes
 # --                   | | +# --# --- non-breaking API additions
 # --                   | | | +# --- code changes with no API change
-version: 0.1.0.6
+version: 0.2.0.0
 
 # -- A short (one-line) description of the package.
 synopsis: (Haskell or Literate Haskell) <-> Markdown converter
@@ -32,11 +32,22 @@ extra-source-files:
 
 git: https://github.com/deemp/flakes
 
+ghc-options:
+  - -Wall
+  - -Wcompat
+  - -Widentities
+  - -Wincomplete-record-updates
+  - -Wincomplete-uni-patterns
+  - -Wmissing-export-lists
+  - -Wmissing-home-modules
+  - -Wpartial-fields
+  - -Wredundant-constraints
+
 dependencies:
   - base >=4 && < 5
   - data-default
-  - aeson
-  - yaml
+  - microlens
+  - microlens-th
 
 library:
   source-dirs: src
@@ -47,12 +58,29 @@ executables:
     dependencies:
       - lima
       - optparse-applicative
-      - string-interpolate
+      - yaml
+      - bytestring
+      - aeson
+  lhs-input-1:
+    main: testdata/lhs/input1.lhs
 
 tests:
-  lima-test:
+  conversions:
     main: Main.hs
-    source-dirs: test
+    source-dirs: test/Conversions
     dependencies:
       - lima
       - string-interpolate
+      - tasty-hunit
+      - tasty
+      - directory
+      - hedgehog
+      - tasty-hedgehog
+      - pretty-simple
+      - breakpoint
+  doctests:
+    main: Main.hs
+    source-dirs: test/Doctests
+    dependencies:
+      - doctest-parallel
+      - lima
