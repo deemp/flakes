@@ -41,41 +41,40 @@ library
       Paths_lima
   hs-source-dirs:
       src
+  default-extensions:
+      BlockArguments
+      ConstraintKinds
+      DataKinds
+      DeriveAnyClass
+      DeriveDataTypeable
+      DeriveGeneric
+      DuplicateRecordFields
+      ExistentialQuantification
+      FlexibleInstances
+      GADTs
+      ImplicitParams
+      ImportQualifiedPost
+      InstanceSigs
+      LambdaCase
+      MultiWayIf
+      NamedFieldPuns
+      OverloadedStrings
+      QuasiQuotes
+      RankNTypes
+      RecordWildCards
+      ScopedTypeVariables
+      StandaloneDeriving
+      TemplateHaskell
+      TupleSections
+      TypeApplications
+      TypeFamilies
+      ViewPatterns
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base ==4.*
     , data-default
     , microlens
     , microlens-th
-  default-language: Haskell2010
-
-executable lhs-input-1
-  main-is: testdata/lhs/input1.lhs
-  other-modules:
-      Paths_lima
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
-  build-depends:
-      base ==4.*
-    , data-default
-    , microlens
-    , microlens-th
-  default-language: Haskell2010
-
-executable lima
-  main-is: app/Main.hs
-  other-modules:
-      Paths_lima
-  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
-  build-depends:
-      aeson
-    , base ==4.*
-    , bytestring
-    , data-default
-    , lima
-    , microlens
-    , microlens-th
-    , optparse-applicative
-    , yaml
   default-language: Haskell2010
 
 test-suite conversions
@@ -85,16 +84,42 @@ test-suite conversions
       Paths_lima
   hs-source-dirs:
       test/Conversions
+  default-extensions:
+      BlockArguments
+      ConstraintKinds
+      DataKinds
+      DeriveAnyClass
+      DeriveDataTypeable
+      DeriveGeneric
+      DuplicateRecordFields
+      ExistentialQuantification
+      FlexibleInstances
+      GADTs
+      ImplicitParams
+      ImportQualifiedPost
+      InstanceSigs
+      LambdaCase
+      MultiWayIf
+      NamedFieldPuns
+      OverloadedStrings
+      QuasiQuotes
+      RankNTypes
+      RecordWildCards
+      ScopedTypeVariables
+      StandaloneDeriving
+      TemplateHaskell
+      TupleSections
+      TypeApplications
+      TypeFamilies
+      ViewPatterns
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base ==4.*
     , breakpoint
-    , data-default
     , directory
     , hedgehog
     , lima
     , microlens
-    , microlens-th
     , pretty-simple
     , string-interpolate
     , tasty
@@ -109,12 +134,38 @@ test-suite doctests
       Paths_lima
   hs-source-dirs:
       test/Doctests
+  default-extensions:
+      BlockArguments
+      ConstraintKinds
+      DataKinds
+      DeriveAnyClass
+      DeriveDataTypeable
+      DeriveGeneric
+      DuplicateRecordFields
+      ExistentialQuantification
+      FlexibleInstances
+      GADTs
+      ImplicitParams
+      ImportQualifiedPost
+      InstanceSigs
+      LambdaCase
+      MultiWayIf
+      NamedFieldPuns
+      OverloadedStrings
+      QuasiQuotes
+      RankNTypes
+      RecordWildCards
+      ScopedTypeVariables
+      StandaloneDeriving
+      TemplateHaskell
+      TupleSections
+      TypeApplications
+      TypeFamilies
+      ViewPatterns
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base ==4.*
-    , data-default
     , doctest-parallel
     , lima
     , microlens
-    , microlens-th
   default-language: Haskell2010

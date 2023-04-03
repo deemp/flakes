@@ -43,27 +43,46 @@ ghc-options:
   - -Wpartial-fields
   - -Wredundant-constraints
 
+default-extensions:
+  - BlockArguments
+  - ConstraintKinds
+  - DataKinds
+  - DeriveAnyClass
+  - DeriveDataTypeable
+  - DeriveGeneric
+  - DuplicateRecordFields
+  - ExistentialQuantification
+  - FlexibleInstances
+  - GADTs
+  - ImplicitParams
+  - ImportQualifiedPost
+  - InstanceSigs
+  - LambdaCase
+  - MultiWayIf
+  - NamedFieldPuns
+  - OverloadedStrings
+  - QuasiQuotes
+  - RankNTypes
+  - RecordWildCards
+  - ScopedTypeVariables
+  - StandaloneDeriving
+  - TemplateHaskell
+  - TupleSections
+  - TypeApplications
+  - TypeFamilies
+  - ViewPatterns
+
 dependencies:
   - base >=4 && < 5
-  - data-default
   - microlens
-  - microlens-th
+  - text
 
 library:
   source-dirs: src
-
-executables:
-  lima:
-    main: app/Main.hs
-    dependencies:
-      - lima
-      - optparse-applicative
-      - yaml
-      - bytestring
-      - aeson
-  lhs-input-1:
-    main: testdata/lhs/input1.lhs
-
+  dependencies:
+    - data-default
+    - microlens-th
+  
 tests:
   conversions:
     main: Main.hs
