@@ -108,6 +108,7 @@ module Converter (
   mergeTokens,
   stripTokens,
   normalizeTokens,
+  PrettyPrint (..),
 
   -- * Examples
   exampleNonTexTokens',
@@ -200,7 +201,7 @@ class Show a => PrettyPrint a where
 
 instance PrettyPrint String where
   pp :: String -> Pretty String
-  pp = Pretty
+  pp = Pretty . dropWhileEnd (== '\n')
 
 instance PrettyPrint (Config User) where
   pp :: Config User -> Pretty String
@@ -639,18 +640,19 @@ exampleTexTokens =
 -- \end{code}
 -- <BLANKLINE>
 -- % Hello,
+-- <BLANKLINE>
 -- % world!
 -- <BLANKLINE>
--- Line 1.
--- Line 2.
+-- Line 1
+-- Line 2
 -- <BLANKLINE>
--- Line 1.
--- Line 2.
+-- Line 1
+-- Line 2
 -- <BLANKLINE>
 -- % LIMA_DISABLE
 -- <BLANKLINE>
--- % text
--- % disabled
+-- % Line 1
+-- % Line 2
 -- <BLANKLINE>
 -- % LIMA_ENABLE
 texFromTokens :: Config User -> Tokens -> String
@@ -836,23 +838,27 @@ texIntoTokens (toInternalConfig -> conf@Config{..}) xs = tokens
 -- >    a =
 -- >      f b
 -- <BLANKLINE>
+-- % LIMA_INDENT 2
+-- <BLANKLINE>
 -- % LIMA_INDENT 5
 -- <BLANKLINE>
 -- >      a =
 -- >        f b
+-- <BLANKLINE>
 -- % Hello,
+-- <BLANKLINE>
 -- % world!
 -- <BLANKLINE>
--- Line 1.
--- Line 2.
+-- Line 1
+-- Line 2
 -- <BLANKLINE>
--- Line 1.
--- Line 2.
+-- Line 1
+-- Line 2
 -- <BLANKLINE>
 -- % LIMA_DISABLE
 -- <BLANKLINE>
--- text
--- disabled
+-- Line 1
+-- Line 2
 -- <BLANKLINE>
 -- % LIMA_ENABLE
 lhsFromTokens :: Config User -> Tokens -> String
@@ -1033,6 +1039,8 @@ lhsIntoTokens (toInternalConfig -> conf@Config{..}) xs = tokens
 --   f b
 -- ```
 -- <BLANKLINE>
+--   <!-- LIMA_INDENT 2 -->
+-- <BLANKLINE>
 --      <!-- LIMA_INDENT 5 -->
 -- <BLANKLINE>
 --      ```haskell
@@ -1041,19 +1049,20 @@ lhsIntoTokens (toInternalConfig -> conf@Config{..}) xs = tokens
 --      ```
 -- <BLANKLINE>
 -- <!-- Hello,
+-- <BLANKLINE>
 -- world!
 -- -->
 -- <BLANKLINE>
--- Line 1.
--- Line 2.
+-- Line 1
+-- Line 2
 -- <BLANKLINE>
--- Line 1.
--- Line 2.
+-- Line 1
+-- Line 2
 -- <BLANKLINE>
 -- <!-- LIMA_DISABLE
 -- <BLANKLINE>
--- text
--- disabled
+-- Line 1
+-- Line 2
 -- <BLANKLINE>
 -- LIMA_ENABLE -->
 mdFromTokens :: Config User -> Tokens -> String
@@ -1260,27 +1269,30 @@ mdIntoTokens (toInternalConfig -> conf@Config{..}) xs = tokens
 -- a =
 --   f b
 -- <BLANKLINE>
+-- {- LIMA_INDENT 2 -}
+-- <BLANKLINE>
 -- {- LIMA_INDENT 5 -}
 -- <BLANKLINE>
 -- a =
 --   f b
 -- <BLANKLINE>
 -- {- Hello,
+-- <BLANKLINE>
 -- world!
 -- -}
 -- <BLANKLINE>
 -- {-
--- a =
---   f b
+-- Line 1
+-- Line 2
 -- <BLANKLINE>
--- a =
---   f b
+-- Line 1
+-- Line 2
 -- -}
 -- <BLANKLINE>
 -- {- LIMA_DISABLE -}
 -- <BLANKLINE>
--- a =
---   f b
+-- Line 1
+-- Line 2
 -- <BLANKLINE>
 -- {- LIMA_ENABLE -}
 hsFromTokens :: Config User -> Tokens -> String

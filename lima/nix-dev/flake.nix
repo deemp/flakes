@@ -38,8 +38,8 @@
             myPackage = overrideCabal (super.callCabal2nix myPackageName ../. { }) (
               x: {
                 testHaskellDepends = [
-                  (donts super.doctest-parallel_0_3_0)
-                ] ++ x.testHaskellDepends;
+                  super.doctest-parallel_0_3_0_1
+                ] ++ (x.testHaskellDepends or [ ]);
               }
             );
           };

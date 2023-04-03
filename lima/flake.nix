@@ -21,51 +21,29 @@
       inherit (drv-tools.functions.${system}) mkBinName withAttrs withMan withDescription;
       inherit (drv-tools.configs.${system}) man;
       inherit (haskell-tools.functions.${system}) toolsGHC;
-      inherit (toolsGHC { version = "925"; }) justStaticExecutable callCabal2nix haskellPackages;
 
       packageName = "lima";
 
-      package = callCabal2nix packageName ./. { };
+      inherit (pkgs.haskell.lib) overrideCabal;
+      inherit (toolsGHC {
+        version = "926";
+      }) callCabal2nix haskellPackages;
 
-      packageExecutableName = "lima";
-      packageExe =
-        let
-          packageWithCompletion = haskellPackages.generateOptparseApplicativeCompletions [ packageExecutableName ] package;
-          staticExecutable = justStaticExecutable { package = packageWithCompletion; };
-        in
-        withMan
-          (withDescription staticExecutable (_: "Convert `Haskell` (`.hs`) to `Markdown` (`.md`) or between `Literate Haskell` (`.lhs`) and `Markdown` (`.md`)"))
-          (x:
-            ''
-              ${man.DESCRIPTION}
-              ${x.meta.description}
-
-              ${man.SYNOPSYS}
-              `${packageExecutableName} <command> (-f file) [-c config]`
-
-              ${man.EXAMPLES}
-              `${packageExecutableName} lhs2md -f testdata/input0.lhs -f testdata/input1.lhs`
-              :   convert: `testdata/input0.lhs` ->  `testdata/input0.lhs.md` and `testdata/input1.lhs` -> `testdata/input1.lhs.md`
-              `${packageExecutableName} hs2md -f testdata/input2.hs -c testdata/config/lima.yaml`
-              :   convert: `testdata/input2.hs` ->  `testdata/input2.hs.md`
-            ''
-          );
+      package = overrideCabal (callCabal2nix packageName ./. { }) (
+        x: {
+          testHaskellDepends = [
+            haskellPackages.doctest-parallel_0_3_0_1
+          ] ++ (x.testHaskellDepends or [ ]);
+        }
+      );
 
       packages = {
-        default = packageExe;
-        inherit package;
-        test = haskellPackages.buildFromCabalSdist package;
-      };
-
-      devShells.default = pkgs.mkShell {
-        buildInputs = [ packageExe ];
-        shellHook = ''
-          source ${packageExe}/share/bash-completion/completions/${packageExecutableName}
-        '';
+        default = package;
+        sdist = haskellPackages.buildFromCabalSdist package;
       };
     in
     {
-      inherit packages devShells;
+      inherit packages;
     });
 
   nixConfig = {
