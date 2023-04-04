@@ -7,13 +7,13 @@ Feel free to remove the `VSCodium`-related `Nix` code and whatever you want!
 
 ## Prerequisites
 
-- [flake.nix](./flake.nix) - code in this flake is extensively commented. Read it to understand how this flake works.
-- [language-tools/haskell](https://github.com/deemp/flakes/blob/main/language-tools/haskell/flake.nix) - this flake provides the `Haskell` tools in a convenient way (IMHO)
-- [Conventions](https://github.com/deemp/flakes/blob/main/README/Conventions.md#dev-tools) - you may want to use this flake just for development.
+- [flake.nix](./flake.nix) - code in this flake is extensively commented.
+- [language-tools/haskell](https://github.com/deemp/flakes/blob/main/language-tools/haskell/flake.nix) - a flake that conveniently provides `Haskell` tools.
+- [Conventions](https://github.com/deemp/flakes/blob/main/README/Conventions.md#dev-tools) - I recommended to use this flake just for development. For packaging an app, make another flake with a limited number of inputs to reduce the `flake.lock` size.
 
 See these for additional info:
 
-- [codium-generic](https://github.com/deemp/flakes/tree/main/templates/codium/generic#readme) - info just about `VSCodium` and extensions.
+- [codium-generic](https://github.com/deemp/flakes/tree/main/templates/codium/generic#readme) - info just about `VSCodium` with extensions.
 - [codium-haskell](https://github.com/deemp/flakes/tree/main/templates/codium/haskell#readme) - an advanced version of this flake.
   - Shows how to build a static binary from your package and how to make a Docker image with it.
 - [Haskell](https://github.com/deemp/flakes/blob/main/README/Haskell.md) - general info about `Haskell` tools.
@@ -55,19 +55,23 @@ First, as `nix-managed` uses an `lzma` package, it needs a `C` library `liblzma`
 
 Second, `nix-managed` calls the `hello` command at runtime (see `someFunc` in `src/Lib.hs`). This command comes from a `hello` executable which is delivered via `Nix` as `pkgs.hello`.
 
-1. We now enter a `devShell`.
+`cabal` that I used in `flake.nix` has on its `PATH` that `hello` executable.
+
+Let's inspect what's available.
+
+1. Enter the `devShell`.
 
     ```console
     nix develop
     ```
 
-1. And run the app.
+1. Run the app.
 
     ```console
     cabal run
     ```
 
-1. Next, we can access the `hello` executable in a repl as this executable is on `PATH` of `cabal`.
+1. Next, access the `hello` executable in a repl.
 
     ```console
     cabal repl
@@ -79,7 +83,7 @@ Second, `nix-managed` calls the `hello` command at runtime (see `someFunc` in `s
     Hello, world!
     ```
 
-1. Furthermore, as `ghcid` uses a `cabal repl` command, when running `ghcid`, `hello` will still be available to the app.
+1. `ghcid` uses the `cabal repl` command. That's why, when running `ghcid`, `hello` will be available to the app.
 
     ```console
     ghcid

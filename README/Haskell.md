@@ -16,6 +16,17 @@ This template provides a sample configuration for this tool in the `.ghcid` file
 - [haskell-nix](https://github.com/Gabriella439/haskell-nix) - examples of packaging haskell apps
 - [nixpkgs](https://github.com/NixOS/nixpkgs/blob/ea692c2ad1afd6384e171eabef4f0887d2b882d3/pkgs/development/haskell-modules/hackage-packages.nix) - Haskell packages
 
+### completions
+
+```nix
+devShells.default = pkgs.mkShell {
+    buildInputs = [ packageExe ];
+    shellHook = ''
+      source ${packageExe}/share/bash-completion/completions/${packageExecutableName}
+    '';
+  };
+```
+
 ## package.yaml
 
 It is translated via [hpack](https://github.com/sol/hpack) into [.cabal](https://cabal.readthedocs.io/en/3.8/cabal-package.html).

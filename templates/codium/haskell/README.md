@@ -8,14 +8,14 @@ Feel free to remove the `VSCodium`-related `Nix` code and whatever you want!
 
 ## Prerequisites
 
-- [flake.nix](./flake.nix) - code in this flake is extensively commented. Read it to understand how this flake works.
-- [language-tools/haskell](https://github.com/deemp/flakes/blob/main/language-tools/haskell/flake.nix) - this flake provides the `Haskell` tools in a convenient way (IMHO).
-- [Conventions](https://github.com/deemp/flakes/blob/main/README/Conventions.md#dev-tools) - you may want to use this flake just for development.
+- [flake.nix](./flake.nix) - code in this flake is extensively commented.
+- [language-tools/haskell](https://github.com/deemp/flakes/blob/main/language-tools/haskell/flake.nix) - a flake that conveniently provides `Haskell` tools.
+- [Conventions](https://github.com/deemp/flakes/blob/main/README/Conventions.md#dev-tools) - I recommended to use this flake just for development. For packaging an app, make another flake with a limited number of inputs to reduce the `flake.lock` size.
 
 See these for additional info:
 
-- [codium-generic](https://github.com/deemp/flakes/tree/main/templates/codium/generic#readme) - info just about `VSCodium` and extensions.
-- [codium-haskell-simple](https://github.com/deemp/flakes/tree/main/templates/codium/haskell-simple#readme) - a simplified version of this flake
+- [codium-generic](https://github.com/deemp/flakes/tree/main/templates/codium/generic#readme) - info just about `VSCodium` with extensions.
+- [codium-haskell-simple](https://github.com/deemp/flakes/tree/main/templates/codium/haskell-simple#readme) - a simplified version of this flake.
 - [Haskell](https://github.com/deemp/flakes/blob/main/README/Haskell.md) - general info about `Haskell` tools.
 - [Troubleshooting](https://github.com/deemp/flakes/blob/main/README/Troubleshooting.md)
 - [Prerequisites](https://github.com/deemp/flakes#prerequisites)
@@ -53,23 +53,27 @@ The `devShells.default` here is similar to the [cabal](#cabal) version (`devshel
 
 The `nix-managed` package (package in this flake) has several non-`Haskell` dependencies.
 
-One of them is `pkgs.hello`. `nix-managed` calls the `hello` command at runtime (see `someFunc` in `src/Lib.hs`). 
+First, as `nix-managed` uses an `lzma` package, it needs a `C` library `liblzma`. This library is delivered via `Nix` as `pkgs.lzma`.
 
-This command is available in 
+Second, `nix-managed` calls the `hello` command at runtime (see `someFunc` in `src/Lib.hs`). This command comes from a `hello` executable which is delivered via `Nix` as `pkgs.hello`.
 
-1. We now enter a `devShell`.
+`cabal` that I used in `flake.nix` has on its `PATH` that `hello` executable.
+
+Let's inspect what's available.
+
+1. Enter the `devShell`.
 
     ```console
     nix develop
     ```
 
-1. And run the app.
+1. Run the app.
 
     ```console
     cabal run
     ```
 
-1. Next, we can access the `hello` executable in a repl as this executable is on `PATH` of `cabal`.
+1. Next, access the `hello` executable in a repl.
 
     ```console
     cabal repl
@@ -81,7 +85,7 @@ This command is available in
     Hello, world!
     ```
 
-1. Furthermore, as `ghcid` uses a `cabal repl` command, when running `ghcid`, `hello` will still be available to the app.
+1. `ghcid` uses the `cabal repl` command. That's why, when running `ghcid`, `hello` will be available to the app.
 
     ```console
     ghcid
@@ -105,7 +109,7 @@ ghcVersions.x86_64-linux
 To switch to `GHC 9.0.2`:
 
 1. In `flake.nix`, change GHC version from `"925"` to `"902"`.
-1. If using `stack`, in `stack.yaml`, change `resolver` to [lts-19.33](https://www.stackage.org/lts-19.33) or a later one from `stackage`.
+1. If using `stack`, in `stack.yaml`, change `resolver` to [lts-19.33](https://www.stackage.org/lts-19.33) or a later one.
 
 ## Configs
 

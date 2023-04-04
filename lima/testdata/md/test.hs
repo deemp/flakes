@@ -1,36 +1,35 @@
 {- LIMA_INDENT 3 -}
 
-a =
-  f b
+{- LIMA_DISABLE -}
 
-{- LIMA_DEDENT -}
+-- What's the answer?
 
-a =
-  f b
+{- LIMA_ENABLE -}
+
+{- LIMA_INDENT 1 -}
 
 {- LIMA_INDENT 2 -}
 
-{- LIMA_INDENT 5 -}
+{-
+- Intermediate results
+-}
 
-a =
-  f b
+a = const 3
+b = a 4
 
-{- Hello,
+{- LIMA_DEDENT -}
+
+answer = b * 14
+
+{- Hello from comments,
 
 world!
 -}
 
 {-
-Line 1
-Line 2
+Hello from text,
+world!
 
-Line 1
-Line 2
+And from
+here!
 -}
-
-{- LIMA_DISABLE -}
-
-Line 1
-Line 2
-
-{- LIMA_ENABLE -}

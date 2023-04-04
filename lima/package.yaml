@@ -14,12 +14,12 @@ name: lima
 version: 0.2.0.0
 
 # -- A short (one-line) description of the package.
-synopsis: (Haskell or Literate Haskell) <-> Markdown converter
+synopsis: Convert between Haskell, Markdown, Literate Haskell, TeX
 
 # # -- A longer description of the package.
-description: "See the [README.md](https://github.com/deemp/flakes/tree/main/lima#readme)"
+description: "See the [README.md](https://github.com/deemp/lima#readme)"
 
-bug-reports: https://github.com/deemp/flakes/issues
+bug-reports: https://github.com/deemp/lima/issues
 license: MIT
 license-file: LICENSE
 author: Fabian Schneider
@@ -30,7 +30,7 @@ extra-source-files:
   - README.md
   - testdata/**/*
 
-git: https://github.com/deemp/flakes
+git: https://github.com/deemp/lima
 
 ghc-options:
   - -Wall
@@ -82,7 +82,14 @@ library:
   dependencies:
     - data-default
     - microlens-th
-  
+
+executables:
+  readme:
+    main: README.hs
+    dependencies:
+      - lima
+      - text
+
 tests:
   conversions:
     main: Main.hs
@@ -103,3 +110,15 @@ tests:
     dependencies:
       - doctest-parallel
       - lima
+  readme-hs-to-md:
+    main: Main.hs
+    source-dirs: test/HsToMd
+    dependencies:
+      - lima
+      - text
+  readme-md-to-hs:
+    main: Main.hs
+    source-dirs: test/MdToHs
+    dependencies:
+      - lima
+      - text

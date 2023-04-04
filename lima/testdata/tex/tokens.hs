@@ -1,59 +1,36 @@
-[ Indent
-    { n = 3 }
-, Text
-    { someLines = [ "\\begin{code}" ] }
-, HaskellCode
-    { someLines =
-        [ "  f b"
-        , "a ="
-        ]
-    }
-, Text
-    { someLines = [ "\\end{code}" ] }
-, Dedent
-, Text
-    { someLines = [ "\\begin{code}" ] }
-, HaskellCode
-    { someLines =
-        [ "  f b"
-        , "a ="
-        ]
-    }
-, Text
-    { someLines = [ "\\end{code}" ] }
+[ Disabled
+    { manyLines = [ "-- What's the answer?" ] }
+, Indent
+    { n = 1 }
 , Indent
     { n = 2 }
-, Indent
-    { n = 5 }
 , Text
-    { someLines = [ "\\begin{code}" ] }
-, HaskellCode
-    { someLines =
-        [ "  f b"
-        , "a ="
-        ]
-    }
-, Text
-    { someLines = [ "\\end{code}" ] }
-, Comment
-    { body = "world!" :|
+    { someLines = "\\begin{code}" :|
         [ ""
-        , "Hello,"
+        , "Intermediate results"
+        ]
+    }
+, HaskellCode
+    { manyLines =
+        [ "b = a 4"
+        , "a = const 3"
         ]
     }
 , Text
-    { someLines =
-        [ "Line 2"
-        , "Line 1"
-        , ""
-        , "Line 2"
-        , "Line 1"
+    { someLines = "\\end{code}" :| [] }
+, Dedent
+, Text
+    { someLines = "\\begin{code}" :| [] }
+, HaskellCode
+    { manyLines = [ "answer = b * 14" ] }
+, Text
+    { someLines = "\\end{code}" :| [] }
+, Comment
+    { someLines = "world!" :|
+        [ ""
+        , "Hello from comments,"
         ]
     }
-, Disabled
-    { someLines =
-        [ "Line 2"
-        , "Line 1"
-        ]
-    }
+, Text
+    { someLines = "world!" :| [ "Hello from text," ] }
 ]

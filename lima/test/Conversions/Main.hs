@@ -1,10 +1,10 @@
 {-# OPTIONS_GHC -fplugin Debug.Breakpoint #-}
 
-module Main (main) where
-
-import Converter (Config, Dialect (..), Token (..), Tokens, User, def, exampleNonTexTokens, exampleTexTokens, normalizeTokens, selectFromTokens, selectIntoTokens, showDialectExtension, showDialectName, stripEmpties, texHaskellCodeEnd, texHaskellCodeStart, toInternalConfig)
+import Converter (Config, Format (..), Token (..), Tokens, User, def, exampleNonTexTokens, exampleTexTokens, normalizeTokens, selectFromTokens, selectToTokens, showFormatExtension, showFormatName, stripEmpties, texHaskellCodeEnd, texHaskellCodeStart, toInternalConfig)
 import Data.List.NonEmpty (NonEmpty (..))
 import Data.String.Interpolate (i)
+import Data.Text qualified as T
+import Data.Text.IO qualified as T
 import Hedgehog (Gen, MonadGen, MonadTest, Property, property, tripping)
 import Hedgehog.Gen qualified as Gen
 import Hedgehog.Range qualified as Range
@@ -30,17 +30,26 @@ main =
       , testTripping Md
       ]
 
-selectDialectName :: Dialect -> String
-selectDialectName = \case
-  TeX -> showDialectName TeX
-  _ -> "Non-" <> showDialectName TeX
+-- TODO test initial haskell code indentation is the same as after parsing
+-- so, generate lines with indentation relative to the previous indent token
 
-testDialectWrite :: FilePath -> Tokens -> Dialect -> TestTree
-testDialectWrite dir tokens dialect =
-  testCase [i|Write #{showDialectName dialect} code|] do
-    let text = selectFromTokens def dialect tokens
-    writeFile [i|#{dir}/test.#{showDialectExtension dialect}|] text
-    assertEqual "Roundtrip" tokens (selectIntoTokens def dialect text)
+-- TODO test no newline as the first line in fromTokens
+
+-- TODO no newlines in the generated lines
+
+--
+
+selectDialectName :: Format -> String
+selectDialectName = \case
+  TeX -> showFormatName TeX
+  _ -> "Non-" <> showFormatName TeX
+
+testDialectWrite :: FilePath -> Tokens -> Format -> TestTree
+testDialectWrite dir tokens format =
+  testCase [i|Write #{showFormatName format} code|] do
+    let text = selectFromTokens def format tokens
+    T.writeFile [i|#{dir}/test.#{showFormatExtension format}|] text
+    assertEqual "Roundtrip" tokens (selectToTokens def format text)
 
 writeTokens :: FilePath -> Tokens -> TestTree
 writeTokens dir tokens = testCase "Write tokens to a file" $
@@ -55,41 +64,41 @@ writeTokens dir tokens = testCase "Write tokens to a file" $
         h
         tokens
 
-testDialectsWrite :: FilePath -> [Dialect] -> Tokens -> [TestTree]
-testDialectsWrite dir dialects tokens =
-  (testDialectWrite dir tokens <$> dialects) <> [writeTokens dir tokens]
+testFormatsWrite :: FilePath -> [Format] -> Tokens -> [TestTree]
+testFormatsWrite dir formats tokens =
+  (testDialectWrite dir tokens <$> formats) <> [writeTokens dir tokens]
 
-selectTokens :: Dialect -> Tokens
+selectTokens :: Format -> Tokens
 selectTokens = \case
   TeX -> exampleTexTokens
   _ -> exampleNonTexTokens
 
-selectDialects :: Dialect -> [Dialect]
-selectDialects = \case
+selectFormats :: Format -> [Format]
+selectFormats = \case
   TeX -> [Hs, Md, Lhs, TeX]
   _ -> [Hs, Md, Lhs]
 
-testWrite :: Dialect -> TestTree
-testWrite dialect =
-  let dir = [i|#{testDir}/#{showDialectExtension dialect}|]
+testWrite :: Format -> TestTree
+testWrite format =
+  let dir = [i|#{testDir}/#{showFormatExtension format}|]
    in withResource (createDirectoryIfMissing True dir) pure $
         const $
-          testGroup [i|Using #{selectDialectName dialect} tokens|] $
-            (testDialectsWrite dir (selectDialects dialect) (selectTokens dialect))
+          testGroup [i|Using #{selectDialectName format} tokens|] $
+            (testFormatsWrite dir (selectFormats format) (selectTokens format))
 
 alphabet :: MonadGen m => m Char
 alphabet = Gen.alphaNum
 
-genNonEmpty :: Gen (NonEmpty String)
+genNonEmpty :: Gen (NonEmpty T.Text)
 genNonEmpty = Gen.nonEmpty (Range.constant 1 5) genLine
 
-genLine :: Gen String
+genLine :: Gen T.Text
 genLine = do
-  indent <- Gen.string (Range.constant 0 5) (pure ' ')
-  contents <- Gen.string (Range.constant 1 5) alphabet
+  indent <- Gen.text (Range.constant 0 5) (pure ' ')
+  contents <- Gen.text (Range.constant 1 5) alphabet
   pure $ indent <> contents
 
-genLines :: Gen [String]
+genLines :: Gen [T.Text]
 genLines = Gen.list (Range.constant 1 5) genLine
 
 -- Tokens
@@ -104,12 +113,12 @@ genDedent = pure Dedent
 
 genComment :: Gen Token
 genComment = do
-  body <- genNonEmpty
-  pure $ Comment{body}
+  someLines <- genNonEmpty
+  pure $ Comment{someLines}
 
 genText :: Gen Token
 genText = do
-  someLines <- stripEmpties <$> genLines
+  someLines <- genNonEmpty
   pure Text{..}
 
 genNonDisabled :: (?genCode :: GenCode) => Gen Tokens
@@ -120,8 +129,8 @@ genNonDisabled =
 genDisabled :: Env => Gen Token
 genDisabled = do
   tokens <- genNonDisabled
-  let someLines = reverse $ lines $ selectFromTokens ?config ?dialect tokens
-  pure $ Disabled{someLines}
+  let manyLines = reverse $ T.lines $ selectFromTokens ?config ?format tokens
+  pure $ Disabled{manyLines}
 
 genTokensSublist :: Env => Gen Tokens
 genTokensSublist =
@@ -137,26 +146,26 @@ genTokens = do
 texGenCode :: (?config :: Config User) => Gen [Token]
 texGenCode = do
   let config = toInternalConfig ?config
-  someLines <- genLines
-  let someLines' = if null (stripEmpties someLines) then ["a"] else someLines
+  manyLines <- genLines
+  let manyLines' = if null (stripEmpties manyLines) then ["a"] else manyLines
   pure $
-    [ Text{someLines = [config ^. texHaskellCodeStart]}
-    , HaskellCode{someLines = someLines'}
-    , Text{someLines = [config ^. texHaskellCodeEnd]}
+    [ Text{someLines = config ^. texHaskellCodeStart :| []}
+    , HaskellCode{manyLines = manyLines'}
+    , Text{someLines = config ^. texHaskellCodeEnd :| []}
     ]
 
 -- Code tokens from tex files can only be recognized in a specific sequence
 -- That's why, they're generated in a list
 notTexGenCode :: Gen [Token]
 notTexGenCode = do
-  someLines <- genLines
-  let someLines' = if null (stripEmpties someLines) then ["a"] else someLines
-  pure [HaskellCode{someLines = someLines'}]
+  manyLines <- genLines
+  let manyLines' = if null (stripEmpties manyLines) then ["a"] else manyLines
+  pure [HaskellCode{manyLines = manyLines'}]
 
 -- Tripping
-trippingTokens :: (MonadTest m, ?config :: Config User, ?dialect :: Dialect) => Tokens -> m ()
+trippingTokens :: (MonadTest m, ?config :: Config User, ?format :: Format) => Tokens -> m ()
 trippingTokens tokens =
-  tripping tokens (selectFromTokens ?config ?dialect) (Just . selectIntoTokens ?config ?dialect)
+  tripping tokens (selectFromTokens ?config ?format) (Just . selectToTokens ?config ?format)
 
 testTrippingTokens :: Env => Property
 testTrippingTokens = property do
@@ -166,15 +175,15 @@ testTrippingTokens = property do
 
 type GenCode = Gen [Token]
 
-type Env = (?config :: Config User, ?dialect :: Dialect, ?genCode :: GenCode)
+type Env = (?config :: Config User, ?format :: Format, ?genCode :: GenCode)
 
-selectGenCode :: Dialect -> ((?config :: Config User) => GenCode)
+selectGenCode :: Format -> ((?config :: Config User) => GenCode)
 selectGenCode = \case
   TeX -> texGenCode
   _ -> notTexGenCode
 
-testTripping :: Dialect -> TestTree
-testTripping dialect =
-  let ?config = def; ?dialect = dialect
-   in let ?genCode = selectGenCode dialect
-       in testProperty [i|Roundtrip #{selectDialectName dialect} tokens for all dialects|] $ testTrippingTokens
+testTripping :: Format -> TestTree
+testTripping format =
+  let ?config = def; ?format = format
+   in let ?genCode = selectGenCode format
+       in testProperty [i|Roundtrip #{selectDialectName format} tokens for all formats|] $ testTrippingTokens

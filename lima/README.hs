@@ -1,3 +1,4 @@
+{-
 # lima
 
 Convert between files in different formats.
@@ -54,19 +55,19 @@ Convert between files in different formats.
 1. Create a test suite.
 1. Add `lima` and `text` to its dependencies.
 1. Create a test module. It can have the following contents.
+-}
 
-    <!-- LIMA_INDENT 4 -->
+{- LIMA_INDENT 4 -}
 
-    ```haskell
-    import Converter (Format (..), convertTo, def)
-    import Data.Text.IO qualified as T
-    
-    main :: IO ()
-    main = T.readFile "README.hs" >>= T.writeFile "README.md" . (Hs `convertTo` Md) def
-    ```
+import Converter (Format (..), convertTo, def)
+import Data.Text.IO qualified as T
 
-<!-- LIMA_DEDENT -->
+main :: IO ()
+main = T.readFile "README.hs" >>= T.writeFile "README.md" . (Hs `convertTo` Md) def
 
+{- LIMA_DEDENT -}
+
+{-
 ### Example
 
 This package has two such test suites:
@@ -123,3 +124,4 @@ cabal build
 1. Open a `Haskell` file there, hover over a term and wait until `HLS` shows hints.
 
 1. [Troubleshoot](https://github.com/deemp/flakes/blob/main/README/Troubleshooting.md) if necessary.
+-}

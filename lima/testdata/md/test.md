@@ -1,40 +1,35 @@
    <!-- LIMA_INDENT 3 -->
 
-   ```haskell
-   a =
-     f b
-   ```
+<!-- LIMA_DISABLE
+
+-- What's the answer?
+
+LIMA_ENABLE -->
+
+ <!-- LIMA_INDENT 1 -->
+
+  <!-- LIMA_INDENT 2 -->
+
+- Intermediate results
+
+  ```haskell
+  a = const 3
+  b = a 4
+  ```
 
 <!-- LIMA_DEDENT -->
 
 ```haskell
-a =
-  f b
+answer = b * 14
 ```
 
-  <!-- LIMA_INDENT 2 -->
-
-     <!-- LIMA_INDENT 5 -->
-
-     ```haskell
-     a =
-       f b
-     ```
-
-<!-- Hello,
+<!-- Hello from comments,
 
 world!
 -->
 
-Line 1
-Line 2
+Hello from text,
+world!
 
-Line 1
-Line 2
-
-<!-- LIMA_DISABLE
-
-Line 1
-Line 2
-
-LIMA_ENABLE -->
+And from
+here!

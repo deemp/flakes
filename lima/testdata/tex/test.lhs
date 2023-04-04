@@ -1,39 +1,29 @@
-% LIMA_INDENT 3
+% LIMA_DISABLE
+
+% -- What's the answer?
+
+% LIMA_ENABLE
+
+% LIMA_INDENT 1
+
+% LIMA_INDENT 2
+
+Intermediate results
 
 \begin{code}
->    a =
->      f b
+>   a = const 3
+>   b = a 4
 \end{code}
 
 % LIMA_DEDENT
 
 \begin{code}
->    a =
->      f b
+> answer = b * 14
 \end{code}
 
-% LIMA_INDENT 2
-
-% LIMA_INDENT 5
-
-\begin{code}
->      a =
->        f b
-\end{code}
-
-% Hello,
+% Hello from comments,
 
 % world!
 
-Line 1
-Line 2
-
-Line 1
-Line 2
-
-% LIMA_DISABLE
-
-Line 1
-Line 2
-
-% LIMA_ENABLE
+Hello from text,
+world!

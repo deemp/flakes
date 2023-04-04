@@ -1,47 +1,34 @@
 [ Indent
     { n = 3 }
+, Disabled
+    { manyLines = [ "-- What's the answer?" ] }
+, Indent
+    { n = 1 }
+, Indent
+    { n = 2 }
+, Text
+    { someLines = "- Intermediate results" :| [] }
 , HaskellCode
-    { someLines =
-        [ "  f b"
-        , "a ="
+    { manyLines =
+        [ "b = a 4"
+        , "a = const 3"
         ]
     }
 , Dedent
 , HaskellCode
-    { someLines =
-        [ "  f b"
-        , "a ="
-        ]
-    }
-, Indent
-    { n = 2 }
-, Indent
-    { n = 5 }
-, HaskellCode
-    { someLines =
-        [ "  f b"
-        , "a ="
-        ]
-    }
+    { manyLines = [ "answer = b * 14" ] }
 , Comment
-    { body = "world!" :|
+    { someLines = "world!" :|
         [ ""
-        , "Hello,"
+        , "Hello from comments,"
         ]
     }
 , Text
-    { someLines =
-        [ "Line 2"
-        , "Line 1"
+    { someLines = "here!" :|
+        [ "And from"
         , ""
-        , "Line 2"
-        , "Line 1"
-        ]
-    }
-, Disabled
-    { someLines =
-        [ "Line 2"
-        , "Line 1"
+        , "world!"
+        , "Hello from text,"
         ]
     }
 ]
