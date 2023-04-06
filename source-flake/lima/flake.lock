@@ -3,12 +3,14 @@
     "drv-tools": {
       "inputs": {
         "flake-utils": [
+          "haskell-language-server",
           "drv-tools",
           "flake-utils_",
           "flake-utils"
         ],
         "flake-utils_": "flake-utils_",
         "nixpkgs": [
+          "haskell-language-server",
           "drv-tools",
           "nixpkgs_",
           "nixpkgs"
@@ -136,15 +138,49 @@
         "type": "github"
       }
     },
+    "haskell-language-server": {
+      "inputs": {
+        "drv-tools": "drv-tools",
+        "flake-utils": [
+          "haskell-language-server",
+          "flake-utils_",
+          "flake-utils"
+        ],
+        "flake-utils_": "flake-utils__2",
+        "haskell-tools": "haskell-tools",
+        "nixpkgs": [
+          "haskell-language-server",
+          "nixpkgs_",
+          "nixpkgs"
+        ],
+        "nixpkgs_": "nixpkgs__3"
+      },
+      "locked": {
+        "lastModified": 1680802378,
+        "narHash": "sha256-wfkwnrKTZYGaMRRIvQ8N1eV1HW5xlxphlQId8axBdWw=",
+        "owner": "deemp",
+        "repo": "lima",
+        "rev": "bdf31865042421d1268b5acccf6dbf2f91b75d12",
+        "type": "github"
+      },
+      "original": {
+        "owner": "deemp",
+        "repo": "lima",
+        "rev": "bdf31865042421d1268b5acccf6dbf2f91b75d12",
+        "type": "github"
+      }
+    },
     "haskell-tools": {
       "inputs": {
         "flake-utils": [
+          "haskell-language-server",
           "haskell-tools",
           "flake-utils_",
           "flake-utils"
         ],
         "flake-utils_": "flake-utils__3",
         "nixpkgs": [
+          "haskell-language-server",
           "haskell-tools",
           "nixpkgs_",
           "nixpkgs"
@@ -277,18 +313,7 @@
     },
     "root": {
       "inputs": {
-        "drv-tools": "drv-tools",
-        "flake-utils": [
-          "flake-utils_",
-          "flake-utils"
-        ],
-        "flake-utils_": "flake-utils__2",
-        "haskell-tools": "haskell-tools",
-        "nixpkgs": [
-          "nixpkgs_",
-          "nixpkgs"
-        ],
-        "nixpkgs_": "nixpkgs__3"
+        "haskell-language-server": "haskell-language-server"
       }
     }
   },
