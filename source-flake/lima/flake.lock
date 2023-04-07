@@ -3,14 +3,14 @@
     "drv-tools": {
       "inputs": {
         "flake-utils": [
-          "haskell-language-server",
+          "lima",
           "drv-tools",
           "flake-utils_",
           "flake-utils"
         ],
         "flake-utils_": "flake-utils_",
         "nixpkgs": [
-          "haskell-language-server",
+          "lima",
           "drv-tools",
           "nixpkgs_",
           "nixpkgs"
@@ -138,49 +138,17 @@
         "type": "github"
       }
     },
-    "haskell-language-server": {
-      "inputs": {
-        "drv-tools": "drv-tools",
-        "flake-utils": [
-          "haskell-language-server",
-          "flake-utils_",
-          "flake-utils"
-        ],
-        "flake-utils_": "flake-utils__2",
-        "haskell-tools": "haskell-tools",
-        "nixpkgs": [
-          "haskell-language-server",
-          "nixpkgs_",
-          "nixpkgs"
-        ],
-        "nixpkgs_": "nixpkgs__3"
-      },
-      "locked": {
-        "lastModified": 1680802378,
-        "narHash": "sha256-wfkwnrKTZYGaMRRIvQ8N1eV1HW5xlxphlQId8axBdWw=",
-        "owner": "deemp",
-        "repo": "lima",
-        "rev": "bdf31865042421d1268b5acccf6dbf2f91b75d12",
-        "type": "github"
-      },
-      "original": {
-        "owner": "deemp",
-        "repo": "lima",
-        "rev": "bdf31865042421d1268b5acccf6dbf2f91b75d12",
-        "type": "github"
-      }
-    },
     "haskell-tools": {
       "inputs": {
         "flake-utils": [
-          "haskell-language-server",
+          "lima",
           "haskell-tools",
           "flake-utils_",
           "flake-utils"
         ],
         "flake-utils_": "flake-utils__3",
         "nixpkgs": [
-          "haskell-language-server",
+          "lima",
           "haskell-tools",
           "nixpkgs_",
           "nixpkgs"
@@ -200,6 +168,38 @@
         "dir": "language-tools/haskell",
         "owner": "deemp",
         "repo": "flakes",
+        "type": "github"
+      }
+    },
+    "lima": {
+      "inputs": {
+        "drv-tools": "drv-tools",
+        "flake-utils": [
+          "lima",
+          "flake-utils_",
+          "flake-utils"
+        ],
+        "flake-utils_": "flake-utils__2",
+        "haskell-tools": "haskell-tools",
+        "nixpkgs": [
+          "lima",
+          "nixpkgs_",
+          "nixpkgs"
+        ],
+        "nixpkgs_": "nixpkgs__3"
+      },
+      "locked": {
+        "lastModified": 1680804122,
+        "narHash": "sha256-ybAnl9DjsaFI4ZSkSF/FgaHzbCWRmBlzcD+ukCC+QJ4=",
+        "owner": "deemp",
+        "repo": "lima",
+        "rev": "c8c03c164c4a873e87f691a5eca74cedfc2f5760",
+        "type": "github"
+      },
+      "original": {
+        "owner": "deemp",
+        "repo": "lima",
+        "rev": "c8c03c164c4a873e87f691a5eca74cedfc2f5760",
         "type": "github"
       }
     },
@@ -313,7 +313,7 @@
     },
     "root": {
       "inputs": {
-        "haskell-language-server": "haskell-language-server"
+        "lima": "lima"
       }
     }
   },
