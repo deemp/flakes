@@ -36,8 +36,6 @@
               "codium"
               "json2md"
               "devshell"
-              "lima"
-              "lima/nix-dev"
               "terrafix"
               "workflows"
               "."
