@@ -1,4 +1,4 @@
 {
-  inputs.lima.url = "github:deemp/lima/c8c03c164c4a873e87f691a5eca74cedfc2f5760";
+  inputs.lima.url = "github:deemp/lima/0bbfa4c8594695f303f61e4fe4e761007b645718";
   outputs = x: { };
 }
