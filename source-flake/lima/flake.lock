@@ -189,17 +189,17 @@
         "nixpkgs_": "nixpkgs__3"
       },
       "locked": {
-        "lastModified": 1680804122,
-        "narHash": "sha256-ybAnl9DjsaFI4ZSkSF/FgaHzbCWRmBlzcD+ukCC+QJ4=",
+        "lastModified": 1681030741,
+        "narHash": "sha256-ey9E/yPohW7ilkC9ddbDhTdDQ9fyOPPhcVkhQofoGAU=",
         "owner": "deemp",
         "repo": "lima",
-        "rev": "c8c03c164c4a873e87f691a5eca74cedfc2f5760",
+        "rev": "0bbfa4c8594695f303f61e4fe4e761007b645718",
         "type": "github"
       },
       "original": {
         "owner": "deemp",
         "repo": "lima",
-        "rev": "c8c03c164c4a873e87f691a5eca74cedfc2f5760",
+        "rev": "0bbfa4c8594695f303f61e4fe4e761007b645718",
         "type": "github"
       }
     },
