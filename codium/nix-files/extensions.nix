@@ -1,19 +1,22 @@
 # A set of VSCodium extensions
-{ system, pkgs, vscode-extensions }:
+{ system, pkgs, vscode-extensions, vscode-extensions-extra }:
 let
-  inherit (vscode-extensions.extensions.${system}) vscode-marketplace;
+  vscode-marketplace = vscode-extensions.extensions.${system}.vscode-marketplace;
+  vscode-marketplace-extra = vscode-extensions-extra.extensions.${system}.vscode-marketplace;
   inherit (pkgs.lib.attrsets) mapAttrs' mapAttrsToList recursiveUpdate;
-  mkExtensionsGroup = exts@{ ... }: builtins.foldl' recursiveUpdate { } (
+  mkExtensionsGroup = vscode-marketplace_: exts@{ ... }: builtins.foldl' recursiveUpdate { } (
     pkgs.lib.lists.flatten (
       mapAttrsToList
         (name: value:
           let value_ = if builtins.isList value then value else [ value ]; in
-          map (ext: { ${ext} = vscode-marketplace.${name}.${ext}; }) value_
+          map (ext: { ${ext} = vscode-marketplace_.${name}.${ext}; }) value_
         )
         exts));
-  mkExtensions = mapAttrs' (x: y: { name = x; value = mkExtensionsGroup y; });
-in
-mkExtensions
+  mkExtensions = vscode-marketplace_: mapAttrs' (x: y: { name = x; value = mkExtensionsGroup vscode-marketplace_ y; });
+in 
+pkgs.lib.attrsets.recursiveUpdate 
+(
+mkExtensions vscode-marketplace
 {
   c-cpp = {
     ms-vscode = [
@@ -34,9 +37,10 @@ mkExtensions
     bmalehorn = "vscode-fish";
   };
   github = {
-    cschleiden = "vscode-github-actions";
     eamodio = "gitlens";
-    github = "vscode-pull-request-github";
+    github = [ 
+      "vscode-pull-request-github" 
+      "vscode-github-actions" ];
     redhat = "vscode-yaml";
   };
   haskell = {
@@ -81,11 +85,9 @@ mkExtensions
     mkhl = "direnv";
   };
   postgresql = {
-    cweijan = "vscode-postgresql-client2";
     inferrinizzard = "prettier-sql-vscode";
   };
   purescript = {
-    br4ch1st0chr0n3 = "purs-keybindings";
     chunsen = "bracket-select";
     dhall = [
       "dhall-lang"
@@ -123,4 +125,14 @@ mkExtensions
   yaml = {
     redhat = "vscode-yaml";
   };
-}
+})
+
+(mkExtensions vscode-marketplace-extra
+{
+  purescript = {
+    br4ch1st0chr0n3 = "purs-keybindings";
+  };
+  postgresql = {
+    cweijan = "vscode-postgresql-client2";
+  };
+})

@@ -6,6 +6,7 @@
     flake-utils.follows = "flake-utils_/flake-utils";
     vscode-extensions_.url = "github:deemp/flakes?dir=source-flake/nix-vscode-extensions";
     vscode-extensions.follows = "vscode-extensions_/vscode-extensions";
+    vscode-extensions-extra.url = "github:nix-community/nix-vscode-extensions/81c7057b41cccf936b574731c15303fa8a1ea424";
     drv-tools.url = "github:deemp/flakes?dir=drv-tools";
   };
 
@@ -15,6 +16,7 @@
     , nixpkgs
     , drv-tools
     , vscode-extensions
+    , vscode-extensions-extra
     , ...
     }:
     flake-utils.lib.eachDefaultSystem
@@ -29,7 +31,7 @@
         man = drv-tools.configs.${system}.man;
 
         # A set of VSCodium extensions
-        extensions = import ./nix-files/extensions.nix { inherit system vscode-extensions pkgs; };
+        extensions = import ./nix-files/extensions.nix { inherit system vscode-extensions vscode-extensions-extra pkgs; };
 
         # nixified and restructured settings.json
         settingsNix = import ./nix-files/settings.nix;
