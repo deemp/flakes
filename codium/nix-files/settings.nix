@@ -102,6 +102,12 @@
     "nix.formatterPath" = "nixpkgs-fmt";
   };
 
+  prettier = {
+    "[typescript]" = {
+      "editor.defaultFormatter" = "esbenp.prettier-vscode";
+    };
+  };
+
   prettier-sql-vscode = {
     "Prettier-SQL.SQLFlavourOverride" = "postgresql";
     "Prettier-SQL.indentStyle" = "tabularLeft";

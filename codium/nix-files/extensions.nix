@@ -121,6 +121,7 @@ mkExtensions vscode-marketplace
   };
   typescript = {
     ms-vscode = "vscode-typescript-next";
+    esbenp = "prettier-vscode";
   };
   yaml = {
     redhat = "vscode-yaml";
