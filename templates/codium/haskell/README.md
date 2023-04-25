@@ -113,7 +113,7 @@ To switch to `GHC 9.0.2`:
 
 ## Configs
 
-- [package.yaml] - used by `stack` or `hpack` to generate a `.cabal`
+- [package.yaml](./package.yaml) - used by `stack` or `hpack` to generate a `.cabal`
 - [.markdownlint.jsonc](./.markdownlint.jsonc) - for `markdownlint` from the extension `davidanson.vscode-markdownlint`
 - [.ghcid](./.ghcid) - for [ghcid](https://github.com/ndmitchell/ghcid)
 - [.envrc](./.envrc) - for [direnv](https://github.com/direnv/direnv)
