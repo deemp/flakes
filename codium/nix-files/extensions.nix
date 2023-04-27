@@ -126,6 +126,9 @@ mkExtensions vscode-marketplace
     ms-vscode = "vscode-typescript-next";
     esbenp = "prettier-vscode";
   };
+  vlang = {
+    vlanguage = "vscode-vlang";
+  };
   yaml = {
     redhat = "vscode-yaml";
   };
