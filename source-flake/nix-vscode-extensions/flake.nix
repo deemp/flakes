@@ -1,4 +1,4 @@
 {
-  inputs.vscode-extensions.url = "github:nix-community/nix-vscode-extensions/47f6ae0253083fcced205fe2ad1acc62c49e8709";
+  inputs.vscode-extensions.url = "github:nix-community/nix-vscode-extensions/6bf8fe514bbd28ac1053d912380cb2fb1cee5489";
   outputs = x: { };
 }
