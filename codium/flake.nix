@@ -4,8 +4,7 @@
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
-    vscode-extensions_.url = "github:deemp/flakes?dir=source-flake/nix-vscode-extensions";
-    vscode-extensions.follows = "vscode-extensions_/vscode-extensions";
+    vscode-extensions.url = "github:nix-community/nix-vscode-extensions/6bf8fe514bbd28ac1053d912380cb2fb1cee5489";
     vscode-extensions-extra.url = "github:nix-community/nix-vscode-extensions/81c7057b41cccf936b574731c15303fa8a1ea424";
     drv-tools.url = "github:deemp/flakes?dir=drv-tools";
   };
