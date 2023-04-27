@@ -87,6 +87,9 @@ mkExtensions vscode-marketplace
   postgresql = {
     inferrinizzard = "prettier-sql-vscode";
   };
+  prolog = {
+    lilr = "swi-lsp";
+  };
   purescript = {
     chunsen = "bracket-select";
     dhall = [
