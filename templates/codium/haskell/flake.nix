@@ -39,7 +39,7 @@
       # --- Parameters ---
 
       # The desired GHC version
-      ghcVersion = "925";
+      ghcVersion = "927";
 
       # The name of a package
       packageName = "nix-managed";
@@ -245,7 +245,7 @@
         buildInputs = [ pkgs.stack ];
         shellHook = framed "stack run";
       };
-      # The disadvantage of this way is that we depend on `stack`'s resolver, 
+      # The disadvantage of this way is that we depend on `stack` resolver, 
       # while `cabal` depends just on `ghc` and the packages from `haskellPackages`
 
       # --- Tools ---
@@ -308,11 +308,11 @@
 
       devShells = {
 
-        binary = binaryShell;
+        shellFor = shellFor;
 
         cabal = cabalShell;
 
-        shellFor = shellFor;
+        binary = binaryShell;
 
         docker = dockerShell;
 

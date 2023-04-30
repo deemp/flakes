@@ -55,7 +55,7 @@ First, as `nix-managed` uses an `lzma` package, it needs a `C` library `liblzma`
 
 Second, `nix-managed` calls the `hello` command at runtime (see `someFunc` in `src/Lib.hs`). This command comes from a `hello` executable which is delivered via `Nix` as `pkgs.hello`.
 
-`cabal` that I used in `flake.nix` has on its `PATH` that `hello` executable.
+`cabal` from `devShells.default` has on its `PATH` that `hello` executable.
 
 Let's inspect what's available.
 
@@ -95,7 +95,7 @@ Let's inspect what's available.
 
 ## GHC
 
-This template uses `GHC 9.2.5`. See the available `GHC` versions:
+This template uses `GHC 9.2.7`. See the available `GHC` versions:
 
 ```console
 nix repl
@@ -106,7 +106,7 @@ ghcVersions.x86_64-linux
 
 To switch to `GHC 9.0.2`:
 
-1. In `flake.nix`, change GHC version from `"925"` to `"902"`.
+1. In `flake.nix`, change GHC version from `"927"` to `"902"`.
 
 ## Configs
 

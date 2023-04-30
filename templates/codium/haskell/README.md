@@ -49,7 +49,7 @@ See these for additional info:
 
 ## Default devshell
 
-The `devShells.default` here is similar to the [cabal](#cabal) version (`devshells.cabalShell`).
+The `devShells.default` here is similar to the [cabal](#cabal) shell.
 
 The `nix-managed` package (package in this flake) has several non-`Haskell` dependencies.
 
@@ -57,7 +57,7 @@ First, as `nix-managed` uses an `lzma` package, it needs a `C` library `liblzma`
 
 Second, `nix-managed` calls the `hello` command at runtime (see `someFunc` in `src/Lib.hs`). This command comes from a `hello` executable which is delivered via `Nix` as `pkgs.hello`.
 
-`cabal` that I used in `flake.nix` has on its `PATH` that `hello` executable.
+`cabal` from `devShells.default` has on its `PATH` that `hello` executable.
 
 Let's inspect what's available.
 
@@ -97,7 +97,7 @@ Let's inspect what's available.
 
 ## GHC
 
-This template uses `GHC 9.2.5`. See the available `GHC` versions:
+This template uses `GHC 9.2.7`. See the available `GHC` versions:
 
 ```console
 nix repl
@@ -108,7 +108,7 @@ ghcVersions.x86_64-linux
 
 To switch to `GHC 9.0.2`:
 
-1. In `flake.nix`, change GHC version from `"925"` to `"902"`.
+1. In `flake.nix`, change GHC version from `"927"` to `"902"`.
 1. If using `stack`, in `stack.yaml`, change `resolver` to [lts-19.33](https://www.stackage.org/lts-19.33) or a later one.
 
 ## Configs
@@ -127,7 +127,7 @@ Below is the comparison of ways to run a `Haskell` app. I prefer to use everythi
 
 ### shellFor
 
-**Advantages** - easy setup, incremental builds
+**Advantages** - incremental builds
 
 **Disadvantage** - need to start `shellFor` and run other shells (e.g., `devshell`) inside it (or vice versa).
 
@@ -139,7 +139,7 @@ nix develop .#shellFor
 
 ### Cabal
 
-**Advantages** - medium setup, can build incrementally
+**Advantages** - can build incrementally
 
 **Disadvantages** - not that reproducible builds
 
@@ -149,9 +149,9 @@ Incremental builds via `cabal` + `Nix`-provided packages. A devshell will run th
 nix develop .#cabal
 ```
 
-### Nix
+### Binary
 
-**Advantages** - medium setup, reproducible build, make an executable binary app from a Haskell executable.
+**Advantages** - reproducible build, make an executable binary app from a Haskell executable.
 
 **Disadvantages** - no incremental builds (rebuilds the whole project from scratch on slight code changes)
 
@@ -163,7 +163,7 @@ nix develop .#binary
 
 ### Docker
 
-**Advantages** - medium setup, reproducible lightweight container from a package
+**Advantages** - reproducible lightweight container from a package
 
 **Disadvantage** - no incremental builds
 
@@ -173,7 +173,7 @@ Put an executable into a Docker image and run it:
 nix develop .#docker
 ```
 
-### Stack + Nix integration
+### Stack
 
 **Advantage** - uses stack for incremental builds, very easy setup
 
