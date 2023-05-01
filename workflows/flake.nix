@@ -75,13 +75,15 @@
         workflow_dispatch = { };
       };
 
-      run = {
-        nixRunAndCommit = installable: commitMessage:
+      run = rec {
+        nixRunAndCommitDir = dir: installable: commitMessage:
           ''
             git pull --rebase --autostash
+            cd ${dir}
             nix run .#${installable}
             git commit -a -m "action: ${commitMessage}" && git push || echo ""
           '';
+        nixRunAndCommit = nixRunAndCommitDir ".";
       };
 
       steps = {
