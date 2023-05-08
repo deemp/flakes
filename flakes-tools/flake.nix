@@ -19,6 +19,7 @@
         withMan
         runFishScript
         mkShellApp
+        mkShellApps
         mkBin
         framedBrackets
         concatStringsNewline
@@ -104,6 +105,9 @@
             ''
           )
       ;
+
+      # cache nix store
+      # TODO https://github.com/actions/cache/issues/749#issuecomment-1465302692
 
       pushAllToCachix =
         withMan
@@ -253,14 +257,14 @@
           );
 
       # just inherit necessary functions
-      mkFlakesTools = dirs: {
-        updateLocks = flakesUpdate dirs;
-        pushToCachix = flakesPushToCachix dirs;
-        updateAndPushToCachix = flakesUpdateAndPushToCachix dirs;
-        dumpDevshells = flakesDumpDevshells dirs;
-        watchDumpDevshells = flakesWatchDumpDevshells dirs;
-        format = flakesFormat;
-      };
+      mkFlakesTools = dirs: (mkShellApps {
+        updateLocks.text = mkBin (flakesUpdate dirs);
+        pushToCachix.text = mkBin (flakesPushToCachix dirs);
+        updateAndPushToCachix.text = mkBin (flakesUpdateAndPushToCachix dirs);
+        dumpDevshells.text = mkBin (flakesDumpDevshells dirs);
+        watchDumpDevshells.text = mkBin (flakesWatchDumpDevshells dirs);
+        format.text = mkBin flakesFormat;
+      });
     in
     {
       functions = {
