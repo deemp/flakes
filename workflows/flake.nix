@@ -76,14 +76,24 @@
       };
 
       run = rec {
-        nixRunAndCommitDir = dir: installable: commitMessage:
-          ''
-            git pull --rebase --autostash
-            cd ${dir}
-            nix run .#${installable}
-            git commit -a -m "action: ${commitMessage}" && git push || echo ""
-          '';
+        gitPull = ''
+          git pull --rebase --autostash
+        '';
+        nixRunDir = dir: installable: ''
+          cd '${dir}'
+          nix run .#${installable}
+        '';
+        nixRunAndCommitDir = dir: installable: commitMessage: ''
+          ${gitPull}
+          ${nixRunDir dir installable}
+          git commit -a -m "action: ${commitMessage}" && git push || echo ""
+        '';
         nixRunAndCommit = nixRunAndCommitDir ".";
+        nixRun = nixRunDir ".";
+        commit = commitMessage: ''
+          ${gitPull}
+          git commit -a -m "action: ${commitMessage}" && git push || echo ""
+        '';
       };
 
       steps = {
