@@ -47,12 +47,11 @@ After rebasing, they can be `git stash pop`ped to continue the work.
 
 Thus, the process is as follows:
 
-```sh
-git stash
+```console
 # can be omitted in case of automatic fetches
 git fetch
-git rebase
-git stash pop
+git rebase --autostash
+git push
 ```
 
 ## Docs
