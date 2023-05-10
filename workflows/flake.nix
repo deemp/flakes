@@ -31,11 +31,14 @@
         ubuntu-22 = "ubuntu-22.04";
         macos-11 = "macos-11";
         macos-12 = "macos-12";
+        ubuntu-latest = "ubuntu-latest";
       };
       oss = attrValues os;
 
       # insert if: expression into steps
       # can omit ${{ }} - https://docs.github.com/en/actions/learn-github-actions/expressions#example-expression-in-an-if-conditional
+
+      # include steps conditionally
       stepsIf = expr: steps: map (x: x // { "if" = expr; }) steps;
 
       # make stuff available as matrix.os instead of "matrix.os"
@@ -56,6 +59,10 @@
                 "sha"
               ];
               matrix = genAttrsId [
+                "os"
+                "store"
+              ];
+              runner = genAttrsId [
                 "os"
               ];
             }
@@ -96,36 +103,62 @@
         '';
       };
 
+      # Flake file paths -> step to cache based on flake files
+      cacheNixFiles = { flakeFiles ? [ "flake.nix" "flake.lock" ], store ? "auto", keySuffix ? "", checkIsRunnerLinux ? false }:
+        let
+          hashfilesArgs = pkgs.lib.strings.concatMapStringsSep ", " (x: "'${x}'") flakeFiles;
+          hashfiles = expr "hashfiles(${hashfilesArgs})";
+        in
+        (
+          # setting the store doesn't work for macOS
+          # https://discourse.nixos.org/t/how-to-use-a-local-directory-as-a-nix-binary-cache/655
+          if checkIsRunnerLinux then { "if" = "${names.runner.os} == 'Linux'"; } else { }
+        ) //
+        {
+          name = "Cache Nix";
+          uses = "actions/cache@v3.3.0";
+          "with" = {
+            key = "${expr names.runner.os}-nix-${hashfiles}-${keySuffix}";
+            path = store;
+            restore-keys = ''
+              ${expr names.runner.os}-nix-${hashfiles}-${keySuffix}
+              ${expr names.runner.os}-nix-
+            '';
+          };
+        };
+
+      # Flake directories -> step to cache based on flake files
+      cacheNixDirs =
+        { flakeDirs ? [ "." ], store ? nixStoreLinux, keySuffix ? "", checkIsRunnerLinux ? false }:
+        cacheNixFiles ({ flakeFiles = (__concatMap (x: [ "${x}/flake.nix" "${x}/flake.lock" ]) flakeDirs); inherit keySuffix store checkIsRunnerLinux; });
+
+      installNix = { store ? nixStoreLinux }: {
+        name = "Install Nix";
+        uses = "cachix/install-nix-action@v20";
+        "with" = {
+          extra_nix_config = ''
+            access-tokens = github.com=${expr names.secrets.GITHUB_TOKEN}
+            substituters = https://cache.nixos.org/ https://cache.iog.io https://nix-community.cachix.org https://deemp.cachix.org 
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= haskell-language-server.cachix.org-1:juFfHrwkOxqIOZShtC4YC1uT1bBcq2RSvC7OMKx0Nz8= deemp.cachix.org-1:9shDxyR2ANqEPQEEYDL/xIOnoPwxHot21L5fiZnFL18=
+            store = ${store}
+          '';
+          install_url = "https://releases.nixos.org/nix/nix-2.14.1/install";
+        };
+      };
+
       steps = {
         checkout = {
           name = "Checkout this repo";
           uses = "actions/checkout@v3";
         };
-        installNix = {
-          name = "Install Nix";
-          uses = "cachix/install-nix-action@v18";
-          "with" = {
-            extra_nix_config = ''
-              access-tokens = github.com=${expr names.secrets.GITHUB_TOKEN}
-              substituters = https://cache.nixos.org/ https://cache.iog.io https://nix-community.cachix.org https://deemp.cachix.org 
-              trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= haskell-language-server.cachix.org-1:juFfHrwkOxqIOZShtC4YC1uT1bBcq2RSvC7OMKx0Nz8= deemp.cachix.org-1:9shDxyR2ANqEPQEEYDL/xIOnoPwxHot21L5fiZnFL18=
-            '';
-            install_url = "https://releases.nixos.org/nix/nix-2.11.1/install";
-          };
-        };
+        cacheNix = cacheNixDirs { };
         logInToCachix = {
           name = "Log in to Cachix";
-          uses = "cachix/cachix-action@v12";
-          "with" = {
-            name = expr names.secrets.CACHIX_CACHE;
-            authToken = expr names.secrets.CACHIX_AUTH_TOKEN;
-          };
+          run = "nix run nixpkgs#cachix -- authtoken ${ expr names.secrets.CACHIX_AUTH_TOKEN }";
         };
         pushFlakesToCachix = {
           name = "Push flakes to Cachix";
-          env = {
-            CACHIX_CACHE = expr names.secrets.CACHIX_CACHE;
-          };
+          env.CACHIX_CACHE = expr names.secrets.CACHIX_CACHE;
           run = "nix run .#${names.pushToCachix}";
         };
         configGitAsGHActions = {
@@ -142,22 +175,31 @@
           };
       };
 
+      nixStoreLinux = "/home/runner/nix";
+
+      strategies = {
+        # setting the store doesn't work for macOS
+        # https://discourse.nixos.org/t/how-to-use-a-local-directory-as-a-nix-binary-cache/655
+        nixCache.matrix.include = [
+          { os = os.macos-11; }
+          { os = os.macos-12; }
+          { os = os.ubuntu-20; store = nixStoreLinux; }
+          { os = os.ubuntu-22; store = nixStoreLinux; }
+        ];
+      };
+
       nixCI_ = steps_: {
         jobs = {
           nixCI = {
             name = "Nix CI";
-            strategy.matrix.os = oss;
+            strategy = strategies.nixCache;
             runs-on = expr names.matrix.os;
             steps =
               [
                 steps.checkout
-                steps.installNix
+                (installNix { store = expr names.matrix.store; })
+                (cacheNixDirs { keySuffix = "cachix"; store = expr names.matrix.store; })
               ]
-              ++
-              (stepsIf ("${names.matrix.os} == '${os.ubuntu-20}'") [
-                steps.configGitAsGHActions
-                steps.updateLocksAndCommit
-              ])
               ++ steps_
               ++ [
                 steps.logInToCachix
@@ -170,7 +212,10 @@
         inherit on;
       };
 
-      nixCI = nixCI_ [ ];
+      nixCI = nixCI_ (stepsIf ("${names.matrix.os} == '${os.ubuntu-20}'") [
+        steps.configGitAsGHActions
+        steps.updateLocksAndCommit
+      ]);
     in
     {
       packages = {
@@ -179,11 +224,11 @@
       };
       functions = {
         inherit
-          writeYAML writeWorkflow expr genAttrsId
-          stepsIf mkAccessors mkAccessors_ run nixCI_;
+          writeYAML writeWorkflow expr genAttrsId cacheNixFiles cacheNixDirs
+          stepsIf mkAccessors mkAccessors_ run nixCI_ installNix;
       };
       configs = {
-        inherit oss os names on steps nixCI;
+        inherit oss os names on steps nixCI strategies nixStoreLinux;
       };
     });
 }

@@ -16,24 +16,26 @@
     let
       pkgs = nixpkgs.legacyPackages.${system};
       inherit (drv-tools.functions.${system})
-        withMan
-        runFishScript
-        mkShellApp
-        mkShellApps
-        mkBin
-        framedBrackets
-        concatStringsNewline
-        mkDevShellsWithDefault
-        runInEachDir
-        indentStrings4
-        withDescription
+        withMan runFishScript mkShellApp
+        mkShellApps mkBin framedBrackets
+        concatStringsNewline mkDevShellsWithDefault runInEachDir
+        indentStrings4 withDescription
         ;
       inherit (pkgs.lib.lists) flatten;
+
+      # TODO update cachix
+      # https://github.com/cachix/cachix/issues/529
+      cachix = pkgs.haskellPackages.cachix_1_3_3;
+
       man = drv-tools.configs.${system}.man // {
         ENV = "# EXPECTED ENV VARIABLES";
         CACHIX_CACHE = ''
           `CACHIX_CACHE`
           :   cachix cache name  
+        '';
+        CACHIX_AUTH_TOKEN = ''
+          `CACHIX_AUTH_TOKEN`
+          :   cachix authorization token
         '';
       };
       pushXToCachix = inp@{ name, fishScriptPath, runtimeInputs ? [ ], text ? "" }:
@@ -45,9 +47,10 @@
                 runtimeInputs =
                   runtimeInputs ++
                   [
-                    pkgs.cachix
+                    cachix
                     pkgs.jq
                     pkgs.findutils
+                    pkgs.nix
                   ];
               }
             )
@@ -105,10 +108,6 @@
             ''
           )
       ;
-
-      # cache nix store
-      # TODO https://github.com/actions/cache/issues/749#issuecomment-1465302692
-
       pushAllToCachix =
         withMan
           (mkShellApp {
@@ -136,7 +135,7 @@
           rec {
             inherit dirs;
             name = "flakes-update";
-            command = "nix flake update";
+            command = "${pkgs.nix}/bin/nix flake update";
             description = ''Update `flake.lock`s'';
           };
 
@@ -242,12 +241,28 @@
             ''
           );
 
+      logInToCachix = withMan
+        (mkShellApp {
+          name = "logInToCachix";
+          text = "${cachix}/bin/cachix authtoken $CACHIX_AUTH_TOKEN";
+          description = "Log in to cachix";
+        })
+        (x:
+          ''
+            ${man.DESCRIPTION}
+            ${x.meta.description}
+
+            ${man.ENV}
+            
+          ''
+        );
+
       # format all .nix files with the formatter specified in the flake in the CWD
       flakesFormat =
         withMan
           (mkShellApp {
             name = "flakes-format";
-            text = ''nix fmt **/*.nix'';
+            text = ''${pkgs.nix}/bin/nix fmt **/*.nix'';
             description = "Format `.nix` files in `CWD` and its subdirectories";
           })
           (x: ''
@@ -260,6 +275,7 @@
       mkFlakesTools = dirs: (mkShellApps {
         updateLocks.text = mkBin (flakesUpdate dirs);
         pushToCachix.text = mkBin (flakesPushToCachix dirs);
+        logInToCachix.text = mkBin (logInToCachix);
         updateAndPushToCachix.text = mkBin (flakesUpdateAndPushToCachix dirs);
         dumpDevshells.text = mkBin (flakesDumpDevshells dirs);
         watchDumpDevshells.text = mkBin (flakesWatchDumpDevshells dirs);
@@ -283,7 +299,7 @@
         inherit
           dumpDevShells flakesFormat pushAllToCachix
           pushInputsToCachix pushDevShellsToCachix
-          pushPackagesToCachix;
+          pushPackagesToCachix logInToCachix;
       };
 
 
