@@ -3,16 +3,17 @@
 let
   vscode-marketplace = vscode-extensions.extensions.${system}.vscode-marketplace;
   vscode-marketplace-extra = vscode-extensions-extra.extensions.${system}.vscode-marketplace;
+  open-vsx = vscode-extensions.extensions.${system}.open-vsx;
   inherit (pkgs.lib.attrsets) mapAttrs' mapAttrsToList recursiveUpdate;
-  mkExtensionsGroup = vscode-marketplace_: exts@{ ... }: builtins.foldl' recursiveUpdate { } (
+  mkExtensionsGroup = extensionSet: exts@{ ... }: builtins.foldl' recursiveUpdate { } (
     pkgs.lib.lists.flatten (
       mapAttrsToList
         (name: value:
           let value_ = if builtins.isList value then value else [ value ]; in
-          map (ext: { ${ext} = vscode-marketplace_.${name}.${ext}; }) value_
+          map (ext: { ${ext} = extensionSet.${name}.${ext}; }) value_
         )
         exts));
-  mkExtensions = vscode-marketplace_: mapAttrs' (x: y: { name = x; value = mkExtensionsGroup vscode-marketplace_ y; });
+  mkExtensions = extensionSet: mapAttrs' (x: y: { name = x; value = mkExtensionsGroup extensionSet y; });
 in 
 pkgs.lib.attrsets.recursiveUpdate 
 (
@@ -134,10 +135,10 @@ mkExtensions vscode-marketplace
   };
 })
 
-(mkExtensions vscode-marketplace-extra
+(mkExtensions open-vsx
 {
   purescript = {
-    br4ch1st0chr0n3 = "purs-keybindings";
+    deemp = "purs-keybindings";
   };
   postgresql = {
     cweijan = "vscode-postgresql-client2";
