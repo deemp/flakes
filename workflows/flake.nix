@@ -104,7 +104,7 @@
       };
 
       # Flake file paths -> step to cache based on flake files
-      cacheNixFiles = { flakeFiles ? [ "flake.nix" "flake.lock" ], store ? "auto", keySuffix ? "", checkIsRunnerLinux ? false }:
+      cacheNixFiles = { flakeFiles ? [ "flake.nix" "flake.lock" ], store ? "auto", keySuffix ? "", checkIsRunnerLinux ? false, restoreOnly ? true }:
         let
           hashfilesArgs = pkgs.lib.strings.concatMapStringsSep ", " (x: "'${x}'") flakeFiles;
           hashfiles = expr "hashfiles(${hashfilesArgs})";
@@ -113,24 +113,35 @@
           # setting the store doesn't work for macOS
           # https://discourse.nixos.org/t/how-to-use-a-local-directory-as-a-nix-binary-cache/655
           if checkIsRunnerLinux then { "if" = "${names.runner.os} == 'Linux'"; } else { }
-        ) //
-        {
-          name = "Cache Nix";
-          uses = "actions/cache@v3.3.0";
-          "with" = {
-            key = "${expr names.runner.os}-nix-${hashfiles}-${keySuffix}";
-            path = store;
-            restore-keys = ''
-              ${expr names.runner.os}-nix-${hashfiles}-${keySuffix}
-              ${expr names.runner.os}-nix-
-            '';
-          };
-        };
+        ) // (
+          if restoreOnly then {
+            name = "Restore Nix store";
+            uses = "actions/cache/restore@v3";
+            "with" = {
+              path = store;
+              key = ''
+                ${expr names.runner.os}-nix-${hashfiles}-${keySuffix}
+                ${expr names.runner.os}-nix-
+              '';
+            };
+          } else {
+            name = "Restore and cache Nix store";
+            uses = "actions/cache@v3.3.0";
+            "with" = {
+              path = store;
+              key = "${expr names.runner.os}-nix-${hashfiles}-${keySuffix}";
+              restore-keys = ''
+                ${expr names.runner.os}-nix-${hashfiles}-${keySuffix}
+                ${expr names.runner.os}-nix-
+              '';
+            };
+          }
+        );
 
       # Flake directories -> step to cache based on flake files
       cacheNixDirs =
-        { flakeDirs ? [ "." ], store ? nixStoreLinux, keySuffix ? "", checkIsRunnerLinux ? false }:
-        cacheNixFiles ({ flakeFiles = (__concatMap (x: [ "${x}/flake.nix" "${x}/flake.lock" ]) flakeDirs); inherit keySuffix store checkIsRunnerLinux; });
+        { flakeDirs ? [ "." ], store ? nixStoreLinux, keySuffix ? "", checkIsRunnerLinux ? false, restoreOnly ? true }:
+        cacheNixFiles ({ flakeFiles = (__concatMap (x: [ "${x}/flake.nix" "${x}/flake.lock" ]) flakeDirs); inherit keySuffix store checkIsRunnerLinux restoreOnly; });
 
       installNix = { store ? nixStoreLinux }: {
         name = "Install Nix";
@@ -198,7 +209,7 @@
               [
                 steps.checkout
                 (installNix { store = expr names.matrix.store; })
-                (cacheNixDirs { keySuffix = "cachix"; store = expr names.matrix.store; })
+                (cacheNixDirs { keySuffix = "cachix"; store = expr names.matrix.store; restoreOnly = false; })
               ]
               ++ steps_
               ++ [
