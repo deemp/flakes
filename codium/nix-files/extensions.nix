@@ -15,8 +15,8 @@ let
         exts));
   mkExtensions = extensionSet: mapAttrs' (x: y: { name = x; value = mkExtensionsGroup extensionSet y; });
 in 
-pkgs.lib.attrsets.recursiveUpdate 
-(
+__foldl' pkgs.lib.attrsets.recursiveUpdate { }
+[(
 mkExtensions vscode-marketplace
 {
   c-cpp = {
@@ -38,7 +38,6 @@ mkExtensions vscode-marketplace
     bmalehorn = "vscode-fish";
   };
   github = {
-    eamodio = "gitlens";
     github = [ 
       "vscode-pull-request-github" 
       "vscode-github-actions" ];
@@ -134,7 +133,11 @@ mkExtensions vscode-marketplace
     redhat = "vscode-yaml";
   };
 })
-
+(mkExtensions vscode-marketplace-extra {
+  github = {
+    eamodio = "gitlens";
+  };
+})
 (mkExtensions open-vsx
 {
   purescript = {
@@ -144,3 +147,5 @@ mkExtensions vscode-marketplace
     cweijan = "vscode-postgresql-client2";
   };
 })
+
+]
