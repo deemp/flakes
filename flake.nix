@@ -38,6 +38,7 @@
               "devshell"
               "terrafix"
               "workflows"
+              "templates/haskell-minimal"
               "."
             ]
           ]
@@ -74,6 +75,10 @@
       codium-haskell-simple = {
         path = ./templates/codium/haskell-simple;
         description = "${codium-generic.description} for `Haskell`.";
+      };
+      haskell-minimal = {
+        path = ./templates/haskell-minimal;
+        description = "Minimal flake for a `Haskell` package development.";
       };
       codium-python = {
         path = ./templates/codium/python;
