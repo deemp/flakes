@@ -8,6 +8,10 @@ Feel free to remove the `VSCodium`-related `Nix` code and whatever you want!
 
 ## Prerequisites
 
+<details>
+
+  <summary>Spoiler</summary>
+
 - [flake.nix](./flake.nix) - code in this flake is extensively commented.
 - [language-tools/haskell](https://github.com/deemp/flakes/blob/main/language-tools/haskell/flake.nix) - a flake that conveniently provides `Haskell` tools.
 - [Conventions](https://github.com/deemp/flakes/blob/main/README/Conventions.md#dev-tools) - I recommended to use this flake just for development. For packaging an app, make another flake with a limited number of inputs to reduce the `flake.lock` size.
@@ -21,6 +25,8 @@ See these for additional info:
 - [Prerequisites](https://github.com/deemp/flakes#prerequisites)
 - [Nixpkgs support for incremental Haskell builds](https://www.haskellforall.com/2022/12/nixpkgs-support-for-incremental-haskell.html)
 - [flakes](https://github.com/deemp/flakes#readme) - my Nix flakes that may be useful for you.
+
+</details>
 
 ## Quick start
 
@@ -94,32 +100,6 @@ Let's inspect what's available.
 1. `ghcid` will run not only the `main` function, but also the code in magic comments (See `app/Main.hs`).
 
 1. Sometimes, `cabal` doesn't use the `Nix`-supplied packages ([issue](https://github.com/NixOS/nixpkgs/issues/130556#issuecomment-1114239002)). In this case, use `cabal v1-*` - commands.
-
-## GHC
-
-This template uses `GHC 9.2.7`. See the available `GHC` versions:
-
-```console
-nix repl
-:lf .
--- use your system
-ghcVersions.x86_64-linux
-```
-
-To switch to `GHC 9.0.2`:
-
-1. In `flake.nix`, change GHC version from `"927"` to `"902"`.
-1. If using `stack`, in `stack.yaml`, change `resolver` to [lts-19.33](https://www.stackage.org/lts-19.33) or a later one.
-
-## Configs
-
-- [package.yaml](./package.yaml) - used by `stack` or `hpack` to generate a `.cabal`
-- [.markdownlint.jsonc](./.markdownlint.jsonc) - for `markdownlint` from the extension `davidanson.vscode-markdownlint`
-- [.ghcid](./.ghcid) - for [ghcid](https://github.com/ndmitchell/ghcid)
-- [.envrc](./.envrc) - for [direnv](https://github.com/direnv/direnv)
-- [fourmolu.yaml](./fourmolu.yaml) - for [fourmolu](https://github.com/fourmolu/fourmolu#configuration)
-- [ci.yaml](.github/workflows/ci.yaml) - a generated `GitHub Actions` workflow. See [workflows](https://github.com/deemp/flakes/tree/main/workflows). Generate a workflow via `nix run .#writeWorkflows`.
-- `hie.yaml` - not present, but can be generated via [implicit-hie](https://github.com/Avi-D-coder/implicit-hie) (available on devshell) to verify the `Haskell Language Server` setup.
 
 ## Run a Haskell app
 
@@ -244,3 +224,29 @@ Necessary components of `Stack` + `Nix` integration:
 - `stack-shell` with necessary derivations in `flake.nix`
   - The name `stack-shell` is chosen arbitrarily
   - The name should be the same as the one used in `stack.nix`
+
+## GHC
+
+This template uses `GHC 9.2.7`. See the available `GHC` versions:
+
+```console
+nix repl
+:lf .
+-- use your system
+ghcVersions.x86_64-linux
+```
+
+To switch to `GHC 9.0.2`:
+
+1. In `flake.nix`, change GHC version from `"927"` to `"902"`.
+1. If using `stack`, in `stack.yaml`, change `resolver` to [lts-19.33](https://www.stackage.org/lts-19.33) or a later one.
+
+## Configs
+
+- [package.yaml](./package.yaml) - used by `stack` or `hpack` to generate a `.cabal`
+- [.markdownlint.jsonc](./.markdownlint.jsonc) - for `markdownlint` from the extension `davidanson.vscode-markdownlint`
+- [.ghcid](./.ghcid) - for [ghcid](https://github.com/ndmitchell/ghcid)
+- [.envrc](./.envrc) - for [direnv](https://github.com/direnv/direnv)
+- [fourmolu.yaml](./fourmolu.yaml) - for [fourmolu](https://github.com/fourmolu/fourmolu#configuration)
+- [ci.yaml](.github/workflows/ci.yaml) - a generated `GitHub Actions` workflow. See [workflows](https://github.com/deemp/flakes/tree/main/workflows). Generate a workflow via `nix run .#writeWorkflows`.
+- `hie.yaml` - not present, but can be generated via [implicit-hie](https://github.com/Avi-D-coder/implicit-hie) (available on devshell) to verify the `Haskell Language Server` setup.

@@ -7,6 +7,10 @@ Feel free to remove the `VSCodium`-related `Nix` code and whatever you want!
 
 ## Prerequisites
 
+<details>
+
+  <summary>Spoiler</summary>
+
 - [flake.nix](./flake.nix) - code in this flake is extensively commented.
 - [language-tools/haskell](https://github.com/deemp/flakes/blob/main/language-tools/haskell/flake.nix) - a flake that conveniently provides `Haskell` tools.
 - [Conventions](https://github.com/deemp/flakes/blob/main/README/Conventions.md#dev-tools) - I recommended to use this flake just for development. For packaging an app, make another flake with a limited number of inputs to reduce the `flake.lock` size.
@@ -21,6 +25,8 @@ See these for additional info:
 - [Prerequisites](https://github.com/deemp/flakes#prerequisites)
 - [Nixpkgs support for incremental Haskell builds](https://www.haskellforall.com/2022/12/nixpkgs-support-for-incremental-haskell.html)
 - [flakes](https://github.com/deemp/flakes#readme) - my Nix flakes that may be useful for you.
+
+</details>
 
 ## Quick start
 
