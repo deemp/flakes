@@ -178,6 +178,32 @@
           '')
       ;
 
+      # wrap a shell application to, e.g., set a new script name
+      wrapShellApp =
+        { app
+        , name ? app.pname
+        , text ? mkBin app
+        , runtimeInputs ? [ ]
+        , description ? __replaceStrings [ app.pname ] [ name ] app.meta.description
+        , longDescription ? __replaceStrings [ app.pname ] [ name ] app.meta.longDescription
+        }:
+        withMan
+          (withMeta
+            (
+              withAttrs
+                (
+                  pkgs.writeShellApplication ({ inherit name text; } // {
+                    runtimeInputs = pkgs.lib.lists.flatten runtimeInputs;
+                    checkPhase = "";
+                  })
+                )
+                { pname = name; }
+            )
+            (_: { inherit longDescription description; })
+          )
+          (_: longDescription)
+      ;
+
       withAttrs = attrSet1: attrSet2: recursiveUpdate attrSet1 attrSet2;
       withMeta = drv: fMeta: withAttrs drv { meta = fMeta drv; };
       withDescription = drv: fDescription: withAttrs drv { meta.description = fDescription drv; };
@@ -387,6 +413,7 @@
           applyN
           concatMapStringsNewline
           concatStringsNewline
+          wrapShellApp
           framed_
           framedBrackets
           framedBrackets_
