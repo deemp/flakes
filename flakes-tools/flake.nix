@@ -16,7 +16,7 @@
     let
       pkgs = nixpkgs.legacyPackages.${system};
       inherit (drv-tools.functions.${system})
-        withMan runFishScript mkShellApp
+        withMan runFishScript mkShellApp wrapShellApp
         mkShellApps mkBin framedBrackets
         concatStringsNewline mkDevShellsWithDefault runInEachDir
         indentStrings4 withDescription
@@ -142,7 +142,7 @@
 
       # push to cachix all about flakes in specified directories relative to CWD
       flakesPushToCachix = dirs:
-        let description = "Push flakes' inputs and outputs to `cachix` in given directories";
+        let description = "Push flakes inputs and outputs to `cachix` in given directories";
         in
         runInEachDir {
           inherit dirs;
@@ -271,16 +271,19 @@
           ''
           );
 
-      # just inherit necessary functions
-      mkFlakesTools = dirs: (mkShellApps {
-        updateLocks.text = mkBin (flakesUpdate dirs);
-        pushToCachix.text = mkBin (flakesPushToCachix dirs);
-        logInToCachix.text = mkBin (logInToCachix);
-        updateAndPushToCachix.text = mkBin (flakesUpdateAndPushToCachix dirs);
-        dumpDevshells.text = mkBin (flakesDumpDevshells dirs);
-        watchDumpDevshells.text = mkBin (flakesWatchDumpDevshells dirs);
-        format.text = mkBin flakesFormat;
-      });
+      # all flake tools together
+      mkFlakesTools = dirs: (
+        (__mapAttrs (name: app: wrapShellApp { inherit name app; })
+          {
+            updateLocks = flakesUpdate dirs;
+            pushToCachix = flakesPushToCachix dirs;
+            logInToCachix = logInToCachix;
+            updateAndPushToCachix = flakesUpdateAndPushToCachix dirs;
+            dumpDevshells = flakesDumpDevshells dirs;
+            watchDumpDevshells = flakesWatchDumpDevshells dirs;
+            format = flakesFormat;
+          })
+      );
     in
     {
       functions = {
