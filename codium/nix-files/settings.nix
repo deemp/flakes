@@ -124,6 +124,20 @@
     "python.linting.mypyEnabled" = true;
   };
 
+  rescript-vscode = {
+    "rescript.settings.autoRunCodeAnalysis" = true;
+    "rescript.settings.codeLens" = true;
+    "rescript.settings.askToStartBuild" = true;
+  };
+
+  explorer = {
+    "explorer.fileNesting.enabled" = true;
+    "explorer.fileNesting.patterns" = {
+      "*.res" = "\${capture}.mjs, \${capture}.js, \${capture}.cmi, \${capture}.cmt, \${capture}.cmj";
+      "*.resi" = "\${capture}.res";
+    };
+  };
+
   terminal = {
     "terminal.integrated.scrollback" = 100000;
   };
