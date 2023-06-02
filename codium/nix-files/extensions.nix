@@ -2,6 +2,7 @@
 { system, pkgs, vscode-extensions, vscode-extensions-extra }:
 let
   vscode-marketplace = vscode-extensions.extensions.${system}.vscode-marketplace;
+  vscode-marketplace-release = vscode-extensions.extensions.${system}.vscode-marketplace-release;
   vscode-marketplace-extra = vscode-extensions-extra.extensions.${system}.vscode-marketplace;
   open-vsx = vscode-extensions.extensions.${system}.open-vsx;
   inherit (pkgs.lib.attrsets) mapAttrs' mapAttrsToList recursiveUpdate;
@@ -101,6 +102,7 @@ mkExtensions vscode-marketplace
       "language-purescript"
     ];
     ryuta46 = "multi-command";
+    br4ch1st0chr0n3 = "purs-keybindings";
   };
   python = {
     batisteo = "vscode-django";
@@ -133,16 +135,13 @@ mkExtensions vscode-marketplace
     redhat = "vscode-yaml";
   };
 })
-(mkExtensions vscode-marketplace-extra {
+(mkExtensions vscode-marketplace-release {
   github = {
     eamodio = "gitlens";
   };
 })
 (mkExtensions open-vsx
 {
-  purescript = {
-    deemp = "purs-keybindings";
-  };
   postgresql = {
     cweijan = "vscode-postgresql-client2";
   };
