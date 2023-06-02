@@ -114,6 +114,9 @@ mkExtensions vscode-marketplace
     samuelcolvin = "jinjahtml";
     visualstudioexptteam = "vscodeintellicode";
   };
+  rescript = {
+    chenglou92 = "rescript-vscode";
+  };
   sql = {
     inferrinizzard = "prettier-sql-vscode";
     mtxr = "sqltools";
