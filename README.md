@@ -38,5 +38,6 @@ This repo provides several templates. Learn how you can use them:
 ### Available templates
 
 - [codium-generic](./templates/codium/generic/README.md) - `VSCodium` with extensions and executables on `PATH`.
-- [codium-haskell](./templates/codium/codium-haskell/README.md) - `VSCodium` with extensions and executables on `PATH` for `Haskell` (see ). Demonstrates several ways to run a `Haskell` app.
-- see [codium-haskell-simple](./templates/codium/codium-haskell/README.md) - `VSCodium` with extensions and executables on `PATH` for `Haskell`. A simplified version of `codium-haskell`.
+- [codium-haskell](./templates/codium/haskell/README.md) - `VSCodium` with extensions and executables on `PATH` for `Haskell`. Demonstrates several ways to run a `Haskell` app.
+- [codium-haskell-simple](./templates/codium/haskell-simple/README.md) - `VSCodium` with extensions and executables on `PATH` for `Haskell`. A simplified version of `codium-haskell`.
+- [haskell-minimal](./templates/haskell-minimal/README.md) - A minimal flake for developing local `Haskell` packages.
