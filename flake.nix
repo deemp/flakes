@@ -36,7 +36,6 @@
               "codium"
               "json2md"
               "devshell"
-              "terrafix"
               "workflows"
               "templates/haskell-minimal"
               "."
