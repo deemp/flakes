@@ -4,7 +4,7 @@
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
-    nixpkgs-purescript.url = "github:deemp/nixpkgs";
+    nixpkgs-purescript.url = "github:deemp/nixpkgs/purescript";
   };
   outputs = inputs:
     inputs.flake-utils.lib.eachDefaultSystem (system:
