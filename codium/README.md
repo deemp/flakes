@@ -23,6 +23,11 @@ codium .
 
 ## Troubleshooting
 
+### Missing extensions
+
+Only one instance of `VSCodium` gets supplied extensions.
+Close other instances of `VSCodium` before opening a new one.
+
 ### GitHub Personal Access Token (PAT) for VS Codium extensions
 
 - Create a `classic` PAT with permissions: `read:user, repo, user:email, workflow`
