@@ -5,15 +5,10 @@
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
   };
-  outputs =
-    { self
-    , nixpkgs
-    , flake-utils
-    , ...
-    }:
-    flake-utils.lib.eachDefaultSystem (system:
+  outputs = inputs:
+    inputs.flake-utils.lib.eachDefaultSystem (system:
     let
-      pkgs = nixpkgs.legacyPackages.${system};
+      pkgs = inputs.nixpkgs.legacyPackages.${system};
       inherit (builtins) map concatLists attrValues;
       inherit (pkgs.lib.lists) genAttrs;
       inherit (pkgs.lib.strings) concatMapStringsSep;
@@ -22,18 +17,18 @@
       genAttrsId = list: genAttrs list (x: x);
       withAttrs = recursiveUpdate;
 
-      # GHC of a specific version
+      # `GHC` of a specific version
       # With haskell packages that are dependencies of the given packages
       ghcGHC = ghcVersion: override: packages:
         ((haskellPackagesGHCOverride ghcVersion override).ghcWithPackages
           (ps: getHaskellPackagesDeps (packages ps))) // { pname = "ghc"; };
 
-      # build tool with GHC of a specific version available on PATH
-      buildToolWithFlagsGHC = name: drv: flags: ghcVersion: override: packages: runtimeDependencies:
+      # build tool with `GHC` of a specific version available on PATH
+      buildToolWithFlagsGHC = { name, drv, flags, ghcVersion, override, packages, runtimeDependencies }:
         assert builtins.isString name && builtins.isString ghcVersion
           && builtins.isAttrs drv && builtins.isList flags;
         let
-          deps = [
+          runtimeDependencies_ = [
             (ghcGHC ghcVersion override packages)
           ] ++ runtimeDependencies;
           flags_ = concatMapStringsNewline (x: x + " \\") flags;
@@ -51,7 +46,7 @@
                 makeWrapper ${drv}/bin/${name} $out/bin/${name} \
                   --add-flags "\
                     ${flags_}
-                  " ${addDeps deps}
+                  " ${addBinDeps runtimeDependencies_}
               ''
           )
           {
@@ -73,17 +68,19 @@
           packages
           (concatLists (map (package: concatLists (attrValues package.getCabalDeps)) packages));
 
-      # --system-ghc    # Use the existing GHC on PATH (will come from a Nix file)
-      # --no-install-ghc  # Don't try to install GHC if no matching GHC found on PATH
-      stackWithFlagsGHCOverride = buildToolWithFlagsGHC "stack" pkgs.stack [ "--system-ghc" "--no-install-ghc" ];
+      # --system-ghc    # Use the existing `GHC` on `PATH` (will come from a Nix file)
+      # --no-install-ghc  # Don't try to install `GHC` if no matching `GHC` found on `PATH`
+      stackWithFlagsGHCOverride = args@{ ghcVersion, override, packages, runtimeDependencies }:
+        buildToolWithFlagsGHC ({ name = "stack"; drv = pkgs.stack; flags = [ "--system-ghc" "--no-install-ghc" ]; } // args);
       # --enable-nix - allow use a shell.nix if present
-      cabalWithFlagsGHCOverride = buildToolWithFlagsGHC "cabal" pkgs.cabal-install [ "--enable-nix" ];
+      cabalWithFlagsGHCOverride = args@{ ghcVersion, override, packages, runtimeDependencies }:
+        buildToolWithFlagsGHC ({ name = "cabal"; drv = pkgs.cabal-install; flags = [ "--enable-nix" ]; } // args);
 
       haskellPackagesGHCOverride = ghcVersion: override: (haskellPackagesGHC ghcVersion).override override;
 
       haskellPackagesGHC = ghcVersion: pkgs.haskell.packages."ghc${ghcVersion}";
 
-      addDeps = deps: if deps != [ ] then "--prefix PATH : ${pkgs.lib.makeBinPath deps}" else "";
+      addBinDeps = deps: if deps != [ ] then "--prefix PATH : ${pkgs.lib.makeBinPath deps}" else "";
 
       # Build an executable from a Haskell package
       # Provide it with given runtime dependencies
@@ -110,7 +107,9 @@
               cp -rs --no-preserve=mode,ownership ${exe}/* $out/
               rm -rf $out/bin
               mkdir $out/bin
-              makeWrapper ${exe}/bin/${executableName} $out/bin/${binaryName} ${addDeps runtimeDependencies}
+              makeWrapper ${exe}/bin/${executableName} \
+                $out/bin/${binaryName} \
+                ${addBinDeps runtimeDependencies}
             ''
           )
           {
@@ -120,12 +119,12 @@
           }
       ;
 
-      # Tools for a specific GHC version and overriden haskell packages for this GHC
+      # Tools for a specific `GHC` version and overriden haskell packages for this `GHC`
       toolsGHC =
         {
-          # GHC version as it's set in nixpkgs
+          # `GHC` version as it's set in nixpkgs
           # `925` is for `pkgs.haskell.packages.ghc925`
-          version ? "925"
+          version ? "927"
         , # override for haskell packages. See https://nixos.wiki/wiki/Haskell#Overrides
           override ? { }
         , # a function from an attrset Haskell packages to a list of packages that you develop
@@ -139,8 +138,14 @@
         {
           hls = (haskellPackagesGHC version).haskell-language-server;
           # https://docs.haskellstack.org/en/stable/nix_integration/#supporting-both-nix-and-non-nix-developers
-          stack = stackWithFlagsGHCOverride version override packages runtimeDependencies;
-          cabal = cabalWithFlagsGHCOverride version override packages runtimeDependencies;
+          stack = stackWithFlagsGHCOverride {
+            ghcVersion = version;
+            inherit override packages runtimeDependencies;
+          };
+          cabal = cabalWithFlagsGHCOverride {
+            ghcVersion = version;
+            inherit override packages runtimeDependencies;
+          };
           ghc = ghcGHC version override packages;
           inherit (haskellPackagesGHC version) implicit-hie ghcid hpack callCabal2nix;
           haskellPackages = haskellPackagesGHCOverride version override;
@@ -182,7 +187,7 @@
           runtimeDependencies = [ pkgs.hello ];
         };
 
-        ghcVersion_ = "925";
+        ghcVersion_ = "927";
         executableName = "hello-world";
         binaryName = "hello";
         test =
@@ -209,7 +214,10 @@
           default = pkgs.mkShell {
             shellHook = ''
               printf "\n--- cabal runs ---\n"
-              ${test.cabal}/bin/cabal v1-run ${executableName}
+              ${test.cabal}/bin/cabal run ${executableName}
+
+              printf "\n--- stack runs ---\n"
+              ${test.stack}/bin/stack run ${executableName}
 
               printf "\n--- Haskell executable runs ---\n"
               ${test.${packageName}}/bin/${binaryName}
