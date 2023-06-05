@@ -6,20 +6,20 @@
     flake-utils.follows = "flake-utils_/flake-utils";
     nixpkgs-purescript.url = "github:deemp/nixpkgs/purescript";
   };
-  outputs = inputs:
-    inputs.flake-utils.lib.eachDefaultSystem (system:
+  outputs = inputs: inputs.flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = inputs.nixpkgs.legacyPackages.${system};
       pkgs-purescript = inputs.nixpkgs-purescript.legacyPackages.${system};
       packages = {
         inherit (pkgs-purescript) purescript;
         inherit (pkgs) dhall-lsp-server nodejs_18;
-        inherit (pkgs.nodePackages) purescript-language-server purs-tidy;
+        inherit (pkgs.nodePackages) purescript-language-server purs-tidy bower;
         spago = pkgs.lib.meta.addMetaAttrs { description = "PureScript build tool and package manager"; } pkgs.spago;
       };
+      devShells.default = pkgs.mkShell { buildInputs = __attrValues packages; };
     in
     {
-      inherit packages;
+      inherit packages devShells;
     }
-    );
+  );
 }
