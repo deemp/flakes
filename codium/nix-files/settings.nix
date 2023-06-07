@@ -66,9 +66,9 @@
 
   # set your path instead of `front`
   ide-purescript = {
-    "purescript.outputDirectory" = "./front/output/";
-    "purescript.packagePath" = "./front";
-    "purescript.sourcePath" = "./front/src";
+    "purescript.outputDirectory" = "./output";
+    "purescript.packagePath" = "./";
+    "purescript.sourcePath" = "./src";
     "purescript.formatter" = "purs-tidy";
   };
 
