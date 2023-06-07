@@ -121,6 +121,15 @@
           runtimeDependencies = [ pkgs.hello ];
         };
 
+        settingsNixCommon = {
+          inherit (settingsNix)
+            editor errorlens nix-ide explorer terminal
+            files git gitlens json-language-features
+            markdown-all-in-one markdown-language-features
+            todo-tree window workbench
+            ;
+        };
+
         # test write settings
         testWriteSettings = writeSettingsJSON (
           settingsNix // {
@@ -140,7 +149,7 @@
             ;
         };
         configs = {
-          inherit extensions settingsNix;
+          inherit extensions settingsNix settingsNixCommon;
         };
         devShells.default = pkgs.mkShell {
           buildInputs = tools;
