@@ -2,14 +2,6 @@
   # keys are extension IDs (see https://code.visualstudio.com/docs/editor/extension-marketplace)
   # or pre-defined names (workbench, editor)
   # in case of ID clashes, an extension setting should have a full name
-  css-language-features = {
-    "colorInfo.languages" = [
-      {
-        "selector" = "sass";
-        "colors" = [ "css" "hex" "rgb" ];
-      }
-    ];
-  };
 
   csv = {
     "files.associations" = {
@@ -174,10 +166,6 @@
 
   vscode-dhall-lsp-server = {
     "vscode-dhall-lsp-server.executable" = "dhall-lsp-server";
-  };
-
-  window = {
-    "window.restoreWindows" = "none";
   };
 
   workbench = {
