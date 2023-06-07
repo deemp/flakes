@@ -126,7 +126,7 @@
             editor errorlens nix-ide explorer terminal
             files git gitlens json-language-features
             markdown-all-in-one markdown-language-features
-            todo-tree window workbench
+            todo-tree workbench
             ;
         };
 
