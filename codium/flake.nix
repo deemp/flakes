@@ -35,7 +35,18 @@
         # common extensions
         extensionsCommon = { inherit (extensions) nix misc github markdown; };
 
+        # settings.json translated to .nix
         settingsNix = import ./nix-files/settings.nix;
+
+        # common settings
+        settingsCommonNix = {
+          inherit (settingsNix)
+            editor errorlens nix-ide explorer terminal
+            files git gitlens json-language-features
+            markdown-all-in-one markdown-language-features
+            todo-tree workbench
+            ;
+        };
 
         # create a codium with a given set of extensions
         # bashInteractive is necessary for correct work
@@ -121,15 +132,6 @@
         testCodium = mkCodium {
           inherit extensions;
           runtimeDependencies = [ pkgs.hello ];
-        };
-
-        settingsCommonNix = {
-          inherit (settingsNix)
-            editor errorlens nix-ide explorer terminal
-            files git gitlens json-language-features
-            markdown-all-in-one markdown-language-features
-            todo-tree workbench
-            ;
         };
 
         # test write settings
