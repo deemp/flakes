@@ -14,9 +14,8 @@
   outputs = inputs: inputs.flake-utils.lib.eachDefaultSystem
     (system:
       let
-        inherit (inputs.codium.configs.${system}) extensions;
         inherit (inputs.codium.functions.${system}) mkCodium writeSettingsJSON;
-        inherit (inputs.codium.configs.${system}) settingsNix;
+        inherit (inputs.codium.configs.${system}) extensionsCommon settingsCommonNix;
         inherit (inputs.drv-tools.functions.${system}) readDirectories withAttrs;
         inherit (inputs.flakes-tools.functions.${system}) mkFlakesTools;
         inherit (inputs.devshell.functions.${system}) mkCommands mkRunCommands mkShell;
@@ -45,8 +44,8 @@
 
         packages = {
           inherit (flakesTools) pushToCachix updateLocks format;
-          writeSettings = writeSettingsJSON settingsNix;
-          codium = mkCodium { extensions = { inherit (extensions) nix misc github markdown yaml; }; };
+          writeSettings = writeSettingsJSON settingsCommonNix;
+          codium = mkCodium extensionsCommon;
           writeWorkflows = writeWorkflow "CI" (withAttrs nixCI { on.schedule = [{ cron = "0 0 1 * *"; }]; });
         };
       in
