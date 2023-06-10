@@ -103,13 +103,11 @@ Let's inspect what's available.
 
 ## Run a Haskell app
 
-Below is the comparison of ways to run a `Haskell` app. I prefer to use everything apart from `shellFor` and `stack`.
+I prefer to use anything but `stack`.
 
 ### shellFor
 
-**Advantages** - incremental builds
-
-**Disadvantage** - need to start `shellFor` and run other shells (e.g., `devshell`) inside it (or vice versa).
+**Advantages** - incremental builds, can pass the build dependencies to [devshell](https://github.com/numtide/devshell) (See the [PR](https://github.com/numtide/devshell/pull/261))
 
 Make a shell with all deps available and build incrementally via `cabal`.
 

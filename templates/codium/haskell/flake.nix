@@ -132,6 +132,11 @@
       # We use `shellFor` with overriden `haskellPackages` to get the correct dependencies
       # We'll be able to incrementally build our local packages via `cabal`
       # Incremental build means that only necessary rebuilds will be made on changes in a package
+      
+      # It's possible to use the build dependencies of packages from `shellFor` in a [devshell](https://github.com/numtide/devshell) shell
+      # Use `packagesFrom = [ shellFor ]`
+      # See https://github.com/numtide/devshell/pull/261
+
       shellFor =
         haskellPackages.shellFor {
           packages = ps: [ ps.${packageName} ];
@@ -141,13 +146,8 @@
           shellHook = framed "cabal run";
         };
 
-      # The disadvantage of such a `shellFor` is that we have to run this shell before we can start development
-      # If we'd like to start another shell with another toolset (like `devshell` - https://github.com/numtide/devshell)
-      # we'll have to use some way to start the first shell inside the second one.
-
       # --- Cabal shell ---
 
-      # To overcome the disadvantages of  `shellFor`, we use a `cabal` from `toolsGHC` above
       # This is `cabal-install` that's aware of `GHC` and deps of our Haskell app
       # So, instead of a shell like in the case of `shellFor`, we now get a single `cabal` binary
 
