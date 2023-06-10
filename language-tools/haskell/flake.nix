@@ -147,7 +147,11 @@
             inherit override packages runtimeDependencies;
           };
           ghc = ghcGHC version override packages;
-          inherit (haskellPackagesGHC version) implicit-hie ghcid hpack callCabal2nix;
+          
+          inherit (haskellPackagesGHC version) callCabal2nix;
+          implicit-hie = pkgs.haskell.packages.ghc945.implicit-hie_0_1_4_0;
+          inherit (pkgs) ghcid hpack;
+
           haskellPackages = haskellPackagesGHCOverride version override;
           inherit justStaticExecutable getHaskellPackageDeps getHaskellPackagesDeps;
         };
@@ -201,8 +205,7 @@
             };
           in
           {
-            inherit (tools) cabal stack hls ghc implicit-hie
-              ghcid hpack haskellPackages;
+            inherit (tools) cabal stack hls ghc implicit-hie ghcid hpack haskellPackages;
             inherit hello-world;
             deps = "${packageName}".getCabalDeps;
           };
