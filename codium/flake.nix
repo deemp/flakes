@@ -32,7 +32,9 @@
         # A set of VSCodium extensions
         extensions = import ./nix-files/extensions.nix { inherit system vscode-extensions vscode-extensions-extra pkgs; };
 
-        # nixified and restructured settings.json
+        # common extensions
+        extensionsCommon = { inherit (extensions) nix misc github markdown; };
+
         settingsNix = import ./nix-files/settings.nix;
 
         # create a codium with a given set of extensions
@@ -149,7 +151,7 @@
             ;
         };
         configs = {
-          inherit extensions settingsNix settingsCommonNix;
+          inherit extensions extensionsCommon settingsNix settingsCommonNix;
         };
         devShells.default = pkgs.mkShell {
           buildInputs = tools;
