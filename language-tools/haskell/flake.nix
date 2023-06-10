@@ -225,7 +225,9 @@
               printf "\n--- Haskell executable runs ---\n"
               ${test.${packageName}}/bin/${binaryName}
             '';
-            buildInputs = [ test.cabal test.hpack ];
+            buildInputs = __attrValues {
+              inherit (test) cabal stack hls ghc implicit-hie ghcid hpack;
+            };
           };
         };
         inherit test;
