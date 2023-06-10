@@ -8,6 +8,8 @@ Feel free to remove the `VSCodium`-related `Nix` code and whatever you want!
 
 ## Prerequisites
 
+- NixOS wiki - [Haskell](https://nixos.wiki/wiki/Haskell)
+
 <details>
 
   <summary>Spoiler</summary>
@@ -103,6 +105,7 @@ Let's inspect what's available.
 
 ## Run a Haskell app
 
+Below is the comparison of ways to run a `Haskell` app.
 I prefer to use anything but `stack`.
 
 ### shellFor
@@ -225,7 +228,12 @@ Necessary components of `Stack` + `Nix` integration:
 
 ## GHC
 
-This template uses `GHC 9.2.7`. See the available `GHC` versions:
+### Available versions
+
+This flake uses GHC of a specific version (`ghcVersion`).
+
+`nixpkgs` provides other `GHC` versions.
+Explore them in a repl:
 
 ```console
 nix repl
@@ -234,10 +242,12 @@ nix repl
 ghcVersions.x86_64-linux
 ```
 
-To switch to `GHC 9.0.2`:
+### Change version
 
-1. In `flake.nix`, change GHC version from `"927"` to `"902"`.
-1. If using `stack`, in `stack.yaml`, change `resolver` to [lts-19.33](https://www.stackage.org/lts-19.33) or a later one.
+To switch to a specific `GHC` version (let's call it `<ghc>`):
+
+1. In `flake.nix`, change the `ghcVersion` value to `<ghc>`.
+1. If you're using `stack`, in `stack.yaml`, change the `resolver` to match the `<ghc>` version.
 
 ## Configs
 

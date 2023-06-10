@@ -28,7 +28,7 @@
       inherit (inputs.codium.functions.${system}) writeSettingsJSON mkCodium;
       inherit (inputs.drv-tools.functions.${system}) mkBin withAttrs withMan withDescription mkShellApp;
       inherit (inputs.drv-tools.configs.${system}) man;
-      inherit (inputs.codium.configs.${system}) extensions settingsNix;
+      inherit (inputs.codium.configs.${system}) extensions extensionsCommon settingsNix settingsCommonNix;
       inherit (inputs.flakes-tools.functions.${system}) mkFlakesTools;
       inherit (inputs.devshell.functions.${system}) mkCommands mkRunCommands mkShell;
       inherit (inputs.haskell-tools.functions.${system}) toolsGHC;
@@ -39,7 +39,7 @@
       # --- Parameters ---
 
       # The desired GHC version
-      ghcVersion = "927";
+      ghcVersion = "945";
 
       # The name of a package
       packageName = "nix-managed";
@@ -245,7 +245,7 @@
         buildInputs = [ pkgs.stack ];
         shellHook = framed "stack run";
       };
-      # The disadvantage of this way is that we depend on `stack` resolver, 
+      # A disadvantage of this way is that we depend on `stack` resolver, 
       # while `cabal` depends just on `ghc` and the packages from `haskellPackages`
 
       # --- Tools ---
@@ -283,15 +283,12 @@
         # We compose `VSCodium` with dev tools and `HLS`
         # This is to let `VSCodium` run on its own, outside of a devshell
         codium = mkCodium {
-          extensions = { inherit (extensions) nix haskell misc github markdown; };
+          extensions = extensionsCommon // { inherit (extensions) haskell; };
           runtimeDependencies = tools;
         };
 
         # a script to write `.vscode/settings.json`
-        writeSettings = writeSettingsJSON {
-          inherit (settingsNix) haskell todo-tree files editor gitlens
-            git nix-ide workbench markdown-all-in-one markdown-language-features;
-        };
+        writeSettings = writeSettingsJSON (settingsCommonNix // { inherit (settingsNix) haskell; });
 
         # --- Flakes ---
 
@@ -348,13 +345,11 @@
 
   nixConfig = {
     extra-substituters = [
-      "https://haskell-language-server.cachix.org"
       "https://nix-community.cachix.org"
       "https://cache.iog.io"
       "https://deemp.cachix.org"
     ];
     extra-trusted-public-keys = [
-      "haskell-language-server.cachix.org-1:juFfHrwkOxqIOZShtC4YC1uT1bBcq2RSvC7OMKx0Nz8="
       "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
       "hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ="
       "deemp.cachix.org-1:9shDxyR2ANqEPQEEYDL/xIOnoPwxHot21L5fiZnFL18="
