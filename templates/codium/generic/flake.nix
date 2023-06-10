@@ -16,7 +16,7 @@
       let
         pkgs = inputs.nixpkgs.legacyPackages.${system};
         inherit (inputs.codium.functions.${system}) mkCodium writeSettingsJSON;
-        inherit (inputs.codium.configs.${system}) extensions settingsNix;
+        inherit (inputs.codium.configs.${system}) extensions extensionsCommon settingsNix settingsCommon;
         inherit (inputs.vscode-extensions.extensions.${system}) vscode-marketplace open-vsx;
         inherit (inputs.devshell.functions.${system}) mkCommands mkRunCommands mkShell;
         inherit (inputs.workflows.functions.${system}) writeWorkflow;
@@ -32,21 +32,21 @@
           # We compose `VSCodium` with dev tools
           # This is to let `VSCodium` run on its own, outside of a devshell
           codium = mkCodium {
-            extensions = {
-              inherit (extensions) nix haskell misc github markdown;
-              # We can include more extensions by providing them in an attrset here
-              extra = {
-                inherit (vscode-marketplace.golang) go;
-              };
+            # We use the common extensions
+            extensions = extensionsCommon // {
+              # Next, we include the extensions from the pre-defined attrset
+              inherit (extensions) haskell;
+              # Furthermore, we can include extensions from https://github.com/nix-community/nix-vscode-extensions.
+              # It's pinned in the flake inputs
+              extra = { inherit (vscode-marketplace.golang) go; };
             };
             runtimeDependencies = tools;
           };
 
           # a script to write `.vscode/settings.json`
-          writeSettings = writeSettingsJSON {
-            inherit (settingsNix) todo-tree files editor gitlens
-              git nix-ide workbench markdown-all-in-one markdown-language-features;
-          };
+          writeSettings = writeSettingsJSON (settingsCommon // {
+            inherit (settingsNix) haskell;
+          });
 
           # --- Flakes ---
 
