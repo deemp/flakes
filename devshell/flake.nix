@@ -16,7 +16,7 @@
           framedNewlines = framed_ "\n\n" "\n\n";
           framed_ = pref: suff: txt: ''${pref}${txt}${suff}'';
 
-          devshell = let devshell_ = ((pkgs.extend inputs.devshell.overlay).devshell); in
+          devshell = let devshell_ = ((pkgs.extend inputs.devshell.overlays.default).devshell); in
             devshell_ // {
               mkShell = configuration: devshell_.mkShell (
                 configuration // {
@@ -109,6 +109,11 @@
               mkRunCommands "run" { inherit (packages) awk testHello; }
               ++
               [
+                {
+                  # test name collision prevention
+                  name = "hello";
+                  package = pkgs.hello;
+                }
                 {
                   name = "awk, hello";
                 }
