@@ -123,8 +123,8 @@
       toolsGHC =
         {
           # `GHC` version as it's set in nixpkgs
-          # `925` is for `pkgs.haskell.packages.ghc925`
-          version ? "927"
+          # `version` corresponds to `pkgs.haskell.packages.${version}`
+          version ? "945"
         , # override for haskell packages. See https://nixos.wiki/wiki/Haskell#Overrides
           override ? { }
         , # a function from an attrset Haskell packages to a list of packages that you develop
@@ -187,7 +187,7 @@
           runtimeDependencies = [ pkgs.hello ];
         };
 
-        ghcVersion_ = "927";
+        ghcVersion_ = "945";
         executableName = "hello-world";
         binaryName = "hello";
         test =
