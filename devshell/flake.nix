@@ -4,8 +4,7 @@
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
-    devshell_.url = "github:deemp/flakes?dir=source-flake/devshell";
-    devshell.follows = "devshell_/devshell";
+    devshell.url = "github:deemp/devshell/packages-from-upd";
   };
   outputs = inputs:
     inputs.flake-utils.lib.eachDefaultSystem
