@@ -172,12 +172,5 @@
     "workbench.colorTheme" = "Monokai";
   };
 
-  yaml = {
-    "yaml.schemas" = {
-      "https://json.schemastore.org/github-workflow.json" =
-        "workflows/**/*.yml";
-      "https://json.schemastore.org/github-action.json" =
-        "actions/**/action.yml";
-    };
-  };
+  yaml = { };
 }
