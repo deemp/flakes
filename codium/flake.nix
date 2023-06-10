@@ -121,7 +121,7 @@
           runtimeDependencies = [ pkgs.hello ];
         };
 
-        settingsNixCommon = {
+        settingsCommonNix = {
           inherit (settingsNix)
             editor errorlens nix-ide explorer terminal
             files git gitlens json-language-features
@@ -149,7 +149,7 @@
             ;
         };
         configs = {
-          inherit extensions settingsNix settingsNixCommon;
+          inherit extensions settingsNix settingsCommonNix;
         };
         devShells.default = pkgs.mkShell {
           buildInputs = tools;

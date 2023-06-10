@@ -86,7 +86,6 @@
     "jupyter.notebookFileRoot" = ''''${workspaceFolder}'';
   };
 
-
   markdown-all-in-one = {
     "markdown.extension.orderedList.autoRenumber" = false;
   };
