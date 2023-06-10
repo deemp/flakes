@@ -2,13 +2,7 @@
 
 This is a minimal flake for developing local `Haskell` packages.
 
-## Problem
-
-Compose a [shellFor](https://nixos.wiki/wiki/Haskell#Using_shellFor_.28multiple_packages.29) and [devshell](https://github.com/numtide/devshell) when using [direnv](https://direnv.net/).
-
-## Solution
-
-Don't use `shellFor`, just get `cabal-install` and `GHC` with necessary packages in a `devShell`.
+It composes a [devshell](https://github.com/numtide/devshell) and a [shellFor](https://nixos.wiki/wiki/Haskell#Using_shellFor_.28multiple_packages.29).
 
 ## This flake
 

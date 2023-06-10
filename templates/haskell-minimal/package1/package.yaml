@@ -1,6 +1,6 @@
-name: nix-managed
+name: package1
 version: 0.1.0.0
-github: "value/nix-managed"
+github: "value/package1"
 license: BSD3
 author: "value"
 maintainer: "value"
@@ -17,13 +17,14 @@ copyright: "value"
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description: Please see the README on GitHub at <https://github.com/value/nix-managed#readme>
+description: Please see the README on GitHub at <https://github.com/value/package1#readme>
 
 default-extensions:
   - ImportQualifiedPost
 
 dependencies:
   - base >= 4.7 && < 5
+  - zlib
 
 ghc-options:
   - -Wall
@@ -40,7 +41,7 @@ library:
   source-dirs: src
 
 executables:
-  nix-managed:
+  package1:
     main: Main.hs
     source-dirs: app
     ghc-options:
@@ -48,4 +49,4 @@ executables:
       - -rtsopts
       - -with-rtsopts=-N
     dependencies:
-      - nix-managed
+      - package1
