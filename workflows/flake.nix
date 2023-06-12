@@ -84,27 +84,41 @@
 
       # TODO don't build scripts when `nix run` gets an option to make a gc root
 
-      run = rec {
-        gitPull = ''
-          git pull --rebase --autostash
-        '';
-        nixRunDir = dir: installable: ''
-          cd '${dir}'
-          nix build .#${installable}
-          nix run .#${installable}
-        '';
-        nixRunAndCommitDir = dir: installable: commitMessage: ''
-          ${gitPull}
-          ${nixRunDir dir installable}
-          git commit -a -m "action: ${commitMessage}" && git push || echo ""
-        '';
-        nixRunAndCommit = nixRunAndCommitDir ".";
-        nixRun = nixRunDir ".";
-        commit = commitMessage: ''
-          ${gitPull}
-          git commit -a -m "action: ${commitMessage}" && git push || echo ""
-        '';
-      };
+      run =
+        let
+          gitPull = ''
+            git pull --rebase --autostash
+          '';
+          nixRunDir = dir: installable: ''
+            nix build ${dir}#${installable}
+            nix run ${dir}#${installable}
+          '';
+          nixRun = nixRunDir ".";
+          nixRunInDir = dir: installable: ''
+            cd '${dir}'
+            ${nixRun installable}
+          '';
+          pullActionCommit = action: commitMessage: ''
+            ${gitPull}
+            ${action}
+            git commit -a -m "action: ${commitMessage}" && git push || echo ""
+          '';
+          nixRunAndCommitInDir = dir: installable: pullActionCommit (nixRunInDir dir installable);
+          nixRunAndCommitDir = dir: installable: pullActionCommit (nixRunDir dir installable);
+          nixRunAndCommitInPWD = nixRunAndCommitInDir ".";
+          nixRunAndCommit = nixRunAndCommitDir ".";
+          commit = commitMessage: ''
+            ${gitPull}
+            git commit -a -m "action: ${commitMessage}" && git push || echo ""
+          '';
+        in
+        {
+          inherit
+            gitPull pullActionCommit
+            nixRunDir nixRun nixRunInDir
+            nixRunAndCommitInDir nixRunAndCommitDir
+            nixRunAndCommitInPWD nixRunAndCommit;
+        };
 
       # Flake file paths -> step to cache based on flake files
       cacheNixFiles = { flakeFiles ? [ "flake.nix" "flake.lock" ], store ? "auto", keySuffix ? "", checkIsRunnerLinux ? false, restoreOnly ? true }:
@@ -195,10 +209,7 @@
         pushFlakesToCachix = {
           name = "Push flakes to Cachix";
           env.CACHIX_CACHE = expr names.secrets.CACHIX_CACHE;
-          run = ''
-            nix build .#${names.pushToCachix}
-            nix run .#${names.pushToCachix}
-          '';
+          run = run.nixRun names.pushToCachix;
         };
         configGitAsGHActions = {
           name = "Config git for github-actions";
