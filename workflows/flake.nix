@@ -138,22 +138,24 @@
           }
         );
 
+      # nix store directory used for caching
+      # https://nixos.org/manual/nix/unstable/command-ref/conf-file.html?highlight=conf#conf-store
+      nixStore = {
+        linux = "/home/runner/nix";
+        auto = "auto";
+      };
+
       # Flake directories -> step to cache based on flake files
       cacheNixDirs =
-        { flakeDirs ? [ "." ], store ? nixStoreLinux, keySuffix ? "", checkIsRunnerLinux ? false, restoreOnly ? true }:
+        { flakeDirs ? [ "." ], store ? nixStore.linux, keySuffix ? "", checkIsRunnerLinux ? false, restoreOnly ? true }:
         cacheNixFiles ({
           flakeFiles = (__concatMap (x: [ "${x}/flake.nix" "${x}/flake.lock" ]) flakeDirs);
           inherit keySuffix store checkIsRunnerLinux restoreOnly;
         });
 
-      nixStoreLinux = "/home/runner/nix";
-      nixStoreAuto = "auto";
-
-      # Set the custom store to enable caching
-      # https://nixos.org/manual/nix/unstable/command-ref/conf-file.html?highlight=conf#conf-store
       # Keep build outputs to garbage collect at the end only the trash
       # https://nixos.org/manual/nix/unstable/command-ref/conf-file.html#description
-      installNix = { store ? nixStoreAuto }: {
+      installNix = { store ? nixStore.auto }: {
         name = "Install Nix";
         uses = "cachix/install-nix-action@v20";
         "with" = {
@@ -207,10 +209,10 @@
         # setting the store doesn't work for macOS
         # https://discourse.nixos.org/t/how-to-use-a-local-directory-as-a-nix-binary-cache/655
         nixCache.matrix.include = [
-          { os = os.macos-11; store = nixStoreAuto; }
-          { os = os.macos-12; store = nixStoreAuto; }
-          { os = os.ubuntu-20; store = nixStoreLinux; }
-          { os = os.ubuntu-22; store = nixStoreLinux; }
+          { os = os.macos-11; store = nixStore.auto; }
+          { os = os.macos-12; store = nixStore.auto; }
+          { os = os.ubuntu-20; store = nixStore.linux; }
+          { os = os.ubuntu-22; store = nixStore.linux; }
         ];
       };
 
@@ -254,7 +256,7 @@
           stepsIf mkAccessors mkAccessors_ run nixCI_ installNix;
       };
       configs = {
-        inherit oss os names on steps nixCI strategies nixStoreLinux nixStoreAuto;
+        inherit oss os names on steps nixCI strategies nixStore;
       };
     });
 }
