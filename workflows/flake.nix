@@ -82,12 +82,15 @@
         workflow_dispatch = { };
       };
 
+      # TODO don't build scripts when `nix run` gets an option to make a gc root
+
       run = rec {
         gitPull = ''
           git pull --rebase --autostash
         '';
         nixRunDir = dir: installable: ''
           cd '${dir}'
+          nix build .#${installable}
           nix run .#${installable}
         '';
         nixRunAndCommitDir = dir: installable: commitMessage: ''
@@ -184,12 +187,18 @@
         cacheNix = cacheNixDirs { };
         logInToCachix = {
           name = "Log in to Cachix";
-          run = "nix run nixpkgs#cachix -- authtoken ${ expr names.secrets.CACHIX_AUTH_TOKEN }";
+          run = ''
+            nix build nixpkgs#cachix
+            nix run nixpkgs#cachix -- authtoken ${ expr names.secrets.CACHIX_AUTH_TOKEN }
+          '';
         };
         pushFlakesToCachix = {
           name = "Push flakes to Cachix";
           env.CACHIX_CACHE = expr names.secrets.CACHIX_CACHE;
-          run = "nix run .#${names.pushToCachix}";
+          run = ''
+            nix build .#${names.pushToCachix}
+            nix run .#${names.pushToCachix}
+          '';
         };
         configGitAsGHActions = {
           name = "Config git for github-actions";
