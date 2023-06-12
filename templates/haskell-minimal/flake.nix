@@ -19,9 +19,11 @@
       # select a Haskell package set for a specified GHC version
       hpkgs = pkgs.haskell.packages.${ghcVersion};
 
-      # # Provide overrides
-      # # https://nixos.wiki/wiki/Haskell#Overrides
-      # # An override should include a local package into the Haskell package set
+      # Provide overrides
+      # https://nixos.wiki/wiki/Haskell#Overrides
+      # An override should include a local package into the Haskell package set
+      # When composing an override, once can override multiple package attributes
+      # https://nixos.org/manual/nixpkgs/stable/#haskell-mkderivation
       override = {
         overrides = self: super: {
           "${packageName1}" = pkgs.haskell.lib.overrideCabal (self.callCabal2nix packageName1 ./${packageName1} { }) (x: {
@@ -33,6 +35,7 @@
 
       hpkgs_ = hpkgs.override override;
 
+      # https://nixos.wiki/wiki/Haskell#Using_shellFor_.28multiple_packages.29
       devShells.shellFor = hpkgs_.shellFor {
         packages = ps: [ ps.${packageName1} ps.${packageName2} ];
         withHoogle = true;
