@@ -1,5 +1,5 @@
 # Set default location of a temp dir to save devshell profiles to
-set -q PROFILES_FOR_DEVSHELLS || set PROFILES_FOR_DEVSHELLS /tmp/__profiles_for_devshells
+set -q PROFILES_FOR_DEVSHELLS || set PROFILES_FOR_DEVSHELLS $(mktemp -d -t devshells-XXXXXXXXXX)
 mkdir -p $PROFILES_FOR_DEVSHELLS
 
 # get the names of devshells
