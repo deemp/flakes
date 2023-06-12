@@ -232,6 +232,7 @@
               ++ [
                 steps.logInToCachix
                 steps.pushFlakesToCachix
+                steps.nixStoreCollectGarbage
               ]
             ;
           };
