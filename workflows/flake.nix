@@ -177,6 +177,10 @@
           name = "Checkout this repo";
           uses = "actions/checkout@v3";
         };
+        gitPull = {
+          name = "Pull and rebase";
+          run = run.gitPull;
+        };
         cacheNix = cacheNixDirs { };
         logInToCachix = {
           name = "Log in to Cachix";
