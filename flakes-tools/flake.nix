@@ -25,7 +25,7 @@
 
       # TODO update cachix
       # https://github.com/cachix/cachix/issues/529
-      cachix = pkgs.haskellPackages.cachix_1_3_3;
+      cachix = pkgs.cachix;
 
       man = drv-tools.configs.${system}.man // {
         ENV = "# EXPECTED ENV VARIABLES";
