@@ -268,28 +268,25 @@
         inherit on;
       };
 
-      nixCI = nixCI_ {
-        steps_ = dir: (stepsIf ("${names.matrix.os} == '${os.ubuntu-20}'") ([
+      nixCIDir = dir: nixCI_ {
+        steps_ = _: (stepsIf ("${names.matrix.os} == '${os.ubuntu-20}'") ([
           steps.configGitAsGHActions
           (steps.updateLocksAndCommitDir dir)
         ]));
+        inherit dir;
       };
+
+      nixCI = nixCIDir ".";
     in
     {
       packages = {
         writeWorkflowsDir = writeYAML "workflow" "./tmp/nixCI.yaml" nixCI;
-        writeWorkflows = writeWorkflow "nixCI" (nixCI_ {
-          steps_ = dir: (stepsIf ("${names.matrix.os} == '${os.ubuntu-20}'") ([
-            steps.configGitAsGHActions
-            (steps.updateLocksAndCommitDir dir)
-          ]));
-          dir = "nix-dev/";
-        });
+        writeWorkflows = writeWorkflow "nixCI" (nixCIDir "nix-dev/");
       };
       functions = {
         inherit
           writeYAML writeWorkflow expr genAttrsId cacheNixFiles cacheNixDirs
-          stepsIf mkAccessors mkAccessors_ nixCI_ installNix;
+          stepsIf mkAccessors mkAccessors_ nixCI_ nixCIDir installNix;
       };
       attrsets = {
         inherit oss os names on steps nixCI strategies nixStore run;
