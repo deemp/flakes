@@ -189,7 +189,7 @@
         };
       };
 
-      steps = {
+      steps = rec {
         checkout = {
           name = "Checkout this repo";
           uses = "actions/checkout@v3";
@@ -206,11 +206,12 @@
             nix run nixpkgs#cachix -- authtoken ${ expr names.secrets.CACHIX_AUTH_TOKEN }
           '';
         };
-        pushFlakesToCachix = {
+        pushFlakesToCachixDir = dir: {
           name = "Push flakes to Cachix";
           env.CACHIX_CACHE = expr names.secrets.CACHIX_CACHE;
-          run = run.nixRun names.pushToCachix;
+          run = run.nixRunDir dir names.pushToCachix;
         };
+        pushFlakesToCachix = pushFlakesToCachixDir ".";
         configGitAsGHActions = {
           name = "Config git for github-actions";
           run = ''
@@ -218,12 +219,13 @@
             git config user.email github-actions@github.com
           '';
         };
-        updateLocksAndCommit =
+        updateLocksAndCommitDir = dir:
           let name = "Update flake locks"; in
           {
             inherit name;
-            run = run.nixRunAndCommit names.updateLocks name;
+            run = run.nixRunAndCommitDir dir names.updateLocks name;
           };
+        updateLocksAndCommit = updateLocksAndCommitDir ".";
         nixStoreCollectGarbage = {
           name = "Collect garbage in /nix/store";
           run = "nix store gc";
