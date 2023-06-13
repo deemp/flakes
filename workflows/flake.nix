@@ -243,7 +243,7 @@
         ];
       };
 
-      nixCI_ = steps_: {
+      nixCI_ = { steps_ ? (_: [ ]), dir ? "." }: {
         jobs = {
           nixCI = {
             name = "Nix CI";
@@ -255,10 +255,10 @@
                 (installNix { store = expr names.matrix.store; })
                 (cacheNixDirs { keySuffix = "cachix"; store = expr names.matrix.store; restoreOnly = false; })
               ]
-              ++ steps_
+              ++ (steps_ dir)
               ++ [
                 steps.logInToCachix
-                steps.pushFlakesToCachix
+                (steps.pushFlakesToCachixDir dir)
                 steps.nixStoreCollectGarbage
               ]
             ;
@@ -268,15 +268,23 @@
         inherit on;
       };
 
-      nixCI = nixCI_ (stepsIf ("${names.matrix.os} == '${os.ubuntu-20}'") [
-        steps.configGitAsGHActions
-        steps.updateLocksAndCommit
-      ]);
+      nixCI = nixCI_ {
+        steps_ = dir: (stepsIf ("${names.matrix.os} == '${os.ubuntu-20}'") ([
+          steps.configGitAsGHActions
+          (steps.updateLocksAndCommitDir dir)
+        ]));
+      };
     in
     {
       packages = {
         writeWorkflowsDir = writeYAML "workflow" "./tmp/nixCI.yaml" nixCI;
-        writeWorkflows = writeWorkflow "nixCI" nixCI;
+        writeWorkflows = writeWorkflow "nixCI" (nixCI_ {
+          steps_ = dir: (stepsIf ("${names.matrix.os} == '${os.ubuntu-20}'") ([
+            steps.configGitAsGHActions
+            (steps.updateLocksAndCommitDir dir)
+          ]));
+          dir = "nix-dev/";
+        });
       };
       functions = {
         inherit
