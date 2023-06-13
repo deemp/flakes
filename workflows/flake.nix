@@ -281,10 +281,10 @@
       functions = {
         inherit
           writeYAML writeWorkflow expr genAttrsId cacheNixFiles cacheNixDirs
-          stepsIf mkAccessors mkAccessors_ run nixCI_ installNix;
+          stepsIf mkAccessors mkAccessors_ nixCI_ installNix;
       };
-      configs = {
-        inherit oss os names on steps nixCI strategies nixStore;
+      attrsets = {
+        inherit oss os names on steps nixCI strategies nixStore run;
       };
     });
 }
