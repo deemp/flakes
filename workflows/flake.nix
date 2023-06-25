@@ -267,12 +267,19 @@
       };
 
       nixCI = nixCIDir ".";
-    in
-    {
+
       packages = {
         writeWorkflowsDir = writeYAML "workflow" "./tmp/nixCI.yaml" nixCI;
         writeWorkflows = writeWorkflow "nixCI" (nixCIDir "nix-dev/");
       };
+
+      devShells.default = pkgs.mkShell {
+        buildInputs = __attrValues { inherit (packages) writeWorkflows writeWorkflowsDir; };
+      };
+    in
+    {
+      inherit packages devShells;
+
       lib = {
         inherit
           cacheNixFiles
