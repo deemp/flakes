@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import json2md from "json2md"
 import * as fs from "fs"
 

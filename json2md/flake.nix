@@ -3,117 +3,92 @@
     nixpkgs_.url = "github:deemp/flakes?dir=source-flake/nixpkgs";
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
-    dream2nix_.url = "github:deemp/flakes?dir=source-flake/dream2nix";
-    dream2nix.follows = "dream2nix_/dream2nix";
     flake-utils.follows = "flake-utils_/flake-utils";
     drv-tools.url = "github:deemp/flakes?dir=drv-tools";
   };
-  outputs =
-    { self
-    , flake-utils
-    , dream2nix
-    , drv-tools
-    , nixpkgs
-    , ...
-    }:
+  outputs = inputs: inputs.flake-utils.lib.eachDefaultSystem (system:
     let
-      # json2md converts an input JSON into md and prints to stdout
-      # Usage:
-      # json2md input
-      # Example:
-      # json2md <(printf '{"h1": "Hello, world"}' )
-      out1 =
-        dream2nix.lib.makeFlakeOutputs
-          {
-            systems = flake-utils.lib.defaultSystems;
-            config.projectRoot = ./.;
-            source = ./.;
-            settings = [
-              {
-                subsystemInfo.nodejs = 18;
-              }
-            ];
-          };
-      out2 = flake-utils.lib.eachDefaultSystem (system:
+      pkgs = inputs.nixpkgs.legacyPackages.${system};
+      inherit (inputs.drv-tools.lib.${system})
+        mkBin mkBinName writeJSON withMan mkShellApp
+        framedBrackets mkShellApps man;
+      inherit (builtins) isString baseNameOf dirOf;
+
+      json2md = pkgs.buildNpmPackage rec {
+        buildInputs = [
+          pkgs.nodejs_18
+        ];
+
+        pname = "json2md";
+        version = "2.0.0";
+
+        src = ./.;
+
+        npmDepsHash = "sha256-WjGhOEqL6Zg5tbBHgStr10ROcedJnkWCf5qiDwHOOp8=";
+      };
+
+      nix2mdSilent = outPath: dataNix:
+        assert builtins.isString outPath;
+        assert builtins.isList dataNix;
         let
-          pkgs = nixpkgs.legacyPackages.${system};
-          inherit (builtins) isString baseNameOf dirOf;
-          inherit (drv-tools.lib.${system})
-            mkBin mkBinName writeJSON withMan mkShellApp
-            framedBrackets mkShellApps man;
-          nix2mdSilent = outPath: dataNix:
-            assert builtins.isString outPath;
-            assert builtins.isList dataNix;
-            let
-              outName = baseNameOf outPath;
-              outDir = dirOf outPath;
-              tmpJSON = "${outName}.tmp.json";
-              writeTmpJSON = writeJSON "pre-md" "./${tmpJSON}" dataNix;
-              json2md = out1.packages.${system}.default;
-              mdlint = pkgs.nodePackages.markdownlint-cli2;
-              name = "nix-to-md";
-            in
-            mkShellApp {
-              name = name;
-              runtimeInputs = [
-                pkgs.nodejs_18
-                writeTmpJSON
-                json2md
-                mdlint
-              ];
-              text = ''
-                ${mkBin writeTmpJSON}
-                mkdir -p ${outDir}
-                ${mkBinName json2md "json2md"} ${tmpJSON} > ${outPath}
-                ${mkBinName mdlint "markdownlint-cli2-fix"} ${outPath} || echo ""
-                rm ${tmpJSON}
-              '';
-            };
-
-          nix2md = outPath: dataNix:
-            assert builtins.isString outPath;
-            assert builtins.isList dataNix;
-            withMan
-              (
-                let
-                  nix2md_ = nix2mdSilent outPath dataNix;
-                  name = nix2md_.name;
-                in
-                mkShellApp {
-                  name = name;
-                  text = ''
-                    ${mkBin nix2md_}
-                    printf "${framedBrackets "%s"}" "ok ${name}"
-                  '';
-                  description = "Convert a Nix expression to ${outPath}";
-                }
-              )
-              (x: ''
-                ${man.DESCRIPTION}
-                ${x.meta.description}.
-              '');
-
-          test = mkShellApps {
-            testNix2md = {
-              text = "${mkBin (nix2md "tmp/some.md" [{ h1 = "Some text"; }])}";
-            };
-          };
-
-          json2md = out1.packages.${system}.default;
+          outName = baseNameOf outPath;
+          outDir = dirOf outPath;
+          tmpJSON = "${outName}.tmp.json";
+          writeTmpJSON = writeJSON "pre-md" "./${tmpJSON}" dataNix;
+          # json2md = out1.packages.${system}.default;
+          mdlint = pkgs.nodePackages.markdownlint-cli2;
+          name = "nix-to-md";
         in
-        {
-          packages = {
-            inherit json2md;
-          } // test;
-          lib = {
-            inherit nix2mdSilent nix2md;
-          };
-          devShells.default = pkgs.mkShell {
-            buildInputs = [ json2md ] ++ builtins.attrValues test;
-          };
+        mkShellApp {
+          name = name;
+          runtimeInputs = [
+            pkgs.nodejs_18
+            writeTmpJSON
+            json2md
+            mdlint
+          ];
+          text = ''
+            ${mkBin writeTmpJSON}
+            mkdir -p ${outDir}
+            ${mkBinName json2md "json2md"} ${tmpJSON} > ${outPath}
+            ${mkBinName mdlint "markdownlint-cli2-fix"} ${outPath} || echo ""
+            rm ${tmpJSON}
+          '';
+        };
+
+      nix2md = outPath: dataNix:
+        assert builtins.isString outPath;
+        assert builtins.isList dataNix;
+        let
+          nix2md_ = nix2mdSilent outPath dataNix;
+          name = nix2md_.name;
+        in
+        mkShellApp {
+          name = name;
+          text = ''
+            ${mkBin nix2md_}
+            printf "${framedBrackets "%s"}" "ok ${name}"
+          '';
+          description = "Convert a Nix expression to ${outPath}";
         }
-      );
+      ;
+
+      test = mkShellApps {
+        testNix2md = {
+          text = "${mkBin (nix2md "tmp/some.md" [{ h1 = "Some text"; }])}";
+        };
+      };
     in
-    out2
-  ;
+    {
+      packages = {
+        inherit json2md;
+      } // test;
+      lib = {
+        inherit nix2mdSilent nix2md;
+      };
+      devShells.default = pkgs.mkShell {
+        buildInputs = [ json2md ] ++ builtins.attrValues test;
+      };
+    }
+  );
 }
