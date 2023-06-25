@@ -94,7 +94,7 @@
               remote ? false
             , doBuild ? true
             , doRun ? true
-            , scriptNames ? [ ]
+            , scripts ? [ ]
             , doCommit ? false
             , commitMessage ? "run scripts"
             }:
@@ -106,11 +106,11 @@
                     let installable = if remote then name else "${if inDir then "." else dir}#${name}"; in
                     (if doBuild then "nix build ${installable}\n" else "") + (if doRun then "nix run ${installable}\n" else "")
                   )
-                  scriptNames
+                  scripts
              }\n" +
             (if doCommit then "${commit commitMessage}\n" else "")
           ;
-          nixScript = args@{ name, ... }: nix ((builtins.removeAttrs args [ "name" ]) // { scriptNames = [ args.name ]; });
+          nixScript = args@{ name, ... }: nix ((builtins.removeAttrs args [ "name" ]) // { scripts = [ args.name ]; });
         in
         {
           inherit gitPull commit nix nixScript;
