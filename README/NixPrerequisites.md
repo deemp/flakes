@@ -175,6 +175,10 @@ cp flake-2/file{2,3} flake-3
 
    - Provide it in inputs. Inputs accept arbitrary files. Make links follow the format of [flake inputs](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake.html#flake-inputs)
 
+1. How to disable querying remote binary caches?
+
+     - `nix run <installable> --no-substitute`
+
 ## Nix
 
 1. How to wrap an executable to run it with flags?

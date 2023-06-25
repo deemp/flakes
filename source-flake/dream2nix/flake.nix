@@ -1,4 +1,4 @@
 {
-  inputs.dream2nix.url = "github:nix-community/dream2nix/785b76894263fd76a0e69955e4cd990b7b735bdf";
+  inputs.dream2nix.url = "github:nix-community/dream2nix/6b750b01385718a6a84231d3c5451308978fa7de";
   outputs = x: { };
 }
