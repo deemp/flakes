@@ -20,7 +20,7 @@
         ${builtins.readFile ./scripts/activate.sh}
         set +e
       '';
-      inherit (drv-tools.functions.${system}) runInEachDir;
+      inherit (drv-tools.lib.${system}) runInEachDir;
       createVenvs = dirs: runInEachDir
         {
           name = "create-venvs";
@@ -36,11 +36,11 @@
       testCreateVenvs = createVenvs [ "." ];
     in
     {
-      snippets = {
-        inherit activateVenv;
-      };
-      functions = {
-        inherit createVenvs;
+      lib = {
+        inherit
+          activateVenv
+          createVenvs
+          ;
       };
       devShells.default = pkgs.mkShell {
         buildInputs = [ testCreateVenvs ];

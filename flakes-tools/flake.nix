@@ -15,7 +15,7 @@
     }: flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-      inherit (drv-tools.functions.${system})
+      inherit (drv-tools.lib.${system})
         withMan runFishScript mkShellApp wrapShellApp
         mkShellApps mkBin framedBrackets
         concatStringsNewline mkDevShellsWithDefault runInEachDir
@@ -27,7 +27,7 @@
       # https://github.com/cachix/cachix/issues/529
       cachix = pkgs.cachix;
 
-      man = drv-tools.configs.${system}.man // {
+      man = drv-tools.lib.${system}.man // {
         ENV = "# EXPECTED ENV VARIABLES";
         CACHIX_CACHE = ''
           `CACHIX_CACHE`
@@ -286,7 +286,7 @@
       );
     in
     {
-      functions = {
+      lib = {
         inherit
           flakesDumpDevshells
           flakesPushToCachix

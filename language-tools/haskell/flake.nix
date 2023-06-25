@@ -7,7 +7,7 @@
   };
   outputs = inputs:
     inputs.flake-utils.lib.eachDefaultSystem (system:
-    let
+      let
       pkgs = inputs.nixpkgs.legacyPackages.${system};
       inherit (builtins) map concatLists attrValues;
       inherit (pkgs.lib.lists) genAttrs;
@@ -147,7 +147,7 @@
             inherit override packages runtimeDependencies;
           };
           ghc = ghcGHC version override packages;
-          
+
           inherit (haskellPackagesGHC version) callCabal2nix;
           implicit-hie = pkgs.haskell.packages.ghc945.implicit-hie_0_1_4_0;
           inherit (pkgs) ghcid hpack;
@@ -157,7 +157,7 @@
         };
     in
     {
-      functions = {
+      lib = {
         inherit toolsGHC;
       };
     }

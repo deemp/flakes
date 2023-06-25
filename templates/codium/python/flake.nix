@@ -12,9 +12,8 @@
   outputs = inputs: inputs.flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = inputs.nixpkgs.legacyPackages.${system};
-      inherit (inputs.codium.functions.${system}) writeSettingsJSON mkCodium;
-      inherit (inputs.codium.configs.${system}) extensions settingsNix;
-      inherit (inputs.devshell.functions.${system}) mkCommands mkRunCommands mkShell;
+      inherit (inputs.codium.lib.${system}) extensions settingsNix writeSettingsJSON mkCodium;
+      inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkShell;
 
       python =
         pkgs.python310.withPackages (p: with p; [

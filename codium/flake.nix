@@ -23,11 +23,10 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
 
-        inherit (drv-tools.functions.${system})
+        inherit (drv-tools.lib.${system})
           withMan writeJSON toList mergeValues
           mkBin indentStrings4 withDescription
-          withAttrs;
-        man = drv-tools.configs.${system}.man;
+          withAttrs man;
 
         # A set of VSCodium extensions
         extensions = import ./nix-files/extensions.nix { inherit system vscode-extensions vscode-extensions-extra pkgs; };
@@ -145,15 +144,18 @@
         tools = [ testCodium testWriteSettings ];
       in
       {
-        functions = {
+        lib = {
           inherit
             mkCodium
             writeSettingsJSON
             writeTasksJSON
             ;
-        };
-        configs = {
-          inherit extensions extensionsCommon settingsNix settingsCommonNix;
+          inherit
+            extensions
+            extensionsCommon
+            settingsCommonNix
+            settingsNix
+            ;
         };
         devShells.default = pkgs.mkShell {
           buildInputs = tools;

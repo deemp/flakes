@@ -42,7 +42,7 @@
       packages = {
         default = envToJSONConverter;
       };
-      functions = {
+      lib = {
         inherit mkJSON;
       };
       tests = {

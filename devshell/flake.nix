@@ -135,6 +135,13 @@
         in
         {
           inherit devShells packages devshell;
-          functions = { inherit mkCommands mkRunCommandsDir mkRunCommands mkShell; };
+          lib = {
+            inherit
+              mkCommands
+              mkRunCommands
+              mkRunCommandsDir
+              mkShell
+              ;
+          };
         });
 }

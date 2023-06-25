@@ -38,10 +38,9 @@
         let
           pkgs = nixpkgs.legacyPackages.${system};
           inherit (builtins) isString baseNameOf dirOf;
-          inherit (drv-tools.functions.${system})
+          inherit (drv-tools.lib.${system})
             mkBin mkBinName writeJSON withMan mkShellApp
-            framedBrackets mkShellApps;
-          inherit (drv-tools.configs.${system}) man;
+            framedBrackets mkShellApps man;
           nix2mdSilent = outPath: dataNix:
             assert builtins.isString outPath;
             assert builtins.isList dataNix;
@@ -106,7 +105,7 @@
           packages = {
             inherit json2md;
           } // test;
-          functions = {
+          lib = {
             inherit nix2mdSilent nix2md;
           };
           devShells.default = pkgs.mkShell {

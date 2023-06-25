@@ -14,13 +14,11 @@
   outputs = inputs: inputs.flake-utils.lib.eachDefaultSystem
     (system:
       let
-        inherit (inputs.codium.functions.${system}) mkCodium writeSettingsJSON;
-        inherit (inputs.codium.configs.${system}) extensionsCommon settingsCommonNix;
-        inherit (inputs.drv-tools.functions.${system}) readDirectories withAttrs;
-        inherit (inputs.flakes-tools.functions.${system}) mkFlakesTools;
-        inherit (inputs.devshell.functions.${system}) mkCommands mkRunCommands mkShell;
-        inherit (inputs.workflows.functions.${system}) writeWorkflow;
-        inherit (inputs.workflows.configs.${system}) nixCI;
+        inherit (inputs.codium.lib.${system}) mkCodium writeSettingsJSON extensionsCommon settingsCommonNix;
+        inherit (inputs.drv-tools.lib.${system}) readDirectories withAttrs;
+        inherit (inputs.flakes-tools.lib.${system}) mkFlakesTools;
+        inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkShell;
+        inherit (inputs.workflows.lib.${system}) writeWorkflow nixCI;
 
         flakesTools = (mkFlakesTools (
           let f = dir: (builtins.map (x: "${dir}/${x}") (readDirectories ./${dir})); in

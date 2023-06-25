@@ -408,12 +408,11 @@
           json2nix
           ;
       };
-      functions = {
+      lib = {
         inherit
           applyN
           concatMapStringsNewline
           concatStringsNewline
-          wrapShellApp
           framed_
           framedBrackets
           framedBrackets_
@@ -422,8 +421,9 @@
           indentStrings_
           indentStrings4
           indentStrings8
-          mapStrGenAttrs
+          man
           mapGenAttrs
+          mapStrGenAttrs
           mergeValues
           mkAccessors
           mkAccessors_
@@ -446,12 +446,11 @@
           withMan
           withMan_
           withMeta
+          wrapShellApp
           writeJSON
           writeYAML
           ;
       };
-
-      configs = { inherit man; };
 
       # tests 
       devShells.default = pkgs.mkShell {

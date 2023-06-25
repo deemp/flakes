@@ -25,15 +25,12 @@
       # --- Imports ---
 
       pkgs = inputs.nixpkgs.legacyPackages.${system};
-      inherit (inputs.codium.functions.${system}) writeSettingsJSON mkCodium;
-      inherit (inputs.drv-tools.functions.${system}) mkBin withAttrs withMan withDescription mkShellApp;
-      inherit (inputs.drv-tools.configs.${system}) man;
-      inherit (inputs.codium.configs.${system}) extensions extensionsCommon settingsNix settingsCommonNix;
-      inherit (inputs.flakes-tools.functions.${system}) mkFlakesTools;
-      inherit (inputs.devshell.functions.${system}) mkCommands mkRunCommands mkShell;
-      inherit (inputs.haskell-tools.functions.${system}) toolsGHC;
-      inherit (inputs.workflows.functions.${system}) writeWorkflow;
-      inherit (inputs.workflows.configs.${system}) nixCI;
+      inherit (inputs.codium.lib.${system}) extensions extensionsCommon settingsNix settingsCommonNix writeSettingsJSON mkCodium;
+      inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkShell;
+      inherit (inputs.drv-tools.lib.${system}) mkBin withAttrs withMan withDescription mkShellApp man;
+      inherit (inputs.flakes-tools.lib.${system}) mkFlakesTools;
+      inherit (inputs.haskell-tools.lib.${system}) toolsGHC;
+      inherit (inputs.workflows.lib.${system}) writeWorkflow nixCI;
       inherit (inputs) lima;
 
       # --- Parameters ---
@@ -132,7 +129,7 @@
       # We use `shellFor` with overriden `haskellPackages` to get the correct dependencies
       # We'll be able to incrementally build our local packages via `cabal`
       # Incremental build means that only necessary rebuilds will be made on changes in a package
-      
+
       # It's possible to use the build dependencies of packages from `shellFor` in a [devshell](https://github.com/numtide/devshell) shell
       # Use `packagesFrom = [ shellFor ]`
       # See https://github.com/numtide/devshell/pull/261

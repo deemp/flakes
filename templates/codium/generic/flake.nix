@@ -15,13 +15,11 @@
     (system:
       let
         pkgs = inputs.nixpkgs.legacyPackages.${system};
-        inherit (inputs.codium.functions.${system}) mkCodium writeSettingsJSON;
-        inherit (inputs.codium.configs.${system}) extensions extensionsCommon settingsNix settingsCommon;
+        inherit (inputs.codium.lib.${system}) mkCodium writeSettingsJSON extensions extensionsCommon settingsNix settingsCommon;
+        inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkRunCommandsDir mkShell;
+        inherit (inputs.flakes-tools.lib.${system}) mkFlakesTools;
         inherit (inputs.vscode-extensions.extensions.${system}) vscode-marketplace open-vsx;
-        inherit (inputs.devshell.functions.${system}) mkCommands mkRunCommands mkShell;
-        inherit (inputs.workflows.functions.${system}) writeWorkflow;
-        inherit (inputs.workflows.configs.${system}) nixCI;
-        inherit (inputs.flakes-tools.functions.${system}) mkFlakesTools;
+        inherit (inputs.workflows.lib.${system}) writeWorkflow nixCI;
 
         tools = [ pkgs.hello ];
 
@@ -64,10 +62,8 @@
           bash.extra = "hello";
           commands =
             mkCommands "tools" tools
-            ++ mkRunCommands "ide" {
-              "codium ." = packages.codium;
-              inherit (packages) writeSettings;
-            };
+            ++ mkRunCommands "ide" { "codium ." = packages.codium; inherit (packages) writeSettings; }
+            ++ mkRunCommandsDir "." "infra" { inherit (packages) updateLocks pushToCachix writeWorkflows; };
         };
       in
       {

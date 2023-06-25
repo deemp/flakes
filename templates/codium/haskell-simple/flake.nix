@@ -20,13 +20,12 @@
       # --- Imports ---
 
       pkgs = inputs.nixpkgs.legacyPackages.${system};
-      inherit (inputs.codium.functions.${system}) writeSettingsJSON mkCodium;
-      inherit (inputs.codium.configs.${system}) extensions extensionsCommon settingsNix settingsCommonNix;
-      inherit (inputs.flakes-tools.functions.${system}) mkFlakesTools;
-      inherit (inputs.devshell.functions.${system}) mkCommands mkRunCommands mkShell;
-      inherit (inputs.haskell-tools.functions.${system}) toolsGHC;
-      inherit (inputs.workflows.functions.${system}) writeWorkflow;
-      inherit (inputs.workflows.configs.${system}) nixCI;
+      inherit (inputs.codium.lib.${system}) extensions extensionsCommon settingsNix settingsCommonNix writeSettingsJSON mkCodium;
+      inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkShell;
+      inherit (inputs.drv-tools.lib.${system}) mkBin withAttrs withMan withDescription mkShellApp man;
+      inherit (inputs.flakes-tools.lib.${system}) mkFlakesTools;
+      inherit (inputs.haskell-tools.lib.${system}) toolsGHC;
+      inherit (inputs.workflows.lib.${system}) writeWorkflow nixCI;
       inherit (inputs) lima;
 
       # --- Parameters ---
