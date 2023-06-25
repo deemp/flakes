@@ -245,6 +245,8 @@
       };
 
       nixCI_ = { steps_ ? (_: [ ]), dir ? "." }: {
+        name = "Nix CI";
+        inherit on;
         jobs = {
           nixCI = {
             name = "Nix CI";
@@ -266,15 +268,13 @@
             ;
           };
         };
-        name = "Nix CI";
-        inherit on;
       };
 
       nixCIDir = dir: nixCI_ {
-        steps_ = _: (stepsIf ("${names.matrix.os} == '${os.ubuntu-20}'") ([
+        steps_ = _: stepsIf ("${names.matrix.os} == '${os.ubuntu-20}'") [
           steps.configGitAsGHActions
           (steps.updateLocks { inherit dir; })
-        ]));
+        ];
         inherit dir;
       };
 
