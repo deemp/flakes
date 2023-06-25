@@ -86,32 +86,34 @@
         let
           gitPull = ''git pull --rebase --autostash'';
           commit = commitMessage: ''git commit -a -m "action: ${commitMessage}" && git push || echo ""'';
-          nixRun =
-            { needGitPull ? false
+          nix =
+            { doGitPull ? false
             , dir ? "."
             , inDir ? false
             , # script may be from a remote flake
               remote ? false
+            , doBuild ? true
+            , doRun ? true
             , scriptNames ? [ ]
-            , needCommit ? false
+            , doCommit ? false
             , commitMessage ? "run scripts"
             }:
-            (if needGitPull then "${gitPull}\n" else "") +
+            (if doGitPull then "${gitPull}\n" else "") +
             (if inDir then "cd ${dir}\n" else "") +
-            "${concatMapStringsSep
+            "\n${concatMapStringsSep
                   "\n"
                   (name:
-                    let installable = if remote then name else "${if inDir then "." else dir}#${name}"; in 
-                    "\nnix build ${installable}\nnix run ${installable}\n"
+                    let installable = if remote then name else "${if inDir then "." else dir}#${name}"; in
+                    (if doBuild then "nix build ${installable}\n" else "") + (if doRun then "nix run ${installable}\n" else "")
                   )
                   scriptNames
              }\n" +
-            (if needCommit then "${commit commitMessage}\n" else "")
+            (if doCommit then "${commit commitMessage}\n" else "")
           ;
-          nixRunScript = args@{ name, ... }: nixRun ((builtins.removeAttrs args [ "name" ]) // { scriptNames = [ args.name ]; });
+          nixScript = args@{ name, ... }: nix ((builtins.removeAttrs args [ "name" ]) // { scriptNames = [ args.name ]; });
         in
         {
-          inherit gitPull commit nixRun nixRunScript;
+          inherit gitPull commit nix nixScript;
         };
 
       # File paths -> step to cache based on these files
@@ -201,7 +203,7 @@
         pushFlakesToCachixDir = dir: {
           name = "Push flakes to Cachix";
           env.CACHIX_CACHE = expr names.secrets.CACHIX_CACHE;
-          run = run.nixRunScript { inherit dir; name = names.pushToCachix; };
+          run = run.nixScript { inherit dir; name = names.pushToCachix; };
         };
         pushFlakesToCachix = pushFlakesToCachixDir ".";
         configGitAsGHActions = {
@@ -211,12 +213,12 @@
             git config user.email github-actions@github.com
           '';
         };
-        updateLocks = { needCommit ? true, needGitPull ? true, dir ? "." }:
+        updateLocks = { doCommit ? true, doGitPull ? true, dir ? "." }:
           let name = "Update flake locks"; in
           {
             inherit name;
-            run = run.nixRunScript ({
-              inherit needCommit needGitPull dir;
+            run = run.nixScript ({
+              inherit doCommit doGitPull dir;
               name = names.updateLocks;
               commitMessage = name;
             });
