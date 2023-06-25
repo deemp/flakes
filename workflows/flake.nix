@@ -85,7 +85,10 @@
       run =
         let
           gitPull = ''git pull --rebase --autostash'';
-          commit = commitMessage: ''git commit -a -m "action: ${commitMessage}" && git push || echo ""'';
+          commit =
+            { commitMessage ? ""
+            , commitMessages ? [ commitMessage ]
+            }: ''git commit -a ${concatMapStringsSep " \\\n  " (message: ''-m "action: ${message}"'') commitMessages} && git push || echo ""'';
           nix =
             { doGitPull ? false
             , dir ? "."
@@ -97,18 +100,19 @@
             , scripts ? [ ]
             , doCommit ? false
             , commitMessage ? "run scripts"
+            , commitMessages ? [ commitMessage ]
             }:
-            (if doGitPull then "${gitPull}\n" else "") +
-            (if inDir then "cd ${dir}\n" else "") +
-            "\n${concatMapStringsSep
+            (if doGitPull then "${gitPull}\n\n" else "") +
+            (if inDir then "cd ${dir}\n\n" else "") +
+            "${concatMapStringsSep
                   "\n"
                   (name:
                     let installable = if remote then name else "${if inDir then "." else dir}#${name}"; in
                     (if doBuild then "nix build ${installable}\n" else "") + (if doRun then "nix run ${installable}\n" else "")
                   )
                   scripts
-             }\n" +
-            (if doCommit then "${commit commitMessage}\n" else "")
+             }${if builtins.length scripts > 0 then "\n" else ""}" +
+            (if doCommit then "${commit {inherit commitMessages;}}\n" else "")
           ;
           nixScript = args@{ name, ... }: nix ((builtins.removeAttrs args [ "name" ]) // { scripts = [ args.name ]; });
         in
