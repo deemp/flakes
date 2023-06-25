@@ -13,7 +13,7 @@
     (system:
       let
         pkgs = inputs.nixpkgs.legacyPackages.${system};
-        inherit (inputs.codium.lib.${system}) mkCodium writeSettingsJSON extensions extensionsCommon settingsNix settingsCommon;
+        inherit (inputs.codium.lib.${system}) mkCodium writeSettingsJSON extensions extensionsCommon settingsNix settingsCommonNix;
         inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkRunCommandsDir mkShell;
         inherit (inputs.flakes-tools.lib.${system}) mkFlakesTools;
         inherit (inputs.codium.inputs.vscode-extensions.extensions.${system}) vscode-marketplace open-vsx;
@@ -40,7 +40,7 @@
           };
 
           # a script to write `.vscode/settings.json`
-          writeSettings = writeSettingsJSON (settingsCommon // {
+          writeSettings = writeSettingsJSON (settingsCommonNix // {
             inherit (settingsNix) haskell;
           });
 
