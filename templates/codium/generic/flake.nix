@@ -5,8 +5,6 @@
     codium.url = "github:deemp/flakes?dir=codium";
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
-    vscode-extensions_.url = "github:deemp/flakes?dir=source-flake/nix-vscode-extensions";
-    vscode-extensions.follows = "vscode-extensions_/vscode-extensions";
     devshell.url = "github:deemp/flakes?dir=devshell";
     flakes-tools.url = "github:deemp/flakes?dir=flakes-tools";
     workflows.url = "github:deemp/flakes?dir=workflows";
@@ -18,7 +16,7 @@
         inherit (inputs.codium.lib.${system}) mkCodium writeSettingsJSON extensions extensionsCommon settingsNix settingsCommon;
         inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkRunCommandsDir mkShell;
         inherit (inputs.flakes-tools.lib.${system}) mkFlakesTools;
-        inherit (inputs.vscode-extensions.extensions.${system}) vscode-marketplace open-vsx;
+        inherit (inputs.codium.inputs.vscode-extensions.extensions.${system}) vscode-marketplace open-vsx;
         inherit (inputs.workflows.lib.${system}) writeWorkflow nixCI;
 
         tools = [ pkgs.hello ];
