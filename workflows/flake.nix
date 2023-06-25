@@ -171,7 +171,7 @@
       # https://nixos.org/manual/nix/unstable/command-ref/conf-file.html#description
       installNix = { store ? nixStore.auto }: {
         name = "Install Nix";
-        uses = "cachix/install-nix-action@v20";
+        uses = "cachix/install-nix-action@v22";
         "with" = {
           extra_nix_config = ''
             access-tokens = github.com=${expr names.secrets.GITHUB_TOKEN}
