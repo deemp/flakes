@@ -30,7 +30,7 @@
             source = ./.;
             settings = [
               {
-                subsystemInfo.nodejs = 16;
+                subsystemInfo.nodejs = 18;
               }
             ];
           };
@@ -56,7 +56,7 @@
             mkShellApp {
               name = name;
               runtimeInputs = [
-                pkgs.nodejs-16_x
+                pkgs.nodejs_18
                 writeTmpJSON
                 json2md
                 mdlint
