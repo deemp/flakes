@@ -18,6 +18,7 @@
       pkgs = nixpkgs.legacyPackages.${system};
       inherit (drv-tools.lib.${system}) writeYAML genAttrsId mkAccessors mkAccessors_;
       inherit (builtins) concatMap;
+      inherit (pkgs.lib.strings) concatMapStringsSep;
 
       writeWorkflow = name: writeYAML name ".github/workflows/${name}.yaml";
 
@@ -83,44 +84,46 @@
 
       run =
         let
-          gitPull = ''
-            git pull --rebase --autostash
-          '';
-          nixRunDir = dir: installable: ''
-            nix build ${dir}#${installable}
-            nix run ${dir}#${installable}
-          '';
-          nixRun = nixRunDir ".";
-          nixRunInDir = dir: installable: ''
-            cd '${dir}'
-            ${nixRun installable}
-          '';
-          pullActionCommit = action: commitMessage: ''
-            ${gitPull}
-            ${action}
-            git commit -a -m "action: ${commitMessage}" && git push || echo ""
-          '';
-          nixRunAndCommitInDir = dir: installable: pullActionCommit (nixRunInDir dir installable);
-          nixRunAndCommitDir = dir: installable: pullActionCommit (nixRunDir dir installable);
-          nixRunAndCommitInPWD = nixRunAndCommitInDir ".";
-          nixRunAndCommit = nixRunAndCommitDir ".";
-          commit = commitMessage: ''
-            ${gitPull}
-            git commit -a -m "action: ${commitMessage}" && git push || echo ""
-          '';
+          gitPull = ''git pull --rebase --autostash'';
+          commit = commitMessage: ''git commit -a -m "action: ${commitMessage}" && git push || echo ""'';
+          nixRun =
+            { needGitPull ? false
+            , dir ? "."
+            , inDir ? false
+            , # script may be from a remote flake
+              remote ? false
+            , scriptNames ? [ ]
+            , needCommit ? false
+            , commitMessage ? "run scripts"
+            }:
+            (if needGitPull then "${gitPull}\n" else "") +
+            (if inDir then "cd ${dir}\n" else "") +
+            "${concatMapStringsSep
+                  "\n"
+                  (name:
+                    let installable = if remote then name else "${if inDir then "." else dir}#${name}"; in 
+                    "\nnix build ${installable}\nnix run ${installable}\n"
+                  )
+                  scriptNames
+             }\n" +
+            (if needCommit then "${commit commitMessage}\n" else "")
+          ;
+          nixRunScript = args@{ name, ... }: nixRun ((builtins.removeAttrs args [ "name" ]) // { scriptNames = [ args.name ]; });
         in
         {
-          inherit
-            gitPull pullActionCommit
-            nixRunDir nixRun nixRunInDir
-            nixRunAndCommitInDir nixRunAndCommitDir
-            nixRunAndCommitInPWD nixRunAndCommit;
+          inherit gitPull commit nixRun nixRunScript;
         };
 
       # File paths -> step to cache based on these files
-      cacheNixFiles = { files ? [ "**/flake.nix" "**/flake.lock" ], store ? "auto", keySuffix ? "", checkIsRunnerLinux ? false, restoreOnly ? true }:
+      cacheNixFiles =
+        { files ? [ "**/flake.nix" "**/flake.lock" ]
+        , store ? "auto"
+        , keySuffix ? ""
+        , checkIsRunnerLinux ? false
+        , restoreOnly ? true
+        }:
         let
-          hashfilesArgs = pkgs.lib.strings.concatMapStringsSep ", " (x: "'${x}'") files;
+          hashfilesArgs = concatMapStringsSep ", " (x: "'${x}'") files;
           hashfiles = expr "hashfiles(${hashfilesArgs})";
         in
         (
@@ -198,7 +201,7 @@
         pushFlakesToCachixDir = dir: {
           name = "Push flakes to Cachix";
           env.CACHIX_CACHE = expr names.secrets.CACHIX_CACHE;
-          run = run.nixRunDir dir names.pushToCachix;
+          run = run.nixRunScript { inherit dir; name = names.pushToCachix; };
         };
         pushFlakesToCachix = pushFlakesToCachixDir ".";
         configGitAsGHActions = {
@@ -208,13 +211,16 @@
             git config user.email github-actions@github.com
           '';
         };
-        updateLocksAndCommitDir = dir:
+        updateLocks = { needCommit ? true, needGitPull ? true, dir ? "." }:
           let name = "Update flake locks"; in
           {
             inherit name;
-            run = run.nixRunAndCommitDir dir names.updateLocks name;
+            run = run.nixRunScript ({
+              inherit needCommit needGitPull dir;
+              name = names.updateLocks;
+              commitMessage = name;
+            });
           };
-        updateLocksAndCommit = updateLocksAndCommitDir ".";
         nixStoreCollectGarbage = {
           name = "Collect garbage in /nix/store";
           run = "nix store gc";
@@ -261,7 +267,7 @@
       nixCIDir = dir: nixCI_ {
         steps_ = _: (stepsIf ("${names.matrix.os} == '${os.ubuntu-20}'") ([
           steps.configGitAsGHActions
-          (steps.updateLocksAndCommitDir dir)
+          (steps.updateLocks { inherit dir; })
         ]));
         inherit dir;
       };
