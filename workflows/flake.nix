@@ -117,10 +117,10 @@
             nixRunAndCommitInPWD nixRunAndCommit;
         };
 
-      # Flake file paths -> step to cache based on flake files
-      cacheNixFiles = { flakeFiles ? [ "flake.nix" "flake.lock" ], store ? "auto", keySuffix ? "", checkIsRunnerLinux ? false, restoreOnly ? true }:
+      # File paths -> step to cache based on these files
+      cacheNixFiles = { files ? [ "**/flake.nix" "**/flake.lock" ], store ? "auto", keySuffix ? "", checkIsRunnerLinux ? false, restoreOnly ? true }:
         let
-          hashfilesArgs = pkgs.lib.strings.concatMapStringsSep ", " (x: "'${x}'") flakeFiles;
+          hashfilesArgs = pkgs.lib.strings.concatMapStringsSep ", " (x: "'${x}'") files;
           hashfiles = expr "hashfiles(${hashfilesArgs})";
         in
         (
@@ -159,14 +159,6 @@
         auto = "auto";
       };
 
-      # Flake directories -> step to cache based on flake files
-      cacheNixDirs =
-        { flakeDirs ? [ "." ], store ? nixStore.linux, keySuffix ? "", checkIsRunnerLinux ? false, restoreOnly ? true }:
-        cacheNixFiles ({
-          flakeFiles = (concatMap (x: [ "${x}/flake.nix" "${x}/flake.lock" ]) flakeDirs);
-          inherit keySuffix store checkIsRunnerLinux restoreOnly;
-        });
-
       # Keep build outputs to garbage collect at the end only the trash
       # https://nixos.org/manual/nix/unstable/command-ref/conf-file.html#description
       installNix = { store ? nixStore.auto }: {
@@ -195,7 +187,7 @@
           name = "Pull and rebase";
           run = run.gitPull;
         };
-        cacheNix = cacheNixDirs { };
+        cacheNix = cacheNixFiles { };
         logInToCachix = {
           name = "Log in to Cachix";
           run = ''
@@ -251,7 +243,7 @@
                 steps.checkout
                 (installNix { store = expr names.matrix.store; })
                 # TODO cache suffix should depend on os?
-                (cacheNixDirs { keySuffix = "cachix"; store = expr names.matrix.store; restoreOnly = false; })
+                (cacheNixFiles { keySuffix = "cachix"; store = expr names.matrix.store; restoreOnly = false; })
               ]
               ++ (steps_ dir)
               ++ [
@@ -283,7 +275,6 @@
       };
       lib = {
         inherit
-          cacheNixDirs
           cacheNixFiles
           expr
           genAttrsId
