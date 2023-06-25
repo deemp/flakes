@@ -5,6 +5,8 @@ set t $( nix flake show --json | jq -r --arg cur_sys "$CURRENT_SYSTEM" '.devShel
 
 
 if test -n "$t"
+    # build devshells
+    printf "%s\n" $t | xargs -I {} nix build .#{} --profile $PROFILES_FOR_DEVSHELLS/{}
     # save profiles for these devshells
     printf "%s\n" $t | xargs -I {} nix develop .#{} --profile $PROFILES_FOR_DEVSHELLS/{}
     # push profiles for these devshells
