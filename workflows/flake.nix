@@ -16,12 +16,12 @@
     flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = nixpkgs.legacyPackages.${system};
-      inherit (drv-tools.lib.${system})
-        writeYAML genAttrsId mkAccessors mkAccessors_;
+      inherit (drv-tools.lib.${system}) writeYAML genAttrsId mkAccessors mkAccessors_;
+      inherit (builtins) concatMap;
 
       writeWorkflow = name: writeYAML name ".github/workflows/${name}.yaml";
 
-      expr = expr_: "\${{ ${__toString expr_} }}";
+      expr = expr_: "\${{ ${builtins.toString expr_} }}";
 
       os = {
         ubuntu-20 = "ubuntu-20.04";
@@ -36,7 +36,7 @@
       # can omit ${{ }} - https://docs.github.com/en/actions/learn-github-actions/expressions#example-expression-in-an-if-conditional
 
       # include steps conditionally
-      stepsIf = expr: steps: __map (x: x // { "if" = expr; }) steps;
+      stepsIf = expr: steps: map (x: x // { "if" = expr; }) steps;
 
       # make stuff available as matrix.os instead of "matrix.os"
       names =
@@ -120,7 +120,7 @@
       # Flake file paths -> step to cache based on flake files
       cacheNixFiles = { flakeFiles ? [ "flake.nix" "flake.lock" ], store ? "auto", keySuffix ? "", checkIsRunnerLinux ? false, restoreOnly ? true }:
         let
-          hashfilesArgs = pkgs.lib.strings.concat__mapStringsSep ", " (x: "'${x}'") flakeFiles;
+          hashfilesArgs = pkgs.lib.strings.concatMapStringsSep ", " (x: "'${x}'") flakeFiles;
           hashfiles = expr "hashfiles(${hashfilesArgs})";
         in
         (
@@ -163,7 +163,7 @@
       cacheNixDirs =
         { flakeDirs ? [ "." ], store ? nixStore.linux, keySuffix ? "", checkIsRunnerLinux ? false, restoreOnly ? true }:
         cacheNixFiles ({
-          flakeFiles = (__concat__map (x: [ "${x}/flake.nix" "${x}/flake.lock" ]) flakeDirs);
+          flakeFiles = (concatMap (x: [ "${x}/flake.nix" "${x}/flake.lock" ]) flakeDirs);
           inherit keySuffix store checkIsRunnerLinux restoreOnly;
         });
 
