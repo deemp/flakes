@@ -116,13 +116,13 @@
           inherit gitPull commit nix nixScript;
         };
 
-      # File paths -> step to cache based on these files
-      cacheNixFiles =
+      # cache nix store
+      cacheNix =
         { files ? [ "**/flake.nix" "**/flake.lock" ]
         , store ? "auto"
         , keySuffix ? ""
-        , checkIsRunnerLinux ? false
-        , restoreOnly ? true
+        , doCheckIsRunnerLinux ? false
+        , doRestoreOnly ? false
         }:
         let
           hashfilesArgs = concatMapStringsSep ", " (x: "'${x}'") files;
@@ -131,9 +131,9 @@
         (
           # setting the store doesn't work for macOS
           # https://discourse.nixos.org/t/how-to-use-a-local-directory-as-a-nix-binary-cache/655
-          if checkIsRunnerLinux then { "if" = "${names.runner.os} == 'Linux'"; } else { }
+          if doCheckIsRunnerLinux then { "if" = "${names.runner.os} == 'Linux'"; } else { }
         ) // (
-          if restoreOnly then {
+          if doRestoreOnly then {
             name = "Restore Nix store";
             uses = "actions/cache/restore@v3";
             "with" = {
@@ -192,7 +192,7 @@
           name = "Pull and rebase";
           run = run.gitPull;
         };
-        cacheNix = cacheNixFiles { };
+        inherit cacheNix;
         logInToCachix = {
           name = "Log in to Cachix";
           run = ''
@@ -251,7 +251,7 @@
                 steps.checkout
                 (installNix { store = expr names.matrix.store; })
                 # TODO cache suffix should depend on os?
-                (cacheNixFiles { keySuffix = "cachix"; store = expr names.matrix.store; restoreOnly = false; })
+                (cacheNix { keySuffix = "cachix"; store = expr names.matrix.store; })
               ]
               ++ (steps_ dir)
               ++ [
@@ -290,7 +290,7 @@
 
       lib = {
         inherit
-          cacheNixFiles
+          cacheNix
           expr
           genAttrsId
           installNix
