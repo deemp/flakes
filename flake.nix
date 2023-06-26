@@ -15,17 +15,16 @@
     (system:
       let
         inherit (inputs.codium.lib.${system}) mkCodium writeSettingsJSON extensionsCommon settingsCommonNix;
-        inherit (inputs.drv-tools.lib.${system}) readDirectories withAttrs;
+        inherit (inputs.drv-tools.lib.${system}) subDirectories withAttrs;
         inherit (inputs.flakes-tools.lib.${system}) mkFlakesTools;
         inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkShell;
         inherit (inputs.workflows.lib.${system}) writeWorkflow nixCI;
 
         flakesTools = (mkFlakesTools (
-          let f = dir: (builtins.map (x: "${dir}/${x}") (readDirectories ./${dir})); in
           [
-            (f "source-flake")
-            (f "language-tools")
-            (f "templates/codium")
+            (subDirectories "source-flake")
+            (subDirectories "language-tools")
+            (subDirectories "templates/codium")
             [
               "drv-tools"
               "flakes-tools"
@@ -49,10 +48,15 @@
       in
       {
         devShells.default = mkShell {
-          commands = mkRunCommands "ide" {
-            inherit (packages) writeSettings;
-            "codium ." = packages.codium;
-          };
+          commands =
+            mkRunCommands "ide" {
+              inherit (packages) writeSettings;
+              "codium ." = packages.codium;
+            } ++
+            mkRunCommands "infra" {
+              inherit (packages) writeWorkflows;
+            }
+            ;
         };
 
         inherit packages;
