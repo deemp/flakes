@@ -1,5 +1,5 @@
 # set temp directory for outputs for packages
-set -q PATHS_FOR_PACKAGES || set PATHS_FOR_PACKAGES $(mktemp -t packages-XXXXXXXXXX)
+set -q PATHS_FOR_PACKAGES || set PATHS_FOR_PACKAGES $(mkdir tmp && mktemp -t packages-XXXXXXXXXX -p tmp)
 
 set t $( nix flake show --json | jq -r --arg cur_sys "$CURRENT_SYSTEM" '.packages[$cur_sys]|(try keys[] catch "")' )
 
