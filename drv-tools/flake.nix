@@ -117,6 +117,7 @@
       readFiles = dir: readXs dir "regular";
       readDirectories = dir: readXs dir "directory";
       readSymlinks = dir: readXs dir "symlink";
+      subDirectories = dir: (builtins.map (x: "${dir}/${x}") (readDirectories ./${dir}));
 
       # assuming that a `pname` of a program coincides with its main executable's name
       # !unsafe to use with packages whose pname may change!
@@ -434,6 +435,7 @@
           ord
           ord_
           readDirectories
+          subDirectories
           readFiles
           readSymlinks
           readXs
