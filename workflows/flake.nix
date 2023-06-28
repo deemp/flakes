@@ -204,7 +204,7 @@
           run = ''
             TIME=$(gdate --date="${nixCache.time}" +%s)
             gls /nix/store -l --time-style +%s --time=atime | \
-              awk -v t="$TIME" '{ if ($6 > t) printf "%s /nix/store/%s\n", $6, $7 }' > ${nixCache.working-set}
+              awk -v t="$TIME" '{ if ($6 > t) printf "/nix/store/%s\n", $7 }' > ${nixCache.working-set}
             nix-store --export $(cat ${ nixCache.working-set }) > ${ nixCache.cache}
           '';
         };
