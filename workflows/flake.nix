@@ -193,7 +193,7 @@
         importNixCache = {
           "name" = "Import /nix/store cache";
           "run" = ''
-            nix-store --import < ${nixCache.cache} | echo "no cache found :("
+            nix-store --import < ${nixCache.cache} || echo "no cache found :("
             find /nix/store -maxdepth 1 -name '*-*' | xargs -I {} sudo touch -at ${nixCache.access-time} {}
             # for compatibility with macOS
             nix profile install nixpkgs#coreutils-prefixed
