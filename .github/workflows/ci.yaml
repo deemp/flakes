@@ -18,9 +18,9 @@ jobs:
           restore-keys: |
             nix-${{ matrix.os }}-cachix-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
             nix-${{ matrix.os }}-cachix-
-      - name: Import Nix store cache
+      - name: Import /nix/store cache
         run: |
-          nix-store --import < /tmp/nix-cache | echo "no cache found :("
+          nix-store --import < /tmp/nix-cache || echo "no cache found :("
           find /nix/store -maxdepth 1 -name '*-*' | xargs -I {} sudo touch -at 197004020402 {}
           # for compatibility with macOS
           nix profile install nixpkgs#coreutils-prefixed
@@ -47,7 +47,7 @@ jobs:
         run: |+
           nix run .#pushToCachix
 
-      - name: Export cache
+      - name: Export /nix/store cache
         run: |
           TIME=$(gdate --date="1970-04-02 04:02" +%s)
           gls /nix/store -l --time-style +%s --time=atime | \
