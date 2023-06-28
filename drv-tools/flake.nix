@@ -117,7 +117,10 @@
       readFiles = dir: readXs dir "regular";
       readDirectories = dir: readXs dir "directory";
       readSymlinks = dir: readXs dir "symlink";
-      subDirectories = dir: (builtins.map (x: "${dir}/${x}") (readDirectories ./${dir}));
+      
+      # get a list of immediate subdirectories
+      # pwd should be an absolute path like ./.      
+      subDirectories = pwd: dir: builtins.map (x: "${dir}/${x}") (readDirectories "${pwd}/${dir}");
 
       # assuming that a `pname` of a program coincides with its main executable's name
       # !unsafe to use with packages whose pname may change!
@@ -465,6 +468,7 @@
       };
 
       tests = {
+        s = subDirectories ../. "templates";
         t = readFiles ./.;
         accessors = mkAccessors_ "pref" {
           a.b.c = "";
