@@ -8,16 +8,22 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v22
         with:
-          extra_nix_config: "access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}\nsubstituters = https://cache.nixos.org/ https://cache.iog.io https://nix-community.cachix.org https://deemp.cachix.org \ntrusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= deemp.cachix.org-1:9shDxyR2ANqEPQEEYDL/xIOnoPwxHot21L5fiZnFL18=\nstore = ${{ matrix.store }}\nkeep-outputs = true\nkeep-derivations = true\n"
+          extra_nix_config: "access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}\nsubstituters = https://cache.nixos.org/ https://nix-community.cachix.org https://cache.iog.io https://deemp.cachix.org \ntrusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= deemp.cachix.org-1:9shDxyR2ANqEPQEEYDL/xIOnoPwxHot21L5fiZnFL18=\nstore = auto\nkeep-outputs = true\nkeep-derivations = true\n"
           install_url: https://releases.nixos.org/nix/nix-2.16.1/install
       - name: Restore and cache Nix store
-        uses: actions/cache@v3.3.0
+        uses: actions/cache@v3
         with:
-          key: ${{ runner.os }}-nix-${{ hashfiles('./flake.nix', './flake.lock') }}-cachix
-          path: ${{ matrix.store }}
+          key: nix-${{ matrix.os }}-cachix-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
+          path: /tmp/nix-cache
           restore-keys: |
-            ${{ runner.os }}-nix-${{ hashfiles('./flake.nix', './flake.lock') }}-cachix
-            ${{ runner.os }}-nix-
+            nix-${{ matrix.os }}-cachix-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
+            nix-${{ matrix.os }}-cachix-
+      - name: Import Nix store cache
+        run: |
+          nix-store --import < /tmp/nix-cache | echo "no cache found :("
+          find /nix/store -maxdepth 1 -name '*-*' | xargs -I {} sudo touch -at 197004020402 {}
+          # for compatibility with macOS
+          nix profile install nixpkgs#coreutils-prefixed
       - if: matrix.os == 'ubuntu-20.04'
         name: Config git for github-actions
         run: |
@@ -28,7 +34,6 @@ jobs:
         run: |
           git pull --rebase --autostash
 
-          nix build .#updateLocks
           nix run .#updateLocks
 
           git commit -a -m "action: Update flake locks" && git push || echo ""
@@ -39,22 +44,22 @@ jobs:
       - env:
           CACHIX_CACHE: ${{ secrets.CACHIX_CACHE }}
         name: Push flakes to Cachix
-        run: |
-          nix build .#pushToCachix
+        run: |+
           nix run .#pushToCachix
-      - name: Collect garbage in /nix/store
-        run: nix store gc
+
+      - name: Export cache
+        run: |
+          TIME=$(gdate --date="1970-04-02 04:02" +%s)
+          gls /nix/store -l --time-style +%s --time=atime | \
+            awk -v t="$TIME" '{ if ($6 > t) printf "%s /nix/store/%s\n", $6, $7 }' > /tmp/working-set
+          nix-store --export $(cat /tmp/working-set) > /tmp/nix-cache
     strategy:
       matrix:
-        include:
-          - os: macos-11
-            store: auto
-          - os: macos-12
-            store: auto
-          - os: ubuntu-20.04
-            store: /home/runner/nix
-          - os: ubuntu-22.04
-            store: /home/runner/nix
+        os:
+          - macos-11
+          - macos-12
+          - ubuntu-20.04
+          - ubuntu-22.04
 name: Nix CI
 "on":
   pull_request: {}
