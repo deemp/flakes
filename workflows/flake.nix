@@ -196,7 +196,7 @@
           name = "Pull and rebase";
           run = run.gitPull;
         };
-        inherit cacheNix;
+        inherit cacheNix installNix;
         logInToCachix = {
           name = "Log in to Cachix";
           run = ''
@@ -294,10 +294,8 @@
 
       lib = {
         inherit
-          cacheNix
           expr
           genAttrsId
-          installNix
           mkAccessors
           mkAccessors_
           names
