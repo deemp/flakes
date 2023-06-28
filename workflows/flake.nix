@@ -92,10 +92,11 @@
           nix =
             { doGitPull ? false
             , dir ? "."
-            , inDir ? false
+            , # run in directory
+              inDir ? false
             , # script may be from a remote flake
               remote ? false
-            , doBuild ? true
+            , doBuild ? false
             , doRun ? true
             , scripts ? [ ]
             , doCommit ? false
@@ -120,46 +121,38 @@
           inherit gitPull commit nix nixScript;
         };
 
+      nixCache = {
+        cache = "/tmp/nix-cache";
+        working-set = "/tmp/working-set";
+        access-time = "197004020402";
+        time = "1970-04-02 04:02";
+        strategy.matrix.os = __attrValues { inherit (os) macos-11 macos-12 ubuntu-20 ubuntu-22; };
+      };
+
       # cache nix store
       cacheNix =
         { files ? [ "**/flake.nix" "**/flake.lock" ]
-        , store ? "auto"
-        , keySuffix ? ""
-        , doCheckIsRunnerLinux ? false
-        , doRestoreOnly ? false
+        , keyJob ? "job"
+        , keyOs ? expr names.runner.os
+        , path ? nixCache.cache
         }:
         let
           hashfilesArgs = concatMapStringsSep ", " (x: "'${x}'") files;
           hashfiles = expr "hashfiles(${hashfilesArgs})";
         in
-        (
-          # setting the store doesn't work for macOS
-          # https://discourse.nixos.org/t/how-to-use-a-local-directory-as-a-nix-binary-cache/655
-          if doCheckIsRunnerLinux then { "if" = "${names.runner.os} == 'Linux'"; } else { }
-        ) // (
-          if doRestoreOnly then {
-            name = "Restore Nix store";
-            uses = "actions/cache/restore@v3";
-            "with" = {
-              path = store;
-              key = ''
-                ${expr names.runner.os}-nix-${hashfiles}-${keySuffix}
-                ${expr names.runner.os}-nix-
-              '';
-            };
-          } else {
-            name = "Restore and cache Nix store";
-            uses = "actions/cache@v3.3.0";
-            "with" = {
-              path = store;
-              key = "${expr names.runner.os}-nix-${hashfiles}-${keySuffix}";
-              restore-keys = ''
-                ${expr names.runner.os}-nix-${hashfiles}-${keySuffix}
-                ${expr names.runner.os}-nix-
-              '';
-            };
-          }
-        );
+        {
+          name = "Restore and cache Nix store";
+          uses = "actions/cache@v3";
+          "with" = {
+            inherit path;
+            key = "nix-${keyOs}-${keyJob}-${hashfiles}";
+            restore-keys = ''
+              nix-${keyOs}-${keyJob}-${hashfiles}
+              nix-${keyOs}-${keyJob}-
+            '';
+          };
+        }
+      ;
 
       # nix store directory used for caching
       # https://nixos.org/manual/nix/unstable/command-ref/conf-file.html?highlight=conf#conf-store
@@ -176,7 +169,7 @@
         "with" = {
           extra_nix_config = ''
             access-tokens = github.com=${expr names.secrets.GITHUB_TOKEN}
-            substituters = https://cache.nixos.org/ https://cache.iog.io https://nix-community.cachix.org https://deemp.cachix.org 
+            substituters = https://cache.nixos.org/ https://nix-community.cachix.org https://cache.iog.io https://deemp.cachix.org 
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= deemp.cachix.org-1:9shDxyR2ANqEPQEEYDL/xIOnoPwxHot21L5fiZnFL18=
             store = ${store}
             keep-outputs = true
@@ -197,6 +190,24 @@
           run = run.gitPull;
         };
         inherit cacheNix installNix;
+        importNixCache = {
+          "name" = "Import Nix store cache";
+          "run" = ''
+            nix-store --import < ${nixCache.cache} | echo "no cache found :("
+            find /nix/store -maxdepth 1 -name '*-*' | xargs -I {} sudo touch -at ${nixCache.access-time} {}
+            # for compatibility with macOS
+            nix profile install nixpkgs#coreutils-prefixed
+          '';
+        };
+        exportNixCache = {
+          name = "Export cache";
+          run = ''
+            TIME=$(gdate --date="${nixCache.time}" +%s)
+            gls /nix/store -l --time-style +%s --time=atime | \
+              awk -v t="$TIME" '{ if ($6 > t) printf "%s /nix/store/%s\n", $6, $7 }' > ${nixCache.working-set}
+            nix-store --export $(cat ${ nixCache.working-set }) > ${ nixCache.cache}
+          '';
+        };
         logInToCachix = {
           name = "Log in to Cachix";
           run = ''
@@ -233,37 +244,26 @@
         };
       };
 
-      strategies = {
-        # setting the store doesn't work for macOS
-        # https://discourse.nixos.org/t/how-to-use-a-local-directory-as-a-nix-binary-cache/655
-        nixCache.matrix.include = [
-          { os = os.macos-11; store = nixStore.auto; }
-          { os = os.macos-12; store = nixStore.auto; }
-          { os = os.ubuntu-20; store = nixStore.linux; }
-          { os = os.ubuntu-22; store = nixStore.linux; }
-        ];
-      };
-
       nixCI_ = { steps_ ? (_: [ ]), dir ? "." }: {
         name = "Nix CI";
         inherit on;
         jobs = {
           nixCI = {
             name = "Nix CI";
-            strategy = strategies.nixCache;
+            strategy = nixCache.strategy;
             runs-on = expr names.matrix.os;
             steps =
               [
                 steps.checkout
-                (installNix { store = expr names.matrix.store; })
-                # TODO cache suffix should depend on os?
-                (cacheNix { keySuffix = "cachix"; store = expr names.matrix.store; })
+                (installNix { })
+                (cacheNix { keyJob = "cachix"; keyOs = expr names.matrix.os; })
+                steps.importNixCache
               ]
               ++ (steps_ dir)
               ++ [
                 steps.logInToCachix
                 (steps.pushFlakesToCachixDir dir)
-                steps.nixStoreCollectGarbage
+                steps.exportNixCache
               ]
             ;
           };
@@ -309,7 +309,6 @@
           run
           steps
           stepsIf
-          strategies
           writeWorkflow
           writeYAML
           ;
