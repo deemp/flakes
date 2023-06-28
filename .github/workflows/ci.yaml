@@ -51,7 +51,7 @@ jobs:
         run: |
           TIME=$(gdate --date="1970-04-02 04:02" +%s)
           gls /nix/store -l --time-style +%s --time=atime | \
-            awk -v t="$TIME" '{ if ($6 > t) printf "%s /nix/store/%s\n", $6, $7 }' > /tmp/working-set
+            awk -v t="$TIME" '{ if ($6 > t) printf "/nix/store/%s\n", $7 }' > /tmp/working-set
           nix-store --export $(cat /tmp/working-set) > /tmp/nix-cache
     strategy:
       matrix:
