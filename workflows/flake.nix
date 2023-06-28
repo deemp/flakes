@@ -191,7 +191,7 @@
         };
         inherit cacheNix installNix;
         importNixCache = {
-          "name" = "Import Nix store cache";
+          "name" = "Import /nix/store cache";
           "run" = ''
             nix-store --import < ${nixCache.cache} | echo "no cache found :("
             find /nix/store -maxdepth 1 -name '*-*' | xargs -I {} sudo touch -at ${nixCache.access-time} {}
@@ -200,7 +200,7 @@
           '';
         };
         exportNixCache = {
-          name = "Export cache";
+          name = "Export /nix/store cache";
           run = ''
             TIME=$(gdate --date="${nixCache.time}" +%s)
             gls /nix/store -l --time-style +%s --time=atime | \
