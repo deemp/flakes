@@ -80,8 +80,6 @@
         workflow_dispatch = { };
       };
 
-      # TODO don't build scripts when `nix run` gets an option to make a gc root
-
       run =
         let
           gitPull = ''git pull --rebase --autostash'';
@@ -95,7 +93,7 @@
             , inDir ? false
             , # script may be from a remote flake
               remote ? false
-            , doBuild ? true
+            , doBuild ? false
             , doRun ? true
             , scripts ? [ ]
             , doCommit ? false
@@ -120,6 +118,7 @@
           inherit gitPull commit nix nixScript;
         };
 
+      # TODO deprecate?
       # cache nix store
       cacheNix =
         { files ? [ "**/flake.nix" "**/flake.lock" ]
@@ -196,11 +195,13 @@
           name = "Pull and rebase";
           run = run.gitPull;
         };
-        inherit cacheNix;
+        inherit installNix cacheNix;
+        magicNixCache = {
+          uses = "DeterminateSystems/magic-nix-cache-action@v1";
+        };
         logInToCachix = {
           name = "Log in to Cachix";
           run = ''
-            nix build nixpkgs#cachix
             nix run nixpkgs#cachix -- authtoken ${ expr names.secrets.CACHIX_AUTH_TOKEN }
           '';
         };
@@ -236,12 +237,7 @@
       strategies = {
         # setting the store doesn't work for macOS
         # https://discourse.nixos.org/t/how-to-use-a-local-directory-as-a-nix-binary-cache/655
-        nixCache.matrix.include = [
-          { os = os.macos-11; store = nixStore.auto; }
-          { os = os.macos-12; store = nixStore.auto; }
-          { os = os.ubuntu-20; store = nixStore.linux; }
-          { os = os.ubuntu-22; store = nixStore.linux; }
-        ];
+        nixCache.matrix.os = __attrValues { inherit (os) macos-11 macos-12 ubuntu-20 ubuntu-22; };
       };
 
       nixCI_ = { steps_ ? (_: [ ]), dir ? "." }: {
@@ -255,15 +251,13 @@
             steps =
               [
                 steps.checkout
-                (installNix { store = expr names.matrix.store; })
-                # TODO cache suffix should depend on os?
-                (cacheNix { keySuffix = "cachix"; store = expr names.matrix.store; })
+                (installNix { })
+                (steps.magicNixCache)
               ]
               ++ (steps_ dir)
               ++ [
                 steps.logInToCachix
                 (steps.pushFlakesToCachixDir dir)
-                steps.nixStoreCollectGarbage
               ]
             ;
           };
@@ -271,7 +265,7 @@
       };
 
       nixCIDir = dir: nixCI_ {
-        steps_ = _: stepsIf ("${names.matrix.os} == '${os.ubuntu-20}'") [
+        steps_ = _: stepsIf ("${names.matrix.os} == '${os.ubuntu-22}'") [
           steps.configGitAsGHActions
           (steps.updateLocks { inherit dir; })
         ];
