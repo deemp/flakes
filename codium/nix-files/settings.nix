@@ -63,6 +63,7 @@
       "editor.defaultFormatter" = "haskell.haskell";
     };
     "haskell.formattingProvider" = "fourmolu";
+    "haskell.plugin.fourmolu.config.external" = true;
   };
 
   # set your path instead of `front`
