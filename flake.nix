@@ -22,18 +22,18 @@
 
         flakesTools = (mkFlakesTools (
           [
-            (subDirectories "source-flake")
-            (subDirectories "language-tools")
-            (subDirectories "templates/codium")
+            # (subDirectories ./. "source-flake")
+            # (subDirectories ./. "language-tools")
+            # (subDirectories ./. "templates/codium")
             [
-              "drv-tools"
-              "flakes-tools"
-              "env2json"
-              "codium"
-              "json2md"
-              "devshell"
-              "workflows"
-              "templates/haskell-minimal"
+              # "drv-tools"
+              # "flakes-tools"
+              # "env2json"
+              # "codium"
+              # "json2md"
+              # "devshell"
+              # "workflows"
+              # "templates/haskell-minimal"
               "."
             ]
           ]
