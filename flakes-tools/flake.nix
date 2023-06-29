@@ -242,6 +242,8 @@
           '';
         };
 
+      # TODO deprecate
+      # TODO errors due to inotifywait unavailable on macOS
       # watch nix files existing at the moment
       flakesWatchDumpDevshells = dirs:
         let dirs_ = flatten dirs; in
@@ -296,7 +298,6 @@
             pushToCachix = flakesPushToCachix dirs;
             logInToCachix = logInToCachix;
             updateAndPushToCachix = flakesUpdateAndPushToCachix dirs;
-            dumpDevshells = flakesDumpDevshells dirs;
             watchDumpDevshells = flakesWatchDumpDevshells dirs;
             format = flakesFormat;
           })
@@ -309,7 +310,6 @@
           flakesPushToCachix
           flakesUpdate
           flakesUpdateAndPushToCachix
-          flakesWatchDumpDevshells
           mkFlakesTools
           pushXToCachix
           ;
