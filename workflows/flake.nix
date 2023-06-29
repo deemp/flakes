@@ -211,7 +211,6 @@
         logInToCachix = {
           name = "Log in to Cachix";
           run = ''
-            nix build nixpkgs#cachix
             nix run nixpkgs#cachix -- authtoken ${ expr names.secrets.CACHIX_AUTH_TOKEN }
           '';
         };
