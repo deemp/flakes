@@ -6,16 +6,10 @@
     flake-utils.follows = "flake-utils_/flake-utils";
     drv-tools.url = "github:deemp/flakes?dir=drv-tools";
   };
-  outputs =
-    { self
-    , nixpkgs
-    , drv-tools
-    , flake-utils
-    , ...
-    }: flake-utils.lib.eachDefaultSystem (system:
+  outputs = inputs: inputs.flake-utils.lib.eachDefaultSystem (system:
     let
-      pkgs = nixpkgs.legacyPackages.${system};
-      inherit (drv-tools.lib.${system})
+      pkgs = inputs.nixpkgs.legacyPackages.${system};
+      inherit (inputs.drv-tools.lib.${system})
         withMan runFishScript mkShellApp wrapShellApp
         mkShellApps mkBin framedBrackets
         concatStringsNewline mkDevShellsWithDefault runInEachDir
@@ -32,7 +26,7 @@
         CACHIX_CACHE = "CACHIX_CACHE";
       };
 
-      man = drv-tools.lib.${system}.man // {
+      man = inputs.drv-tools.lib.${system}.man // {
         ENV = "# EXPECTED ENV VARIABLES";
         CACHIX_CACHE = ''
           `${env.CACHIX_CACHE}`
@@ -256,7 +250,7 @@
             name = "flakes-watch-dump-devshells";
             text = ''
               printf "${framedBrackets "watcher set"}"
-              inotifywait -qmr -e close_write ./ | \
+              ${pkgs.inotify-tools}/bin/inotifywait -qmr -e close_write ./ | \
               while read dir action file; do
                 if [[ $file =~ .*nix$ ]]; then
                   set +e
@@ -268,7 +262,6 @@
                 fi
               done
             '';
-            runtimeInputs = [ pkgs.inotify-tools ];
             description = "Start a watcher that will update `flake.lock`s and evaluate devshells in given directories";
           })
           (x:
