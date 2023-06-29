@@ -135,6 +135,7 @@
         , keyJob ? "job"
         , keyOs ? expr names.runner.os
         , path ? nixCache.cache
+        , debug ? false
         }:
         let
           hashfilesArgs = concatMapStringsSep ", " (x: "'${x}'") files;
@@ -142,9 +143,9 @@
         in
         {
           name = "Restore and cache Nix store";
-          uses = "actions/cache@v3";
+          uses = "deemp/cache-nix-too@v1.0.0";
           "with" = {
-            inherit path;
+            inherit path debug;
             key = "nix-${keyOs}-${keyJob}-${hashfiles}";
             restore-keys = ''
               nix-${keyOs}-${keyJob}-${hashfiles}
@@ -190,24 +191,6 @@
           run = run.gitPull;
         };
         inherit cacheNix installNix;
-        importNixCache = {
-          "name" = "Import /nix/store cache";
-          "run" = ''
-            nix-store --import < ${nixCache.cache} || echo "no cache found :("
-            find /nix/store -maxdepth 1 -name '*-*' | xargs -I {} sudo touch -at ${nixCache.access-time} {}
-            # for compatibility with macOS
-            nix profile install nixpkgs#coreutils-prefixed
-          '';
-        };
-        exportNixCache = {
-          name = "Export /nix/store cache";
-          run = ''
-            TIME=$(gdate --date="${nixCache.time}" +%s)
-            gls /nix/store -l --time-style +%s --time=atime | \
-              awk -v t="$TIME" '{ if ($6 > t) printf "/nix/store/%s\n", $7 }' > ${nixCache.working-set}
-            nix-store --export $(cat ${ nixCache.working-set }) > ${ nixCache.cache}
-          '';
-        };
         logInToCachix = {
           name = "Log in to Cachix";
           run = ''
@@ -259,12 +242,10 @@
                 steps.checkout
                 (installNix { })
                 (cacheNix { keyJob = "cachix"; keyOs = expr names.matrix.os; })
-                steps.importNixCache
               ]
               ++ (steps_ dir)
               ++ [
                 (steps.pushFlakesToCachixDir dir)
-                steps.exportNixCache
               ]
             ;
           };
