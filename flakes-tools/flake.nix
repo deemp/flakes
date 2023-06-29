@@ -27,14 +27,19 @@
       # https://github.com/cachix/cachix/issues/529
       cachix = pkgs.cachix;
 
+      env = {
+        CACHIX_AUTH_TOKEN = "CACHIX_AUTH_TOKEN";
+        CACHIX_CACHE = "CACHIX_CACHE";
+      };
+
       man = drv-tools.lib.${system}.man // {
         ENV = "# EXPECTED ENV VARIABLES";
         CACHIX_CACHE = ''
-          `CACHIX_CACHE`
+          `${env.CACHIX_CACHE}`
           :   cachix cache name  
         '';
         CACHIX_AUTH_TOKEN = ''
-          `CACHIX_AUTH_TOKEN`
+          `${env.CACHIX_AUTH_TOKEN}`
           :   cachix authorization token
         '';
       };
@@ -113,6 +118,13 @@
           (mkShellApp {
             name = "push-all-to-cachix";
             text = ''
+              if [ -z ''${${env.CACHIX_CACHE}+x} ];
+              then 
+                printf "${framedBrackets "The environment variable ${env.CACHIX_CACHE} is not set. Can't find a Cachix cache"}"
+                exit 1
+              else
+                printf "${framedBrackets "Using the Cachix cache from ${env.CACHIX_CACHE} environment variable"}"
+              fi
               ${mkBin pushInputsToCachix}
               ${mkBin pushDevShellsToCachix}
               ${mkBin pushPackagesToCachix}
@@ -139,19 +151,47 @@
             description = ''Update `flake.lock`s'';
           };
 
+      logInToCachix = withMan
+        (mkShellApp {
+          name = "logInToCachix";
+          text = ''
+            if [ -z ''${${env.CACHIX_AUTH_TOKEN}+x} ];
+            then 
+              printf "${framedBrackets "Environment variable ${env.CACHIX_AUTH_TOKEN} is not set. Can't log in to Cachix"}"
+              exit 1
+            else
+              printf "${framedBrackets "Logging in to Cachix using ${env.CACHIX_AUTH_TOKEN} environment variable"}"
+              ${cachix}/bin/cachix authtoken ${env.CACHIX_AUTH_TOKEN}
+            fi
+          '';
+          description = "Log in to `Cachix`";
+        })
+        (x:
+          ''
+            ${man.DESCRIPTION}
+            ${x.meta.description}
+
+            ${man.ENV}
+            ${man.CACHIX_AUTH_TOKEN}
+          ''
+        );
 
       # push to cachix all about flakes in specified directories relative to CWD
       flakesPushToCachix = dirs:
-        let description = "Push flakes inputs and outputs to `cachix` in given directories";
+        let description = "Push flakes inputs and outputs to `Cachix` in given directories";
         in
         runInEachDir {
           inherit dirs;
           name = "flakes-push-to-cachix";
-          command = "${mkBin pushAllToCachix}";
+          command = ''
+            ${mkBin logInToCachix}
+            ${mkBin pushAllToCachix}
+          '';
           inherit description;
           longDescription = ''
             ${man.ENV}
             ${man.CACHIX_CACHE}
+            ${man.CACHIX_AUTH_TOKEN}
           '';
         };
 
@@ -240,22 +280,6 @@
               ${indentStrings4 dirs_}
             ''
           );
-
-      logInToCachix = withMan
-        (mkShellApp {
-          name = "logInToCachix";
-          text = "${cachix}/bin/cachix authtoken $CACHIX_AUTH_TOKEN";
-          description = "Log in to cachix";
-        })
-        (x:
-          ''
-            ${man.DESCRIPTION}
-            ${x.meta.description}
-
-            ${man.ENV}
-            
-          ''
-        );
 
       # format all .nix files with the formatter specified in the flake in the CWD
       flakesFormat =
