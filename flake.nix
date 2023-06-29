@@ -20,20 +20,21 @@
         inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkShell;
         inherit (inputs.workflows.lib.${system}) writeWorkflow nixCI;
 
+        # cache most frequently used flakes
         flakesTools = (mkFlakesTools (
           [
             (subDirectories ./. "source-flake")
             (subDirectories ./. "language-tools")
-            (subDirectories ./. "templates/codium")
+            # (subDirectories ./. "templates/codium")
             [
-              "drv-tools"
-              "flakes-tools"
-              "env2json"
+              # "drv-tools"
+              # "flakes-tools"
+              # "env2json"
               "codium"
-              "json2md"
-              "devshell"
-              "workflows"
-              "templates/haskell-minimal"
+              # "json2md"
+              # "devshell"
+              # "workflows"
+              # "templates/haskell-minimal"
               "."
             ]
           ]
