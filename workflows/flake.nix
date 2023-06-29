@@ -216,7 +216,10 @@
         };
         pushFlakesToCachixDir = dir: {
           name = "Push flakes to Cachix";
-          env.CACHIX_CACHE = expr names.secrets.CACHIX_CACHE;
+          env = {
+            CACHIX_CACHE = expr names.secrets.CACHIX_CACHE;
+            CACHIX_AUTH_TOKEN = expr names.secrets.CACHIX_AUTH_TOKEN;
+          };
           run = run.nixScript { inherit dir; name = names.pushToCachix; };
         };
         pushFlakesToCachix = pushFlakesToCachixDir ".";
@@ -260,7 +263,6 @@
               ]
               ++ (steps_ dir)
               ++ [
-                steps.logInToCachix
                 (steps.pushFlakesToCachixDir dir)
                 steps.exportNixCache
               ]
