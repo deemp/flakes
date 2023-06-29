@@ -13,9 +13,7 @@ jobs:
       - name: Restore and cache Nix store
         uses: deemp/cache-nix-too@v1.0.0
         with:
-          debug: false
           key: nix-${{ matrix.os }}-cachix-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
-          path: /tmp/nix-cache
           restore-keys: |
             nix-${{ matrix.os }}-cachix-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
             nix-${{ matrix.os }}-cachix-
