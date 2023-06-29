@@ -134,7 +134,7 @@
         { files ? [ "**/flake.nix" "**/flake.lock" ]
         , keyJob ? "job"
         , keyOs ? expr names.runner.os
-        , path ? nixCache.cache
+        , path ? ""
         , debug ? false
         }:
         let
@@ -145,13 +145,14 @@
           name = "Restore and cache Nix store";
           uses = "deemp/cache-nix-too@v1.0.0";
           "with" = {
-            inherit path debug;
             key = "nix-${keyOs}-${keyJob}-${hashfiles}";
             restore-keys = ''
               nix-${keyOs}-${keyJob}-${hashfiles}
               nix-${keyOs}-${keyJob}-
             '';
-          };
+          }
+          // (if debug then { inherit debug; } else { })
+          // (if path != "" then { inherit path; } else { });
         }
       ;
 
