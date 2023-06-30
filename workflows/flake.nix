@@ -136,6 +136,9 @@
         , keyOs ? expr names.runner.os
         , path ? ""
         , debug ? false
+        , nix-cache ? ""
+        , nix-max-depth ? 0
+        , nix-max-qr-paths ? 0
         }:
         let
           hashfilesArgs = concatMapStringsSep ", " (x: "'${x}'") files;
@@ -143,7 +146,7 @@
         in
         {
           name = "Restore and cache Nix store";
-          uses = "deemp/cache-nix-too@v1.0.0";
+          uses = "deemp/cache-nix-too@v1";
           "with" = {
             key = "nix-${keyOs}-${keyJob}-${hashfiles}";
             restore-keys = ''
@@ -151,8 +154,11 @@
               nix-${keyOs}-${keyJob}-
             '';
           }
+          // (if path != "" then { inherit path; } else { })
           // (if debug then { inherit debug; } else { })
-          // (if path != "" then { inherit path; } else { });
+          // (if nix-cache != "" then { inherit nix-cache; } else { })
+          // (if nix-max-depth != 0 then { inherit nix-max-depth; } else { })
+          // (if nix-max-qr-paths != 0 then { inherit nix-max-qr-paths; } else { });
         }
       ;
 
