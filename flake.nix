@@ -25,23 +25,35 @@
           [
             (subDirectories ./. "source-flake")
             (subDirectories ./. "language-tools")
-            # (subDirectories ./. "templates/codium")
             [
-              # "drv-tools"
-              # "flakes-tools"
-              # "env2json"
               "codium"
-              # "json2md"
-              # "devshell"
-              # "workflows"
-              # "templates/haskell-minimal"
+              "."
+            ]
+          ]
+        ));
+
+        flakesToolsLocks = (mkFlakesTools (
+          [
+            (subDirectories ./. "source-flake")
+            (subDirectories ./. "language-tools")
+            (subDirectories ./. "templates/codium")
+            [
+              "drv-tools"
+              "flakes-tools"
+              "env2json"
+              "codium"
+              "json2md"
+              "devshell"
+              "workflows"
+              "templates/haskell-minimal"
               "."
             ]
           ]
         ));
 
         packages = {
-          inherit (flakesTools) pushToCachix updateLocks format;
+          inherit (flakesTools) pushToCachix format;
+          inherit (flakesToolsLocks) updateLocks;
           writeSettings = writeSettingsJSON settingsCommonNix;
           codium = mkCodium ({ extensions = extensionsCommon; });
           writeWorkflows = writeWorkflow "ci" (withAttrs nixCI { on.schedule = [{ cron = "0 0 1 * *"; }]; });
