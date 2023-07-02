@@ -23,12 +23,7 @@
         # cache most frequently used flakes
         flakesTools = (mkFlakesTools (
           [
-            # (subDirectories ./. "source-flake")
-            # (subDirectories ./. "language-tools")
-            [
-              "codium"
-              # "."
-            ]
+            "codium"
           ]
         ));
 
