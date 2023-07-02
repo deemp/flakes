@@ -24,11 +24,11 @@
       },
       "locked": {
         "dir": "source-flake/nixpkgs",
-        "lastModified": 1688176030,
-        "narHash": "sha256-KG2b8jthe9jQG7bm/Aa1a6D7luwcSTyvqeBvJMbLc+4=",
+        "lastModified": 1688315338,
+        "narHash": "sha256-HfboUaDVVvQcinCxRRm5C+z5svZmx1ma2DicTFh9grk=",
         "owner": "deemp",
         "repo": "flakes",
-        "rev": "4bbd8283a2b22f28ebf583868ce0ef305660b47e",
+        "rev": "fa5526402000b3524582497bff39e7b8f15a094f",
         "type": "github"
       },
       "original": {
