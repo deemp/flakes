@@ -236,7 +236,7 @@
         };
       };
 
-      nixCI_ = { steps_ ? (_: [ ]), dir ? "." }: {
+      nixCI_ = { steps_ ? (_: [ ]), dir ? ".", cacheNixArgs ? { } }: {
         name = "Nix CI";
         inherit on;
         jobs = {
@@ -248,7 +248,7 @@
               [
                 steps.checkout
                 (installNix { })
-                (cacheNix { keyJob = "cachix"; keyOs = expr names.matrix.os; })
+                (cacheNix ({ keyJob = "cachix"; keyOs = expr names.matrix.os; } // cacheNixArgs))
               ]
               ++ (steps_ dir)
               ++ [
