@@ -23,7 +23,15 @@
         # cache most frequently used flakes
         flakesTools = (mkFlakesTools (
           [
+            "drv-tools"
+            "flakes-tools"
+            "env2json"
             "codium"
+            "json2md"
+            "devshell"
+            "workflows"
+            "templates/haskell-minimal"
+            "."
           ]
         ));
 
@@ -57,14 +65,15 @@
       {
         devShells.default = mkShell {
           commands =
-            mkRunCommands "ide" {
-              inherit (packages) writeSettings;
-              "codium ." = packages.codium;
-            } ++
+            mkRunCommands "ide"
+              {
+                inherit (packages) writeSettings;
+                "codium ." = packages.codium;
+              } ++
             mkRunCommands "infra" {
               inherit (packages) writeWorkflows;
             }
-            ;
+          ;
         };
 
         inherit packages;
