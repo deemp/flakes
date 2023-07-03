@@ -135,10 +135,7 @@
         , keyJob ? "job"
         , keyOs ? expr names.runner.os
         , path ? ""
-        , debug ? false
-        , nix-cache ? ""
-        , nix-max-depth ? 0
-        , nix-max-qr-paths ? 0
+        , debug-enabled ? false
         }:
         let
           hashfilesArgs = concatMapStringsSep ", " (x: "'${x}'") files;
@@ -155,10 +152,7 @@
             '';
           }
           // (if path != "" then { inherit path; } else { })
-          // (if debug then { inherit debug; } else { })
-          // (if nix-cache != "" then { inherit nix-cache; } else { })
-          // (if nix-max-depth != 0 then { inherit nix-max-depth; } else { })
-          // (if nix-max-qr-paths != 0 then { inherit nix-max-qr-paths; } else { });
+          // (if debug-enabled then { inherit debug-enabled; } else { });
         }
       ;
 
@@ -236,7 +230,7 @@
         };
       };
 
-      nixCI_ = { steps_ ? (_: [ ]), dir ? ".", cacheNixArgs ? { } }: {
+      nixCI_ = { steps_ ? (_: [ ]), dir ? ".", doCacheNix ? true, cacheNixArgs ? { } }: {
         name = "Nix CI";
         inherit on;
         jobs = {
@@ -248,12 +242,10 @@
               [
                 steps.checkout
                 (installNix { })
-                (cacheNix ({ keyJob = "cachix"; keyOs = expr names.matrix.os; } // cacheNixArgs))
               ]
+                (if doCacheNix then [ (cacheNix ({ keyJob = "cachix"; keyOs = expr names.matrix.os; } // cacheNixArgs)) ] else [ ])
               ++ (steps_ dir)
-              ++ [
-                (steps.pushFlakesToCachixDir dir)
-              ]
+              ++ [ (steps.pushFlakesToCachixDir dir) ]
             ;
           };
         };
