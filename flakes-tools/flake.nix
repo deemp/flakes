@@ -4,12 +4,12 @@
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
-    drv-tools.url = "github:deemp/flakes?dir=drv-tools";
   };
   outputs = inputs: inputs.flake-utils.lib.eachDefaultSystem (system:
     let
       pkgs = inputs.nixpkgs.legacyPackages.${system};
-      inherit (inputs.drv-tools.lib.${system})
+      drv-tools = import ../drv-tools;
+      inherit (drv-tools.lib.${system})
         withMan runFishScript mkShellApp wrapShellApp
         mkShellApps mkBin framedBrackets
         concatStringsNewline mkDevShellsWithDefault runInEachDir
@@ -26,7 +26,7 @@
         CACHIX_CACHE = "CACHIX_CACHE";
       };
 
-      man = inputs.drv-tools.lib.${system}.man // {
+      man = drv-tools.lib.${system}.man // {
         ENV = "# EXPECTED ENV VARIABLES";
         CACHIX_CACHE = ''
           `${env.CACHIX_CACHE}`
