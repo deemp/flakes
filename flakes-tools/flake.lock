@@ -1,5 +1,42 @@
 {
   "nodes": {
+    "flake-compat": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1650374568,
+        "narHash": "sha256-Z+s0J8/r907g149rllvwhb4pKi8Wam5ij0st8PwAh+E=",
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "rev": "b4a34015c698c7793d592d66adbab377907a2be8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "rev": "b4a34015c698c7793d592d66adbab377907a2be8",
+        "type": "github"
+      }
+    },
+    "flake-compat_": {
+      "inputs": {
+        "flake-compat": "flake-compat"
+      },
+      "locked": {
+        "dir": "source-flake/flake-compat",
+        "lastModified": 1688461995,
+        "narHash": "sha256-5XYm7vTjC9106y1vXCSQGqMjE7SzOBFt/fyPb5qV024=",
+        "owner": "deemp",
+        "repo": "flakes",
+        "rev": "e984d9dc96f78ba89f284fae19776975112f2371",
+        "type": "github"
+      },
+      "original": {
+        "dir": "source-flake/flake-compat",
+        "owner": "deemp",
+        "repo": "flakes",
+        "type": "github"
+      }
+    },
     "flake-utils": {
       "inputs": {
         "systems": "systems"
@@ -76,6 +113,11 @@
     },
     "root": {
       "inputs": {
+        "flake-compat": [
+          "flake-compat_",
+          "flake-compat"
+        ],
+        "flake-compat_": "flake-compat_",
         "flake-utils": [
           "flake-utils_",
           "flake-utils"
