@@ -219,8 +219,13 @@
       };
 
       nixCI =
-        { steps_ ? (_: [ ])
+        let
+          steps_ = steps;
+          on_ = on;
+        in
+        { steps ? (_: [ ])
         , dir ? "."
+        , on ? on_
         , strategy ? { matrix.os = oss; }
         , installNixArgs ? { }
         , doCacheNix ? true
@@ -238,25 +243,25 @@
               runs-on = expr names.matrix.os;
               steps =
                 [
-                  steps.checkout
+                  steps_.checkout
                   (installNix installNixArgs)
                 ]
                 ++ (
                   if doCacheNix
-                  then [ (cacheNix ({ keyJob = "cachix"; keyOs = expr names.matrix.os; } // cacheNixArgs)) ]
+                  then [ (steps_.cacheNix ({ keyJob = "cachix"; keyOs = expr names.matrix.os; } // cacheNixArgs)) ]
                   else [ ]
                 )
                 ++ (
                   if doUpdateLocks
                   then
                     stepsIf ("${names.matrix.os} == '${os.ubuntu-20}'") [
-                      steps.configGitAsGHActions
-                      (steps.updateLocks ({ inherit dir; } // updateLocksArgs))
+                      steps_.configGitAsGHActions
+                      (steps_.updateLocks ({ inherit dir; } // updateLocksArgs))
                     ]
                   else [ ]
                 )
-                ++ (steps_ dir)
-                ++ (if doPushToCachix then [ (steps.pushToCachix dir) ] else [ ])
+                ++ (steps dir)
+                ++ (if doPushToCachix then [ (steps_.pushToCachix dir) ] else [ ])
               ;
             };
           };
