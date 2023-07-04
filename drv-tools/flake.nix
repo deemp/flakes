@@ -4,6 +4,8 @@
     nixpkgs.follows = "nixpkgs_/nixpkgs";
     flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
     flake-utils.follows = "flake-utils_/flake-utils";
+    flake-compat_.url = "github:deemp/flakes?dir=source-flake/flake-compat";
+    flake-compat.follows = "flake-compat_/flake-compat";
   };
 
   outputs =
