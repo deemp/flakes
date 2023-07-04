@@ -89,7 +89,7 @@
           commit =
             { commitMessage ? ""
             , commitMessages ? [ commitMessage ]
-            }: ''git commit -a ${concatMapStringsSep " \\\n  " (message: ''-m "action: ${message}"'') commitMessages} && git push || echo ""'';
+            }: ''git commit -a ${concatMapStringsSep " \\\n  " (message: ''-m "action: ${message}"'') commitMessages} && git push'';
           nix =
             { doGitPull ? false
             , dir ? "."
