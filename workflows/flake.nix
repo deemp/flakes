@@ -29,8 +29,9 @@
         ubuntu-22 = "ubuntu-22.04";
         macos-11 = "macos-11";
         macos-12 = "macos-12";
-        ubuntu-latest = "ubuntu-latest";
       };
+
+      # A list of runner OSs
       oss = __attrValues os;
 
       # insert if: expression into steps
@@ -39,7 +40,7 @@
       # include steps conditionally
       stepsIf = expr: steps: map (x: x // { "if" = expr; }) steps;
 
-      # make stuff available as matrix.os instead of "matrix.os"
+      # make stuff available like matrix.os instead of "matrix.os"
       names =
         mkAccessors
           (
@@ -121,14 +122,6 @@
           inherit gitPull commit nix nixScript;
         };
 
-      nixCache = {
-        cache = "/tmp/nix-cache";
-        working-set = "/tmp/working-set";
-        access-time = "197004020402";
-        time = "1970-04-02 04:02";
-        strategy.matrix.os = __attrValues { inherit (os) macos-11 macos-12 ubuntu-20 ubuntu-22; };
-      };
-
       # cache nix store
       cacheNix =
         { files ? [ "**/flake.nix" "**/flake.lock" ]
@@ -156,31 +149,27 @@
         }
       ;
 
-      # nix store directory used for caching
-      # https://nixos.org/manual/nix/unstable/command-ref/conf-file.html?highlight=conf#conf-store
-      nixStore = {
-        linux = "/home/runner/nix";
-        auto = "auto";
-      };
-
       # Keep build outputs to garbage collect at the end only the trash
       # https://nixos.org/manual/nix/unstable/command-ref/conf-file.html#description
-      installNix = { store ? nixStore.auto }: {
-        name = "Install Nix";
-        uses = "cachix/install-nix-action@v22";
-        "with" = {
-          extra_nix_config = ''
-            access-tokens = github.com=${expr names.secrets.GITHUB_TOKEN}
-            substituters = https://cache.nixos.org/ https://nix-community.cachix.org https://cache.iog.io https://deemp.cachix.org 
-            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= deemp.cachix.org-1:9shDxyR2ANqEPQEEYDL/xIOnoPwxHot21L5fiZnFL18=
-            store = ${store}
-            keep-outputs = true
-            keep-derivations = true
-          '';
-          # https://releases.nixos.org/?prefix=nix
-          install_url = "https://releases.nixos.org/nix/nix-2.16.1/install";
+      installNix =
+        { modifyExtraNixConfig ? (x: x)
+        , installNixActionVersion ? "v22"
+        , nixVersion ? "2.16.1"
+        }: {
+          name = "Install Nix";
+          uses = "cachix/install-nix-action@${builtins.toString installNixActionVersion}";
+          "with" = {
+            extra_nix_config = modifyExtraNixConfig ''
+              access-tokens = github.com=${expr names.secrets.GITHUB_TOKEN}
+              substituters = https://cache.nixos.org/ https://nix-community.cachix.org https://cache.iog.io https://deemp.cachix.org
+              trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= deemp.cachix.org-1:9shDxyR2ANqEPQEEYDL/xIOnoPwxHot21L5fiZnFL18=
+              keep-outputs = true
+              keep-derivations = true
+            '';
+            # https://releases.nixos.org/?prefix=nix
+            install_url = "https://releases.nixos.org/nix/nix-${nixVersion}/install";
+          };
         };
-      };
 
       steps = rec {
         checkout = {
@@ -198,7 +187,7 @@
             nix run nixpkgs#cachix -- authtoken ${ expr names.secrets.CACHIX_AUTH_TOKEN }
           '';
         };
-        pushFlakesToCachixDir = dir: {
+        pushToCachix = dir: {
           name = "Push flakes to Cachix";
           env = {
             CACHIX_CACHE = expr names.secrets.CACHIX_CACHE;
@@ -206,7 +195,6 @@
           };
           run = run.nixScript { inherit dir; name = names.pushToCachix; };
         };
-        pushFlakesToCachix = pushFlakesToCachixDir ".";
         configGitAsGHActions = {
           name = "Config git for github-actions";
           run = ''
@@ -230,40 +218,53 @@
         };
       };
 
-      nixCI_ = { steps_ ? (_: [ ]), dir ? ".", doCacheNix ? true, cacheNixArgs ? { } }: {
-        name = "Nix CI";
-        inherit on;
-        jobs = {
-          nixCI = {
-            name = "Nix CI";
-            strategy = nixCache.strategy;
-            runs-on = expr names.matrix.os;
-            steps =
-              [
-                steps.checkout
-                (installNix { })
-              ]
-                (if doCacheNix then [ (cacheNix ({ keyJob = "cachix"; keyOs = expr names.matrix.os; } // cacheNixArgs)) ] else [ ])
-              ++ (steps_ dir)
-              ++ [ (steps.pushFlakesToCachixDir dir) ]
-            ;
+      nixCI =
+        { steps_ ? (_: [ ])
+        , dir ? "."
+        , strategy ? { matrix.os = oss; }
+        , installNixArgs ? { }
+        , doCacheNix ? true
+        , cacheNixArgs ? { }
+        , doUpdateLocks ? true
+        , updateLocksArgs ? { }
+        , doPushToCachix ? true
+        }: {
+          name = "Nix CI";
+          inherit on;
+          jobs = {
+            nixCI = {
+              name = "Nix CI";
+              inherit strategy;
+              runs-on = expr names.matrix.os;
+              steps =
+                [
+                  steps.checkout
+                  (installNix installNixArgs)
+                ]
+                ++ (
+                  if doCacheNix
+                  then [ (cacheNix ({ keyJob = "cachix"; keyOs = expr names.matrix.os; } // cacheNixArgs)) ]
+                  else [ ]
+                )
+                ++ (
+                  if doUpdateLocks
+                  then
+                    stepsIf ("${names.matrix.os} == '${os.ubuntu-20}'") [
+                      steps.configGitAsGHActions
+                      (steps.updateLocks ({ inherit dir; } // updateLocksArgs))
+                    ]
+                  else [ ]
+                )
+                ++ (steps_ dir)
+                ++ (if doPushToCachix then [ (steps.pushToCachix dir) ] else [ ])
+              ;
+            };
           };
         };
-      };
-
-      nixCIDir = dir: nixCI_ {
-        steps_ = _: stepsIf ("${names.matrix.os} == '${os.ubuntu-20}'") [
-          steps.configGitAsGHActions
-          (steps.updateLocks { inherit dir; })
-        ];
-        inherit dir;
-      };
-
-      nixCI = nixCIDir ".";
 
       packages = {
-        writeWorkflowsDir = writeYAML "workflow" "./tmp/nixCI.yaml" nixCI;
-        writeWorkflows = writeWorkflow "nixCI" (nixCIDir "nix-dev/");
+        writeWorkflowsDir = writeYAML "workflow" "./tmp/nixCI.yaml" (nixCI { });
+        writeWorkflows = writeWorkflow "nixCI" (nixCI { dir = "nix-dev/"; });
       };
 
       devShells.default = pkgs.mkShell {
@@ -281,9 +282,6 @@
           mkAccessors_
           names
           nixCI
-          nixCI_
-          nixCIDir
-          nixStore
           on
           os
           oss
