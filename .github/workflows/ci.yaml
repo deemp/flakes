@@ -8,15 +8,13 @@ jobs:
       - name: Install Nix
         uses: cachix/install-nix-action@v22
         with:
-          extra_nix_config: "access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}\nsubstituters = https://cache.nixos.org/ https://nix-community.cachix.org https://cache.iog.io https://deemp.cachix.org \ntrusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= deemp.cachix.org-1:9shDxyR2ANqEPQEEYDL/xIOnoPwxHot21L5fiZnFL18=\nstore = auto\nkeep-outputs = true\nkeep-derivations = true\n"
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+            substituters = https://cache.nixos.org/ https://nix-community.cachix.org https://cache.iog.io https://deemp.cachix.org
+            trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= deemp.cachix.org-1:9shDxyR2ANqEPQEEYDL/xIOnoPwxHot21L5fiZnFL18=
+            keep-outputs = true
+            keep-derivations = true
           install_url: https://releases.nixos.org/nix/nix-2.16.1/install
-      - name: Restore and cache Nix store
-        uses: deemp/cache-nix-too@v1
-        with:
-          key: nix-${{ matrix.os }}-cachix-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
-          restore-keys: |
-            nix-${{ matrix.os }}-cachix-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
-            nix-${{ matrix.os }}-cachix-
       - if: matrix.os == 'ubuntu-20.04'
         name: Config git for github-actions
         run: |
@@ -29,7 +27,7 @@ jobs:
 
           nix run .#updateLocks
 
-          git commit -a -m "action: Update flake locks" && git push || echo ""
+          git commit -a -m "action: Update flake locks" && git push
       - env:
           CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
           CACHIX_CACHE: ${{ secrets.CACHIX_CACHE }}
@@ -49,5 +47,5 @@ name: Nix CI
   pull_request: {}
   push: {}
   schedule:
-    - cron: 0 0 1 * *
+    - cron: 0 0 * * 0
   workflow_dispatch: {}

@@ -59,7 +59,7 @@
           inherit (flakesToolsLocks) updateLocks;
           writeSettings = writeSettingsJSON settingsCommonNix;
           codium = mkCodium ({ extensions = extensionsCommon; });
-          writeWorkflows = writeWorkflow "ci" (withAttrs nixCI { on.schedule = [{ cron = "0 0 1 * *"; }]; });
+          writeWorkflows = writeWorkflow "ci" (withAttrs (nixCI { doCacheNix = false; }) { on.schedule = [{ cron = "0 0 * * 0"; }]; });
         };
       in
       {
