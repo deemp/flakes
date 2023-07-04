@@ -242,40 +242,6 @@
           '';
         };
 
-      # TODO deprecate
-      # TODO errors due to inotifywait unavailable on macOS
-      # watch nix files existing at the moment
-      flakesWatchDumpDevshells = dirs:
-        let dirs_ = flatten dirs; in
-        withMan
-          (mkShellApp {
-            name = "flakes-watch-dump-devshells";
-            text = ''
-              printf "${framedBrackets "watcher set"}"
-              ${pkgs.inotify-tools}/bin/inotifywait -qmr -e close_write ./ | \
-              while read dir action file; do
-                if [[ $file =~ .*nix$ ]]; then
-                  set +e
-                  printf "${framedBrackets "started dumping devshells"}"
-                  ${mkBin (flakesUpdate dirs)}
-                  ${mkBin (flakesDumpDevshells dirs)}
-                  printf "${framedBrackets "finished dumping devshells"}"
-                  set -e
-                fi
-              done
-            '';
-            description = "Start a watcher that will update `flake.lock`s and evaluate devshells in given directories";
-          })
-          (x:
-            ''
-              ${man.DESCRIPTION}
-              ${x.meta.description}
-            
-              The given directories relative to `CWD` are:
-              ${indentStrings4 dirs_}
-            ''
-          );
-
       # format all .nix files with the formatter specified in the flake in the CWD
       flakesFormat =
         withMan
@@ -298,7 +264,6 @@
             pushToCachix = flakesPushToCachix dirs;
             logInToCachix = logInToCachix;
             updateAndPushToCachix = flakesUpdateAndPushToCachix dirs;
-            watchDumpDevshells = flakesWatchDumpDevshells dirs;
             format = flakesFormat;
           })
       );
