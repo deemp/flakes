@@ -226,6 +226,7 @@
         { steps ? (_: [ ])
         , dir ? "."
         , on ? on_
+        , os ? os.ubuntu-22
         , strategy ? { matrix.os = oss; }
         , installNixArgs ? { }
         , doCacheNix ? true
@@ -254,7 +255,7 @@
                 ++ (
                   if doUpdateLocks
                   then
-                    stepsIf ("${names.matrix.os} == '${os.ubuntu-20}'") [
+                    stepsIf ("${names.matrix.os} == '${os}'") [
                       steps_.configGitAsGHActions
                       (steps_.updateLocks ({ inherit dir; } // updateLocksArgs))
                     ]
