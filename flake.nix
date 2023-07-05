@@ -1,6 +1,6 @@
 {
   inputs = { };
-  outputs = inputsTop:
+  outputs = inputs:
     let
       inputs_ = {
         inherit (import ./source-flake) nixpkgs flake-utils formatter;

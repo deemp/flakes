@@ -2,19 +2,16 @@
   inputs.flakes.url = "github:deemp/flakes";
 
   outputs =
-    inputsTop:
+    inputs:
     let
       inputs_ =
-        let flakes = inputsTop.flakes.flakes; in
+        let flakes = inputs.flakes.flakes; in
         {
           inherit (flakes.source-flake) flake-utils nixpkgs;
           inherit (flakes) devshell;
         };
 
-      outputs = outputs_ { } // {
-        outputs = outputs_;
-        inputs = inputs_;
-      };
+      outputs = outputs_ { } // { inputs = inputs_; outputs = outputs_; };
 
       outputs_ =
         inputs__:
