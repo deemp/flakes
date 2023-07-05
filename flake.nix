@@ -48,17 +48,17 @@
 
             flakesTools = (mkFlakesTools (
               [
-                (subDirectories ./. "source-flake")
-                (subDirectories ./. "language-tools")
-                (subDirectories ./. "templates/codium")
-                "drv-tools"
-                "flakes-tools"
-                "env2json"
                 "codium"
-                "json2md"
                 "devshell"
-                "workflows"
+                "drv-tools"
+                "env2json"
+                "flakes-tools"
+                "json2md"
+                (subDirectories ./. "language-tools")
+                (subDirectories ./. "source-flake")
+                (subDirectories ./. "templates/codium")
                 "templates/haskell-minimal"
+                "workflows"
                 "."
               ]
             ));
@@ -67,7 +67,7 @@
               inherit (flakesTools) pushToCachix format updateLocks;
               writeSettings = writeSettingsJSON settingsCommonNix;
               codium = mkCodium ({ extensions = extensionsCommon; });
-              writeWorkflows = writeWorkflow "ci" (withAttrs (nixCI { doCacheNix = false; }) { on.schedule = [{ cron = "0 0 * * 0"; }]; });
+              writeWorkflows = writeWorkflow "ci" (withAttrs (nixCI { }) { on.schedule = [{ cron = "0 0 * * 0"; }]; });
             };
 
             tools = [ pkgs.nixd ];
