@@ -1,9 +1,5 @@
 {
-  inputs = {
-    flakes = {
-      url = "github:deemp/flakes";
-    };
-  };
+  inputs.flakes.url = "github:deemp/flakes";
 
   outputs = inputsTop:
     let

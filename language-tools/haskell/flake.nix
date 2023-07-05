@@ -1,9 +1,5 @@
 {
-  inputs = {
-    flakes = {
-      url = "github:deemp/flakes";
-    };
-  };
+  inputs.flakes.url = "github:deemp/flakes";
 
   outputs =
     inputsTop:
@@ -165,8 +161,8 @@
               ghc = ghcGHC version override packages;
 
               inherit (haskellPackagesGHC version) callCabal2nix;
-              implicit-hie = pkgs.haskell.packages.ghc945.implicit-hie_0_1_4_0;
-              fourmolu = pkgs.haskellPackages.fourmolu_0_12_0_0;
+              implicit-hie = pkgs.haskellPackages.implicit-hie_0_1_4_0;
+              fourmolu = pkgs.haskellPackages.fourmolu_0_13_0_0;
               inherit (pkgs) ghcid hpack;
 
               haskellPackages = haskellPackagesGHCOverride version override;
