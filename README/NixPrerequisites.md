@@ -146,7 +146,7 @@ cp flake-2/file{2,3} flake-3
        1. `git add flake.lock`
        1. `git commit` these files
 
-1. Flake tutorials: [1](https://nix-tutorial.gitlabpages.inria.fr/nix-tutorial/flakes.html?highlight=flake), [2](https://yuanwang.ca/posts/getting-started-with-flakes.html), [3](https://ghedam.at/a-tour-of-nix-flakes), [4](https://xeiaso.net/blog/nix-flakes-2-2022-02-27)
+1. Flake tutorials: [1](https://nix-tutorial.gitlabpages.inria.fr/nix-tutorial/flakes.html?highlight=flake), [2](https://yuanwang.ca/posts/getting-started-with-flakes.html), [3](https://ghedam.at/a-tour-of-nix-flakes), [4](https://xeiaso.net/blog/nix-flakes-2-2022-02-27), [5](https://myme.no/posts/2022-01-16-nixos-the-ultimate-dev-environment.html#launch-script)
 
 1. Flake inputs tip (perhaps flawed)
    - Store your flake inputs in a repo - [example](https://github.com/deemp/flakes/blob/2395f79740fdc5f14f91db10b1acd2892cdee28c/source-flake)
