@@ -1,6 +1,6 @@
 {
   inputs = { };
-  outputs = { self }:
+  outputs = inputsTop:
     let
       inputs_ = {
         inherit (import ./source-flake) nixpkgs flake-utils formatter;
@@ -14,7 +14,7 @@
       outputs = flake { } // {
         inherit flake;
         inputs = inputs_;
-        flakes = {  
+        flakes = {
           codium = import ./codium;
           devshell = import ./devshell;
           drv-tools = import ./drv-tools;
@@ -63,18 +63,8 @@
               ]
             ));
 
-            flakesToolsLocks = (mkFlakesTools (
-              [
-                (subDirectories ./. "templates/codium")
-                "source-flake"
-                "templates/haskell-minimal"
-                "."
-              ]
-            ));
-
             packages = {
-              inherit (flakesTools) pushToCachix format;
-              inherit (flakesToolsLocks) updateLocks;
+              inherit (flakesTools) pushToCachix format updateLocks;
               writeSettings = writeSettingsJSON settingsCommonNix;
               codium = mkCodium ({ extensions = extensionsCommon; });
               writeWorkflows = writeWorkflow "ci" (withAttrs (nixCI { doCacheNix = false; }) { on.schedule = [{ cron = "0 0 * * 0"; }]; });

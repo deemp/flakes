@@ -1,64 +1,81 @@
 {
   inputs = {
-    nixpkgs_.url = "github:deemp/flakes?dir=source-flake/nixpkgs";
-    nixpkgs.follows = "nixpkgs_/nixpkgs";
-    codium.url = "github:deemp/flakes?dir=codium";
-    drv-tools.url = "github:deemp/flakes?dir=drv-tools";
-    flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
-    flake-utils.follows = "flake-utils_/flake-utils";
-    devshell.url = "github:deemp/flakes?dir=devshell";
-    flakes-tools.url = "github:deemp/flakes?dir=flakes-tools";
+    flakes = {
+      url = "github:deemp/flakes";
+    };
   };
-  outputs = inputs: inputs.flake-utils.lib.eachDefaultSystem (system:
+
+  outputs =
+    inputsTop:
     let
-      pkgs = inputs.nixpkgs.legacyPackages.${system};
-      inherit (inputs.codium.lib.${system}) extensions settingsNix writeSettingsJSON mkCodium;
-      inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkShell;
-
-      python =
-        pkgs.python310.withPackages (p: with p; [
-          python
-          mypy
-          ipykernel
-          jupyter
-          black
-        ]);
-      tools = [
-        python
-      ];
-
-      packages = {
-        codium = mkCodium {
-          extensions = {
-            inherit (extensions) nix misc github markdown python jupyter;
-          };
-          runtimeDependencies = tools;
+      inputs_ =
+        let flakes = inputsTop.flakes.flakes; in
+        {
+          inherit (flakes.source-flake) flake-utils nixpkgs;
+          inherit (flakes) codium drv-tools flakes-tools devshell;
         };
-        writeSettings = writeSettingsJSON {
-          inherit (settingsNix) todo-tree files editor gitlens
-            git nix-ide workbench markdown-all-in-one markdown-language-features;
-          extra = settingsNix.python // {
-            "python.defaultInterpreterPath" = "${python}/bin/python";
-          };
-        };
+
+      outputs = flake { } // {
+        inherit flake;
+        inputs = inputs_;
       };
 
-      devShells = {
-        default = mkShell {
-          packages = tools;
-          bash.extra = '''';
-          commands =
-            mkCommands "tools" tools ++
-            mkRunCommands "ide" {
-              "codium ." = packages.codium;
-              inherit (packages) writeSettings;
+      flake =
+        inputs__:
+        let inputs = inputs_ // inputs__; in
+        inputs.flake-utils.lib.eachDefaultSystem (system:
+        let
+          pkgs = inputs.nixpkgs.legacyPackages.${system};
+          inherit (inputs.codium.lib.${system}) extensions settingsNix writeSettingsJSON mkCodium;
+          inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkShell;
+
+          python =
+            pkgs.python310.withPackages (p: with p; [
+              python
+              mypy
+              ipykernel
+              jupyter
+              black
+            ]);
+
+          tools = [
+            python
+          ];
+
+          packages = {
+            codium = mkCodium {
+              extensions = {
+                inherit (extensions) nix misc github markdown python jupyter;
+              };
+              runtimeDependencies = tools;
             };
-        };
-      };
+            writeSettings = writeSettingsJSON {
+              inherit (settingsNix) todo-tree files editor gitlens
+                git nix-ide workbench markdown-all-in-one markdown-language-features;
+              extra = settingsNix.python // {
+                "python.defaultInterpreterPath" = "${python}/bin/python";
+              };
+            };
+          };
+
+          devShells = {
+            default = mkShell {
+              packages = tools;
+              bash.extra = '''';
+              commands =
+                mkCommands "tools" tools ++
+                mkRunCommands "ide" {
+                  "codium ." = packages.codium;
+                  inherit (packages) writeSettings;
+                };
+            };
+          };
+        in
+        {
+          inherit packages devShells;
+        });
     in
-    {
-      inherit packages devShells;
-    });
+    outputs;
   nixConfig = {
     extra-substituters = [
       "https://nix-community.cachix.org"

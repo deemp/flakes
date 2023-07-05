@@ -2,15 +2,18 @@
   inputs = {
     flakes = {
       url = "github:deemp/flakes";
-      flake = false;
     };
   };
+
   outputs =
-    { self }:
+    inputsTop:
     let
-      inputs_ = {
-        inherit (import inputsTop.flakes.outPath) source-flake flake-utils drv-tools;
-      };
+      inputs_ =
+        let flakes = inputsTop.flakes.flakes; in
+        {
+          inherit (flakes.source-flake) flake-utils nixpkgs;
+          inherit (flakes) drv-tools;
+        };
 
       outputs = flake { } // {
         inherit flake;
@@ -23,7 +26,7 @@
         inputs.flake-utils.lib.eachDefaultSystem (system:
         let
           pkgs = inputs.nixpkgs.legacyPackages.${system};
-          inherit (drv-tools.lib.${system})
+          inherit (inputs.drv-tools.lib.${system})
             mkBin mkBinName writeJSON withMan mkShellApp
             framedBrackets mkShellApps man;
           inherit (builtins) isString baseNameOf dirOf;

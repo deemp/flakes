@@ -2,15 +2,18 @@
   inputs = {
     flakes = {
       url = "github:deemp/flakes";
-      flake = false;
     };
   };
+
   outputs =
     inputsTop:
     let
-      inputs_ = {
-        inherit (import inputsTop.flakes.outPath) flake-utils nixpkgs codium devshell flakes-tools workflows;
-      };
+      inputs_ =
+        let flakes = inputsTop.flakes.flakes; in
+        {
+          inherit (flakes.source-flake) flake-utils nixpkgs;
+          inherit (flakes) codium devshell flakes-tools workflows;
+        };
 
       outputs = flake { } // {
         inherit flake;

@@ -2,15 +2,17 @@
   inputs = {
     flakes = {
       url = "github:deemp/flakes";
-      flake = false;
     };
   };
-  outputs =
-    inputsTop:
+
+  outputs = inputsTop:
     let
-      inputs_ = {
-        inherit (import inputsTop.flake) nixpkgs flake-utils drv-tools;
-      };
+      inputs_ =
+        let flakes = inputsTop.flakes.flakes; in
+        {
+          inherit (flakes.source-flake) flake-utils nixpkgs;
+          inherit (flakes) drv-tools;
+        };
 
       outputs = flake { } // {
         inherit flake;
@@ -22,12 +24,12 @@
         let inputs = inputs_ // inputs__; in
         inputs.flake-utils.lib.eachDefaultSystem (system:
         let
-          pkgs = nixpkgs.legacyPackages.${system};
+          pkgs = inputs.nixpkgs.legacyPackages.${system};
           activateVenv = ''
             ${builtins.readFile ./scripts/activate.sh}
             set +e
           '';
-          inherit (drv-tools.lib.${system}) runInEachDir;
+          inherit (inputs.drv-tools.lib.${system}) runInEachDir;
           createVenvs = dirs: runInEachDir
             {
               name = "create-venvs";

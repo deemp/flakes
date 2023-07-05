@@ -2,18 +2,18 @@
   inputs = {
     flakes = {
       url = "github:deemp/flakes";
-      flake = false;
     };
   };
 
   outputs =
     inputsTop:
     let
-      inputs_ = {
-        inherit (import inputsTop.flakes)
-          flake-utils nixpkgs vscode-extensions
-          vscode-extensions-extra drv-tools;
-      };
+      inputs_ =
+        let flakes = inputsTop.flakes.flakes; in
+        {
+          inherit (flakes.source-flake) flake-utils nixpkgs nix-vscode-extensions nix-vscode-extensions-extra;
+          inherit (flakes) drv-tools;
+        };
 
       outputs = flake { } // {
         inherit flake;
@@ -36,7 +36,7 @@
             # A set of VSCodium extensions
             extensions = import ./nix-files/extensions.nix {
               inherit system pkgs;
-              inherit (inputs) vscode-extensions vscode-extensions-extra;
+              inherit (inputs) nix-vscode-extensions nix-vscode-extensions-extra;
             };
 
             # common extensions
