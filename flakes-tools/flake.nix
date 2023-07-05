@@ -251,11 +251,11 @@
             };
 
           # format all .nix files with the formatter specified in the flake in the CWD
-          flakesFormat =
+          flakesFormat = dirs:
             withMan
               (mkShellApp {
                 name = "flakes-format";
-                text = ''${pkgs.nix}/bin/nix fmt **/*.nix'';
+                text = ''${pkgs.nix}/bin/nix fmt ${builtins.concatStringsSep " " dirs}'';
                 description = "Format `.nix` files in `CWD` and its subdirectories";
               })
               (x: ''
@@ -265,16 +265,18 @@
               );
 
           # all flake tools together
-          mkFlakesTools = dirs: (
+          mkFlakesTools =
+            dirs_:
+            let dirs = pkgs.lib.lists.flatten dirs_; in
             (__mapAttrs (name: app: wrapShellApp { inherit name app; })
               {
                 updateLocks = flakesUpdate dirs;
                 pushToCachix = flakesPushToCachix dirs;
                 logInToCachix = logInToCachix;
                 updateAndPushToCachix = flakesUpdateAndPushToCachix dirs;
-                format = flakesFormat;
+                format = flakesFormat dirs;
               })
-          );
+          ;
         in
         {
           lib = {
