@@ -2,7 +2,6 @@
   inputs = {
     flakes = {
       url = "github:deemp/flakes";
-      flake = false;
     };
   };
 
@@ -10,7 +9,7 @@
     inputsTop:
     let
       inputs_ =
-        let flakes = (import inputsTop.flakes.outPath).flakes; in
+        let flakes = inputsTop.flakes.flakes; in
         {
           inherit (flakes.source-flake) flake-utils nixpkgs;
         };
