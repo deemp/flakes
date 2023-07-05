@@ -8,7 +8,7 @@
         let flakes = inputs.flakes.flakes; in
         {
           inherit (flakes.source-flake) flake-utils nixpkgs;
-          inherit (flakes) drv-tools;
+          inherit (flakes) drv-tools flakes-tools;
         };
 
       outputs = outputs_ { } // { inputs = inputs_; outputs = outputs_; };
@@ -21,7 +21,10 @@
           pkgs = inputs.nixpkgs.legacyPackages.${system};
           inherit (inputs.drv-tools.lib.${system}) writeYAML genAttrsId mkAccessors mkAccessors_;
           inherit (builtins) concatMap;
+          testFlakesTools = (inputs.flakes-tools.testFlakesTools.${system});
           inherit (pkgs.lib.strings) concatMapStringsSep;
+          inherit (pkgs.lib.attrsets) mapAttrsToList;
+          inherit (pkgs.lib.lists) flatten;
 
           writeWorkflow = name: writeYAML name ".github/workflows/${name}.yaml";
 
@@ -41,7 +44,8 @@
           # can omit ${{ }} - https://docs.github.com/en/actions/learn-github-actions/expressions#example-expression-in-an-if-conditional
 
           # include steps conditionally
-          stepsIf = expr: steps: map (x: x // { "if" = expr; }) steps;
+          stepsIf = expr: steps: map (x: x // { "if" = expr; }) (flatten steps);
+          stepMaybe = cond: step: if cond then [ step ] else [ ];
 
           # make stuff available like matrix.os instead of "matrix.os"
           names =
@@ -70,7 +74,7 @@
                 }
                 // (
                   # from flakes-tools - https://github.com/deemp/flakes/blob/9183df7c07abe9c1f5b4198ef6fb0b979c7af3a3/flakes-tools/flake.nix#L256
-                  genAttrsId [ "pushToCachix" "updateLocks" ]
+                  genAttrsId (mapAttrsToList (name: val: name) testFlakesTools)
                 )
               );
 
@@ -198,6 +202,10 @@
               };
               run = run.nixScript { inherit dir; name = names.pushToCachix; };
             };
+            format = dir: {
+              name = "Format Nix files";
+              run = run.nixScript { inherit dir; name = names.format; };
+            };
             configGitAsGHActions = {
               name = "Config git for github-actions";
               run = ''
@@ -235,6 +243,7 @@
             , installNixArgs ? { }
             , doCacheNix ? true
             , cacheNixArgs ? { }
+            , doFormat ? true
             , doUpdateLocks ? true
             , updateLocksArgs ? { }
             , doPushToCachix ? true
@@ -246,27 +255,22 @@
                   name = "Nix CI";
                   inherit strategy;
                   runs-on = expr names.matrix.os;
-                  steps =
-                    [
+                  steps = flatten
+                    ([
                       steps_.checkout
                       (installNix installNixArgs)
                     ]
+                    ++ (stepMaybe doCacheNix (steps_.cacheNix ({ keyJob = "cachix"; keyOs = expr names.matrix.os; } // cacheNixArgs)))
                     ++ (
-                      if doCacheNix
-                      then [ (steps_.cacheNix ({ keyJob = "cachix"; keyOs = expr names.matrix.os; } // cacheNixArgs)) ]
-                      else [ ]
-                    )
-                    ++ (
-                      if doUpdateLocks
-                      then
-                        stepsIf ("${names.matrix.os} == '${os}'") [
-                          steps_.configGitAsGHActions
-                          (steps_.updateLocks ({ inherit dir; } // updateLocksArgs))
-                        ]
-                      else [ ]
+                      stepsIf ("${names.matrix.os} == '${os}'") [
+                        steps_.configGitAsGHActions
+                        (stepMaybe doFormat (steps_.format dir))
+                        (stepMaybe doUpdateLocks (steps_.updateLocks ({ inherit dir; } // updateLocksArgs)))
+                      ]
                     )
                     ++ (steps dir)
-                    ++ (if doPushToCachix then [ (steps_.pushToCachix dir) ] else [ ])
+                    ++ (stepMaybe doPushToCachix (steps_.pushToCachix dir))
+                    )
                   ;
                 };
               };
