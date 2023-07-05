@@ -14,12 +14,12 @@
           haskell-tools = flakes.language-tools.haskell;
         };
 
-      outputs = flake { } // {
-        inherit flake;
+      outputs = outputs_ { } // {
+        outputs = outputs_;
         inputs = inputs_;
       };
 
-      flake =
+      outputs_ =
         inputs__:
         let inputs = inputs_ // inputs__; in
         inputs.flake-utils.lib.eachDefaultSystem (system:

@@ -11,12 +11,12 @@
           inherit (flakes) codium devshell flakes-tools workflows;
         };
 
-      outputs = flake { } // {
-        inherit flake;
+      outputs = outputs_ { } // {
+        outputs = outputs_;
         inputs = inputs_;
       };
 
-      flake =
+      outputs_ =
         inputs__:
         let inputs = inputs_ // inputs__; in
         inputs_.flake-utils.outputs.lib.eachDefaultSystem
