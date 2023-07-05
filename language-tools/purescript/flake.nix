@@ -1,25 +1,41 @@
 {
   inputs = {
-    nixpkgs_.url = "github:deemp/flakes?dir=source-flake/nixpkgs";
-    nixpkgs.follows = "nixpkgs_/nixpkgs";
-    flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
-    flake-utils.follows = "flake-utils_/flake-utils";
-    nixpkgs-purescript.url = "github:deemp/nixpkgs/purescript";
+    flakes = {
+      url = "github:deemp/flakes";
+      flake = false;
+    };
   };
-  outputs = inputs: inputs.flake-utils.lib.eachDefaultSystem (system:
+
+  outputs = { self, nixpkgs-purescript }:
     let
-      pkgs = inputs.nixpkgs.legacyPackages.${system};
-      pkgs-purescript = inputs.nixpkgs-purescript.legacyPackages.${system};
-      packages = {
-        inherit (pkgs-purescript) purescript;
-        inherit (pkgs) dhall-lsp-server nodejs_18;
-        inherit (pkgs.nodePackages) purescript-language-server purs-tidy bower;
-        spago = pkgs.lib.meta.addMetaAttrs { description = "PureScript build tool and package manager"; } pkgs.spago;
+      inputs_ = {
+        inherit (import inputsTop.flakes.outPath) flake-utils nixpkgs nixpkgs-purescript;
       };
-      devShells.default = pkgs.mkShell { buildInputs = __attrValues packages; };
+
+      outputs = flake { } // {
+        inherit flake;
+        inputs = inputs_;
+      };
+
+      flake =
+        inputs__:
+        let inputs = inputs_ // inputs__; in
+        inputs.flake-utils.lib.eachDefaultSystem (system:
+        let
+          pkgs = inputs.nixpkgs.legacyPackages.${system};
+          pkgs-purescript = inputs.nixpkgs-purescript.legacyPackages.${system};
+          packages = {
+            inherit (pkgs-purescript) purescript;
+            inherit (pkgs) dhall-lsp-server nodejs_18;
+            inherit (pkgs.nodePackages) purescript-language-server purs-tidy bower;
+            spago = pkgs.lib.meta.addMetaAttrs { description = "PureScript build tool and package manager"; } pkgs.spago;
+          };
+          devShells.default = pkgs.mkShell { buildInputs = __attrValues packages; };
+        in
+        {
+          inherit packages devShells;
+        }
+        );
     in
-    {
-      inherit packages devShells;
-    }
-  );
+    outputs;
 }

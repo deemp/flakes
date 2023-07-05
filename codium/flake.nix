@@ -1,169 +1,178 @@
 {
   inputs = {
-    nixpkgs_.url = "github:deemp/flakes?dir=source-flake/nixpkgs";
-    nixpkgs.follows = "nixpkgs_/nixpkgs";
-    flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
-    flake-utils.follows = "flake-utils_/flake-utils";
-    vscode-extensions.url = "github:nix-community/nix-vscode-extensions/219877e9da73d5d0ee833cc2cb4b1ea26e76e1df";
-    vscode-extensions-extra.url = "github:nix-community/nix-vscode-extensions/288ddbb70b5befac24602bfe7e5d9fe09dfae8d0";
-    drv-tools.url = "github:deemp/flakes?dir=drv-tools";
+    flakes = {
+      url = "github:deemp/flakes";
+      flake = false;
+    };
   };
 
   outputs =
-    { self
-    , flake-utils
-    , nixpkgs
-    , drv-tools
-    , vscode-extensions
-    , vscode-extensions-extra
-    , ...
-    }:
-    flake-utils.lib.eachDefaultSystem
-      (system:
-      let
-        pkgs = nixpkgs.legacyPackages.${system};
+    inputsTop:
+    let
+      inputs_ = {
+        inherit (import inputsTop.flakes)
+          flake-utils nixpkgs vscode-extensions
+          vscode-extensions-extra drv-tools;
+      };
 
-        inherit (drv-tools.lib.${system})
-          withMan writeJSON toList mergeValues
-          mkBin indentStrings4 withDescription
-          withAttrs man;
+      outputs = flake { } // {
+        inherit flake;
+        inputs = inputs_;
+      };
 
-        # A set of VSCodium extensions
-        extensions = import ./nix-files/extensions.nix { inherit system vscode-extensions vscode-extensions-extra pkgs; };
-
-        # common extensions
-        extensionsCommon = { inherit (extensions) nix misc github markdown; };
-
-        # settings.json translated to .nix
-        settingsNix = import ./nix-files/settings.nix;
-
-        # common settings
-        settingsCommonNix = {
-          inherit (settingsNix)
-            editor errorlens nix-ide explorer terminal
-            files git gitlens json-language-features
-            markdown-all-in-one markdown-language-features
-            todo-tree workbench
-            ;
-        };
-
-        # create a codium with a given set of extensions
-        # bashInteractive is necessary for correct work
-        mkCodium = { extensions ? { }, runtimeDependencies ? [ ] }:
+      flake =
+        inputs__:
+        let inputs = inputs_ // inputs__; in
+        inputs.flake-utils.lib.eachDefaultSystem
+          (system:
           let
-            inherit (pkgs) vscode-with-extensions vscodium;
-            codium =
-              (vscode-with-extensions.override {
-                vscode = vscodium;
-                vscodeExtensions = toList extensions;
-              });
-            deps = pkgs.lib.lists.flatten [
-              pkgs.bashInteractive
-              pkgs.rnix-lsp
-              pkgs.nixpkgs-fmt
-              pkgs.direnv
-              runtimeDependencies
-            ];
-            exeName = "codium";
-          in
-          withMan
-            (withAttrs
-              (pkgs.runCommand exeName
-                { buildInputs = [ pkgs.makeBinaryWrapper ]; }
-                ''
-                  mkdir $out
-                  cp -rs --no-preserve=mode,ownership ${codium}/* $out/
-                  rm -rf $out/bin
-                  mkdir $out/bin
-                  makeWrapper ${codium}/bin/${exeName} $out/bin/${exeName} --prefix PATH : ${pkgs.lib.makeBinPath deps}
-                ''
-              )
-              {
-                inherit (vscodium) version;
-                pname = exeName;
-                name = "${exeName}-${vscodium.version}";
-                meta = codium.meta // { description = "`VSCodium` with extensions and binaries on `PATH`"; };
-              })
-            (x: ''
-              ${man.DESCRIPTION}
-              ${x.meta.description}
-              Its default runtime dependencies include `bashInteractive`, `rnix-lsp`, `nixpkgs-fmt`, `direnv`.
+            pkgs = inputs.nixpkgs.legacyPackages.${system};
 
-              Verify executables are on `PATH`: 
-                  
-                  Open VSCodium
-                  Open a terminal there and run `printf '$PATH'`
+            inherit (inputs.drv-tools.lib.${system})
+              withMan writeJSON toList mergeValues
+              mkBin indentStrings4 withDescription
+              withAttrs man;
 
-              `PATH` should contain the Nix store paths of binaries that you set as runtime dependencies
-
-              If no, try each of the following actions in order until the `PATH` is correct. After each action, check `PATH` in VSCodium:
-                    
-                  1. Repair VSCodium derivation (https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-store-repair.html)
-                  2. Run VSCodium in a new terminal
-                  3. Restart OS and collect Nix garbage (https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-store-gc.html), then run VSCodium
-                      nix store gc
-            '')
-        ;
-
-        writeSettingsJSON = settings:
-          withMan
-            (withDescription (writeJSON "settings" "./.vscode/settings.json" (mergeValues settings))
-              (_: "Write `.vscode/settings.json`"))
-            (x: ''
-              ${man.DESCRIPTION}
-              ${x.meta.description}
-            '');
-
-        writeTasksJSON = tasks:
-          withMan
-            (withDescription
-              (writeJSON "tasks" "./.vscode/tasks.json" tasks)
-              (_: "Write `.vscode/tasks.json`")
-            )
-            (x: ''
-              ${man.DESCRIPTION}
-              ${x.meta.description}
-            '');
-
-        # stuff for testing
-
-        # codium with all extensions enabled
-        testCodium = mkCodium {
-          inherit extensions;
-          runtimeDependencies = [ pkgs.hello ];
-        };
-
-        # test write settings
-        testWriteSettings = writeSettingsJSON (
-          settingsNix // {
-            other = {
-              "window.restoreWindows" = "none";
+            # A set of VSCodium extensions
+            extensions = import ./nix-files/extensions.nix {
+              inherit system pkgs;
+              inherit (inputs) vscode-extensions vscode-extensions-extra;
             };
-          }
-        );
-        tools = [ testCodium testWriteSettings ];
-      in
-      {
-        lib = {
-          inherit
-            mkCodium
-            writeSettingsJSON
-            writeTasksJSON
+
+            # common extensions
+            extensionsCommon = { inherit (extensions) nix misc github markdown; };
+
+            # settings.json translated to .nix
+            settingsNix = import ./nix-files/settings.nix;
+
+            # common settings
+            settingsCommonNix = {
+              inherit (settingsNix)
+                editor errorlens nix-ide explorer terminal
+                files git gitlens json-language-features
+                markdown-all-in-one markdown-language-features
+                todo-tree workbench
+                ;
+            };
+
+            # create a codium with a given set of extensions
+            # bashInteractive is necessary for correct work
+            mkCodium = { extensions ? { }, runtimeDependencies ? [ ] }:
+              let
+                inherit (pkgs) vscode-with-extensions vscodium;
+                codium =
+                  (vscode-with-extensions.override {
+                    vscode = vscodium;
+                    vscodeExtensions = toList extensions;
+                  });
+                deps = pkgs.lib.lists.flatten [
+                  pkgs.bashInteractive
+                  pkgs.rnix-lsp
+                  # pkgs.nixd
+                  pkgs.nixpkgs-fmt
+                  # pkgs.direnv
+                  runtimeDependencies
+                ];
+                exeName = "codium";
+              in
+              withMan
+                (withAttrs
+                  (pkgs.runCommand exeName
+                    { buildInputs = [ pkgs.makeBinaryWrapper ]; }
+                    ''
+                      mkdir $out
+                      cp -rs --no-preserve=mode,ownership ${codium}/* $out/
+                      rm -rf $out/bin
+                      mkdir $out/bin
+                      makeWrapper ${codium}/bin/${exeName} $out/bin/${exeName} --prefix PATH : ${pkgs.lib.makeBinPath deps}
+                    ''
+                  )
+                  {
+                    inherit (vscodium) version;
+                    pname = exeName;
+                    name = "${exeName}-${vscodium.version}";
+                    meta = codium.meta // { description = "`VSCodium` with extensions and binaries on `PATH`"; };
+                  })
+                (x: ''
+                  ${man.DESCRIPTION}
+                  ${x.meta.description}
+                  Its default runtime dependencies include `bashInteractive`, `rnix-lsp`, `nixpkgs-fmt`, `direnv`.
+
+                  Verify executables are on `PATH`: 
+                  
+                      Open VSCodium
+                      Open a terminal there and run `printf '$PATH'`
+
+                  `PATH` should contain the Nix store paths of binaries that you set as runtime dependencies
+
+                  If no, try each of the following actions in order until the `PATH` is correct. After each action, check `PATH` in VSCodium:
+                    
+                      1. Repair VSCodium derivation (https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-store-repair.html)
+                      2. Run VSCodium in a new terminal
+                      3. Restart OS and collect Nix garbage (https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-store-gc.html), then run VSCodium
+                          nix store gc
+                '')
             ;
-          inherit
-            extensions
-            extensionsCommon
-            settingsCommonNix
-            settingsNix
-            ;
-        };
-        devShells.default = pkgs.mkShell {
-          buildInputs = tools;
-          shellHook = ''
-            codium --list-extensions
-          '';
-        };
-      });
+
+            writeSettingsJSON = settings:
+              withMan
+                (withDescription (writeJSON "settings" "./.vscode/settings.json" (mergeValues settings))
+                  (_: "Write `.vscode/settings.json`"))
+                (x: ''
+                  ${man.DESCRIPTION}
+                  ${x.meta.description}
+                '');
+
+            writeTasksJSON = tasks:
+              withMan
+                (withDescription
+                  (writeJSON "tasks" "./.vscode/tasks.json" tasks)
+                  (_: "Write `.vscode/tasks.json`")
+                )
+                (x: ''
+                  ${man.DESCRIPTION}
+                  ${x.meta.description}
+                '');
+
+            # stuff for testing
+
+            # codium with all extensions enabled
+            testCodium = mkCodium {
+              inherit extensions;
+              runtimeDependencies = [ pkgs.hello ];
+            };
+
+            # test write settings
+            testWriteSettings = writeSettingsJSON (
+              settingsNix // {
+                other = {
+                  "window.restoreWindows" = "none";
+                };
+              }
+            );
+            tools = [ testCodium testWriteSettings ];
+          in
+          {
+            lib = {
+              inherit
+                extensions
+                extensionsCommon
+                mkCodium
+                settingsCommonNix
+                settingsNix
+                writeSettingsJSON
+                writeTasksJSON
+                ;
+            };
+            devShells.default = pkgs.mkShell {
+              buildInputs = tools;
+              shellHook = ''
+                codium --list-extensions
+              '';
+            };
+          });
+    in
+    outputs;
 
   nixConfig = {
     extra-substituters = [
@@ -178,4 +187,3 @@
     ];
   };
 }
-

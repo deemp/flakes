@@ -1,9 +1,15 @@
-(import (
-  let
-    lock = builtins.fromJSON (builtins.readFile ./flake.lock);
-  in fetchTarball {
-    url = "https://github.com/edolstra/flake-compat/archive/${lock.nodes.flake-compat.locked.rev}.tar.gz";
-    sha256 = lock.nodes.flake-compat.locked.narHash; }
-) {
-  src =  ./.;
-}).defaultNix
+(import
+  (
+    let
+      lock = (builtins.fromJSON (builtins.readFile ./flake.lock)).nodes.flakes.locked;
+    in
+    (
+      import
+        "${fetchTarball {
+          url = "https://github.com/deemp/flakes/archive/${lock.rev}.tar.gz";
+          sha256 = lock.narHash;
+        }}/source-flake"
+    ).outputs.flake-compat.outPath
+  )
+  { src = ./.; }
+).defaultNix

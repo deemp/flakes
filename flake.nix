@@ -1,108 +1,131 @@
 {
-  inputs = {
-    nixpkgs_.url = "github:deemp/flakes?dir=source-flake/nixpkgs";
-    nixpkgs.follows = "nixpkgs_/nixpkgs";
-    flake-utils_.url = "github:deemp/flakes?dir=source-flake/flake-utils";
-    flake-utils.follows = "flake-utils_/flake-utils";
-    flakes-tools.url = "github:deemp/flakes?dir=flakes-tools";
-    drv-tools.url = "github:deemp/flakes?dir=drv-tools";
-    formatter.url = "github:deemp/flakes?dir=source-flake/formatter";
-    codium.url = "github:deemp/flakes?dir=codium";
-    devshell.url = "github:deemp/flakes?dir=devshell";
-    workflows.url = "github:deemp/flakes?dir=workflows";
-  };
-  outputs = inputs: inputs.flake-utils.lib.eachDefaultSystem
-    (system:
-      let
-        inherit (inputs.codium.lib.${system}) mkCodium writeSettingsJSON extensionsCommon settingsCommonNix;
-        inherit (inputs.drv-tools.lib.${system}) subDirectories withAttrs;
-        inherit (inputs.flakes-tools.lib.${system}) mkFlakesTools;
-        inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkShell;
-        inherit (inputs.workflows.lib.${system}) writeWorkflow nixCI;
+  inputs = { };
+  outputs = { self }:
+    let
+      inputs_ = {
+        inherit (import ./source-flake) nixpkgs flake-utils formatter;
+        drv-tools = import ./drv-tools;
+        flakes-tools = import ./flakes-tools;
+        codium = import ./codium;
+        devshell = import ./devshell;
+        workflows = import ./workflows;
+      };
 
-        # cache most frequently used flakes
-        flakesTools = (mkFlakesTools (
-          [
-            "drv-tools"
-            "flakes-tools"
-            "env2json"
-            "codium"
-            "json2md"
-            "devshell"
-            "workflows"
-            "templates/haskell-minimal"
-            "."
-          ]
-        ));
-
-        flakesToolsLocks = (mkFlakesTools (
-          [
-            (subDirectories ./. "source-flake")
-            (subDirectories ./. "language-tools")
-            (subDirectories ./. "templates/codium")
-            [
-              "drv-tools"
-              "flakes-tools"
-              "env2json"
-              "codium"
-              "json2md"
-              "devshell"
-              "workflows"
-              "templates/haskell-minimal"
-              "."
-            ]
-          ]
-        ));
-
-        packages = {
-          inherit (flakesTools) pushToCachix format;
-          inherit (flakesToolsLocks) updateLocks;
-          writeSettings = writeSettingsJSON settingsCommonNix;
-          codium = mkCodium ({ extensions = extensionsCommon; });
-          writeWorkflows = writeWorkflow "ci" (withAttrs (nixCI { doCacheNix = false; }) { on.schedule = [{ cron = "0 0 * * 0"; }]; });
+      outputs = flake { } // {
+        inherit flake;
+        inputs = inputs_;
+        flakes = {  
+          codium = import ./codium;
+          devshell = import ./devshell;
+          drv-tools = import ./drv-tools;
+          env2json = import ./env2json;
+          flakes-tools = import ./flakes-tools;
+          json2md = import ./json2md;
+          language-tools = {
+            haskell = import ./language-tools/haskell;
+            purescript = import ./language-tools/purescript;
+            python = import ./language-tools/python;
+          };
+          source-flake = import ./source-flake;
+          workflows = import ./workflows;
         };
-      in
-      {
-        devShells.default = mkShell {
-          commands =
-            mkRunCommands "ide"
-              {
-                inherit (packages) writeSettings;
-                "codium ." = packages.codium;
-              } ++
-            mkRunCommands "infra" {
-              inherit (packages) writeWorkflows;
-            }
-          ;
-        };
+      };
 
-        inherit packages;
-      })
-  // {
-    inherit (inputs.formatter) formatter;
-    templates = rec {
-      codium-generic = {
-        path = ./templates/codium/generic;
-        description = "`VSCodium` with extensions and executables";
-      };
-      codium-haskell = {
-        path = ./templates/codium/haskell;
-        description = "${codium-generic.description} for `Haskell`. Shows 5 ways to run a `Haskell` app.";
-      };
-      codium-haskell-simple = {
-        path = ./templates/codium/haskell-simple;
-        description = "${codium-generic.description} for `Haskell`.";
-      };
-      haskell-minimal = {
-        path = ./templates/haskell-minimal;
-        description = "Minimal flake for a `Haskell` package development.";
-      };
-      codium-python = {
-        path = ./templates/codium/python;
-        description = "${codium-generic.description} for `Python`.";
-      };
-    };
-  };
+      flake =
+        inputs__:
+        let inputs = inputs_ // inputs__; in
+        inputs.flake-utils.lib.eachDefaultSystem
+          (system:
+          let
+            pkgs = inputs.nixpkgs.legacyPackages.${system};
+            inherit (inputs.codium.lib.${system}) mkCodium writeSettingsJSON extensionsCommon settingsCommonNix;
+            inherit (inputs.drv-tools.lib.${system}) subDirectories withAttrs;
+            inherit (inputs.flakes-tools.lib.${system}) mkFlakesTools;
+            inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkShell;
+            inherit (inputs.workflows.lib.${system}) writeWorkflow nixCI;
+
+            # cache most frequently used flakes
+
+            flakesTools = (mkFlakesTools (
+              [
+                (subDirectories ./. "source-flake")
+                (subDirectories ./. "language-tools")
+                (subDirectories ./. "templates/codium")
+                "drv-tools"
+                "flakes-tools"
+                "env2json"
+                "codium"
+                "json2md"
+                "devshell"
+                "workflows"
+                "templates/haskell-minimal"
+                "."
+              ]
+            ));
+
+            flakesToolsLocks = (mkFlakesTools (
+              [
+                (subDirectories ./. "templates/codium")
+                "source-flake"
+                "templates/haskell-minimal"
+                "."
+              ]
+            ));
+
+            packages = {
+              inherit (flakesTools) pushToCachix format;
+              inherit (flakesToolsLocks) updateLocks;
+              writeSettings = writeSettingsJSON settingsCommonNix;
+              codium = mkCodium ({ extensions = extensionsCommon; });
+              writeWorkflows = writeWorkflow "ci" (withAttrs (nixCI { doCacheNix = false; }) { on.schedule = [{ cron = "0 0 * * 0"; }]; });
+            };
+
+            tools = [ pkgs.nixd ];
+          in
+          {
+            devShells.default = mkShell {
+              packages = tools;
+              commands =
+                mkCommands "tools" tools ++
+                mkRunCommands "ide" {
+                  inherit (packages) writeSettings;
+                  "codium ." = packages.codium;
+                } ++
+                mkRunCommands "infra" {
+                  inherit (packages) writeWorkflows;
+                }
+              ;
+            };
+
+            inherit packages;
+          })
+        // {
+          inherit (inputs) formatter;
+          templates = rec {
+            codium-generic = {
+              path = ./templates/codium/generic;
+              description = "`VSCodium` with extensions and executables";
+            };
+            codium-haskell = {
+              path = ./templates/codium/haskell;
+              description = "${codium-generic.description} for `Haskell`. Shows 5 ways to run a `Haskell` app.";
+            };
+            codium-haskell-simple = {
+              path = ./templates/codium/haskell-simple;
+              description = "${codium-generic.description} for `Haskell`.";
+            };
+            haskell-minimal = {
+              path = ./templates/haskell-minimal;
+              description = "Minimal flake for a `Haskell` package development.";
+            };
+            codium-python = {
+              path = ./templates/codium/python;
+              description = "${codium-generic.description} for `Python`.";
+            };
+          };
+        };
+    in
+    outputs;
 
   nixConfig = {
     extra-trusted-substituters = [
