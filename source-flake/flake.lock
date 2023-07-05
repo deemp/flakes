@@ -428,6 +428,22 @@
         "type": "github"
       }
     },
+    "nixpkgs-purescript": {
+      "locked": {
+        "lastModified": 1685960562,
+        "narHash": "sha256-tPjVvEEa9mHPK045GGFC8bvZ3NWXRF/Ec9gdF690EZ4=",
+        "owner": "deemp",
+        "repo": "nixpkgs",
+        "rev": "853d935a30ec852b9638c42bf918661bd44f2ecd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "deemp",
+        "ref": "purescript",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixpkgs_": {
       "inputs": {
         "nixpkgs": "nixpkgs_2"
@@ -631,6 +647,7 @@
         "lima": "lima",
         "nix-vscode-extensions": "nix-vscode-extensions",
         "nixpkgs": "nixpkgs_6",
+        "nixpkgs-purescript": "nixpkgs-purescript",
         "poetry2nix": "poetry2nix",
         "vscode-extensions": "vscode-extensions",
         "vscode-extensions-extra": "vscode-extensions-extra"
