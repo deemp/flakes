@@ -277,6 +277,8 @@
                 format = flakesFormat dirs;
               })
           ;
+
+          testFlakesTools = mkFlakesTools [ "." ];
         in
         {
           lib = {
@@ -297,8 +299,10 @@
               pushPackagesToCachix logInToCachix;
           };
 
+          inherit testFlakesTools;
+
           devShells.default = pkgs.mkShell {
-            buildInputs = [ (builtins.attrValues (mkFlakesTools [ "." ])) ];
+            buildInputs = [ (builtins.attrValues testFlakesTools) ];
           };
         });
     in
