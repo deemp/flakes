@@ -32,7 +32,7 @@
               # --- IDE ---
 
               # This part can be removed if you don't use `VSCodium`
-              # We compose `VSCodium` with dev tools
+              # We compose `VSCodium` with extensions and runtime tools
               # This is to let `VSCodium` run on its own, outside of a devshell
               codium = mkCodium {
                 # We use the common extensions

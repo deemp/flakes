@@ -2,10 +2,10 @@
   inputs.flakes.url = "github:deemp/flakes";
 
   outputs =
-    inputs:
+    inputsTop:
     let
       inputs_ =
-        let flakes = inputs.flakes.flakes; in
+        let flakes = inputsTop.flakes.flakes; in
         {
           inherit (flakes.source-flake) flake-utils nixpkgs;
           inherit (flakes)
@@ -147,7 +147,7 @@
             # --- IDE ---
 
             # This part can be removed if you don't use `VSCodium`
-            # We compose `VSCodium` with dev tools and `HLS`
+            # We compose `VSCodium` with extensions and runtime tools
             # This is to let `VSCodium` run on its own, outside of a devshell
             codium = mkCodium {
               extensions = extensionsCommon // { inherit (extensions) haskell; };
