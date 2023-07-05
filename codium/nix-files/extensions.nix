@@ -85,6 +85,9 @@ mkExtensions vscode-marketplace
     jnoortheen = "nix-ide";
     mkhl = "direnv";
   };
+  pdf = {
+    tomoki1207 = "pdf";
+  };
   postgresql = {
     inferrinizzard = "prettier-sql-vscode";
   };
