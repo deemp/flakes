@@ -122,6 +122,10 @@ __foldl' pkgs.lib.attrsets.recursiveUpdate { }
           rescript = {
             chenglou92 = "rescript-vscode";
           };
+          scala = {
+            scalameta = "metals";
+            scala-lang = "scala";
+          };
           sql = {
             inferrinizzard = "prettier-sql-vscode";
             mtxr = "sqltools";
