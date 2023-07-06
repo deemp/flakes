@@ -132,16 +132,15 @@
           toolsGHC =
             {
               # `GHC` version as it's set in nixpkgs
-              # `version` corresponds to `pkgs.haskell.packages.${version}`
-              version ? "945"
-            , # override for haskell packages. See https://nixos.wiki/wiki/Haskell#Overrides
+              # `version` corresponds to `pkgs.haskell.packages."ghc${version}"`
+              version ? "928"
+            , # override for haskell packages. See https://nixos.wiki/wiki/Haskell#Overrides, https://nixos.org/manual/nixpkgs/unstable/#haskell
               override ? { }
-            , # a function from an attrset Haskell packages to a list of packages that you develop
+            , # a function from an attrset of Haskell packages to a list of packages that you develop
               # packages that you develop should be provided in the override
               packages ? (_: [ ])
-            , # what should be available on PATH
-              # this lists lists necessary non-Haskell executables for all Haskell packages
-              # These non-Haskell packages will be available to a build tool
+            , # Programs that will be available to a build tool at development time
+              # and to a Haskell program at runtime
               runtimeDependencies ? [ ]
             }:
             {

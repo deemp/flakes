@@ -104,13 +104,19 @@
           inherit (toolsGHC {
             version = ghcVersion;
             inherit override;
+
+            # Programs that will be available to cabal at development time
+            # and to a Haskell program at runtime
             runtimeDependencies = packageRuntimeDependencies;
-            # If we work on multiple packages, we need to supply all of them.
-            # Suppose we develop packages A and B, where B is in deps of A.
+
+            # If we work on multiple packages, we need to supply all of them
+            # so that their dependencies can be correctrly filtered.
+
+            # Suppose we develop packages A and B, where B is in dependencies of A.
             # GHC will be given dependencies of both A and B.
-            # However, we don't want B to be in the list of deps of GHC
+            # However, we don't want B to be in the list of dependencies of GHC
             # because build of GHC may fail due to errors in B.
-            packages = (ps: [ ps.${packageName} ]);
+            packages = ps: [ ps.${packageName} ];
           })
             stack hls cabal implicit-hie justStaticExecutable
             ghcid callCabal2nix haskellPackages hpack ghc;
