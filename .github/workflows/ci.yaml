@@ -21,13 +21,20 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
       - if: matrix.os == 'ubuntu-22.04'
+        name: Format Nix files
+        run: |+
+          nix run .#format
+
+      - if: matrix.os == 'ubuntu-22.04'
         name: Update flake locks
-        run: |
+        run: |+
           git pull --rebase --autostash
 
           nix run .#updateLocks
 
-          git commit -a -m "action: Update flake locks" && git push
+          git commit -a -m "action: Update flake locks" \
+                                 && git push || echo "push failed!"
+
       - env:
           CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
           CACHIX_CACHE: ${{ secrets.CACHIX_CACHE }}
