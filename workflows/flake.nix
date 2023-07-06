@@ -96,7 +96,10 @@
               commit =
                 { commitMessage ? ""
                 , commitMessages ? [ commitMessage ]
-                }: ''git commit -a ${concatMapStringsSep " \\\n  " (message: ''-m "action: ${message}"'') commitMessages} && git push'';
+                , doIgnorePushFailed ? true
+                }: ''git commit -a ${concatMapStringsSep " \\\n  " (message: ''-m "action: ${message}"'') commitMessages} \
+                       && git push ${if doIgnorePushFailed then ''|| echo "push failed!"'' else ""}
+                    '';
               nix =
                 { doGitPull ? false
                 , dir ? "."
@@ -110,6 +113,7 @@
                 , doCommit ? false
                 , commitMessage ? "run scripts"
                 , commitMessages ? [ commitMessage ]
+                , doIgnorePushFailed ? true
                 }:
                 (if doGitPull then "${gitPull}\n\n" else "") +
                 (if inDir then "cd ${dir}\n\n" else "") +
@@ -246,6 +250,7 @@
             , doFormat ? true
             , doUpdateLocks ? true
             , updateLocksArgs ? { }
+            , doIgnorePushFailed ? true
             , doPushToCachix ? true
             }: {
               name = "Nix CI";
