@@ -245,7 +245,7 @@
             , os ? os_.ubuntu-22
             , strategy ? { matrix.os = oss; }
             , installNixArgs ? { }
-            , doCacheNix ? true
+            , doCacheNix ? false
             , cacheNixArgs ? { }
             , doFormat ? true
             , doUpdateLocks ? true
