@@ -134,6 +134,8 @@
           # same as `mkBin`, but need to provide the necessary executable name
           mkBinName = drv@{ ... }: name_: "${drv}/bin/${name_}";
 
+          inherit (pkgs.lib) getExe;
+
           # frame a text with newlines
           framedNewlines = framed_ "\n\n" "\n\n";
           framed_ = pref: suff: txt: ''${pref}${txt}${suff}'';
@@ -427,6 +429,7 @@
               framedBrackets_
               framedNewlines
               genAttrsId
+              getExe
               indentStrings_
               indentStrings4
               indentStrings8
