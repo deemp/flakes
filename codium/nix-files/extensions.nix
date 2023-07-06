@@ -95,6 +95,7 @@ __foldl' pkgs.lib.attrsets.recursiveUpdate { }
           };
           prolog = {
             lilr = "swi-lsp";
+            jeff-hykin = "better-prolog-syntax";
           };
           purescript = {
             chunsen = "bracket-select";
