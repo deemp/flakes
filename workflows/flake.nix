@@ -247,7 +247,7 @@
             , installNixArgs ? { }
             , doCacheNix ? false
             , cacheNixArgs ? { }
-            , doFormat ? true
+            , doFormat ? false
             , doUpdateLocks ? true
             , updateLocksArgs ? { }
             , doIgnorePushFailed ? true
