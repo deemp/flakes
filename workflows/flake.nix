@@ -157,28 +157,23 @@
               }
               // (if path != "" then { inherit path; } else { })
               // (if debug-enabled then { inherit debug-enabled; } else { });
-            }
-          ;
+            };
 
           # Keep build outputs to garbage collect at the end only the trash
           # https://nixos.org/manual/nix/unstable/command-ref/conf-file.html#description
           installNix =
-            { modifyExtraNixConfig ? (x: x)
-            , installNixActionVersion ? "v22"
-            , nixVersion ? "2.16.1"
+            { modifyNixConfig ? (x: x)
+            , installNixActionVersion ? "v25"
             }: {
               name = "Install Nix";
-              uses = "cachix/install-nix-action@${builtins.toString installNixActionVersion}";
+              uses = "nixbuild/nix-quick-install-action@${builtins.toString installNixActionVersion}";
               "with" = {
-                extra_nix_config = modifyExtraNixConfig ''
+                nix_conf = modifyNixConfig ''
                   access-tokens = github.com=${expr names.secrets.GITHUB_TOKEN}
                   substituters = https://cache.nixos.org/ https://nix-community.cachix.org https://cache.iog.io https://deemp.cachix.org
                   trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= deemp.cachix.org-1:9shDxyR2ANqEPQEEYDL/xIOnoPwxHot21L5fiZnFL18=
                   keep-outputs = true
-                  keep-derivations = true
                 '';
-                # https://releases.nixos.org/?prefix=nix
-                install_url = "https://releases.nixos.org/nix/nix-${nixVersion}/install";
               };
             };
 
@@ -231,6 +226,10 @@
               name = "Collect garbage in /nix/store";
               run = "nix store gc";
             };
+            lockNixpkgs = {
+              name = "Pin nixpkgs";
+              run = "nix registry add nixpkgs github:NixOS/nixpkgs/unstable";
+            };
           };
 
           nixCI =
@@ -245,9 +244,10 @@
             , os ? os_.ubuntu-22
             , strategy ? { matrix.os = oss; }
             , installNixArgs ? { }
-            , doCacheNix ? false
+            , doCacheNix ? true
+            , doPinNixpkgs ? true
             , cacheNixArgs ? { }
-            , doFormat ? false
+            , doFormat ? true
             , doUpdateLocks ? true
             , updateLocksArgs ? { }
             , doIgnorePushFailed ? true
@@ -266,6 +266,7 @@
                       (installNix installNixArgs)
                     ]
                     ++ (stepMaybe doCacheNix (steps_.cacheNix ({ keyJob = "cachix"; keyOs = expr names.matrix.os; } // cacheNixArgs)))
+                    ++ (stepMaybe doPinNixpkgs steps_.lockNixpkgs)
                     ++ (
                       stepsIf ("${names.matrix.os} == '${os}'") [
                         steps_.configGitAsGHActions
