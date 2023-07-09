@@ -28,6 +28,11 @@ save-inputs () {
     # get inputs
     t="$( nix flake archive --json | jq -r '.path,(.inputs|to_entries[].value.path)' )"
     
+    PROFILES_FOR_INPUTS="${PROFILES_FOR_INPUTS:-$(mktemp -d -t inputs-XXXXXXXXXX)}"
+
+    # save profiles for these devshells so that they're not garbage collected
+    printf "%s\n" $t | xargs -I {} nix profile install {} --profile "$PROFILES_FOR_INPUTS/{}"
+
     if [ "$doPushToCachix" = true ]; then
         # push inputs
         printf "%s\n" $t | cachix push "$CACHIX_CACHE"

@@ -4,7 +4,7 @@
     devshell.url = "github:numtide/devshell/2cf83bb31720fcc29a999aee28d6da101173e66a";
     flake-compat = {
       url = "github:edolstra/flake-compat/b4a34015c698c7793d592d66adbab377907a2be8";
-      outputs_ = false;
+      flake = false;
     };
     flake-utils.url = "github:numtide/flake-utils";
     lima.url = "github:deemp/lima/0bbfa4c8594695f303f61e4fe4e761007b645718";
