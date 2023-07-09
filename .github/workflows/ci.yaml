@@ -49,9 +49,15 @@ jobs:
         run: |+
           nix run .#pushToCachix
           nix profile install .#pushToCachix
+      
+      - name: Show gc roots
+        run: nix-store --gc --print-roots
 
       - name: Collect garbage in /nix/store
         run: nix store gc
+
+      - name: Show gc roots
+        run: nix-store --gc --print-roots
     strategy:
       matrix:
         os:
