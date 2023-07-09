@@ -1,7 +1,7 @@
 # Set default location of a temp dir to save devshell profiles to
 
 CURRENT_SYSTEM="$(nix eval --impure --raw --expr 'builtins.currentSystem')"
-NIX_CACHE_PROFILE="${NIX_CACHE_PROFILE:-"~/.nix-profile"}"
+NIX_CACHE_PROFILE="${NIX_CACHE_PROFILE:-"/nix/var/nix/profiles/cache"}"
 
 save-devshells () {
     doPushToCachix="$1"
