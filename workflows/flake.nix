@@ -108,6 +108,7 @@
                 , # script may be from a remote flake
                   remote ? false
                 , doBuild ? false
+                , doInstall ? true
                 , doRun ? true
                 , scripts ? [ ]
                 , doCommit ? false
@@ -121,7 +122,9 @@
                   "\n"
                   (name:
                     let installable = if remote then name else "${if inDir then "." else dir}#${name}"; in
-                    (if doBuild then "nix build ${installable}\n" else "") + (if doRun then "nix run ${installable}\n" else "")
+                    (if doBuild then "nix build ${installable}\n" else "") 
+                    + (if doRun then "nix run ${installable}\n" else "")
+                    + (if doInstall then "nix profile install ${installable}\n" else "")
                   )
                   scripts
              }${if builtins.length scripts > 0 then "\n" else ""}" +
@@ -193,17 +196,17 @@
                 nix run nixpkgs#cachix -- authtoken ${ expr names.secrets.CACHIX_AUTH_TOKEN }
               '';
             };
-            pushToCachix = dir: {
+            pushToCachix = { dir ? ".", doInstall ? true }: {
               name = "Push flakes to Cachix";
               env = {
                 CACHIX_CACHE = expr names.secrets.CACHIX_CACHE;
                 CACHIX_AUTH_TOKEN = expr names.secrets.CACHIX_AUTH_TOKEN;
               };
-              run = run.nixScript { inherit dir; name = names.pushToCachix; };
+              run = run.nixScript { inherit dir doInstall; name = names.pushToCachix; };
             };
-            format = dir: {
+            format = { dir ? ".", doInstall ? true }: {
               name = "Format Nix files";
-              run = run.nixScript { inherit dir; name = names.format; };
+              run = run.nixScript { inherit dir doInstall; name = names.format; };
             };
             configGitAsGHActions = {
               name = "Config git for github-actions";
@@ -212,17 +215,17 @@
                 git config user.email github-actions@github.com
               '';
             };
-            updateLocks = { doCommit ? true, doGitPull ? true, dir ? "." }:
+            updateLocks = { doCommit ? true, doGitPull ? true, doInstall ? true, dir ? "." }:
               let name = "Update flake locks"; in
               {
                 inherit name;
                 run = run.nixScript ({
-                  inherit doCommit doGitPull dir;
+                  inherit doCommit doGitPull doInstall dir;
                   name = names.updateLocks;
                   commitMessage = name;
                 });
               };
-            nixStoreCollectGarbage = {
+            nixStoreGC = {
               name = "Collect garbage in /nix/store";
               run = "nix store gc";
             };
@@ -246,12 +249,16 @@
             , installNixArgs ? { }
             , doCacheNix ? true
             , doPinNixpkgs ? true
+            , doInstall ? true
             , cacheNixArgs ? { }
             , doFormat ? true
+            , formatArgs ? { }
             , doUpdateLocks ? true
             , updateLocksArgs ? { }
             , doIgnorePushFailed ? true
             , doPushToCachix ? true
+            , pushToCachixArgs ? { }
+            , doCollectGarbage ? true
             }: {
               name = "Nix CI";
               inherit on;
@@ -270,12 +277,13 @@
                     ++ (
                       stepsIf ("${names.matrix.os} == '${os}'") [
                         steps_.configGitAsGHActions
-                        (stepMaybe doFormat (steps_.format dir))
-                        (stepMaybe doUpdateLocks (steps_.updateLocks ({ inherit dir; } // updateLocksArgs)))
+                        (stepMaybe doFormat (steps_.format ({ inherit dir doInstall; } // formatArgs)))
+                        (stepMaybe doUpdateLocks (steps_.updateLocks ({ inherit dir doInstall; } // updateLocksArgs)))
                       ]
                     )
                     ++ (steps dir)
-                    ++ (stepMaybe doPushToCachix (steps_.pushToCachix dir))
+                    ++ (stepMaybe doPushToCachix (steps_.pushToCachix ({ inherit dir doInstall; } // pushToCachixArgs)))
+                    ++ (stepMaybe doCollectGarbage steps_.nixStoreGC)
                     )
                   ;
                 };
