@@ -31,6 +31,7 @@ jobs:
         name: Format Nix files
         run: |+
           nix run .#format
+          nix profile install .#format
 
       - if: matrix.os == 'ubuntu-22.04'
         name: Update flake locks
@@ -38,6 +39,7 @@ jobs:
           git pull --rebase --autostash
 
           nix run .#updateLocks
+          nix profile install .#updateLocks
 
           git commit -a -m "action: Update flake locks" \
                                  && git push || echo "push failed!"
@@ -48,7 +50,10 @@ jobs:
         name: Push flakes to Cachix
         run: |+
           nix run .#pushToCachix
+          nix profile install .#pushToCachix
 
+      - name: Collect garbage in /nix/store
+        run: nix store gc
     strategy:
       matrix:
         os:
