@@ -59,7 +59,7 @@ jobs:
           nix profile list --profile /nix/var/nix/profiles
 
       - name: Collect garbage in /nix/store
-        run: nix store gc
+        run: nix store gc -vvvv
 
       - name: Show gc roots
         run: |
