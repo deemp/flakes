@@ -28,7 +28,7 @@
 
           cachix = pkgs.cachix;
 
-          env = genAttrsId [ "CACHIX_AUTH_TOKEN" "CACHIX_CACHE" "PROFILES_FOR_DEVSHELLS" "PROFILES_FOR_PACKAGES" ];
+          env = genAttrsId [ "CACHIX_AUTH_TOKEN" "CACHIX_CACHE" "NIX_CACHE_PROFILE" ];
 
           man = inputs.drv-tools.lib.${system}.man // {
             ENV = "# EXPECTED ENV VARIABLES";
@@ -43,6 +43,10 @@
             PROFILES_FOR_DEVSHELLS = ''
               `${env.PROFILES_FOR_DEVSHELLS}`
               :   cachix authorization token
+            '';
+            NIX_CACHE_PROFILE = ''
+              `${env.NIX_CACHE_PROFILE}`
+              :   Profile to install tools to
             '';
           };
 
@@ -85,6 +89,7 @@
 
                   ${man.ENV}
                   ${man.CACHIX_CACHE}
+                  ${man.NIX_CACHE_PROFILE}
                 ''
               );
 
@@ -136,6 +141,7 @@
                 (if doPushToCachix then ''
                   ${man.CACHIX_CACHE}
                   ${man.CACHIX_AUTH_TOKEN}
+                  ${man.NIX_CACHE_PROFILE}
                 '' else "");
               };
             in
