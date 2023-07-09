@@ -71,8 +71,6 @@
             };
 
             tools = [ pkgs.nixd ];
-          in
-          {
             devShells.default = mkShell {
               packages = tools;
               commands =
@@ -83,11 +81,11 @@
                 } ++
                 mkRunCommands "infra" {
                   inherit (packages) writeWorkflows;
-                }
-              ;
+                };
             };
-
-            inherit packages;
+          in
+          {
+            inherit packages devShells;
           })
         // {
           inherit (inputs) formatter;

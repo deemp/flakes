@@ -9,10 +9,12 @@ save-devshells () {
     mkdir -p $PROFILES_FOR_DEVSHELLS
 
     # get the names of devshells
-    t="$( printf "%s\ndefault" "$( nix flake show --json | jq -r --arg cur_sys "$CURRENT_SYSTEM" '.devShells[$cur_sys]|(try keys[] catch "")' )" )"
+    t="$( nix flake show --json \
+            | jq -r --arg cur_sys "$CURRENT_SYSTEM" '.devShells[$cur_sys]|(try keys[] catch "")' \
+            | xargs -I {} printf "devShells.$CURRENT_SYSTEM.{}\n" )"
 
     # save profiles for these devshells so that they're not garbage collected
-    printf "%s\n" $t | xargs -I {} nix develop .#{} --profile "$PROFILES_FOR_DEVSHELLS/{}"
+    printf "%s\n" $t | xargs -I {} nix profile install .#{} --profile "$PROFILES_FOR_DEVSHELLS/{}"
     
     if [ "$doPushToCachix" = true ] ; then
         # push profiles for these devshells
@@ -38,7 +40,9 @@ save-packages () {
     # set temp directory for outputs for packages
     PROFILES_FOR_PACKAGES="${PROFILES_FOR_PACKAGES:-$(mktemp -d -t packages-XXXXXXXXXX)}"
 
-    t="$( printf "%s\ndefault" "$( nix flake show --json | jq -r --arg cur_sys "$CURRENT_SYSTEM" '.packages[$cur_sys]|(try keys[] catch "")' )" )"
+    t="$( nix flake show --json \
+            | jq -r --arg cur_sys "$CURRENT_SYSTEM" '.packages[$cur_sys]|(try keys[] catch "")' \
+            | xargs -I {} printf "packages.$CURRENT_SYSTEM.{}\n" )"
 
     printf "%s\n" "$t" | xargs -I {} nix profile install .#{} --profile "$PROFILES_FOR_PACKAGES/{}"
 
