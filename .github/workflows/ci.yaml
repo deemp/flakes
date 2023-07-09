@@ -53,7 +53,10 @@ jobs:
       - name: Show gc roots
         run: |
           nix-store --gc --print-roots
-          nix profile list
+      - name: List profiles
+        run: |
+          ls /nix/var/nix/profiles
+          nix profile list --profile /nix/var/nix/profiles
 
       - name: Collect garbage in /nix/store
         run: nix store gc
@@ -61,7 +64,11 @@ jobs:
       - name: Show gc roots
         run: |
           nix-store --gc --print-roots
-          nix profile list
+      
+      - name: List profiles
+        run: |
+          ls /nix/var/nix/profiles
+          nix profile list --profile /nix/var/nix/profiles
 
     strategy:
       matrix:
