@@ -65,6 +65,7 @@
                       ''
                     else ""
                   ) + ''
+                    set +e
                     source ${./scripts.sh}
                     save-all ${builtins.toString doPushToCachix}
                   '';
