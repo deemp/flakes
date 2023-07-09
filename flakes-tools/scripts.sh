@@ -1,7 +1,8 @@
 # Set default location of a temp dir to save devshell profiles to
 
 CURRENT_SYSTEM="$(nix eval --impure --raw --expr 'builtins.currentSystem')"
-NIX_CACHE_PROFILE="${NIX_CACHE_PROFILE:-"/nix/var/nix/profiles/cache"}"
+RANDOM_CACHE_NAME="$(basename "$(mktemp -t cache.XXXXXXXXX)")"
+NIX_CACHE_PROFILE="${NIX_CACHE_PROFILE:-"/nix/var/nix/profiles/$RANDOM_CACHE_NAME"}"
 
 save-devshells () {
     doPushToCachix="$1"
