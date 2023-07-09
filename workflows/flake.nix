@@ -229,10 +229,6 @@
               name = "Collect garbage in /nix/store";
               run = "nix store gc";
             };
-            lockNixpkgs = {
-              name = "Pin nixpkgs";
-              run = "nix registry add nixpkgs github:NixOS/nixpkgs/unstable";
-            };
           };
 
           nixCI =
@@ -248,7 +244,6 @@
             , strategy ? { matrix.os = oss; }
             , installNixArgs ? { }
             , doCacheNix ? true
-            , doPinNixpkgs ? true
             , doInstall ? true
             , cacheNixArgs ? { }
             , doFormat ? true
@@ -273,7 +268,6 @@
                       (installNix installNixArgs)
                     ]
                     ++ (stepMaybe doCacheNix (steps_.cacheNix ({ keyJob = "cachix"; keyOs = expr names.matrix.os; } // cacheNixArgs)))
-                    ++ (stepMaybe doPinNixpkgs steps_.lockNixpkgs)
                     ++ (
                       stepsIf ("${names.matrix.os} == '${os}'") [
                         steps_.configGitAsGHActions
