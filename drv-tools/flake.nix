@@ -414,11 +414,6 @@
             ) // (common path);
         in
         {
-          packages = {
-            inherit
-              json2nix
-              ;
-          };
           lib = {
             inherit
               applyN
@@ -433,6 +428,7 @@
               indentStrings_
               indentStrings4
               indentStrings8
+              json2nix
               man
               mapGenAttrs
               mapStrGenAttrs
