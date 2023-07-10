@@ -25,10 +25,6 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-
-      - name: Remove old cache profiles
-        run: rm -rf /nix/var/nix/profiles/cache*
-
       - if: matrix.os == 'ubuntu-22.04'
         name: Format Nix files
         run: |+
@@ -51,31 +47,11 @@ jobs:
           CACHIX_CACHE: ${{ secrets.CACHIX_CACHE }}
         name: Push flakes to Cachix
         run: |+
-          # nix run .#pushToCachix
-          # nix profile install .#pushToCachix
-      
-      - name: Show gc roots
-        run: nix-store --gc --print-roots
-      - name: List profiles
-        run: |
-          ls /nix/var/nix/profiles
-          nix profile list --profile /nix/var/nix/profiles
+          nix run .#pushToCachix
+          nix profile install .#pushToCachix
 
-      # - name: Setup tmate session
-      #   uses: mxschmitt/action-tmate@v3
-        
       - name: Collect garbage in /nix/store
-        run: nix store gc -vvvv
-
-      - name: Show gc roots
-        run: |
-          nix-store --gc --print-roots
-      
-      - name: List profiles
-        run: |
-          ls /nix/var/nix/profiles
-          nix profile list --profile /nix/var/nix/profiles
-
+        run: nix store gc
     strategy:
       matrix:
         os:
