@@ -17,6 +17,10 @@ jobs:
         uses: deemp/cache-nix-too@v1
         with:
           key: nix-${{ matrix.os }}-cachix-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
+          linux-gc-enabled: true
+          linux-max-store-size: 2831155200
+          macos-gc-enabled: true
+          macos-max-store-size: 2831155200
           restore-keys: |
             nix-${{ matrix.os }}-cachix-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
             nix-${{ matrix.os }}-cachix-
@@ -50,8 +54,6 @@ jobs:
           nix run .#pushToCachix
           nix profile install .#pushToCachix
 
-      - name: Collect garbage in /nix/store
-        run: nix store gc
     strategy:
       matrix:
         os:
