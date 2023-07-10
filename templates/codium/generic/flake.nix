@@ -23,7 +23,7 @@
             inherit (inputs_.codium.lib.${system}) mkCodium writeSettingsJSON extensions extensionsCommon settingsNix settingsCommonNix;
             inherit (inputs_.devshell.lib.${system}) mkCommands mkRunCommands mkRunCommandsDir mkShell;
             inherit (inputs_.flakes-tools.lib.${system}) mkFlakesTools;
-            inherit (inputs_.codium.outputs.inputs.vscode-extensions.extensions.${system}) vscode-marketplace open-vsx;
+            inherit (inputs_.codium.outputs.inputs.nix-vscode-extensions.extensions.${system}) vscode-marketplace open-vsx;
             inherit (inputs_.workflows.lib.${system}) writeWorkflow nixCI;
 
             tools = [ pkgs.hello ];
