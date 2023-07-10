@@ -124,8 +124,8 @@
                   (name:
                     let installable = if remote then name else "${if inDir then "." else dir}#${name}"; in
                     (if doBuild then "nix build ${installable}\n" else "") 
-                    + (if doRun then "nix run ${installable}\n" else "")
                     + (if doInstall then "nix profile install ${installable}\n" else "")
+                    + (if doRun then "nix run ${installable}\n" else "")
                   )
                   scripts
              }${if builtins.length scripts > 0 then "\n" else ""}" +
