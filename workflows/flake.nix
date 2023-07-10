@@ -142,7 +142,10 @@
             , keyJob ? "job"
             , keyOs ? expr names.runner.os
             , path ? ""
-            , debug-enabled ? false
+            , linuxGCEnabled ? true
+            , linuxMaxStoreSize ? 0
+            , macosGCEnabled ? true
+            , macosMaxStoreSize ? 0
             }:
             let
               hashfilesArgs = concatMapStringsSep ", " (x: "'${x}'") files;
@@ -159,7 +162,8 @@
                 '';
               }
               // (if path != "" then { inherit path; } else { })
-              // (if debug-enabled then { inherit debug-enabled; } else { });
+              // (if linuxGCEnabled then { linux-gc-enabled = true; linux-max-store-size = linuxMaxStoreSize; } else { })
+              // (if macosGCEnabled then { macos-gc-enabled = true; macos-max-store-size = macosMaxStoreSize; } else { });
             };
 
           # Keep build outputs to garbage collect at the end only the trash
@@ -253,7 +257,6 @@
             , doIgnorePushFailed ? true
             , doPushToCachix ? true
             , pushToCachixArgs ? { }
-            , doCollectGarbage ? true
             }: {
               name = "Nix CI";
               inherit on;
@@ -277,7 +280,6 @@
                     )
                     ++ (steps dir)
                     ++ (stepMaybe doPushToCachix (steps_.pushToCachix ({ inherit dir doInstall; } // pushToCachixArgs)))
-                    ++ (stepMaybe doCollectGarbage steps_.nixStoreGC)
                     )
                   ;
                 };
@@ -286,7 +288,13 @@
 
           packages = {
             writeWorkflowsDir = writeYAML "workflow" "./tmp/nixCI.yaml" (nixCI { });
-            writeWorkflows = writeWorkflow "nixCI" (nixCI { dir = "nix-dev/"; });
+            writeWorkflows = writeWorkflow "nixCI" (nixCI {
+              dir = "nix-dev/";
+              cacheNixArgs = {
+                linuxMaxStoreSize = 6442450944;
+                macosMaxStoreSize = 6442450944;
+              };
+            });
           };
 
           devShells.default = pkgs.mkShell {
