@@ -2,9 +2,12 @@
 
 CURRENT_SYSTEM="$(nix eval --impure --raw --expr 'builtins.currentSystem')"
 RANDOM_CACHE_NAME="$(basename "$(mktemp -t cache.XXXXXXXXX)")"
-NIX_CACHE_PROFILE="${NIX_CACHE_PROFILE:-"/nix/var/nix/profiles/$RANDOM_CACHE_NAME"}"
+CACHE_DIRECTORY="${CACHE_DIRECTORY:-"/nix/var/nix/profiles/cache"}"
+NIX_CACHE_PROFILE="${NIX_CACHE_PROFILE:-"$CACHE_DIRECTORY/$RANDOM_CACHE_NAME"}"
 
-save-devshells () {
+mkdir -p "$(dirname "$NIX_CACHE_PROFILE")"
+
+saveDevshells () {
     doPushToCachix="$1"
 
     # get the names of devshells
@@ -21,7 +24,7 @@ save-devshells () {
     fi
 }
 
-save-inputs () {
+saveInputs () {
     doPushToCachix="$1"
 
     # get inputs
@@ -36,7 +39,7 @@ save-inputs () {
     fi
 }
 
-save-packages () {
+savePackages () {
     doPushToCachix="$1"
 
     t="$( nix flake show --json \
@@ -50,9 +53,9 @@ save-packages () {
     fi
 }
 
-save-all () {
+saveAll () {
     doPushToCachix="$1"
-    save-devshells "$doPushToCachix"
-    save-inputs "$doPushToCachix"
-    save-packages "$doPushToCachix"
+    saveDevshells "$doPushToCachix"
+    saveInputs "$doPushToCachix"
+    savePackages "$doPushToCachix"
 }

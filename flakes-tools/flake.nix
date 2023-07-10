@@ -28,7 +28,7 @@
 
           cachix = pkgs.cachix;
 
-          env = genAttrsId [ "CACHIX_AUTH_TOKEN" "CACHIX_CACHE" "NIX_CACHE_PROFILE" ];
+          env = genAttrsId [ "CACHIX_AUTH_TOKEN" "CACHIX_CACHE" "NIX_CACHE_PROFILE" "CACHE_DIRECTORY" ];
 
           man = inputs.drv-tools.lib.${system}.man // {
             ENV = "# EXPECTED ENV VARIABLES";
@@ -50,7 +50,9 @@
             '';
           };
 
-          saveAll = { doPushToCachix ? true }:
+          CACHE_DIRECTORY = "/nix/var/nix/profiles/cache";
+
+          saveAll = { doPushToCachix ? false }:
             withMan
               (mkShellApp {
                 name = "save-all";
@@ -68,10 +70,17 @@
                         fi
                       ''
                     else ""
-                  ) + ''
-                    set +e
+                  )
+                  + ''
+                    set +e -a
+                    if [ -z ''${${env.CACHE_DIRECTORY}+x} ]; then
+                      export ${env.CACHE_DIRECTORY}="${CACHE_DIRECTORY}"
+                      printf "${framedBrackets "The environment variable ${env.CACHE_DIRECTORY} is not set. Using the \$${env.CACHE_DIRECTORY} directory for profiles."}"
+                    else
+                      printf "${framedBrackets "Using the \$${env.CACHE_DIRECTORY} directory for profiles."}"
+                    fi
                     source ${./scripts.sh}
-                    save-all ${builtins.toString doPushToCachix}
+                    saveAll ${if doPushToCachix then "true" else "false"}
                   '';
                 description = "Push inputs and outputs (`packages` and `devShells`) of a flake to `cachix`";
                 runtimeInputs =
@@ -147,11 +156,8 @@
               writeSources = pkgs.symlinkJoin { name = "appa"; paths = sources; };
             in
             mkShellApp {
-              name = saveInEachDir.pname;
-              text = ''
-                ${getExe logInToCachix}
-                ${getExe saveInEachDir}
-              '';
+              name = "flakes-${if doPushToCachix then "push-to-cachix" else "save"}";
+              text = (if doPushToCachix then getExe logInToCachix else "") + "\n${getExe saveInEachDir}";
               inherit (saveInEachDir.meta) description longDescription;
               # TODO can't symlink inputs - error No such file or directory
               # runtimeInputs = [ writeSources ];
@@ -223,6 +229,7 @@
               mkFlakesTools
               flakesFormat
               logInToCachix
+              CACHE_DIRECTORY
               ;
           };
           inherit testFlakesTools;
