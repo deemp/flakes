@@ -303,7 +303,7 @@
             # --- GH Actions
 
             # A script to write GitHub Actions workflow file into `.github/ci.yaml`
-            writeWorkflows = writeWorkflow "ci" nixCI;
+            writeWorkflows = writeWorkflow "ci" (nixCI { });
           };
 
           # --- Devshells ---

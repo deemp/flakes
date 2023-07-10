@@ -74,7 +74,7 @@
               writeWorkflows = writeWorkflow "ci" (withAttrs
                 (nixCI {
                   cacheNixArgs = {
-                    linuxMaxStoreSize = 9000000000;
+                    linuxMaxStoreSize = 5000000000;
                     macosMaxStoreSize = 5000000000;
                   };
                 })

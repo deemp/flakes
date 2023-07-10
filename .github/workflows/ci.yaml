@@ -24,6 +24,8 @@ jobs:
           restore-keys: |
             nix-${{ matrix.os }}-cachix-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
             nix-${{ matrix.os }}-cachix-
+      - name: Remove old cache profiles
+        run: rm -rf /nix/var/nix/profiles/cache
       - if: matrix.os == 'ubuntu-22.04'
         name: Config git for github-actions
         run: |
