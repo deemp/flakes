@@ -1,6 +1,6 @@
 {
   inputs = { };
-  outputs = inputs:
+  outputs = inputs@{ self, ... }:
     let
       inputs_ = {
         inherit (import ./source-flake) nixpkgs flake-utils formatter;
@@ -12,8 +12,8 @@
       };
 
       outputs = outputs_ { } // {
-        outputs = outputs_;
         inputs = inputs_;
+        outputs = outputs_;
         flakes = {
           codium = import ./codium;
           devshell = import ./devshell;
@@ -46,22 +46,26 @@
 
             # cache most frequently used flakes
 
-            flakesTools = (mkFlakesTools (
-              [
-                # "codium"
-                # "devshell"
-                # "drv-tools"
-                # "env2json"
-                # "flakes-tools"
-                # "json2md"
-                # (subDirectories ./. "language-tools")
-                # (subDirectories ./. "source-flake")
-                # (subDirectories ./. "templates/codium")
-                # "templates/haskell-minimal"
-                # "workflows"
-                "."
-              ]
-            ));
+            flakesTools = (mkFlakesTools {
+              root = self.outPath;
+              dirs =
+                [
+                  "codium"
+                  "devshell"
+                  "drv-tools"
+                  "env2json"
+                  "flakes-tools"
+                  "json2md"
+                  "templates/haskell-minimal"
+                  "workflows"
+                  "."
+                ];
+              subDirs = [
+                "language-tools"
+                "source-flake"
+                "templates/codium"
+              ];
+            });
 
             packages = {
               inherit (flakesTools) pushToCachix format updateLocks;
