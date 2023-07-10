@@ -2,7 +2,7 @@
   inputs.flakes.url = "github:deemp/flakes";
 
   outputs =
-    inputs:
+    inputs@{ self, ... }:
     let
       inputs_ =
         let flakes = inputs.flakes.flakes; in
@@ -54,7 +54,7 @@
               # --- Flakes ---
 
               # Scripts that can be used in CI
-              inherit (mkFlakesTools [ "." ]) updateLocks pushToCachix;
+              inherit (mkFlakesTools { dirs = [ "." ]; root = self.outPath; }) updateLocks pushToCachix;
 
               # --- GH Actions
 

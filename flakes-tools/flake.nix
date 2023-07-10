@@ -193,25 +193,23 @@
           mkFlakesTools =
             { dirs ? [ ], subDirs ? [ ], root }:
             let
-              dirs_ = flatten dirs;
               saveArgs = {
-                dirs = dirs_ ++ builtins.map (subDirectories root) subDirs;
+                dirs = flatten (dirs ++ builtins.map (subDirectories root) subDirs);
                 sources = flakesGetSources (import root);
               };
             in
             (__mapAttrs (name: app: wrapShellApp { inherit name app; })
               {
-                updateLocks = flakesUpdate dirs_;
+                updateLocks = flakesUpdate saveArgs.dirs;
                 pushToCachix = flakesSaveAll (saveArgs // { doPushToCachix = true; });
                 saveAll = flakesSaveAll saveArgs;
-                format = flakesFormat dirs_;
+                format = flakesFormat saveArgs.dirs;
                 inherit logInToCachix;
               }
             )
           ;
 
           testFlakesTools = mkFlakesTools { dirs = [ "." ]; root = self.outPath; };
-          packages = testFlakesTools;
           devShells.default = pkgs.mkShell {
             buildInputs = __attrValues testFlakesTools;
           };
@@ -227,7 +225,8 @@
               logInToCachix
               ;
           };
-          inherit packages devShells;
+          inherit testFlakesTools;
+          inherit devShells;
         });
     in
     outputs;
