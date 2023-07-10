@@ -51,8 +51,8 @@ jobs:
           CACHIX_CACHE: ${{ secrets.CACHIX_CACHE }}
         name: Push flakes to Cachix
         run: |+
-          nix run .#pushToCachix
-          nix profile install .#pushToCachix
+          # nix run .#pushToCachix
+          # nix profile install .#pushToCachix
       
       - name: Show gc roots
         run: nix-store --gc --print-roots
