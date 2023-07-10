@@ -124,8 +124,8 @@
           readSymlinks = dir: readXs dir "symlink";
 
           # get a list of immediate subdirectories
-          # pwd should be an absolute path like ./.      
-          subDirectories = pwd: dir: builtins.map (x: "${dir}/${x}") (readDirectories "${pwd}/${dir}");
+          # root should be an absolute path like ./.      
+          subDirectories = root: dir: builtins.map (x: "${dir}/${x}") (readDirectories "${root}/${dir}");
 
           # assuming that a `pname` of a program coincides with its main executable's name
           # unsafe to use with packages whose pname may change!
