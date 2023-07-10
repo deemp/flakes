@@ -47,7 +47,8 @@ jobs:
 
           git commit -a -m "action: Update flake locks" \
                                  && git push || echo "push failed!"
-
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
       - env:
           CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
           CACHIX_CACHE: ${{ secrets.CACHIX_CACHE }}
