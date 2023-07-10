@@ -77,7 +77,7 @@
                     linuxMaxStoreSize = 9000000000;
                     macosMaxStoreSize = 5000000000;
                   };
-                 })
+                })
                 { on.schedule = [{ cron = "0 0 * * 0"; }]; });
             };
 
