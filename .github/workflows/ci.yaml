@@ -18,9 +18,9 @@ jobs:
         with:
           key: nix-${{ matrix.os }}-cachix-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
           linux-gc-enabled: true
-          linux-max-store-size: 2831155200
+          linux-max-store-size: 9000000000
           macos-gc-enabled: true
-          macos-max-store-size: 2831155200
+          macos-max-store-size: 9000000000
           restore-keys: |
             nix-${{ matrix.os }}-cachix-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
             nix-${{ matrix.os }}-cachix-
