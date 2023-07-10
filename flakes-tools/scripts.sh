@@ -55,7 +55,9 @@ savePackages () {
 
 saveAll () {
     doPushToCachix="$1"
+    set +e -a
     saveDevshells "$doPushToCachix"
     saveInputs "$doPushToCachix"
     savePackages "$doPushToCachix"
+    echo "done!"
 }

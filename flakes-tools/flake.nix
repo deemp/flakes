@@ -72,7 +72,6 @@
                     else ""
                   )
                   + ''
-                    set +e -a
                     if [ -z ''${${env.CACHE_DIRECTORY}+x} ]; then
                       export ${env.CACHE_DIRECTORY}="${CACHE_DIRECTORY}"
                       printf "${framedBrackets "The environment variable ${env.CACHE_DIRECTORY} is not set. Using the \$${env.CACHE_DIRECTORY} directory for profiles."}"
