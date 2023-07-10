@@ -5,7 +5,7 @@ RANDOM_CACHE_NAME="$(basename "$(mktemp -t cache.XXXXXXXXX)")"
 CACHE_DIRECTORY="${CACHE_DIRECTORY:-"/nix/var/nix/profiles/cache"}"
 NIX_CACHE_PROFILE="${NIX_CACHE_PROFILE:-"$CACHE_DIRECTORY/$RANDOM_CACHE_NAME"}"
 
-mkdir -p "$(dirname "$NIX_CACHE_PROFILE")"
+mkdir -p "$CACHE_DIRECTORY"
 
 saveDevshells () {
     doPushToCachix="$1"
