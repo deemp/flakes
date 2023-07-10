@@ -22,6 +22,7 @@
           inherit (inputs.drv-tools.lib.${system}) writeYAML genAttrsId mkAccessors mkAccessors_;
           inherit (builtins) concatMap;
           testFlakesTools = (inputs.flakes-tools.testFlakesTools.${system});
+          inherit (inputs.flakes-tools.lib.${system}) CACHE_DIRECTORY;
           inherit (pkgs.lib.strings) concatMapStringsSep;
           inherit (pkgs.lib.attrsets) mapAttrsToList;
           inherit (pkgs.lib.lists) flatten;
@@ -233,6 +234,10 @@
               name = "Collect garbage in /nix/store";
               run = "nix store gc";
             };
+            removeCacheProfiles = { dir ? CACHE_DIRECTORY }: {
+              name = "Remove old cache profiles";
+              run = "rm -rf ${dir}";
+            };
           };
 
           nixCI =
@@ -248,8 +253,9 @@
             , strategy ? { matrix.os = oss; }
             , installNixArgs ? { }
             , doCacheNix ? true
-            , doInstall ? true
             , cacheNixArgs ? { }
+            , cacheDirectory ? CACHE_DIRECTORY
+            , doInstall ? true
             , doFormat ? true
             , formatArgs ? { }
             , doUpdateLocks ? true
@@ -270,7 +276,10 @@
                       steps_.checkout
                       (installNix installNixArgs)
                     ]
-                    ++ (stepMaybe doCacheNix (steps_.cacheNix ({ keyJob = "cachix"; keyOs = expr names.matrix.os; } // cacheNixArgs)))
+                    ++ (stepMaybe doCacheNix [
+                      (steps_.cacheNix ({ keyJob = "cachix"; keyOs = expr names.matrix.os; } // cacheNixArgs))
+                      (steps_.removeCacheProfiles { dir = cacheDirectory; })
+                    ])
                     ++ (
                       stepsIf ("${names.matrix.os} == '${os}'") [
                         steps_.configGitAsGHActions
