@@ -253,6 +253,7 @@
             , strategy ? { matrix.os = oss; }
             , installNixArgs ? { }
             , doCacheNix ? true
+            , doRemoveCacheProfiles ? true
             , cacheNixArgs ? { }
             , cacheDirectory ? CACHE_DIRECTORY
             , doInstall ? true
@@ -276,10 +277,8 @@
                       steps_.checkout
                       (installNix installNixArgs)
                     ]
-                    ++ (stepMaybe doCacheNix [
-                      (steps_.cacheNix ({ keyJob = "cachix"; keyOs = expr names.matrix.os; } // cacheNixArgs))
-                      (steps_.removeCacheProfiles { dir = cacheDirectory; })
-                    ])
+                    ++ (stepMaybe doCacheNix (steps_.cacheNix ({ keyJob = "cachix"; keyOs = expr names.matrix.os; } // cacheNixArgs)))
+                    ++ (stepMaybe doRemoveCacheProfiles (steps_.removeCacheProfiles { dir = cacheDirectory; }))
                     ++ (
                       stepsIf ("${names.matrix.os} == '${os}'") [
                         steps_.configGitAsGHActions
