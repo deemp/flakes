@@ -1,9 +1,8 @@
 # A set of VSCodium extensions
-{ system, pkgs, nix-vscode-extensions, nix-vscode-extensions-extra }:
+{ system, pkgs, nix-vscode-extensions }:
 let
   vscode-marketplace = nix-vscode-extensions.extensions.${system}.vscode-marketplace;
   vscode-marketplace-release = nix-vscode-extensions.extensions.${system}.vscode-marketplace-release;
-  vscode-marketplace-extra = nix-vscode-extensions-extra.extensions.${system}.vscode-marketplace;
   open-vsx = nix-vscode-extensions.extensions.${system}.open-vsx;
   inherit (pkgs.lib.attrsets) mapAttrs' mapAttrsToList recursiveUpdate;
   mkExtensionsGroup = extensionSet: exts@{ ... }: builtins.foldl' recursiveUpdate { } (

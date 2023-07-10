@@ -7,7 +7,7 @@
       inputs_ =
         let flakes = inputs.flakes.flakes; in
         {
-          inherit (flakes.source-flake) flake-utils nixpkgs nix-vscode-extensions nix-vscode-extensions-extra;
+          inherit (flakes.source-flake) flake-utils nixpkgs nix-vscode-extensions;
           inherit (flakes) drv-tools;
         };
 
@@ -29,7 +29,7 @@
             # A set of VSCodium extensions
             extensions = import ./nix-files/extensions.nix {
               inherit system pkgs;
-              inherit (inputs) nix-vscode-extensions nix-vscode-extensions-extra;
+              inherit (inputs) nix-vscode-extensions;
             };
 
             # common extensions
