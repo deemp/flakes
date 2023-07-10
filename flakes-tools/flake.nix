@@ -2,7 +2,7 @@
   inputs.flakes.url = "github:deemp/flakes";
 
   outputs =
-    inputs:
+    inputs@{ self, ... }:
     let
       inputs_ =
         let flakes = inputs.flakes.flakes; in
@@ -21,10 +21,10 @@
           pkgs = inputs.nixpkgs.outputs.legacyPackages.${system};
           inherit (inputs.drv-tools.outputs.lib.${system})
             withMan mkShellApp wrapShellApp
-            mkShellApps getExe framedBrackets
-            runInEachDir genAttrsId
+            getExe framedBrackets
+            runInEachDir genAttrsId subDirectories
             ;
-          inherit (pkgs.lib.lists) flatten;
+          inherit (pkgs.lib.lists) flatten unique;
 
           cachix = pkgs.cachix;
 
@@ -127,7 +127,7 @@
               ''
             );
 
-          flakesSaveAll = { dirs ? [ ], doPushToCachix ? false }:
+          flakesSaveAll = { dirs ? [ ], doPushToCachix ? false, sources ? [ ] }:
             let
               description = "Save and conditionally push to `Cachix` inputs and outputs of flakes in specified directories relative to `CWD`.";
               saveInEachDir = runInEachDir {
@@ -144,6 +144,7 @@
                   ${man.NIX_CACHE_PROFILE}
                 '' else "");
               };
+              writeSources = pkgs.symlinkJoin { name = "appa"; paths = sources; };
             in
             mkShellApp {
               name = saveInEachDir.pname;
@@ -152,6 +153,8 @@
                 ${getExe saveInEachDir}
               '';
               inherit (saveInEachDir.meta) description longDescription;
+              # TODO can't symlink inputs - error No such file or directory
+              # runtimeInputs = [ writeSources ];
             };
 
           # format all .nix files with the formatter specified in the flake in the CWD
@@ -168,25 +171,55 @@
               ''
               );
 
+          flakesGetSources = s:
+            if builtins.isString s
+            then [ s ]
+            else
+              let
+                getOutPath = s: if builtins.hasAttr "outPath" s then builtins.match "(/nix/store/[^/]+).*" "${s.outPath}" else [ ];
+                inherit (builtins) hasAttr;
+                inherit (pkgs.lib.attrsets) hasAttrByPath mapAttrsToList;
+                sources =
+                  getOutPath s ++
+                  (if hasAttrByPath [ "outputs" "inputs" ] s
+                  then mapAttrsToList (name: value: flakesGetSources value) s.outputs.inputs
+                  else if hasAttr "inputs" s then mapAttrsToList (name: value: getOutPath value) s.inputs
+                  else [ ]
+                  );
+              in
+              unique (flatten sources);
+
           # all flake tools together
           mkFlakesTools =
-            dirs_:
-            let dirs = pkgs.lib.lists.flatten dirs_; in
+            { dirs ? [ ], subDirs ? [ ], root }:
+            let
+              dirs_ = flatten dirs;
+              saveArgs = {
+                dirs = dirs_ ++ builtins.map (subDirectories root) subDirs;
+                sources = flakesGetSources (import root);
+              };
+            in
             (__mapAttrs (name: app: wrapShellApp { inherit name app; })
               {
-                updateLocks = flakesUpdate dirs;
-                pushToCachix = flakesSaveAll { inherit dirs; doPushToCachix = true; };
-                saveAll = flakesSaveAll { inherit dirs; };
-                format = flakesFormat dirs;
+                updateLocks = flakesUpdate dirs_;
+                pushToCachix = flakesSaveAll (saveArgs // { doPushToCachix = true; });
+                saveAll = flakesSaveAll saveArgs;
+                format = flakesFormat dirs_;
                 inherit logInToCachix;
-              })
+              }
+            )
           ;
 
-          testFlakesTools = mkFlakesTools [ "." ];
+          testFlakesTools = mkFlakesTools { dirs = [ "." ]; root = self.outPath; };
+          packages = testFlakesTools;
+          devShells.default = pkgs.mkShell {
+            buildInputs = __attrValues testFlakesTools;
+          };
         in
         {
           lib = {
             inherit
+              flakesGetSources
               flakesUpdate
               flakesSaveAll
               mkFlakesTools
@@ -194,12 +227,7 @@
               logInToCachix
               ;
           };
-
-          inherit testFlakesTools;
-
-          devShells.default = pkgs.mkShell {
-            buildInputs = [ (builtins.attrValues testFlakesTools) ];
-          };
+          inherit packages devShells;
         });
     in
     outputs;
