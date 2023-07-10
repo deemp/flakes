@@ -61,8 +61,8 @@ jobs:
           ls /nix/var/nix/profiles
           nix profile list --profile /nix/var/nix/profiles
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
         
       - name: Collect garbage in /nix/store
         run: nix store gc -vvvv
