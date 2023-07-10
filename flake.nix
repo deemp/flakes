@@ -71,7 +71,14 @@
               inherit (flakesTools) pushToCachix format updateLocks;
               writeSettings = writeSettingsJSON settingsCommonNix;
               codium = mkCodium ({ extensions = extensionsCommon; });
-              writeWorkflows = writeWorkflow "ci" (withAttrs (nixCI { }) { on.schedule = [{ cron = "0 0 * * 0"; }]; });
+              writeWorkflows = writeWorkflow "ci" (withAttrs
+                (nixCI {
+                  cacheNixArgs = {
+                    linuxMaxStoreSize = 9000000000;
+                    macosMaxStoreSize = 5000000000;
+                  };
+                 })
+                { on.schedule = [{ cron = "0 0 * * 0"; }]; });
             };
 
             tools = [ pkgs.nixd ];
