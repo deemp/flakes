@@ -48,6 +48,28 @@ jobs:
           git commit -a -m "action: Update flake locks" \
                                  && git push || echo "push failed!"
 
+      - if: matrix.os == 'ubuntu-22.04'
+        name: Build docs
+        run: |
+          nix profile install .#genDocs
+          nix run .#genDocs
+          cp -r docs/book docs/dist
+      - if: matrix.os == 'ubuntu-22.04'
+        name: Update docs
+        run: |
+          git add "docs/src"
+          git commit -a -m "Update docs" && git push || echo "push failed!"
+      - if: matrix.os == 'ubuntu-22.04'
+        name: GitHub Pages action
+        uses: peaceiris/actions-gh-pages@v3.9.3
+        with:
+          force_orphan: true
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/dist
+      - if: matrix.os == 'ubuntu-22.04'
+        name: Remove dist dir
+        run: |
+          rm -rf "docs/dist"
       - env:
           CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
           CACHIX_CACHE: ${{ secrets.CACHIX_CACHE }}

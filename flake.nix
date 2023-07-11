@@ -39,12 +39,10 @@
           let
             pkgs = inputs.nixpkgs.legacyPackages.${system};
             inherit (inputs.codium.lib.${system}) mkCodium writeSettingsJSON extensionsCommon settingsCommonNix;
-            inherit (inputs.drv-tools.lib.${system}) subDirectories withAttrs;
+            inherit (inputs.drv-tools.lib.${system}) subDirectories withAttrs mkShellApps getExe;
             inherit (inputs.flakes-tools.lib.${system}) mkFlakesTools;
             inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkShell;
-            inherit (inputs.workflows.lib.${system}) writeWorkflow nixCI;
-
-            # cache most frequently used flakes
+            workflows = (inputs.workflows.lib.${system});
 
             flakesTools = (mkFlakesTools {
               root = self.outPath;
@@ -67,32 +65,78 @@
               ];
             });
 
-            packages = {
-              inherit (flakesTools) pushToCachix format updateLocks;
-              writeSettings = writeSettingsJSON settingsCommonNix;
-              codium = mkCodium ({ extensions = extensionsCommon; });
-              writeWorkflows = writeWorkflow "ci" (withAttrs
-                (nixCI {
-                  cacheNixArgs = {
-                    linuxMaxStoreSize = 5000000000;
-                    macosMaxStoreSize = 5000000000;
+            packages =
+              let
+                packages1 = mkShellApps {
+                  genDocs = {
+                    text = ''
+                      mkdir -p docs/src
+                      cp README/*.md docs/src
+                      ${getExe pkgs.mdbook} build docs
+                    '';
+                    description = "Generate docs";
                   };
-                })
-                { on.schedule = [{ cron = "0 0 * * 0"; }]; });
-            };
+                };
+
+                inherit (workflows) writeWorkflow nixCI expr steps names run stepsIf os;
+
+                packages2 = {
+                  inherit (flakesTools) pushToCachix format updateLocks;
+                  writeSettings = writeSettingsJSON settingsCommonNix;
+                  codium = mkCodium ({ extensions = extensionsCommon; });
+                  writeWorkflows = writeWorkflow "ci" (withAttrs
+                    (nixCI {
+                      cacheNixArgs = {
+                        linuxMaxStoreSize = 5000000000;
+                        macosMaxStoreSize = 5000000000;
+                      };
+                      steps = dirs:
+                        stepsIf ("${names.matrix.os} == '${os.ubuntu-22}'") [
+                          {
+                            name = "Build docs";
+                            run = ''
+                              nix profile install .#${packages1.genDocs.pname}
+                              nix run .#${packages1.genDocs.pname}
+                              cp -r docs/book docs/dist
+                            '';
+                          }
+                          {
+                            name = "Update docs";
+                            run = ''
+                              git add "docs/src"
+                              git commit -a -m "Update docs" && git push || echo "push failed!"
+                            '';
+                          }
+                          {
+                            name = "GitHub Pages action";
+                            uses = "peaceiris/actions-gh-pages@v3.9.3";
+                            "with" = {
+                              github_token = expr names.secrets.GITHUB_TOKEN;
+                              publish_dir = "docs/dist";
+                              force_orphan = true;
+                            };
+                          }
+                          {
+                            name = "Remove dist dir";
+                            run = ''
+                              rm -rf "docs/dist"
+                            '';
+                          }
+                        ];
+                    })
+                    { on.schedule = [{ cron = "0 0 * * 0"; }]; });
+                };
+              in
+              packages1 // packages2;
 
             tools = [ pkgs.nixd ];
             devShells.default = mkShell {
               packages = tools;
               commands =
-                mkCommands "tools" tools ++
-                mkRunCommands "ide" {
-                  inherit (packages) writeSettings;
-                  "codium ." = packages.codium;
-                } ++
-                mkRunCommands "infra" {
-                  inherit (packages) writeWorkflows;
-                };
+                mkCommands "tools" tools
+                ++ mkRunCommands "ide" { inherit (packages) writeSettings; "codium ." = packages.codium; }
+                ++ mkRunCommands "infra" { inherit (packages) writeWorkflows; }
+                ++ mkRunCommands "docs" { inherit (packages) genDocs; };
             };
           in
           {
