@@ -257,7 +257,7 @@
             , cacheNixArgs ? { }
             , cacheDirectory ? CACHE_DIRECTORY
             , doInstall ? true
-            , doFormat ? true
+            , doFormat ? false
             , formatArgs ? { }
             , doUpdateLocks ? true
             , updateLocksArgs ? { }
