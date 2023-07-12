@@ -24,6 +24,8 @@ jobs:
           restore-keys: |
             nix-${{ matrix.os }}-cachix-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
             nix-${{ matrix.os }}-cachix-
+      - name: Remove old cache profiles
+        run: rm -rf /nix/var/nix/profiles/cache
       - if: matrix.os == 'ubuntu-22.04'
         name: Config git for github-actions
         run: |
@@ -32,16 +34,16 @@ jobs:
       - if: matrix.os == 'ubuntu-22.04'
         name: Format Nix files
         run: |+
-          nix run .#format
           nix profile install .#format
+          nix run .#format
 
       - if: matrix.os == 'ubuntu-22.04'
         name: Update flake locks
         run: |+
           git pull --rebase --autostash
 
-          nix run .#updateLocks
           nix profile install .#updateLocks
+          nix run .#updateLocks
 
           git commit -a -m "action: Update flake locks" \
                                  && git push || echo "push failed!"
@@ -51,8 +53,8 @@ jobs:
           CACHIX_CACHE: ${{ secrets.CACHIX_CACHE }}
         name: Push flakes to Cachix
         run: |+
-          nix run .#pushToCachix
           nix profile install .#pushToCachix
+          nix run .#pushToCachix
 
     strategy:
       matrix:
