@@ -118,7 +118,7 @@
             # because build of GHC may fail due to errors in B.
             packages = ps: [ ps.${packageName} ];
           })
-            hls cabal implicit-hie justStaticExecutable
+            hls cabal fourmolu implicit-hie justStaticExecutable
             ghcid callCabal2nix haskellPackages hpack ghc;
 
           # --- Tools ---
@@ -128,6 +128,7 @@
             ghcid
             hpack
             implicit-hie
+            fourmolu
             cabal
             # `cabal` already has a `ghc` on its `PATH`,
             # so you may remove `ghc` from this list
