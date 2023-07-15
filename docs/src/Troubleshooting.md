@@ -22,9 +22,9 @@ do you want to permanently mark this value as trusted (y/N)?
 
 answer `y` again. This is to let you use the binary caches listed by the flake.
 
-## Unreliable inputs
+## VSCodium troubleshooting
 
-Many of my flakes provide `VSCodium` with extensions in devshells. This dependency on extensions makes devshells prone to errors when such extensions are unavailable. Should this be the case, exclude `VSCodium` (usually called `codium`) from devshells inputs (in `devshell`, usually called `packages`).
+See [VSCodium troubleshooting](https://github.com/deemp/flakes/blob/main/codium/README.md#troubleshooting)
 
 ## Substituters and keys
 
@@ -43,6 +43,6 @@ Alternative steps:
    1. Run `nix store repair .#`
       - `.#` denotes an [installable](https://nixos.org/manual/nix/stable/command-ref/new-cli/nix.html?highlight=installable#installables)
 
-## VSCodium troubleshooting
+## Locales
 
-See [VSCodium troubleshooting](https://github.com/deemp/flakes/blob/main/codium/README.md#troubleshooting)
+See [Locales](https://nixos.wiki/wiki/Locales)
