@@ -32,12 +32,6 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
       - if: matrix.os == 'ubuntu-22.04'
-        name: Format Nix files
-        run: |+
-          nix profile install .#format
-          nix run .#format
-
-      - if: matrix.os == 'ubuntu-22.04'
         name: Update flake locks
         run: |+
           git pull --rebase --autostash
