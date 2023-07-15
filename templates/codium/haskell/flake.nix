@@ -38,7 +38,7 @@
           # --- Parameters ---
 
           # The desired GHC version
-          ghcVersion = "945";
+          ghcVersion = "928";
 
           # The name of a package
           packageName = "nix-managed";
