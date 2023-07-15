@@ -125,10 +125,10 @@
                     let installable = if remote then name else "${if inDir then "." else dir}#${name}"; in
                     (if doBuild then "nix build ${installable}\n" else "") 
                     + (if doInstall then "nix profile install ${installable}\n" else "")
-                    + (if doRun then "nix run ${installable}\n" else "")
+                    + (if doRun then "nix run ${installable}" else "")
                   )
                   scripts
-             }${if builtins.length scripts > 0 then "\n" else ""}" +
+                }" +
                 (if doCommit then "${commit {inherit commitMessages;}}\n" else "")
               ;
               nixScript = args@{ name, ... }: nix ((builtins.removeAttrs args [ "name" ]) // { scripts = [ args.name ]; });
