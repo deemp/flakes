@@ -216,8 +216,8 @@
             configGitAsGHActions = {
               name = "Config git for github-actions";
               run = ''
-                git config user.name github-actions
-                git config user.email github-actions@github.com
+                git config --global user.name github-actions
+                git config --global user.email github-actions@github.com
               '';
             };
             updateLocks = { doCommit ? true, doGitPull ? true, doInstall ? true, dir ? "." }:
