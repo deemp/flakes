@@ -29,23 +29,20 @@ jobs:
       - if: matrix.os == 'ubuntu-22.04'
         name: Config git for github-actions
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
+          git config --global user.name github-actions
+          git config --global user.email github-actions@github.com
       - if: matrix.os == 'ubuntu-22.04'
         name: Format Nix files
-        run: |+
+        run: |-
           nix profile install .#format
           nix run .#format
-
       - if: matrix.os == 'ubuntu-22.04'
         name: Update flake locks
         run: |+
           git pull --rebase --autostash
 
           nix profile install .#updateLocks
-          nix run .#updateLocks
-
-          git commit -a -m "action: Update flake locks" \
+          nix run .#updateLocksgit commit -a -m "action: Update flake locks" \
                                  && git push || echo "push failed!"
 
       - if: matrix.os == 'ubuntu-22.04'
@@ -74,10 +71,9 @@ jobs:
           CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
           CACHIX_CACHE: ${{ secrets.CACHIX_CACHE }}
         name: Push flakes to Cachix
-        run: |+
+        run: |-
           nix profile install .#pushToCachix
           nix run .#pushToCachix
-
     strategy:
       matrix:
         os:

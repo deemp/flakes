@@ -90,13 +90,13 @@
                         linuxMaxStoreSize = 5000000000;
                         macosMaxStoreSize = 5000000000;
                       };
+                      doFormat = true;
                       steps = dirs:
                         stepsIf ("${names.matrix.os} == '${os.ubuntu-22}'") [
                           {
                             name = "Build docs";
                             run = ''
-                              nix profile install .#${packages1.genDocs.pname}
-                              nix run .#${packages1.genDocs.pname}
+                              ${run.nixScript {name = packages1.genDocs.pname;}}
                               cp -r docs/book docs/dist
                             '';
                           }
