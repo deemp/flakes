@@ -78,3 +78,15 @@ devShells.default = pkgs.mkShell {
     '';
   };
 ```
+
+## Troubleshooting
+
+### Haskell Language Server
+
+#### Clear cache
+
+Sometimes, `HLS` finds errors in code despite `cabal build` running successfully.
+If you use `VS Code`, find `Outputs` of `Haskell Language Server` and determine the cache directory for a project.
+
+It should have approximately this form: `/home/<user name>/.cache/hie-bios/dist-<project-name>-<something>`.
+Remove it and restart `HLS`.
