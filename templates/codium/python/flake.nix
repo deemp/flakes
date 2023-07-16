@@ -40,7 +40,6 @@
               extensions = {
                 inherit (extensions) nix misc github markdown python jupyter;
               };
-              runtimeDependencies = tools;
             };
             writeSettings = writeSettingsJSON {
               inherit (settingsNix) todo-tree files editor gitlens

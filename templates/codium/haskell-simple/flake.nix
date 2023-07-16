@@ -154,12 +154,9 @@
             # --- IDE ---
 
             # This part can be removed if you don't use `VSCodium`
-            # We compose `VSCodium` with extensions and runtime tools
+            # We compose `VSCodium` with extensions
             # This is to let `VSCodium` run on its own, outside of a devshell
-            codium = mkCodium {
-              extensions = extensionsCommon // { inherit (extensions) haskell; };
-              runtimeDependencies = tools;
-            };
+            codium = mkCodium { extensions = extensionsCommon // { inherit (extensions) haskell; }; };
 
             # a script to write `.vscode/settings.json`
             writeSettings = writeSettingsJSON (settingsCommonNix // { inherit (settingsNix) haskell; });

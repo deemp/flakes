@@ -31,11 +31,9 @@
             packages = {
               # --- IDE ---
 
-              # This part can be removed if you don't use `VSCodium`
-              # We compose `VSCodium` with extensions and runtime tools
-              # This is to let `VSCodium` run on its own, outside of a devshell
+              # We compose `VSCodium` with extensions
               codium = mkCodium {
-                # We use the common extensions
+                # We use common extensions
                 extensions = extensionsCommon // {
                   # Next, we include the extensions from the pre-defined attrset
                   inherit (extensions) haskell;
@@ -43,7 +41,6 @@
                   # It's pinned in the flake inputs
                   extra = { inherit (vscode-marketplace.golang) go; };
                 };
-                runtimeDependencies = tools;
               };
 
               # a script to write `.vscode/settings.json`
