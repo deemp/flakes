@@ -56,11 +56,11 @@
                   "json2md"
                   "templates/haskell-minimal"
                   "workflows"
+                  "source-flake"
                   "."
                 ];
               subDirs = [
                 "language-tools"
-                "source-flake"
                 "templates/codium"
               ];
             });
