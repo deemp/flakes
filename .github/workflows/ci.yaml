@@ -38,13 +38,14 @@ jobs:
           nix run .#format
       - if: matrix.os == 'ubuntu-22.04'
         name: Update flake locks
-        run: |+
+        run: |-
           git pull --rebase --autostash
 
           nix profile install .#updateLocks
-          nix run .#updateLocksgit commit -a -m "action: Update flake locks" \
-                                 && git push || echo "push failed!"
+          nix run .#updateLocks
 
+          git commit -a -m "action: Update flake locks" \
+                                 && git push || echo "push failed!"
       - if: matrix.os == 'ubuntu-22.04'
         name: Build docs
         run: |
