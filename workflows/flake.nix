@@ -19,11 +19,11 @@
         inputs.flake-utils.lib.eachDefaultSystem (system:
         let
           pkgs = inputs.nixpkgs.legacyPackages.${system};
-          inherit (inputs.drv-tools.lib.${system}) writeYAML genAttrsId mkAccessors mkAccessors_;
-          inherit (builtins) concatMap;
+          inherit (inputs.drv-tools.lib.${system}) writeYAML genAttrsId mkAccessors mkAccessors_ singletonIf;
+          inherit (builtins) concatMap filter map;
           testFlakesTools = (inputs.flakes-tools.testFlakesTools.${system});
           inherit (inputs.flakes-tools.lib.${system}) CACHE_DIRECTORY;
-          inherit (pkgs.lib.strings) concatMapStringsSep;
+          inherit (pkgs.lib.strings) concatMapStringsSep concatStringsSep;
           inherit (pkgs.lib.attrsets) mapAttrsToList;
           inherit (pkgs.lib.lists) flatten;
 
@@ -46,7 +46,6 @@
 
           # include steps conditionally
           stepsIf = expr: steps: map (x: x // { "if" = expr; }) (flatten steps);
-          stepMaybe = cond: step: if cond then [ step ] else [ ];
 
           # make stuff available like matrix.os instead of "matrix.os"
           names =
@@ -98,9 +97,8 @@
                 { commitMessage ? ""
                 , commitMessages ? [ commitMessage ]
                 , doIgnorePushFailed ? true
-                }: ''git commit -a ${concatMapStringsSep " \\\n  " (message: ''-m "action: ${message}"'') commitMessages} \
-                       && git push ${if doIgnorePushFailed then ''|| echo "push failed!"'' else ""}
-                    '';
+                }: "git commit -a ${concatMapStringsSep " \\\n  " (message: ''-m "action: ${message}"'') commitMessages} \\
+                       && git push ${if doIgnorePushFailed then ''|| echo "push failed!"'' else ""}";
               nix =
                 { doGitPull ? false
                 , dir ? "."
@@ -117,19 +115,25 @@
                 , commitMessages ? [ commitMessage ]
                 , doIgnorePushFailed ? true
                 }:
-                (if doGitPull then "${gitPull}\n\n" else "") +
-                (if inDir then "cd ${dir}\n\n" else "") +
-                "${concatMapStringsSep
-                  "\n"
-                  (name:
-                    let installable = if remote then name else "${if inDir then "." else dir}#${name}"; in
-                    (if doBuild then "nix build ${installable}\n" else "") 
-                    + (if doInstall then "nix profile install ${installable}\n" else "")
-                    + (if doRun then "nix run ${installable}" else "")
+                concatStringsSep "\n\n" (flatten [
+                  (singletonIf doGitPull gitPull)
+                  (singletonIf inDir "cd ${dir}")
+                  (map
+                    (name:
+                    let
+                      installable = if remote then name else "${if inDir then "." else dir}#${name}";
+                      lines = flatten [
+                        (singletonIf doBuild "nix build ${installable}")
+                        (singletonIf doInstall "nix profile install ${installable}")
+                        (singletonIf doRun "nix run ${installable}")
+                      ];
+                    in
+                    concatStringsSep "\n" lines
+                    )
+                    scripts
                   )
-                  scripts
-                }" +
-                (if doCommit then "${commit {inherit commitMessages;}}\n" else "")
+                  (singletonIf doCommit (commit { inherit commitMessages; }))
+                ])
               ;
               nixScript = args@{ name, ... }: nix ((builtins.removeAttrs args [ "name" ]) // { scripts = [ args.name ]; });
             in
@@ -273,22 +277,21 @@
                   inherit strategy;
                   runs-on = expr names.matrix.os;
                   steps = flatten
-                    ([
+                    [
                       steps_.checkout
                       (installNix installNixArgs)
+                      (singletonIf doCacheNix (steps_.cacheNix ({ keyJob = "cachix"; keyOs = expr names.matrix.os; } // cacheNixArgs)))
+                      (singletonIf doRemoveCacheProfiles (steps_.removeCacheProfiles { dir = cacheDirectory; }))
+                      (
+                        stepsIf ("${names.matrix.os} == '${os}'") [
+                          steps_.configGitAsGHActions
+                          (singletonIf doFormat (steps_.format ({ inherit dir doInstall; } // formatArgs)))
+                          (singletonIf doUpdateLocks (steps_.updateLocks ({ inherit dir doInstall; } // updateLocksArgs)))
+                        ]
+                      )
+                      (steps dir)
+                      (singletonIf doPushToCachix (steps_.pushToCachix ({ inherit dir doInstall; } // pushToCachixArgs)))
                     ]
-                    ++ (stepMaybe doCacheNix (steps_.cacheNix ({ keyJob = "cachix"; keyOs = expr names.matrix.os; } // cacheNixArgs)))
-                    ++ (stepMaybe doRemoveCacheProfiles (steps_.removeCacheProfiles { dir = cacheDirectory; }))
-                    ++ (
-                      stepsIf ("${names.matrix.os} == '${os}'") [
-                        steps_.configGitAsGHActions
-                        (stepMaybe doFormat (steps_.format ({ inherit dir doInstall; } // formatArgs)))
-                        (stepMaybe doUpdateLocks (steps_.updateLocks ({ inherit dir doInstall; } // updateLocksArgs)))
-                      ]
-                    )
-                    ++ (steps dir)
-                    ++ (stepMaybe doPushToCachix (steps_.pushToCachix ({ inherit dir doInstall; } // pushToCachixArgs)))
-                    )
                   ;
                 };
               };
