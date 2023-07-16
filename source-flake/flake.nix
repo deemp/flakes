@@ -7,7 +7,7 @@
       flake = false;
     };
     flake-utils.url = "github:numtide/flake-utils";
-    lima.url = "github:deemp/lima/0bbfa4c8594695f303f61e4fe4e761007b645718";
+    lima.url = "github:deemp/lima";
     nix-vscode-extensions.url = "github:nix-community/nix-vscode-extensions/295dcce52610c93100c4098714eb06032249bd9d";
     nixpkgs.url = "github:NixOS/nixpkgs/ec322bf9e598a510995e7540f17af57ee0c8d5b9";
     poetry2nix = {
