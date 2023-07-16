@@ -265,8 +265,10 @@
             # `cabal` already has a `ghc` on its `PATH`,
             # so you may remove `ghc` from this list
             # Then, you can access `ghc` like `cabal exec -- ghc --version`
-            ghc
             # anyway, if you'd like to use `GHC`, write it before `HLS` - see https://github.com/NixOS/nixpkgs/issues/225895
+            
+            # ghc
+            
             hls
           ];
 
