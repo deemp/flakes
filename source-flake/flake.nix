@@ -14,9 +14,6 @@
       url = "github:nix-community/poetry2nix/4f8d61cd936f853242a4ce1fd476f5488c288c26";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    vscode-extensions.url = "github:nix-community/nix-vscode-extensions/219877e9da73d5d0ee833cc2cb4b1ea26e76e1df";
-    vscode-extensions-extra.url = "github:nix-community/nix-vscode-extensions/288ddbb70b5befac24602bfe7e5d9fe09dfae8d0";
-
     nixpkgs-purescript.url = "github:deemp/nixpkgs/purescript";
   };
 
