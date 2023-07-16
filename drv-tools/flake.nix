@@ -50,6 +50,16 @@
           # map values to strings and to attrsets and merge them
           mapStrGenAttrs = f: list: foldl' recursiveUpdate { } (builtins.map (x: f (toString x)) list);
 
+          mempty = val:
+            if builtins.isString val then ""
+            else if builtins.isList val then [ ]
+            else if builtins.isAttrs val then { }
+            else throw "Expected a string, list, or an attrset";
+
+          singletonIf = cond: val: if cond then [ val ] else [ ];
+
+          memptyUnless = cond: val: if cond then val else mempty val;
+
           # List -> Set
           # Generate a set from a list of sets with all keys renamed
           # in the order they go in that list
@@ -432,6 +442,8 @@
               man
               mapGenAttrs
               mapStrGenAttrs
+              mempty
+              memptyUnless
               mergeValues
               mkAccessors
               mkAccessors_
@@ -448,6 +460,7 @@
               readXs
               runFishScript
               runInEachDir
+              singletonIf
               toList
               withAttrs
               withDescription
