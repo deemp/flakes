@@ -108,6 +108,7 @@
                   remote ? false
                 , doBuild ? false
                 , doInstall ? true
+                , installPriority ? 0
                 , doRun ? true
                 , scripts ? [ ]
                 , doCommit ? false
@@ -124,7 +125,7 @@
                       installable = if remote then name else "${if inDir then "." else dir}#${name}";
                       lines = flatten [
                         (singletonIf doBuild "nix build ${installable}")
-                        (singletonIf doInstall "nix profile install ${installable}")
+                        (singletonIf doInstall "nix profile install ${installable}${if installPriority > 0 then " --priority ${builtins.toString installPriority}" else ""}")
                         (singletonIf doRun "nix run ${installable}")
                       ];
                     in
