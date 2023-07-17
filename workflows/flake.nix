@@ -159,7 +159,7 @@
             in
             {
               name = "Restore and cache Nix store";
-              uses = "deemp/cache-nix-too@v1";
+              uses = "nix-community/cache-nix-action@v1";
               "with" = {
                 key = "nix-${keyOs}-${keyJob}-${hashfiles}";
                 restore-keys = ''
