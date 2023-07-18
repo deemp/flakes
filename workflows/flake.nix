@@ -24,7 +24,7 @@
           testFlakesTools = (inputs.flakes-tools.testFlakesTools.${system});
           inherit (inputs.flakes-tools.lib.${system}) CACHE_DIRECTORY;
           inherit (pkgs.lib.strings) concatMapStringsSep concatStringsSep;
-          inherit (pkgs.lib.attrsets) mapAttrsToList;
+          inherit (pkgs.lib.attrsets) mapAttrsToList recursiveUpdate;
           inherit (pkgs.lib.lists) flatten;
 
           writeWorkflow = name: writeYAML name ".github/workflows/${name}.yaml";
@@ -93,13 +93,31 @@
           run =
             let
               gitPull = ''git pull --rebase --autostash'';
-              commit =
-                { commitMessage ? ""
+              # TODO git add
+              commit_ =
+                { doAdd ? false
+                , add ? [ ]
+                , doCommit ? false
+                , commitMessage ? "commit message"
                 , commitMessages ? [ commitMessage ]
-                , doIgnorePushFailed ? true
-                }: "git commit -a ${concatMapStringsSep " \\\n  " (message: ''-m "action: ${message}"'') commitMessages} \\
-                       && git push ${if doIgnorePushFailed then ''|| echo "push failed!"'' else ""}";
-              nix =
+                , doPush ? false
+                , doIgnorePushFailed ? false
+                }: concatStringsSep "\n"
+                  (flatten [
+                    (singletonIf doAdd "git add ${concatStringsSep " " add}")
+                    (singletonIf doCommit "git commit ${concatMapStringsSep " \\\n  " (message: ''-m "action: ${message}"'') commitMessages}")
+                    (singletonIf doPush "git push${if doIgnorePushFailed then '' || echo "push failed!"'' else ""}")
+                  ]);
+
+              commit = args: commit_ ({
+                doAdd = true;
+                add = [ "." ];
+                doCommit = true;
+                doPush = true;
+              } // args
+              );
+
+              nix_ =
                 { doGitPull ? false
                 , dir ? "."
                 , # run in directory
@@ -107,14 +125,12 @@
                 , # script may be from a remote flake
                   remote ? false
                 , doBuild ? false
-                , doInstall ? true
+                , doInstall ? false
                 , installPriority ? 0
-                , doRun ? true
+                , doRun ? false
                 , scripts ? [ ]
                 , doCommit ? false
-                , commitMessage ? "run scripts"
-                , commitMessages ? [ commitMessage ]
-                , doIgnorePushFailed ? true
+                , commitArgs ? { }
                 }:
                 concatStringsSep "\n\n" (flatten [
                   (singletonIf doGitPull gitPull)
@@ -133,24 +149,31 @@
                     )
                     scripts
                   )
-                  (singletonIf doCommit (commit { inherit commitMessages; }))
+                  (singletonIf doCommit (commit commitArgs))
                 ])
               ;
+              nix = args: nix_ ({ doInstall = true; doRun = true; } // args);
               nixScript = args@{ name, ... }: nix ((builtins.removeAttrs args [ "name" ]) // { scripts = [ args.name ]; });
             in
             {
-              inherit gitPull commit nix nixScript;
+              inherit
+                gitPull
+                commit
+                commit_
+                nix
+                nix_
+                nixScript;
             };
 
           # cache nix store
-          cacheNix =
-            { files ? [ "**/flake.nix" "**/flake.lock" ]
+          cacheNix_ =
+            { files ? [ ]
             , keyJob ? "job"
             , keyOs ? expr names.runner.os
             , path ? ""
-            , linuxGCEnabled ? true
+            , linuxGCEnabled ? false
             , linuxMaxStoreSize ? 0
-            , macosGCEnabled ? true
+            , macosGCEnabled ? false
             , macosMaxStoreSize ? 0
             }:
             let
@@ -171,6 +194,8 @@
               // (if linuxGCEnabled then { linux-gc-enabled = true; linux-max-store-size = linuxMaxStoreSize; } else { })
               // (if macosGCEnabled then { macos-gc-enabled = true; macos-max-store-size = macosMaxStoreSize; } else { });
             };
+
+          cacheNix = args: cacheNix_ ({ files = [ "**/flake.nix" "**/flake.lock" ]; } // args);
 
           # Keep build outputs to garbage collect at the end only the trash
           # https://nixos.org/manual/nix/unstable/command-ref/conf-file.html#description
@@ -195,18 +220,25 @@
               name = "Checkout this repo";
               uses = "actions/checkout@v3";
             };
+
             gitPull = {
               name = "Pull and rebase";
               run = run.gitPull;
             };
-            inherit cacheNix installNix;
+
+            inherit
+              cacheNix
+              cacheNix_
+              installNix;
+
             logInToCachix = {
               name = "Log in to Cachix";
               run = ''
                 nix run nixpkgs#cachix -- authtoken ${ expr names.secrets.CACHIX_AUTH_TOKEN }
               '';
             };
-            pushToCachix = { dir ? ".", doInstall ? true }: {
+
+            pushToCachix_ = { dir ? ".", doInstall ? false }: {
               name = "Push flakes to Cachix";
               env = {
                 CACHIX_CACHE = expr names.secrets.CACHIX_CACHE;
@@ -214,10 +246,16 @@
               };
               run = run.nixScript { inherit dir doInstall; name = names.pushToCachix; };
             };
-            format = { dir ? ".", doInstall ? true }: {
+
+            pushToCachix = args: pushToCachix_ ({ doInstall = true; } // args);
+
+            format_ = { dir ? ".", doInstall ? false }: {
               name = "Format Nix files";
               run = run.nixScript { inherit dir doInstall; name = names.format; };
             };
+
+            format = args: format_ ({ doInstall = true; } // args);
+
             configGitAsGHActions = {
               name = "Config git for github-actions";
               run = ''
@@ -225,27 +263,34 @@
                 git config --global user.email github-actions@github.com
               '';
             };
-            updateLocks = { doCommit ? true, doGitPull ? true, doInstall ? true, dir ? "." }:
+
+            updateLocks_ = { dir ? ".", doInstall ? false, doGitPull ? false, doCommit ? false, commitArgs ? { } }:
               let name = "Update flake locks"; in
               {
                 inherit name;
                 run = run.nixScript ({
                   inherit doCommit doGitPull doInstall dir;
+                  commitArgs = {
+                    commitMessage = name;
+                  } // commitArgs;
                   name = names.updateLocks;
-                  commitMessage = name;
                 });
               };
+
+            updateLocks = args: updateLocks_ ({ doInstall = true; doGitPull = true; doCommit = true; } // args);
+
             nixStoreGC = {
               name = "Collect garbage in /nix/store";
               run = "nix store gc";
             };
+
             removeCacheProfiles = { dir ? CACHE_DIRECTORY }: {
               name = "Remove old cache profiles";
               run = "rm -rf ${dir}";
             };
           };
 
-          nixCI =
+          nixCI_ =
             let
               steps_ = steps;
               on_ = on;
@@ -257,17 +302,16 @@
             , os ? os_.ubuntu-22
             , strategy ? { matrix.os = oss; }
             , installNixArgs ? { }
-            , doCacheNix ? true
-            , doRemoveCacheProfiles ? true
+            , doCacheNix ? false
+            , doRemoveCacheProfiles ? false
             , cacheNixArgs ? { }
             , cacheDirectory ? CACHE_DIRECTORY
-            , doInstall ? true
+            , doInstall ? false
             , doFormat ? false
             , formatArgs ? { }
-            , doUpdateLocks ? true
+            , doUpdateLocks ? false
             , updateLocksArgs ? { }
-            , doIgnorePushFailed ? true
-            , doPushToCachix ? true
+            , doPushToCachix ? false
             , pushToCachixArgs ? { }
             }: {
               name = "Nix CI";
@@ -298,11 +342,25 @@
               };
             };
 
+          nixCI = args: nixCI_ (
+            recursiveUpdate
+              {
+                doCacheNix = true;
+                doRemoveCacheProfiles = true;
+                doInstall = true;
+                doUpdateLocks = true;
+                updateLocksArgs = { doGitPull = true; };
+                doPushToCachix = true;
+              }
+              args);
+
           packages = {
             writeWorkflowsDir = writeYAML "workflow" "./tmp/nixCI.yaml" (nixCI { });
             writeWorkflows = writeWorkflow "nixCI" (nixCI {
               dir = "nix-dev/";
               cacheNixArgs = {
+                linuxGCEnabled = true;
+                macosGCEnabled = true;
                 linuxMaxStoreSize = 6442450944;
                 macosMaxStoreSize = 6442450944;
               };
@@ -324,6 +382,7 @@
               mkAccessors_
               names
               nixCI
+              nixCI_
               on
               os
               oss
