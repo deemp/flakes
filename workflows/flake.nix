@@ -358,10 +358,6 @@
             recursiveUpdate
               {
                 doCacheNix = true;
-                cacheNixArgs = {
-                  linuxGCEnabled = true;
-                  macosGCEnabled = true;
-                };
                 doRemoveCacheProfiles = true;
                 doInstall = true;
                 doUpdateLocks = true;
@@ -375,7 +371,9 @@
             writeWorkflows = writeWorkflow "nixCI" (nixCI {
               dir = "nix-dev/";
               cacheNixArgs = {
+                linuxGCEnabled = true;
                 linuxMaxStoreSize = 6442450944;
+                macosGCEnabled = true;
                 macosMaxStoreSize = 6442450944;
               };
             });

@@ -87,7 +87,9 @@
                   writeWorkflows = writeWorkflow "ci" (withAttrs
                     (nixCI {
                       cacheNixArgs = {
+                        linuxGCEnabled = true;
                         linuxMaxStoreSize = 5000000000;
+                        macosGCEnabled = true;
                         macosMaxStoreSize = 5000000000;
                       };
                       updateLocksArgs = { doCommit = false; doGitPull = false; };
