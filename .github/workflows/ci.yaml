@@ -17,6 +17,10 @@ jobs:
         uses: nix-community/cache-nix-action@v1
         with:
           key: nix-${{ matrix.os }}-cachix-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
+          linux-gc-enabled: true
+          linux-max-store-size: 5000000000
+          macos-gc-enabled: true
+          macos-max-store-size: 5000000000
           restore-keys: |
             nix-${{ matrix.os }}-cachix-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
             nix-${{ matrix.os }}-cachix-
@@ -35,15 +39,38 @@ jobs:
       - if: matrix.os == 'ubuntu-22.04'
         name: Update flake locks
         run: |-
-          git pull --rebase --autostash
-
           nix profile install .#updateLocks
           nix run .#updateLocks
+      - if: matrix.os == 'ubuntu-22.04'
+        name: Write workflows
+        run: |-
+          ROOT_DIR=$PWD
+          cd templates/codium/haskell
+          nix profile install .#writeWorkflows
+          nix run .#writeWorkflows
+          cd $ROOT_DIR
+
+          ROOT_DIR=$PWD
+          cd templates/codium/haskell-simple
+          nix profile install .#writeWorkflows
+          nix run .#writeWorkflows
+          cd $ROOT_DIR
+
+          ROOT_DIR=$PWD
+          cd workflows
+          nix profile install .#writeWorkflows
+          nix run .#writeWorkflows
+          cd $ROOT_DIR
+      - if: matrix.os == 'ubuntu-22.04'
+        name: Commit and push
+        run: |
+          git pull --rebase --autostash
 
           git add .
           git commit \
             -m "action: Update flake locks" \
-            || echo "commit failed!"
+            -m "action: Format Nix files" \
+            -m "action: Write workflows"
           git push
       - if: matrix.os == 'ubuntu-22.04'
         name: Build docs

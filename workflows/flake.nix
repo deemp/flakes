@@ -141,15 +141,16 @@
                 }:
                 concatStringsSep "\n\n" (flatten [
                   (singletonIf doGitPull gitPull)
-                  (singletonIf inDir "cd ${dir}")
                   (map
                     (name:
                     let
                       installable = if remote then name else "${if inDir then "." else dir}#${name}";
                       lines = flatten [
+                        (singletonIf inDir "ROOT_DIR=$PWD\ncd ${dir}")
                         (singletonIf doBuild "nix build ${installable}")
                         (singletonIf doInstall "nix profile install ${installable}${if installPriority > 0 then " --priority ${builtins.toString installPriority}" else ""}")
                         (singletonIf doRun "nix run ${installable}")
+                        (singletonIf inDir "cd $ROOT_DIR")
                       ];
                     in
                     concatStringsSep "\n" lines
@@ -160,7 +161,7 @@
                 ])
               ;
               nix = args: nix_ ({ doInstall = true; doRun = true; } // args);
-              nixScript = args@{ name, ... }: nix ((builtins.removeAttrs args [ "name" ]) // { scripts = [ args.name ]; });
+              nixScript = args@{ name ? "script", ... }: nix ((builtins.removeAttrs args [ "name" ]) // { scripts = [ args.name ]; });
             in
             {
               inherit

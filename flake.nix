@@ -90,9 +90,32 @@
                         linuxMaxStoreSize = 5000000000;
                         macosMaxStoreSize = 5000000000;
                       };
+                      updateLocksArgs = { doCommit = false; doGitPull = false; };
                       doFormat = true;
                       steps = dirs:
                         stepsIf ("${names.matrix.os} == '${os.ubuntu-22}'") [
+                          (
+                            let name = "Write workflows"; in
+                            [
+                              {
+                                inherit name;
+                                run =
+                                  pkgs.lib.strings.concatMapStringsSep "\n\n"
+                                    (dir: "${run.nixScript { inherit dir; inDir = true; name = "writeWorkflows"; }}")
+                                    [ "templates/codium/haskell" "templates/codium/haskell-simple" "workflows" ]
+                                ;
+                              }
+                              {
+                                name = "Commit and push";
+                                run = ''
+                                  ${run.nix_ {
+                                    doGitPull = true; doCommit = true;
+                                    commitArgs.commitMessages = [ (steps.updateLocks { }).name (steps.format { }).name name ];
+                                  }}
+                                '';
+                              }
+                            ]
+                          )
                           {
                             name = "Build docs";
                             run = ''
