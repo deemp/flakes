@@ -14,7 +14,7 @@ jobs:
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= deemp.cachix.org-1:9shDxyR2ANqEPQEEYDL/xIOnoPwxHot21L5fiZnFL18=
             keep-outputs = true
       - name: Restore and cache Nix store
-        uses: deemp/cache-nix-too@v1
+        uses: nix-community/cache-nix-action@v1
         with:
           key: nix-${{ matrix.os }}-cachix-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
           linux-gc-enabled: true
@@ -29,27 +29,28 @@ jobs:
       - if: matrix.os == 'ubuntu-22.04'
         name: Config git for github-actions
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
+          git config --global user.name github-actions
+          git config --global user.email github-actions@github.com
       - if: matrix.os == 'ubuntu-22.04'
         name: Update flake locks
-        run: |+
+        run: |-
           git pull --rebase --autostash
 
           nix profile install .#updateLocks
           nix run .#updateLocks
 
-          git commit -a -m "action: Update flake locks" \
-                                 && git push || echo "push failed!"
-
+          git add .
+          git commit \
+            -m "action: Update flake locks" \
+            || echo "commit failed!"
+          git push
       - env:
           CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
           CACHIX_CACHE: ${{ secrets.CACHIX_CACHE }}
         name: Push flakes to Cachix
-        run: |+
+        run: |-
           nix profile install .#pushToCachix
           nix run .#pushToCachix
-
     strategy:
       matrix:
         os:
