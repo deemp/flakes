@@ -101,11 +101,17 @@
                 , commitMessage ? "commit message"
                 , commitMessages ? [ commitMessage ]
                 , doPush ? false
+                , doIgnoreCommitFailed ? false
                 , doIgnorePushFailed ? false
                 }: concatStringsSep "\n"
                   (flatten [
                     (singletonIf doAdd "git add ${concatStringsSep " " add}")
-                    (singletonIf doCommit "git commit ${concatMapStringsSep " \\\n  " (message: ''-m "action: ${message}"'') commitMessages}")
+                    (singletonIf doCommit
+                      (concatStringsSep "" [
+                        "git commit \\\n  ${concatMapStringsSep " \\\n  " (message: ''-m "action: ${message}"'') commitMessages}"
+                        "${if doIgnoreCommitFailed then ''${" \\\n  "}|| echo "commit failed!"'' else ""}"
+                      ])
+                    )
                     (singletonIf doPush "git push${if doIgnorePushFailed then '' || echo "push failed!"'' else ""}")
                   ]);
 
@@ -349,7 +355,7 @@
                 doRemoveCacheProfiles = true;
                 doInstall = true;
                 doUpdateLocks = true;
-                updateLocksArgs = { doGitPull = true; };
+                updateLocksArgs = { doGitPull = true; commitArgs.doIgnoreCommitFailed = true; };
                 doPushToCachix = true;
               }
               args);

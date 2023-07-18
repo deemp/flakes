@@ -41,7 +41,9 @@ jobs:
           nix run .#updateLocks
 
           git add .
-          git commit -m "action: Update flake locks"
+          git commit \
+            -m "action: Update flake locks" \
+            || echo "commit failed!"
           git push
       - if: matrix.os == 'ubuntu-22.04'
         name: Build docs
