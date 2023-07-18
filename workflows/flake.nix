@@ -45,6 +45,8 @@
           # can omit ${{ }} - https://docs.github.com/en/actions/learn-github-actions/expressions#example-expression-in-an-if-conditional
 
           # include steps conditionally
+          # don't use interpolation
+          # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idif
           stepsIf = expr: steps: map (x: x // { "if" = expr; }) (flatten steps);
 
           # make stuff available like matrix.os instead of "matrix.os"
@@ -93,7 +95,6 @@
           run =
             let
               gitPull = ''git pull --rebase --autostash'';
-              # TODO git add
               commit_ =
                 { doAdd ? false
                 , add ? [ ]
@@ -307,7 +308,7 @@
             , defaultOS ? os.ubuntu-22
             , strategy ? { matrix.os = oss; }
             , doCheckOS ? strategy != { }
-            , runsOn ? (if doCheckOS then expr names.matrix.os else defaultOS)
+            , runsOn ? (if doCheckOS then names.matrix.os else defaultOS)
             , installNixArgs ? { }
             , doCacheNix ? false
             , doRemoveCacheProfiles ? false
@@ -321,18 +322,21 @@
             , doPushToCachix ? false
             , pushToCachixArgs ? { }
             }:
+            let
+              runsOn_ = (if doCheckOS then expr else (x: x)) runsOn;
+            in
             {
               name = "Nix CI";
               inherit on;
               jobs = {
                 nixCI = {
                   name = "Nix CI";
-                  runs-on = runsOn;
+                  runs-on = runsOn_;
                   steps = flatten
                     [
                       steps_.checkout
                       (installNix installNixArgs)
-                      (singletonIf doCacheNix (steps_.cacheNix ({ keyJob = "cachix"; keyOS = runsOn; } // cacheNixArgs)))
+                      (singletonIf doCacheNix (steps_.cacheNix ({ keyJob = "cachix"; keyOS = runsOn_; } // cacheNixArgs)))
                       (singletonIf doRemoveCacheProfiles (steps_.removeCacheProfiles { dir = cacheDirectory; }))
                       (
                         (if doCheckOS then stepsIf ("${runsOn} == '${defaultOS}'") else (x: x)) [
@@ -353,13 +357,15 @@
             recursiveUpdate
               {
                 doCacheNix = true;
+                cacheNixArgs = {
+                  linuxGCEnabled = true;
+                  macosGCEnabled = true;
+                };
                 doRemoveCacheProfiles = true;
                 doInstall = true;
                 doUpdateLocks = true;
                 updateLocksArgs = { doGitPull = true; commitArgs.doIgnoreCommitFailed = true; };
                 doPushToCachix = true;
-                # strategy = { };
-                # runsOn = expr names.runner.os;
               }
               args);
 
@@ -368,8 +374,6 @@
             writeWorkflows = writeWorkflow "nixCI" (nixCI {
               dir = "nix-dev/";
               cacheNixArgs = {
-                linuxGCEnabled = true;
-                macosGCEnabled = true;
                 linuxMaxStoreSize = 6442450944;
                 macosMaxStoreSize = 6442450944;
               };
