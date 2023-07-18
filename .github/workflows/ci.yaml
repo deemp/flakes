@@ -22,17 +22,17 @@ jobs:
             nix-${{ matrix.os }}-cachix-
       - name: Remove old cache profiles
         run: rm -rf /nix/var/nix/profiles/cache
-      - if: matrix.os == 'ubuntu-22.04'
+      - if: ${{ matrix.os }} == 'ubuntu-22.04'
         name: Config git for github-actions
         run: |
           git config --global user.name github-actions
           git config --global user.email github-actions@github.com
-      - if: matrix.os == 'ubuntu-22.04'
+      - if: ${{ matrix.os }} == 'ubuntu-22.04'
         name: Format Nix files
         run: |-
           nix profile install .#format
           nix run .#format
-      - if: matrix.os == 'ubuntu-22.04'
+      - if: ${{ matrix.os }} == 'ubuntu-22.04'
         name: Update flake locks
         run: |-
           git pull --rebase --autostash

@@ -175,7 +175,7 @@
           cacheNix_ =
             { files ? [ ]
             , keyJob ? "job"
-            , keyOs ? expr names.runner.os
+            , keyOS ? expr names.runner.os
             , path ? ""
             , linuxGCEnabled ? false
             , linuxMaxStoreSize ? 0
@@ -190,10 +190,10 @@
               name = "Restore and cache Nix store";
               uses = "nix-community/cache-nix-action@v1";
               "with" = {
-                key = "nix-${keyOs}-${keyJob}-${hashfiles}";
+                key = "nix-${keyOS}-${keyJob}-${hashfiles}";
                 restore-keys = ''
-                  nix-${keyOs}-${keyJob}-${hashfiles}
-                  nix-${keyOs}-${keyJob}-
+                  nix-${keyOS}-${keyJob}-${hashfiles}
+                  nix-${keyOS}-${keyJob}-
                 '';
               }
               // (if path != "" then { inherit path; } else { })
@@ -300,13 +300,14 @@
             let
               steps_ = steps;
               on_ = on;
-              os_ = os;
             in
             { steps ? (_: [ ])
             , dir ? "."
             , on ? on_
-            , os ? os_.ubuntu-22
+            , defaultOS ? os.ubuntu-22
             , strategy ? { matrix.os = oss; }
+            , doCheckOS ? strategy != { }
+            , runsOn ? (if doCheckOS then expr names.matrix.os else defaultOS)
             , installNixArgs ? { }
             , doCacheNix ? false
             , doRemoveCacheProfiles ? false
@@ -319,22 +320,22 @@
             , updateLocksArgs ? { }
             , doPushToCachix ? false
             , pushToCachixArgs ? { }
-            }: {
+            }:
+            {
               name = "Nix CI";
               inherit on;
               jobs = {
                 nixCI = {
                   name = "Nix CI";
-                  inherit strategy;
-                  runs-on = expr names.matrix.os;
+                  runs-on = runsOn;
                   steps = flatten
                     [
                       steps_.checkout
                       (installNix installNixArgs)
-                      (singletonIf doCacheNix (steps_.cacheNix ({ keyJob = "cachix"; keyOs = expr names.matrix.os; } // cacheNixArgs)))
+                      (singletonIf doCacheNix (steps_.cacheNix ({ keyJob = "cachix"; keyOS = runsOn; } // cacheNixArgs)))
                       (singletonIf doRemoveCacheProfiles (steps_.removeCacheProfiles { dir = cacheDirectory; }))
                       (
-                        stepsIf ("${names.matrix.os} == '${os}'") [
+                        (if doCheckOS then stepsIf ("${runsOn} == '${defaultOS}'") else (x: x)) [
                           steps_.configGitAsGHActions
                           (singletonIf doFormat (steps_.format ({ inherit dir doInstall; } // formatArgs)))
                           (singletonIf doUpdateLocks (steps_.updateLocks ({ inherit dir doInstall; } // updateLocksArgs)))
@@ -344,7 +345,7 @@
                       (singletonIf doPushToCachix (steps_.pushToCachix ({ inherit dir doInstall; } // pushToCachixArgs)))
                     ]
                   ;
-                };
+                } // (if doCheckOS then { inherit strategy; } else { });
               };
             };
 
@@ -357,6 +358,8 @@
                 doUpdateLocks = true;
                 updateLocksArgs = { doGitPull = true; commitArgs.doIgnoreCommitFailed = true; };
                 doPushToCachix = true;
+                # strategy = { };
+                # runsOn = expr names.runner.os;
               }
               args);
 
