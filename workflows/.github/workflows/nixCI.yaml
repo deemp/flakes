@@ -39,8 +39,9 @@ jobs:
           nix profile install nix-dev/#updateLocks
           nix run nix-dev/#updateLocks
 
-          git commit -a -m "action: Update flake locks" \
-                                 && git push || echo "push failed!"
+          git add .
+          git commit -m "action: Update flake locks"
+          git push
       - env:
           CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
           CACHIX_CACHE: ${{ secrets.CACHIX_CACHE }}
