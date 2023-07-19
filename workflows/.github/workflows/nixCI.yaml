@@ -1,6 +1,8 @@
 jobs:
   nixCI:
     name: Nix CI
+    permissions:
+      contents: write
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout this repo
@@ -60,6 +62,8 @@ jobs:
   purgeCache:
     name: Purge cache
     needs: nixCI
+    permissions:
+      actions: write
     runs-on: ubuntu-22.04
     steps:
       - name: Purge cache

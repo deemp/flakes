@@ -200,6 +200,7 @@
               // (if macosGCEnabled then { macos-gc-enabled = true; macos-max-store-size = macosMaxStoreSize; } else { });
             };
 
+          # don't enable GC to not disable for macos
           cacheNix = args: cacheNix_ ({ files = [ "**/flake.nix" "**/flake.lock" ]; } // args);
 
           # Keep build outputs to garbage collect at the end only the trash
@@ -348,6 +349,7 @@
                 "${nixCIJOb}" = {
                   name = nixCIName;
                   runs-on = runsOn_;
+                  permissions.contents = "write";
                   steps = flatten
                     [
                       steps_.checkout
@@ -370,6 +372,7 @@
                   name = purgeCacheName;
                   runs-on = defaultOS;
                   needs = purgeCacheNeeds;
+                  permissions.actions = "write";
                   steps = flatten [
                     (singletonIf doPurgeCache (steps_.purgeCache purgeCacheArgs))
                   ];

@@ -1,6 +1,8 @@
 jobs:
   nixCI:
     name: Nix CI
+    permissions:
+      contents: write
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout this repo
@@ -22,7 +24,6 @@ jobs:
           macos-gc-enabled: true
           macos-max-store-size: 5000000000
           restore-keys: |
-            nix-${{ matrix.os }}-cachix-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
             nix-${{ matrix.os }}-cachix-
       - name: Remove old cache profiles
         run: rm -rf /nix/var/nix/profiles/cache
@@ -111,6 +112,8 @@ jobs:
   purgeCache:
     name: Purge cache
     needs: nixCI
+    permissions:
+      actions: write
     runs-on: ubuntu-22.04
     steps:
       - name: Purge cache
