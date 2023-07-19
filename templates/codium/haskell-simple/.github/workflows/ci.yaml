@@ -18,7 +18,6 @@ jobs:
         with:
           key: nix-${{ matrix.os }}-cachix-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
           restore-keys: |
-            nix-${{ matrix.os }}-cachix-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
             nix-${{ matrix.os }}-cachix-
       - name: Remove old cache profiles
         run: rm -rf /nix/var/nix/profiles/cache
