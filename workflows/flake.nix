@@ -327,7 +327,7 @@
             , purgeCacheArgs ? { }
             , purgeCacheJob ? "purgeCache"
             , purgeCacheName ? "Purge cache"
-            , purgeCacheDependsOn ? nixCIJOb
+            , purgeCacheNeeds ? nixCIJOb
             , doRemoveCacheProfiles ? false
             , cacheNixArgs ? { }
             , cacheDirectory ? CACHE_DIRECTORY
@@ -370,7 +370,7 @@
                 "${purgeCacheJob}" = {
                   name = purgeCacheName;
                   runs-on = defaultOS;
-                  needs = purgeCacheDependsOn;
+                  needs = purgeCacheNeeds;
                   steps = flatten [
                     (singletonIf doPurgeCache (steps_.purgeCache purgeCacheArgs))
                   ];
