@@ -90,8 +90,6 @@
             workflow_dispatch = { };
           };
 
-          # TODO don't build scripts when `nix run` gets an option to make a gc root
-
           run =
             let
               gitPull = ''git pull --rebase --autostash'';
@@ -239,6 +237,17 @@
               cacheNix_
               installNix;
 
+            purgeCache_ = { debug ? false, accessed ? false, created ? false, maxAge ? 0 }: {
+              name = "Purge cache";
+              uses = "deemp/purge-cache@v1";
+              "with" = {
+                inherit debug accessed created;
+                max-age = maxAge;
+              };
+            };
+
+            purgeCache = attrs: purgeCache_ ({ debug = true; accessed = true; created = true; maxAge = 172800; } // attrs);
+
             logInToCachix = {
               name = "Log in to Cachix";
               run = ''
@@ -307,11 +316,18 @@
             , dir ? "."
             , on ? on_
             , defaultOS ? os.ubuntu-22
+            , nixCIJOb ? "nixCI"
+            , nixCIName ? "Nix CI"
             , strategy ? { matrix.os = oss; }
             , doCheckOS ? strategy != { }
             , runsOn ? (if doCheckOS then names.matrix.os else defaultOS)
             , installNixArgs ? { }
             , doCacheNix ? false
+            , doPurgeCache ? false
+            , purgeCacheArgs ? { }
+            , purgeCacheJob ? "purgeCache"
+            , purgeCacheName ? "Purge cache"
+            , purgeCacheDependsOn ? nixCIJOb
             , doRemoveCacheProfiles ? false
             , cacheNixArgs ? { }
             , cacheDirectory ? CACHE_DIRECTORY
@@ -330,8 +346,8 @@
               name = "Nix CI";
               inherit on;
               jobs = {
-                nixCI = {
-                  name = "Nix CI";
+                "${nixCIJOb}" = {
+                  name = nixCIName;
                   runs-on = runsOn_;
                   steps = flatten
                     [
@@ -351,6 +367,14 @@
                     ]
                   ;
                 } // (if doCheckOS then { inherit strategy; } else { });
+                "${purgeCacheJob}" = {
+                  name = purgeCacheName;
+                  runs-on = defaultOS;
+                  needs = purgeCacheDependsOn;
+                  steps = flatten [
+                    (singletonIf doPurgeCache (steps_.purgeCache purgeCacheArgs))
+                  ];
+                };
               };
             };
 
@@ -361,6 +385,7 @@
                 doRemoveCacheProfiles = true;
                 doInstall = true;
                 doUpdateLocks = true;
+                doPurgeCache = true;
                 updateLocksArgs = { doGitPull = true; commitArgs.doIgnoreCommitFailed = true; };
                 doPushToCachix = true;
               }

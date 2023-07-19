@@ -108,6 +108,18 @@ jobs:
           - macos-12
           - ubuntu-20.04
           - ubuntu-22.04
+  purgeCache:
+    name: Purge cache
+    needs: nixCI
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Purge cache
+        uses: deemp/purge-cache@v1
+        with:
+          accessed: true
+          created: true
+          debug: true
+          max-age: 172800
 name: Nix CI
 "on":
   pull_request: {}
