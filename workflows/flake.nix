@@ -192,7 +192,6 @@
               "with" = {
                 key = "nix-${keyOS}-${keyJob}-${hashfiles}";
                 restore-keys = ''
-                  nix-${keyOS}-${keyJob}-${hashfiles}
                   nix-${keyOS}-${keyJob}-
                 '';
               }
