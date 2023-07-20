@@ -95,6 +95,10 @@ jobs:
         name: Remove dist dir
         run: |
           rm -rf "docs/dist"
+      - name: Save flakes
+        run: |-
+          nix profile install .#saveFlakes
+          nix run .#saveFlakes
       - env:
           CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
           CACHIX_CACHE: ${{ secrets.CACHIX_CACHE }}

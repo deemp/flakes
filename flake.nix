@@ -81,7 +81,8 @@
                 inherit (workflows) writeWorkflow nixCI expr steps names run stepsIf os;
 
                 packages2 = {
-                  inherit (flakesTools) pushToCachix format updateLocks;
+                  inherit (mkFlakesTools { root = ./.; dirs = [ "source-flake" "codium" ]; }) pushToCachix;
+                  inherit (flakesTools) saveFlakes format updateLocks;
                   writeSettings = writeSettingsJSON settingsCommonNix;
                   codium = mkCodium ({ extensions = extensionsCommon; });
                   writeWorkflows = writeWorkflow "ci" (withAttrs
@@ -94,6 +95,7 @@
                       };
                       updateLocksArgs = { doCommit = false; doGitPull = false; };
                       doFormat = true;
+                      doPushToCachix = true;
                       steps = dirs:
                         stepsIf ("${names.matrix.os} == '${os.ubuntu-22}'") [
                           (
