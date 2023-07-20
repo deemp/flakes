@@ -51,12 +51,12 @@
               # --- Flakes ---
 
               # Scripts that can be used in CI
-              inherit (mkFlakesTools { dirs = [ "." ]; root = self.outPath; }) updateLocks pushToCachix;
+              inherit (mkFlakesTools { dirs = [ "." ]; root = self.outPath; }) updateLocks pushToCachix saveFlakes format;
 
               # --- GH Actions
 
               # A script to write GitHub Actions workflow file into `.github/ci.yaml`
-              writeWorkflows = writeWorkflow "ci" (nixCI { });
+              writeWorkflows = writeWorkflow "ci" (nixCI { doPushToCachix = true; });
             };
 
             devShells.default = mkShell {
@@ -65,7 +65,7 @@
               commands =
                 mkCommands "tools" tools
                 ++ mkRunCommands "ide" { "codium ." = packages.codium; inherit (packages) writeSettings; }
-                ++ mkRunCommandsDir "." "infra" { inherit (packages) updateLocks pushToCachix writeWorkflows; };
+                ++ mkRunCommandsDir "." "infra" { inherit (packages) updateLocks pushToCachix saveFlakes writeWorkflows format; };
             };
           in
           {
