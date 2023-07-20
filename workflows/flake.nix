@@ -273,6 +273,13 @@
 
             format = args: format_ ({ doInstall = true; } // args);
 
+            saveFlakes_ = { dir ? ".", doInstall ? false }: {
+              name = "Save flakes";
+              run = run.nixScript { inherit dir doInstall; name = names.saveFlakes; };
+            };
+
+            saveFlakes = args: saveFlakes_ ({ doInstall = true; } // args);
+
             configGitAsGHActions = {
               name = "Config git for github-actions";
               run = ''
@@ -336,6 +343,8 @@
             , formatArgs ? { }
             , doUpdateLocks ? false
             , updateLocksArgs ? { }
+            , doSaveAll ? false
+            , saveFlakesArgs ? { }
             , doPushToCachix ? false
             , pushToCachixArgs ? { }
             }:
@@ -364,6 +373,7 @@
                         ]
                       )
                       (steps dir)
+                      (singletonIf doSaveAll (steps_.saveFlakes { inherit dir doInstall; } // saveFlakesArgs))
                       (singletonIf doPushToCachix (steps_.pushToCachix ({ inherit dir doInstall; } // pushToCachixArgs)))
                     ]
                   ;
@@ -389,7 +399,7 @@
                 doUpdateLocks = true;
                 doPurgeCache = true;
                 updateLocksArgs = { doGitPull = true; commitArgs.doIgnoreCommitFailed = true; };
-                doPushToCachix = true;
+                doSaveAll = true;
               }
               args);
 
@@ -397,6 +407,7 @@
             writeWorkflowsDir = writeYAML "workflow" "./tmp/nixCI.yaml" (nixCI { });
             writeWorkflows = writeWorkflow "nixCI" (nixCI {
               dir = "nix-dev/";
+              doPushToCachix = true;
               cacheNixArgs = {
                 linuxGCEnabled = true;
                 linuxMaxStoreSize = 6442450944;
