@@ -14,6 +14,8 @@
       url = "github:nix-community/poetry2nix/4f8d61cd936f853242a4ce1fd476f5488c288c26";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    dream2nix.url = "github:nix-community/dream2nix/e68bff6dbd5aa2b9ffae1e12f60c71bf0bee0143";
+    # TODO use purescript from nixpkgs
     nixpkgs-purescript.url = "github:deemp/nixpkgs/purescript";
   };
 
