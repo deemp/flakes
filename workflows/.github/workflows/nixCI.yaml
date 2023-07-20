@@ -45,7 +45,7 @@ jobs:
             -m "action: Update flake locks" \
             || echo "commit failed!"
           git push
-      - name: Save all
+      - name: Save flakes
         run: |-
           nix profile install nix-dev/#saveFlakes
           nix run nix-dev/#saveFlakes

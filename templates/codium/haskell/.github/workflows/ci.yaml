@@ -41,13 +41,10 @@ jobs:
             -m "action: Update flake locks" \
             || echo "commit failed!"
           git push
-      - env:
-          CACHIX_AUTH_TOKEN: ${{ secrets.CACHIX_AUTH_TOKEN }}
-          CACHIX_CACHE: ${{ secrets.CACHIX_CACHE }}
-        name: Push flakes to Cachix
+      - name: Save flakes
         run: |-
-          nix profile install .#pushToCachix
-          nix run .#pushToCachix
+          nix profile install .#saveFlakes
+          nix run .#saveFlakes
     strategy:
       matrix:
         os:
