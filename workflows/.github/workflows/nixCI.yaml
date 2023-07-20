@@ -2,6 +2,7 @@ jobs:
   nixCI:
     name: Nix CI
     permissions:
+      actions: write
       contents: write
     runs-on: ${{ matrix.os }}
     steps:
@@ -61,6 +62,13 @@ jobs:
         run: |-
           nix profile install nix-dev/#pushToCachix
           nix run nix-dev/#pushToCachix
+      - name: Purge cache
+        uses: deemp/purge-cache@v1
+        with:
+          accessed: false
+          created: true
+          debug: true
+          max-age: 172800
     strategy:
       matrix:
         os:
@@ -68,20 +76,6 @@ jobs:
           - macos-12
           - ubuntu-20.04
           - ubuntu-22.04
-  purgeCache:
-    name: Purge cache
-    needs: nixCI
-    permissions:
-      actions: write
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Purge cache
-        uses: deemp/purge-cache@v1
-        with:
-          accessed: true
-          created: true
-          debug: true
-          max-age: 172800
 name: Nix CI
 "on":
   pull_request: {}
