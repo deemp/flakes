@@ -53,7 +53,7 @@ savePackages () {
     fi
 }
 
-saveAll () {
+saveFlakes () {
     doPushToCachix="$1"
     set +e -a
     saveDevshells "$doPushToCachix"

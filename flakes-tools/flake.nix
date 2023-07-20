@@ -21,8 +21,9 @@
           pkgs = inputs.nixpkgs.outputs.legacyPackages.${system};
           inherit (inputs.drv-tools.outputs.lib.${system})
             withMan mkShellApp wrapShellApp
-            getExe framedBrackets
+            getExe framedBrackets singletonIf
             runInEachDir genAttrsId subDirectories
+            concatStringsNewline
             ;
           inherit (pkgs.lib.lists) flatten unique;
 
@@ -52,7 +53,7 @@
 
           CACHE_DIRECTORY = "/nix/var/nix/profiles/cache";
 
-          saveAll = { doPushToCachix ? false }:
+          saveFlakes = { doPushToCachix ? false }:
             withMan
               (mkShellApp {
                 name = "save-all";
@@ -79,7 +80,7 @@
                       printf "${framedBrackets "Using the \$${env.CACHE_DIRECTORY} directory for profiles."}"
                     fi
                     source ${./scripts.sh}
-                    saveAll ${if doPushToCachix then "true" else "false"}
+                    saveFlakes ${if doPushToCachix then "true" else "false"}
                   '';
                 description = "Push inputs and outputs (`packages` and `devShells`) of a flake to `cachix`";
                 runtimeInputs =
@@ -135,28 +136,33 @@
               ''
             );
 
-          flakesSaveAll = { dirs ? [ ], doPushToCachix ? false, sources ? [ ] }:
+          flakesSave = { dirs ? [ ], doPushToCachix ? false, sources ? [ ] }:
             let
               description = "Save and conditionally push to `Cachix` inputs and outputs of flakes in specified directories relative to `CWD`.";
               saveInEachDir = runInEachDir {
                 inherit dirs;
                 name = "flakes-save";
-                command = getExe (saveAll { inherit doPushToCachix; });
+                command = getExe (saveFlakes { inherit doPushToCachix; });
                 inherit description;
-                longDescription = ''
-                  ${man.ENV}
-                '' +
-                (if doPushToCachix then ''
-                  ${man.CACHIX_CACHE}
-                  ${man.CACHIX_AUTH_TOKEN}
-                  ${man.NIX_CACHE_PROFILE}
-                '' else "");
+                longDescription =
+                  concatStringsNewline [
+                    man.ENV
+                    (singletonIf doPushToCachix [
+                      man.CACHIX_CACHE
+                      man.CACHIX_AUTH_TOKEN
+                    ])
+                    man.NIX_CACHE_PROFILE
+                  ];
               };
               writeSources = pkgs.symlinkJoin { name = "appa"; paths = sources; };
             in
             mkShellApp {
               name = "flakes-${if doPushToCachix then "push-to-cachix" else "save"}";
-              text = (if doPushToCachix then getExe logInToCachix else "") + "\n${getExe saveInEachDir}";
+              text =
+                concatStringsNewline [
+                  (singletonIf doPushToCachix (getExe logInToCachix))
+                  (getExe saveInEachDir)
+                ];
               inherit (saveInEachDir.meta) description longDescription;
               # TODO can't symlink inputs - error No such file or directory
               # runtimeInputs = [ writeSources ];
@@ -206,8 +212,8 @@
             (__mapAttrs (name: app: wrapShellApp { inherit name app; })
               {
                 updateLocks = flakesUpdate saveArgs.dirs;
-                pushToCachix = flakesSaveAll (saveArgs // { doPushToCachix = true; });
-                saveAll = flakesSaveAll saveArgs;
+                pushToCachix = flakesSave (saveArgs // { doPushToCachix = true; });
+                saveFlakes = flakesSave saveArgs;
                 format = flakesFormat saveArgs.dirs;
                 inherit logInToCachix;
               }
@@ -224,7 +230,7 @@
             inherit
               flakesGetSources
               flakesUpdate
-              flakesSaveAll
+              flakesSave
               mkFlakesTools
               flakesFormat
               logInToCachix
