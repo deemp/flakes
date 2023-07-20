@@ -155,10 +155,10 @@
           framedBrackets_ = pref: suff: framed_ "${pref}[ " " ]${suff}";
 
           # concat strings and separate them by a newline character
-          concatStringsNewline = concatStringsSep "\n";
+          concatStringsNewline = list: concatStringsSep "\n" (flatten list);
 
           # concatMap strings and separate them by a newline character
-          concatMapStringsNewline = concatMapStringsSep "\n";
+          concatMapStringsNewline = f: list: concatMapStringsSep "\n" f (flatten list);
 
           # man headings
           man = {
@@ -185,7 +185,7 @@
                   withAttrs
                     (
                       pkgs.writeShellApplication ({ inherit name text; } // {
-                        runtimeInputs = pkgs.lib.lists.flatten runtimeInputs;
+                        runtimeInputs = flatten runtimeInputs;
                         checkPhase = "";
                       })
                     )
@@ -214,7 +214,7 @@
                   withAttrs
                     (
                       pkgs.writeShellApplication ({ inherit name text; } // {
-                        runtimeInputs = pkgs.lib.lists.flatten runtimeInputs;
+                        runtimeInputs = flatten runtimeInputs;
                         checkPhase = "";
                       })
                     )
@@ -401,6 +401,7 @@
 
           # make accessors from an attrset so that a.b.c represents a string "a.b.c"
           mkAccessors = mkAccessors_ "";
+
           # make accessors with an initial path
           mkAccessors_ = path: attrs@{ ... }:
             assert isString path;
