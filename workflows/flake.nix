@@ -316,7 +316,7 @@
             , dir ? "."
             , on ? on_
             , defaultOS ? os.ubuntu-22
-            , nixCIJOb ? "nixCI"
+            , nixCIJob ? "nixCI"
             , nixCIName ? "Nix CI"
             , strategy ? { matrix.os = oss; }
             , doCheckOS ? strategy != { }
@@ -327,7 +327,7 @@
             , purgeCacheArgs ? { }
             , purgeCacheJob ? "purgeCache"
             , purgeCacheName ? "Purge cache"
-            , purgeCacheNeeds ? nixCIJOb
+            , purgeCacheNeeds ? nixCIJob
             , doRemoveCacheProfiles ? false
             , cacheNixArgs ? { }
             , cacheDirectory ? CACHE_DIRECTORY
@@ -346,7 +346,7 @@
               name = "Nix CI";
               inherit on;
               jobs = {
-                "${nixCIJOb}" = {
+                "${nixCIJob}" = {
                   name = nixCIName;
                   runs-on = runsOn_;
                   permissions.contents = "write";
