@@ -246,7 +246,7 @@
               };
             };
 
-            purgeCache = attrs: purgeCache_ ({ debug = true; accessed = true; created = true; maxAge = 172800; } // attrs);
+            purgeCache = attrs: purgeCache_ ({ debug = true; created = true; maxAge = 172800; } // attrs);
 
             logInToCachix = {
               name = "Log in to Cachix";
@@ -332,9 +332,6 @@
             , doCacheNix ? false
             , doPurgeCache ? false
             , purgeCacheArgs ? { }
-            , purgeCacheJob ? "purgeCache"
-            , purgeCacheName ? "Purge cache"
-            , purgeCacheNeeds ? nixCIJob
             , doRemoveCacheProfiles ? false
             , cacheNixArgs ? { }
             , cacheDirectory ? CACHE_DIRECTORY
@@ -343,7 +340,7 @@
             , formatArgs ? { }
             , doUpdateLocks ? false
             , updateLocksArgs ? { }
-            , doSaveAll ? false
+            , doSaveFlakes ? false
             , saveFlakesArgs ? { }
             , doPushToCachix ? false
             , pushToCachixArgs ? { }
@@ -358,7 +355,7 @@
                 "${nixCIJob}" = {
                   name = nixCIName;
                   runs-on = runsOn_;
-                  permissions.contents = "write";
+                  permissions = { contents = "write"; actions = "write"; };
                   steps = flatten
                     [
                       steps_.checkout
@@ -373,20 +370,12 @@
                         ]
                       )
                       (steps dir)
-                      (singletonIf doSaveAll (steps_.saveFlakes { inherit dir doInstall; } // saveFlakesArgs))
+                      (singletonIf doSaveFlakes (steps_.saveFlakes { inherit dir doInstall; } // saveFlakesArgs))
                       (singletonIf doPushToCachix (steps_.pushToCachix ({ inherit dir doInstall; } // pushToCachixArgs)))
+                      (singletonIf doPurgeCache (steps_.purgeCache purgeCacheArgs))
                     ]
                   ;
                 } // (if doCheckOS then { inherit strategy; } else { });
-                "${purgeCacheJob}" = {
-                  name = purgeCacheName;
-                  runs-on = defaultOS;
-                  needs = purgeCacheNeeds;
-                  permissions.actions = "write";
-                  steps = flatten [
-                    (singletonIf doPurgeCache (steps_.purgeCache purgeCacheArgs))
-                  ];
-                };
               };
             };
 
@@ -399,7 +388,7 @@
                 doUpdateLocks = true;
                 doPurgeCache = true;
                 updateLocksArgs = { doGitPull = true; commitArgs.doIgnoreCommitFailed = true; };
-                doSaveAll = true;
+                doSaveFlakes = true;
                 doFormat = true;
               }
               args);
