@@ -400,6 +400,7 @@
                 doPurgeCache = true;
                 updateLocksArgs = { doGitPull = true; commitArgs.doIgnoreCommitFailed = true; };
                 doSaveAll = true;
+                doFormat = true;
               }
               args);
 
