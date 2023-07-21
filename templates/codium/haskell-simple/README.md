@@ -3,8 +3,6 @@
 - `VSCodium` with extensions and executables for `Haskell`.
 - A sample `Haskell` project.
 
-Feel free to remove the `VSCodium`-related `Nix` code and whatever you want!
-
 ## Prerequisites
 
 - NixOS wiki - [Haskell](https://nixos.wiki/wiki/Haskell)
@@ -14,16 +12,14 @@ Feel free to remove the `VSCodium`-related `Nix` code and whatever you want!
   <summary>Spoiler</summary>
 
 - [flake.nix](./flake.nix) - code in this flake is extensively commented.
-- [codium-haskell-simple](https://github.com/deemp/flakes/tree/main/templates/codium/haskell-simple#readme) - this flake.
-- [codium-haskell](https://github.com/deemp/flakes/tree/main/templates/codium/haskell#readme) - an advanced version of this flake.
-- [language-tools/haskell](https://github.com/deemp/flakes/blob/main/language-tools/haskell/flake.nix) - a flake that conveniently provides `Haskell` tools.
-- [Conventions](https://github.com/deemp/flakes/blob/main/README/Conventions.md#dev-tools)
-- [codium-generic](https://github.com/deemp/flakes/tree/main/templates/codium/generic#readme) - info just about `VSCodium` with extensions.
+- [codium-haskell](https://github.com/deemp/flakes/tree/main/templates/codium/haskell#readme) - template for this flake.
 - [Haskell](https://github.com/deemp/flakes/blob/main/README/Haskell.md) - general info about `Haskell` tools.
+- [language-tools/haskell](https://github.com/deemp/flakes/blob/main/language-tools/haskell/flake.nix) - a flake that provides `Haskell` tools.
+- [codium-generic](https://github.com/deemp/flakes/tree/main/templates/codium/generic#readme) - info just about `VSCodium` with extensions.
 - [Troubleshooting](https://github.com/deemp/flakes/blob/main/README/Troubleshooting.md)
-- [Prerequisites](https://github.com/deemp/flakes#prerequisites)
-- [Nixpkgs support for incremental Haskell builds](https://www.haskellforall.com/2022/12/nixpkgs-support-for-incremental-haskell.html)
 - [flakes](https://github.com/deemp/flakes#readme) - my Nix flakes that may be useful for you.
+- [Conventions](https://github.com/deemp/flakes/blob/main/README/Conventions.md)
+- [Prerequisites](https://github.com/deemp/flakes#prerequisites)
 
 </details>
 
