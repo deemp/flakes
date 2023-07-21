@@ -56,7 +56,7 @@
               # --- GH Actions
 
               # A script to write GitHub Actions workflow file into `.github/ci.yaml`
-              writeWorkflows = writeWorkflow "ci" (nixCI { doPushToCachix = true; });
+              writeWorkflows = writeWorkflow "ci" (nixCI { jobArgs.doPushToCachix = true; });
             };
 
             devShells.default = mkShell {

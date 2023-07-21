@@ -87,69 +87,60 @@
                   codium = mkCodium ({ extensions = extensionsCommon; });
                   writeWorkflows = writeWorkflow "ci" (withAttrs
                     (nixCI {
-                      cacheNixArgs = {
-                        linuxGCEnabled = true;
-                        linuxMaxStoreSize = 5000000000;
-                        macosGCEnabled = true;
-                        macosMaxStoreSize = 5000000000;
-                      };
-                      updateLocksArgs = { doCommit = false; doGitPull = false; };
-                      doFormat = true;
-                      doPushToCachix = true;
-                      steps = dirs:
-                        stepsIf ("${names.matrix.os} == '${os.ubuntu-22}'") [
-                          (
-                            let name = "Write workflows"; in
-                            [
-                              {
-                                inherit name;
-                                run =
-                                  pkgs.lib.strings.concatMapStringsSep "\n\n"
+                      jobArgs = {
+                        cacheNixArgs = {
+                          linuxGCEnabled = true;
+                          linuxMaxStoreSize = 5000000000;
+                          macosGCEnabled = true;
+                          macosMaxStoreSize = 5000000000;
+                        };
+                        doFormat = true;
+                        doPushToCachix = true;
+                        doCommit = false;
+                        steps = dirs:
+                          stepsIf ("${names.matrix.os} == '${os.ubuntu-22}'") [
+                            (
+                              let
+                                nameWriteWorkflows = "Write workflows";
+                                nameUpdateDocs = "Update docs";
+                              in
+                              [
+                                {
+                                  name = nameWriteWorkflows;
+                                  run = pkgs.lib.strings.concatMapStringsSep "\n\n"
                                     (dir: "${run.nixScript { inherit dir; inDir = true; name = "writeWorkflows"; }}")
                                     [ "templates/codium/haskell" "templates/codium/haskell-simple" "workflows" ]
-                                ;
-                              }
-                              {
-                                name = "Commit and push";
-                                run = ''
-                                  ${run.nix_ {
-                                    doGitPull = true; doCommit = true;
-                                    commitArgs.commitMessages = [ (steps.updateLocks { }).name (steps.format { }).name name ];
-                                  }}
-                                '';
-                              }
-                            ]
-                          )
-                          {
-                            name = "Build docs";
-                            run = ''
-                              ${run.nixScript {name = packages1.genDocs.pname;}}
-                              cp -r docs/book docs/dist
-                            '';
-                          }
-                          {
-                            name = "Update docs";
-                            run = ''
-                              git add "docs/src"
-                              git commit -a -m "Update docs" && git push || echo "push failed!"
-                            '';
-                          }
-                          {
-                            name = "GitHub Pages action";
-                            uses = "peaceiris/actions-gh-pages@v3.9.3";
-                            "with" = {
-                              github_token = expr names.secrets.GITHUB_TOKEN;
-                              publish_dir = "docs/dist";
-                              force_orphan = true;
-                            };
-                          }
-                          {
-                            name = "Remove dist dir";
-                            run = ''
-                              rm -rf "docs/dist"
-                            '';
-                          }
-                        ];
+                                  ;
+                                }
+                                {
+                                  name = nameUpdateDocs;
+                                  run = run.nixScript { name = packages1.genDocs.pname; };
+                                }
+                                (steps.commit {
+                                  messages = [
+                                    (steps.updateLocks { }).name
+                                    (steps.format { }).name
+                                    nameWriteWorkflows
+                                    nameUpdateDocs
+                                  ];
+                                })
+                              ]
+                            )
+                            {
+                              name = "Copy docs";
+                              run = "cp -r docs/book docs/dist";
+                            }
+                            {
+                              name = "Publish docs to GitHub Pages";
+                              uses = "peaceiris/actions-gh-pages@v3.9.3";
+                              "with" = {
+                                github_token = expr names.secrets.GITHUB_TOKEN;
+                                publish_dir = "docs/dist";
+                                force_orphan = true;
+                              };
+                            }
+                          ];
+                      };
                     })
                     { on.schedule = [{ cron = "0 0 * * 0"; }]; });
                 };
@@ -168,9 +159,9 @@
           in
           {
             inherit packages devShells;
+            formatter = inputs.formatter.${system};
           })
         // {
-          inherit (inputs) formatter;
           templates = rec {
             codium-generic = {
               path = ./templates/codium/generic;

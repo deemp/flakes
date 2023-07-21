@@ -24,8 +24,8 @@
           testFlakesTools = (inputs.flakes-tools.testFlakesTools.${system});
           inherit (inputs.flakes-tools.lib.${system}) CACHE_DIRECTORY;
           inherit (pkgs.lib.strings) concatMapStringsSep concatStringsSep;
-          inherit (pkgs.lib.attrsets) mapAttrsToList recursiveUpdate;
-          inherit (pkgs.lib.lists) flatten;
+          inherit (pkgs.lib.attrsets) mapAttrsToList recursiveUpdate hasAttrByPath;
+          inherit (pkgs.lib.lists) flatten imap0;
 
           writeWorkflow = name: writeYAML name ".github/workflows/${name}.yaml";
 
@@ -94,32 +94,46 @@
             let
               gitPull = ''git pull --rebase --autostash'';
               commit_ =
-                { doAdd ? false
+                { doGitPull ? false
+                , doAdd ? false
                 , add ? [ ]
                 , doCommit ? false
-                , commitMessage ? "commit message"
-                , commitMessages ? [ commitMessage ]
-                , doPush ? false
+                , doMessageFirst ? false
+                , messageFirst ? "action"
+                , messagePrefix ? "action: "
+                , message ? "commit message"
+                , messages ? [ message ]
                 , doIgnoreCommitFailed ? false
+                , doPush ? false
                 , doIgnorePushFailed ? false
-                }: concatStringsSep "\n"
+                }: concatStringsSep "\n\n"
                   (flatten [
+                    (singletonIf doGitPull gitPull)
                     (singletonIf doAdd "git add ${concatStringsSep " " add}")
                     (singletonIf doCommit
                       (concatStringsSep "" [
-                        "git commit \\\n  ${concatMapStringsSep " \\\n  " (message: ''-m "action: ${message}"'') commitMessages}"
+                        "git commit \\\n  ${
+                          concatMapStringsSep " \\\n  "
+                          (message: ''-m "${messagePrefix}${message}"'') 
+                          (flatten [(singletonIf doMessageFirst messageFirst) messages])
+                        }"
                         "${if doIgnoreCommitFailed then ''${" \\\n  "}|| echo "commit failed!"'' else ""}"
                       ])
                     )
-                    (singletonIf doPush "git push${if doIgnorePushFailed then '' || echo "push failed!"'' else ""}")
+                    (singletonIf doPush "git push${if doIgnorePushFailed then " || echo \"push failed!\"" else ""}")
                   ]);
 
-              commit = args: commit_ ({
-                doAdd = true;
-                add = [ "." ];
-                doCommit = true;
-                doPush = true;
-              } // args
+              commit = args: commit_ (
+                {
+                  doGitPull = true;
+                  doAdd = true;
+                  add = [ "." ];
+                  doCommit = true;
+                  doMessageFirst = true;
+                  messagePrefix = "";
+                  doIgnoreCommitFailed = true;
+                  doPush = true;
+                } // args
               );
 
               nix_ =
@@ -129,31 +143,35 @@
                   inDir ? false
                 , # script may be from a remote flake
                   remote ? false
+                , scripts ? [ ]
                 , doBuild ? false
                 , doInstall ? false
-                , installPriority ? 0
+                , doInstallPriority ? (builtins.length scripts) > 1
+                , # starting install priority
+                  installPriority ? 0
                 , doRun ? false
-                , scripts ? [ ]
                 , doCommit ? false
                 , commitArgs ? { }
                 }:
                 concatStringsSep "\n\n" (flatten [
                   (singletonIf doGitPull gitPull)
-                  (map
-                    (name:
-                    let
-                      installable = if remote then name else "${if inDir then "." else dir}#${name}";
-                      lines = flatten [
-                        (singletonIf inDir "ROOT_DIR=$PWD\ncd ${dir}")
-                        (singletonIf doBuild "nix build ${installable}")
-                        (singletonIf doInstall "nix profile install ${installable}${if installPriority > 0 then " --priority ${builtins.toString installPriority}" else ""}")
-                        (singletonIf doRun "nix run ${installable}")
-                        (singletonIf inDir "cd $ROOT_DIR")
-                      ];
-                    in
-                    concatStringsSep "\n" lines
-                    )
-                    scripts
+                  (
+                    imap0
+                      (
+                        i: name:
+                        let
+                          installable = if remote then name else "${if inDir then "." else dir}#${name}";
+                          lines = flatten [
+                            (singletonIf inDir "ROOT_DIR=$PWD\ncd ${dir}")
+                            (singletonIf doBuild "nix build ${installable}")
+                            (singletonIf doInstall "nix profile install ${installable}${if doInstallPriority then " --priority ${builtins.toString (i + installPriority)}" else ""}")
+                            (singletonIf doRun "nix run ${installable}")
+                            (singletonIf inDir "cd $ROOT_DIR")
+                          ];
+                        in
+                        concatStringsSep "\n" lines
+                      )
+                      scripts
                   )
                   (singletonIf doCommit (commit commitArgs))
                 ])
@@ -227,9 +245,9 @@
               uses = "actions/checkout@v3";
             };
 
-            gitPull = {
-              name = "Pull and rebase";
-              run = run.gitPull;
+            commit = args: {
+              name = "Commit & Push";
+              run = run.commit args;
             };
 
             inherit
@@ -281,27 +299,19 @@
             saveFlakes = args: saveFlakes_ ({ doInstall = true; } // args);
 
             configGitAsGHActions = {
-              name = "Config git for github-actions";
+              name = "Configure git for github-actions";
               run = ''
                 git config --global user.name github-actions
                 git config --global user.email github-actions@github.com
               '';
             };
 
-            updateLocks_ = { dir ? ".", doInstall ? false, doGitPull ? false, doCommit ? false, commitArgs ? { } }:
-              let name = "Update flake locks"; in
-              {
-                inherit name;
-                run = run.nixScript ({
-                  inherit doCommit doGitPull doInstall dir;
-                  commitArgs = {
-                    commitMessage = name;
-                  } // commitArgs;
-                  name = names.updateLocks;
-                });
-              };
+            updateLocks_ = { dir ? ".", doInstall ? false }: {
+              name = "Update flake locks";
+              run = run.nixScript { name = names.updateLocks; inherit doInstall dir; };
+            };
 
-            updateLocks = args: updateLocks_ ({ doInstall = true; doGitPull = true; doCommit = true; } // args);
+            updateLocks = args: updateLocks_ ({ doInstall = true; } // args);
 
             nixStoreGC = {
               name = "Collect garbage in /nix/store";
@@ -314,20 +324,18 @@
             };
           };
 
-          nixCI_ =
-            let
-              steps_ = steps;
-              on_ = on;
-            in
-            { steps ? (_: [ ])
-            , dir ? "."
-            , on ? on_
+          # if there are multiple jobs that need caches
+          # it may be better to purge caches only in the last one
+          job_ =
+            let steps_ = steps; in
+            { dir ? "."
+            , steps ? (_: [ ])
             , defaultOS ? os.ubuntu-22
-            , nixCIJob ? "nixCI"
-            , nixCIName ? "Nix CI"
+            , name ? "Nix CI"
             , strategy ? { matrix.os = oss; }
-            , doCheckOS ? strategy != { }
-            , runsOn ? (if doCheckOS then names.matrix.os else defaultOS)
+            , doMatrixOS ? hasAttrByPath [ "matrix" "os" ] strategy
+            , runsOn ? (if doMatrixOS then names.matrix.os else defaultOS)
+            , permissions ? { }
             , installNixArgs ? { }
             , doCacheNix ? false
             , doPurgeCache ? false
@@ -340,69 +348,99 @@
             , formatArgs ? { }
             , doUpdateLocks ? false
             , updateLocksArgs ? { }
+            , doCommit ? false
+            , commitArgs ? { }
             , doSaveFlakes ? false
             , saveFlakesArgs ? { }
             , doPushToCachix ? false
             , pushToCachixArgs ? { }
             }:
             let
-              runsOn_ = (if doCheckOS then expr else (x: x)) runsOn;
+              runsOn_ = (if doMatrixOS then expr else (x: x)) runsOn;
             in
             {
-              name = "Nix CI";
+              inherit name;
+              runs-on = runsOn_;
+              permissions = { contents = "write"; actions = "write"; } // permissions;
+              steps = flatten [
+                steps_.checkout
+                (installNix installNixArgs)
+                (singletonIf doCacheNix (steps_.cacheNix ({ keyOS = runsOn_; } // cacheNixArgs)))
+                (singletonIf doRemoveCacheProfiles (steps_.removeCacheProfiles { dir = cacheDirectory; }))
+                (
+                  (if doMatrixOS then stepsIf ("${runsOn} == '${defaultOS}'") else (x: x)) [
+                    steps_.configGitAsGHActions
+                    (singletonIf doFormat (steps_.format ({ inherit dir doInstall; } // formatArgs)))
+                    (singletonIf doUpdateLocks (steps_.updateLocks ({ inherit dir doInstall; } // updateLocksArgs)))
+                    (singletonIf doCommit (steps_.commit ({
+                      messages = [
+                        (singletonIf doFormat (steps_.format { }).name)
+                        (singletonIf doUpdateLocks (steps_.updateLocks { }).name)
+                      ];
+                    } // commitArgs)))
+                  ]
+                )
+                (steps dir)
+                (singletonIf doSaveFlakes (steps_.saveFlakes ({ inherit dir doInstall; } // saveFlakesArgs)))
+                (singletonIf doPushToCachix (steps_.pushToCachix ({ inherit dir doInstall; } // pushToCachixArgs)))
+                (singletonIf doPurgeCache (steps_.purgeCache purgeCacheArgs))
+              ];
+            } // (if strategy != { } then { inherit strategy; } else { });
+
+          job = args: job_ (
+            {
+              doCacheNix = true;
+              doRemoveCacheProfiles = true;
+              doInstall = true;
+              doPurgeCache = true;
+            }
+            //
+            args
+          );
+
+          nixCI_ =
+            let
+              steps_ = steps;
+              on_ = on;
+            in
+            { actionName ? "Nix CI"
+            , on ? on_
+            , jobId ? "default"
+            , jobArgs ? { }
+            }:
+            {
+              name = actionName;
               inherit on;
               jobs = {
-                "${nixCIJob}" = {
-                  name = nixCIName;
-                  runs-on = runsOn_;
-                  permissions = { contents = "write"; actions = "write"; };
-                  steps = flatten
-                    [
-                      steps_.checkout
-                      (installNix installNixArgs)
-                      (singletonIf doCacheNix (steps_.cacheNix ({ keyJob = "cachix"; keyOS = runsOn_; } // cacheNixArgs)))
-                      (singletonIf doRemoveCacheProfiles (steps_.removeCacheProfiles { dir = cacheDirectory; }))
-                      (
-                        (if doCheckOS then stepsIf ("${runsOn} == '${defaultOS}'") else (x: x)) [
-                          steps_.configGitAsGHActions
-                          (singletonIf doFormat (steps_.format ({ inherit dir doInstall; } // formatArgs)))
-                          (singletonIf doUpdateLocks (steps_.updateLocks ({ inherit dir doInstall; } // updateLocksArgs)))
-                        ]
-                      )
-                      (steps dir)
-                      (singletonIf doSaveFlakes (steps_.saveFlakes { inherit dir doInstall; } // saveFlakesArgs))
-                      (singletonIf doPushToCachix (steps_.pushToCachix ({ inherit dir doInstall; } // pushToCachixArgs)))
-                      (singletonIf doPurgeCache (steps_.purgeCache purgeCacheArgs))
-                    ]
-                  ;
-                } // (if doCheckOS then { inherit strategy; } else { });
+                "${jobId}" = job (
+                  # recursiveUpdate, because there are default nested attributes
+                  {
+                    doUpdateLocks = true;
+                    doFormat = true;
+                    doCommit = true;
+                    doSaveFlakes = true;
+                  }
+                  //
+                  jobArgs
+                );
               };
             };
 
-          nixCI = args: nixCI_ (
-            recursiveUpdate
-              {
-                doCacheNix = true;
-                doRemoveCacheProfiles = true;
-                doInstall = true;
-                doUpdateLocks = true;
-                doPurgeCache = true;
-                updateLocksArgs = { doGitPull = true; commitArgs.doIgnoreCommitFailed = true; };
-                doSaveFlakes = true;
-                doFormat = true;
-              }
-              args);
+          # This action config should be used for a default job
+          nixCI = args: nixCI_ ({ jobId = "nixCI"; } // args);
 
           packages = {
             writeWorkflowsDir = writeYAML "workflow" "./tmp/nixCI.yaml" (nixCI { });
             writeWorkflows = writeWorkflow "nixCI" (nixCI {
-              dir = "nix-dev/";
-              doPushToCachix = true;
-              cacheNixArgs = {
-                linuxGCEnabled = true;
-                linuxMaxStoreSize = 6442450944;
-                macosGCEnabled = true;
-                macosMaxStoreSize = 6442450944;
+              jobArgs = {
+                dir = "nix-dev/";
+                doPushToCachix = true;
+                cacheNixArgs = {
+                  linuxGCEnabled = true;
+                  linuxMaxStoreSize = 6442450944;
+                  macosGCEnabled = true;
+                  macosMaxStoreSize = 6442450944;
+                };
               };
             });
           };
@@ -418,6 +456,8 @@
             inherit
               expr
               genAttrsId
+              job
+              job_
               mkAccessors
               mkAccessors_
               names

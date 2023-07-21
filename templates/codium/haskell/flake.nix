@@ -7,7 +7,7 @@
       inputs_ =
         let flakes = inputs.flakes.flakes; in
         {
-          inherit (flakes.source-flake) flake-utils nixpkgs;
+          inherit (flakes.source-flake) flake-utils nixpkgs formatter;
           inherit (flakes)
             codium drv-tools devshell
             flakes-tools workflows lima;
@@ -301,7 +301,7 @@
             # --- GH Actions
 
             # A script to write GitHub Actions workflow file into `.github/ci.yaml`
-            writeWorkflows = writeWorkflow "ci" (nixCI { doPushToCachix = true; });
+            writeWorkflows = writeWorkflow "ci" (nixCI { jobArgs.doPushToCachix = true; });
           };
 
           # --- Devshells ---
@@ -324,7 +324,7 @@
               bash.extra = "export LANG=C.utf8";
               commands =
                 mkCommands "tools" tools
-                ++ mkCommands "packages" [ packages.default ]
+                ++ mkRunCommands "packages" { inherit (packages) default; }
                 ++ mkRunCommands "ide" { "codium ." = packages.codium; inherit (packages) writeSettings; }
                 ++ mkRunCommands "infra" { inherit (packages) writeWorkflows updateLocks pushToCachix saveFlakes; }
                 ++
@@ -342,6 +342,8 @@
           inherit packages devShells;
 
           inherit stack-shell;
+
+          formatter = inputs.formatter.${system};
 
           ghcVersions = pkgs.lib.attrsets.mapAttrsToList (name: _: pkgs.lib.strings.removePrefix "ghc" name) pkgs.haskell.compiler;
         });
