@@ -15,13 +15,11 @@ Feel free to remove the `VSCodium`-related `Nix` code and whatever you want!
   <summary>Spoiler</summary>
 
 - [flake.nix](./flake.nix) - code in this flake is extensively commented.
-- [language-tools/haskell](https://github.com/deemp/flakes/blob/main/language-tools/haskell/flake.nix) - a flake that conveniently provides `Haskell` tools.
-- [Conventions](https://github.com/deemp/flakes/blob/main/README/Conventions.md#dev-tools) - I recommended to use this flake just for development. For packaging an app, make another flake with a limited number of inputs to reduce the `flake.lock` size.
-
-See these for additional info:
-
-- [codium-generic](https://github.com/deemp/flakes/tree/main/templates/codium/generic#readme) - info just about `VSCodium` with extensions.
+- [codium-haskell](https://github.com/deemp/flakes/tree/main/templates/codium/haskell#readme) - this flake.
 - [codium-haskell-simple](https://github.com/deemp/flakes/tree/main/templates/codium/haskell-simple#readme) - a simplified version of this flake.
+- [language-tools/haskell](https://github.com/deemp/flakes/blob/main/language-tools/haskell/flake.nix) - a flake that conveniently provides `Haskell` tools.
+- [Conventions](https://github.com/deemp/flakes/blob/main/README/Conventions.md#dev-tools)
+- [codium-generic](https://github.com/deemp/flakes/tree/main/templates/codium/generic#readme) - info just about `VSCodium` with extensions.
 - [Haskell](https://github.com/deemp/flakes/blob/main/README/Haskell.md) - general info about `Haskell` tools.
 - [Troubleshooting](https://github.com/deemp/flakes/blob/main/README/Troubleshooting.md)
 - [Prerequisites](https://github.com/deemp/flakes#prerequisites)
