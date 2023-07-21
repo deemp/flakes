@@ -124,4 +124,4 @@ To switch to a specific `GHC` version (let's call it `<ghc>`):
 - [.envrc](./.envrc) - for [direnv](https://github.com/direnv/direnv)
 - [fourmolu.yaml](./fourmolu.yaml) - for [fourmolu](https://github.com/fourmolu/fourmolu#configuration)
 - [ci.yaml](.github/workflows/ci.yaml) - a generated `GitHub Actions` workflow. See [workflows](https://github.com/deemp/flakes/tree/main/workflows). Generate a workflow via `nix run .#writeWorkflows`.
-- `hie.yaml` - not present, but can be generated via [implicit-hie](https://github.com/Avi-D-coder/implicit-hie) (available on devshell) to verify the `Haskell Language Server` setup.
+- [hie.yaml] - a config for [hie-bios](https://github.com/haskell/hie-bios). Can be generated via [implicit-hie](https://github.com/Avi-D-coder/implicit-hie) to check the `Haskell Language Server` setup.
