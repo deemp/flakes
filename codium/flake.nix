@@ -33,7 +33,7 @@
             };
 
             # common extensions
-            extensionsCommon = { inherit (extensions) nix misc github markdown; };
+            extensionsCommon = { inherit (extensions) nix misc github markdown toml; };
 
             # settings.json translated to .nix
             settingsNix = import ./nix-files/settings.nix;
