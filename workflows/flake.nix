@@ -373,8 +373,8 @@
                     (singletonIf doFormat (steps_.format ({ inherit dir doInstall; } // formatArgs)))
                     (singletonIf doCommit (steps_.commit ({
                       messages = [
-                        (singletonIf doFormat (steps_.format { }).name)
                         (singletonIf doUpdateLocks (steps_.updateLocks { }).name)
+                        (singletonIf doFormat (steps_.format { }).name)
                       ];
                     } // commitArgs)))
                   ]
