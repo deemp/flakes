@@ -30,15 +30,15 @@ jobs:
           git config --global user.name github-actions
           git config --global user.email github-actions@github.com
       - if: matrix.os == 'ubuntu-22.04'
-        name: Format Nix files
-        run: |-
-          nix profile install .#format
-          nix run .#format
-      - if: matrix.os == 'ubuntu-22.04'
         name: Update flake locks
         run: |-
           nix profile install .#updateLocks
           nix run .#updateLocks
+      - if: matrix.os == 'ubuntu-22.04'
+        name: Format Nix files
+        run: |-
+          nix profile install .#format
+          nix run .#format
       - if: matrix.os == 'ubuntu-22.04'
         name: Commit & Push
         run: |-
