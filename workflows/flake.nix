@@ -245,6 +245,11 @@
               uses = "actions/checkout@v3";
             };
 
+            gitPull = {
+              name = "Pull latest repo changes";
+              run = run.gitPull;
+            };
+
             commit = args: {
               name = "Commit & Push";
               run = run.commit args;
@@ -265,13 +270,6 @@
             };
 
             purgeCache = attrs: purgeCache_ ({ debug = true; created = true; maxAge = 172800; } // attrs);
-
-            logInToCachix = {
-              name = "Log in to Cachix";
-              run = ''
-                nix run nixpkgs#cachix -- authtoken ${ expr names.secrets.CACHIX_AUTH_TOKEN }
-              '';
-            };
 
             pushToCachix_ = { dir ? ".", doInstall ? false }: {
               name = "Push flakes to Cachix";
@@ -370,8 +368,8 @@
                 (
                   (if doMatrixOS then stepsIf ("${runsOn} == '${defaultOS}'") else (x: x)) [
                     steps_.configGitAsGHActions
-                    (singletonIf doFormat (steps_.format ({ inherit dir doInstall; } // formatArgs)))
                     (singletonIf doUpdateLocks (steps_.updateLocks ({ inherit dir doInstall; } // updateLocksArgs)))
+                    (singletonIf doFormat (steps_.format ({ inherit dir doInstall; } // formatArgs)))
                     (singletonIf doCommit (steps_.commit ({
                       messages = [
                         (singletonIf doFormat (steps_.format { }).name)
