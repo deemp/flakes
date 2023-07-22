@@ -330,10 +330,11 @@
             , steps ? (_: [ ])
             , defaultOS ? os.ubuntu-22
             , name ? "Nix CI"
+            , permissions ? { }
             , strategy ? { matrix.os = oss; }
             , doMatrixOS ? hasAttrByPath [ "matrix" "os" ] strategy
             , runsOn ? (if doMatrixOS then names.matrix.os else defaultOS)
-            , permissions ? { }
+            , doConfigGitAsGHActions ? doUpdateLocks || doFormat || doCommit
             , installNixArgs ? { }
             , doCacheNix ? false
             , doPurgeCache ? false
@@ -367,7 +368,7 @@
                 (singletonIf doRemoveCacheProfiles (steps_.removeCacheProfiles { dir = cacheDirectory; }))
                 (
                   (if doMatrixOS then stepsIf ("${runsOn} == '${defaultOS}'") else (x: x)) [
-                    steps_.configGitAsGHActions
+                    (singletonIf doConfigGitAsGHActions steps_.configGitAsGHActions)
                     (singletonIf doUpdateLocks (steps_.updateLocks ({ inherit dir doInstall; } // updateLocksArgs)))
                     (singletonIf doFormat (steps_.format ({ inherit dir doInstall; } // formatArgs)))
                     (singletonIf doCommit (steps_.commit ({
