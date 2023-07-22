@@ -52,8 +52,8 @@ jobs:
 
           git commit \
             -m "action" \
-            -m "Format Nix files" \
             -m "Update flake locks" \
+            -m "Format Nix files" \
             || echo "commit failed!"
 
           git push
