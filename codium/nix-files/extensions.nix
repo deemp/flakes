@@ -20,7 +20,7 @@ __foldl' pkgs.lib.attrsets.recursiveUpdate { }
     (
       mkExtensions vscode-marketplace
         {
-          c-cpp = {
+          cpp = {
             ms-vscode = [
               "cmake-tools"
               "cpptools-themes"
