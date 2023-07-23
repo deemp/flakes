@@ -4,7 +4,7 @@
     let makeFlake = import ./makeFlake.nix; in
     makeFlake {
       inputs = {
-        inherit (import ./source-flake) nixpkgs;
+        inherit (import ./source-flake) nixpkgs formatter;
         codium = import ./codium;
         devshell = import ./devshell;
         drv-tools = import ./drv-tools;
