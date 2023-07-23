@@ -13,7 +13,7 @@ let
   inputs_ = inputs;
   customOutputs = inputs__:
     let inputs = inputs_ // inputs__; in
-    inputs.flake-utils.lib.eachSystem systems (system: perSystem { inherit inputs system; })
+    (import ./source-flake).flake-utils.lib.eachSystem systems (system: perSystem { inherit inputs system; })
     // raw inputs
     # save overriden inputs
     // { inherit inputs; };

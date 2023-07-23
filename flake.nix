@@ -3,16 +3,12 @@
   outputs = { self }:
     let makeFlake = import ./makeFlake.nix; in
     makeFlake {
-      inputs = (import ./source-flake) // {
+      inputs = {
+        inherit (import ./source-flake) nixpkgs;
         codium = import ./codium;
         devshell = import ./devshell;
         drv-tools = import ./drv-tools;
-        env2json = import ./env2json;
         flakes-tools = import ./flakes-tools;
-        haskell-tools = import ./language-tools/haskell;
-        json2md = import ./json2md;
-        purescript-tools = import ./language-tools/purescript;
-        python-tools = import ./language-tools/python;
         workflows = import ./workflows;
       };
       perSystem = { inputs, system }:
@@ -109,7 +105,7 @@
                           }
                           {
                             name = "Publish docs on GitHub Pages";
-                            uses = "peaceiris/actions-gh-pages@v3.9.3";
+                            uses = "peiris/actions-gh-pages@v3.9.3";
                             "with" = {
                               github_token = expr names.secrets.GITHUB_TOKEN;
                               publish_dir = "docs/dist";
@@ -139,6 +135,18 @@
           formatter = inputs.formatter.${system};
         };
       raw = inputs: {
+        all = (import ./source-flake) // {
+          codium = import ./codium;
+          devshell = import ./devshell;
+          drv-tools = import ./drv-tools;
+          env2json = import ./env2json;
+          flakes-tools = import ./flakes-tools;
+          haskell-tools = import ./language-tools/haskell;
+          json2md = import ./json2md;
+          purescript-tools = import ./language-tools/purescript;
+          python-tools = import ./language-tools/python;
+          workflows = import ./workflows;
+        };
         inherit makeFlake;
         templates = rec {
           codium-generic = {
