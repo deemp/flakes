@@ -50,6 +50,22 @@
       }
     },
     "devshell": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1663445644,
+        "narHash": "sha256-+xVlcK60x7VY1vRJbNUEAHi17ZuoQxAIH4S4iUFUGBA=",
+        "owner": "numtide",
+        "repo": "devshell",
+        "rev": "e3dc3e21594fe07bdb24bdf1c8657acaa4cb8f66",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "devshell",
+        "type": "github"
+      }
+    },
+    "devshell-source": {
       "inputs": {
         "nixpkgs": "nixpkgs_3",
         "systems": "systems_2"
@@ -68,25 +84,9 @@
         "type": "github"
       }
     },
-    "devshell_2": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1663445644,
-        "narHash": "sha256-+xVlcK60x7VY1vRJbNUEAHi17ZuoQxAIH4S4iUFUGBA=",
-        "owner": "numtide",
-        "repo": "devshell",
-        "rev": "e3dc3e21594fe07bdb24bdf1c8657acaa4cb8f66",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "devshell",
-        "type": "github"
-      }
-    },
     "dream2nix": {
       "inputs": {
-        "devshell": "devshell_2",
+        "devshell": "devshell",
         "drv-parts": "drv-parts",
         "flake-compat": "flake-compat_3",
         "flake-parts": "flake-parts",
@@ -483,11 +483,11 @@
         "nixpkgs": "nixpkgs_5"
       },
       "locked": {
-        "lastModified": 1689989611,
-        "narHash": "sha256-hjuqNnx4bsNAo7kQ0aqDzgDgqByNAB8RDNZliZ+En0A=",
+        "lastModified": 1690076737,
+        "narHash": "sha256-LdLfJLysjAEcY8EaxN4n2kBrw7IXbfQMKzFqgWC2qL0=",
         "owner": "nix-community",
         "repo": "nix-vscode-extensions",
-        "rev": "7c98d4f258d352e3bd6078577ee134e8ebdae7d8",
+        "rev": "869d07107a16287e66b89a7a56de5180f4ede3b9",
         "type": "github"
       },
       "original": {
@@ -711,7 +711,7 @@
     "root": {
       "inputs": {
         "cachix": "cachix",
-        "devshell": "devshell",
+        "devshell-source": "devshell-source",
         "dream2nix": "dream2nix",
         "flake-compat": "flake-compat_4",
         "flake-utils": "flake-utils_3",

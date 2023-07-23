@@ -2,7 +2,7 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/ec322bf9e598a510995e7540f17af57ee0c8d5b9";
     cachix.url = "github:cachix/cachix";
-    devshell.url = "github:numtide/devshell";
+    devshell-source.url = "github:numtide/devshell";
     flake-compat = {
       url = "github:edolstra/flake-compat";
       flake = false;
