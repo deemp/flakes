@@ -11,8 +11,6 @@
         inherit (inputs.codium.outputs.inputs.nix-vscode-extensions.extensions.${system}) vscode-marketplace open-vsx;
         inherit (inputs.workflows.lib.${system}) writeWorkflow nixCI;
 
-        tools = [ pkgs.hello ];
-
         packages = {
           # --- IDE ---
 
@@ -43,6 +41,8 @@
           # A script to write GitHub Actions workflow file into `.github/ci.yaml`
           writeWorkflows = writeWorkflow "ci" (nixCI { jobArgs.doPushToCachix = true; });
         };
+
+        tools = [ pkgs.hello ];
 
         devShells.default = mkShell {
           packages = tools;
