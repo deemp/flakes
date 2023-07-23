@@ -1,54 +1,40 @@
 {
   inputs.flakes.url = "github:deemp/flakes";
-
-  outputs = inputs:
-    let
-      inputs_ =
-        let flakes = inputs.flakes.flakes; in
-        {
-          inherit (flakes.source-flake) flake-utils nixpkgs;
-          inherit (flakes) drv-tools;
+  outputs = inputs: inputs.flakes.makeFlake {
+    inputs = { inherit (inputs.flakes.all) nixpkgs drv-tools; };
+    perSystem = { inputs, system }:
+      let
+        pkgs = inputs.nixpkgs.legacyPackages.${system};
+        activateVenv = ''
+          ${builtins.readFile ./scripts/activate.sh}
+          set +e
+        '';
+        inherit (inputs.drv-tools.lib.${system}) runInEachDir;
+        createVenvs = dirs: runInEachDir
+          {
+            name = "create-venvs";
+            message = "creating environment in";
+            inherit dirs;
+            command = ''
+              ${activateVenv}
+              poetry install --no-root
+            '';
+            runtimeInputs = [ pkgs.poetry ];
+            description = "Create Python `.venv`s via `poetry` in given directories";
+          };
+        testCreateVenvs = createVenvs [ "." ];
+      in
+      {
+        lib = {
+          inherit
+            activateVenv
+            createVenvs
+            ;
         };
-
-      outputs = outputs_ { } // { inputs = inputs_; outputs = outputs_; };
-
-      outputs_ =
-        inputs__:
-        let inputs = inputs_ // inputs__; in
-        inputs.flake-utils.lib.eachDefaultSystem (system:
-        let
-          pkgs = inputs.nixpkgs.legacyPackages.${system};
-          activateVenv = ''
-            ${builtins.readFile ./scripts/activate.sh}
-            set +e
-          '';
-          inherit (inputs.drv-tools.lib.${system}) runInEachDir;
-          createVenvs = dirs: runInEachDir
-            {
-              name = "create-venvs";
-              message = "creating environment in";
-              inherit dirs;
-              command = ''
-                ${activateVenv}
-                poetry install --no-root
-              '';
-              runtimeInputs = [ pkgs.poetry ];
-              description = "Create Python `.venv`s via `poetry` in given directories";
-            };
-          testCreateVenvs = createVenvs [ "." ];
-        in
-        {
-          lib = {
-            inherit
-              activateVenv
-              createVenvs
-              ;
-          };
-          devShells.default = pkgs.mkShell {
-            buildInputs = [ testCreateVenvs ];
-          };
-        }
-        );
-    in
-    outputs;
+        devShells.default = pkgs.mkShell {
+          buildInputs = [ testCreateVenvs ];
+        };
+      }
+    ;
+  };
 }

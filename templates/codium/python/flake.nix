@@ -1,73 +1,48 @@
 {
   inputs.flakes.url = "github:deemp/flakes";
+  outputs = inputs@{ self, ... }: inputs.flakes.makeFlake {
+    inputs = { inherit (inputs.flakes.all) nixpkgs codium drv-tools flakes-tools devshell; };
+    perSystem = { inputs, system }:
+      let
+        pkgs = inputs.nixpkgs.legacyPackages.${system};
+        inherit (inputs.codium.lib.${system}) extensions extensionsCommon settingsNix settingsCommonNix writeSettingsJSON mkCodium;
+        inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkShell;
 
-  outputs =
-    inputs:
-    let
-      inputs_ =
-        let flakes = inputs.flakes.flakes; in
-        {
-          inherit (flakes.source-flake) flake-utils nixpkgs;
-          inherit (flakes) codium drv-tools flakes-tools devshell;
+        python =
+          pkgs.python310.withPackages (p: with p; [
+            python
+            mypy
+            ipykernel
+            jupyter
+            black
+          ]);
+
+        tools = [ python ];
+
+        packages = {
+          codium = mkCodium { extensions = extensionsCommon // { inherit (extensions) python jupyter; }; };
+          writeSettings = writeSettingsJSON (settingsCommonNix // {
+            python = settingsNix.python // {
+              "python.defaultInterpreterPath" = "${python}/bin/python";
+            };
+          });
         };
 
-      outputs = outputs_ { } // { inputs = inputs_; outputs = outputs_; };
-
-      outputs_ =
-        inputs__:
-        let inputs = inputs_ // inputs__; in
-        inputs.flake-utils.lib.eachDefaultSystem (system:
-        let
-          pkgs = inputs.nixpkgs.legacyPackages.${system};
-          inherit (inputs.codium.lib.${system}) extensions settingsNix writeSettingsJSON mkCodium;
-          inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkShell;
-
-          python =
-            pkgs.python310.withPackages (p: with p; [
-              python
-              mypy
-              ipykernel
-              jupyter
-              black
-            ]);
-
-          tools = [
-            python
-          ];
-
-          packages = {
-            codium = mkCodium {
-              extensions = {
-                inherit (extensions) nix misc github markdown python jupyter;
-              };
-            };
-            writeSettings = writeSettingsJSON {
-              inherit (settingsNix) todo-tree files editor gitlens
-                git nix-ide workbench markdown-all-in-one markdown-language-features;
-              extra = settingsNix.python // {
-                "python.defaultInterpreterPath" = "${python}/bin/python";
-              };
-            };
+        devShells = {
+          default = mkShell {
+            packages = tools;
+            bash.extra = "";
+            commands =
+              mkCommands "tools" tools
+              ++ mkRunCommands "ide" { "codium ." = packages.codium; inherit (packages) writeSettings; };
           };
+        };
+      in
+      {
+        inherit packages devShells;
+      };
+  };
 
-          devShells = {
-            default = mkShell {
-              packages = tools;
-              bash.extra = '''';
-              commands =
-                mkCommands "tools" tools ++
-                mkRunCommands "ide" {
-                  "codium ." = packages.codium;
-                  inherit (packages) writeSettings;
-                };
-            };
-          };
-        in
-        {
-          inherit packages devShells;
-        });
-    in
-    outputs;
   nixConfig = {
     extra-substituters = [
       "https://nix-community.cachix.org"

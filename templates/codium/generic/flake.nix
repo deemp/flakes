@@ -1,78 +1,62 @@
 {
   inputs.flakes.url = "github:deemp/flakes";
+  outputs = inputs@{ self, ... }: inputs.flakes.makeFlake {
+    inputs = { inherit (inputs.flakes.all) nixpkgs codium devshell flakes-tools workflows; };
+    perSystem = { inputs, system }:
+      let
+        pkgs = inputs.nixpkgs.legacyPackages.${system};
+        inherit (inputs.codium.lib.${system}) mkCodium writeSettingsJSON extensions extensionsCommon settingsNix settingsCommonNix;
+        inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkRunCommandsDir mkShell;
+        inherit (inputs.flakes-tools.lib.${system}) mkFlakesTools;
+        inherit (inputs.codium.outputs.inputs.nix-vscode-extensions.extensions.${system}) vscode-marketplace open-vsx;
+        inherit (inputs.workflows.lib.${system}) writeWorkflow nixCI;
 
-  outputs =
-    inputs@{ self, ... }:
-    let
-      inputs_ =
-        let flakes = inputs.flakes.flakes; in
-        {
-          inherit (flakes.source-flake) flake-utils nixpkgs;
-          inherit (flakes) codium devshell flakes-tools workflows;
+        tools = [ pkgs.hello ];
+
+        packages = {
+          # --- IDE ---
+
+          # We compose `VSCodium` with extensions
+          codium = mkCodium {
+            # We use common extensions
+            extensions = extensionsCommon // {
+              # Next, we include the extensions from the pre-defined attrset
+              inherit (extensions) haskell;
+              # Furthermore, we can include extensions from https://github.com/nix-community/nix-vscode-extensions.
+              # It's pinned in the flake inputs
+              extra = { inherit (vscode-marketplace.golang) go; };
+            };
+          };
+
+          # a script to write `.vscode/settings.json`
+          writeSettings = writeSettingsJSON (settingsCommonNix // {
+            inherit (settingsNix) haskell;
+          });
+
+          # --- Flakes ---
+
+          # Scripts that can be used in CI
+          inherit (mkFlakesTools { dirs = [ "." ]; root = self.outPath; }) updateLocks pushToCachix saveFlakes format;
+
+          # --- GH Actions
+
+          # A script to write GitHub Actions workflow file into `.github/ci.yaml`
+          writeWorkflows = writeWorkflow "ci" (nixCI { jobArgs.doPushToCachix = true; });
         };
 
-      outputs = outputs_ { } // { inputs = inputs_; outputs = outputs_; };
-
-      outputs_ =
-        inputs__:
-        let inputs = inputs_ // inputs__; in
-        inputs_.flake-utils.outputs.lib.eachDefaultSystem
-          (system:
-          let
-            pkgs = inputs_.nixpkgs.legacyPackages.${system};
-            inherit (inputs_.codium.lib.${system}) mkCodium writeSettingsJSON extensions extensionsCommon settingsNix settingsCommonNix;
-            inherit (inputs_.devshell.lib.${system}) mkCommands mkRunCommands mkRunCommandsDir mkShell;
-            inherit (inputs_.flakes-tools.lib.${system}) mkFlakesTools;
-            inherit (inputs_.codium.outputs.inputs.nix-vscode-extensions.extensions.${system}) vscode-marketplace open-vsx;
-            inherit (inputs_.workflows.lib.${system}) writeWorkflow nixCI;
-
-            tools = [ pkgs.hello ];
-
-            packages = {
-              # --- IDE ---
-
-              # We compose `VSCodium` with extensions
-              codium = mkCodium {
-                # We use common extensions
-                extensions = extensionsCommon // {
-                  # Next, we include the extensions from the pre-defined attrset
-                  inherit (extensions) haskell;
-                  # Furthermore, we can include extensions from https://github.com/nix-community/nix-vscode-extensions.
-                  # It's pinned in the flake inputs
-                  extra = { inherit (vscode-marketplace.golang) go; };
-                };
-              };
-
-              # a script to write `.vscode/settings.json`
-              writeSettings = writeSettingsJSON (settingsCommonNix // {
-                inherit (settingsNix) haskell;
-              });
-
-              # --- Flakes ---
-
-              # Scripts that can be used in CI
-              inherit (mkFlakesTools { dirs = [ "." ]; root = self.outPath; }) updateLocks pushToCachix saveFlakes format;
-
-              # --- GH Actions
-
-              # A script to write GitHub Actions workflow file into `.github/ci.yaml`
-              writeWorkflows = writeWorkflow "ci" (nixCI { jobArgs.doPushToCachix = true; });
-            };
-
-            devShells.default = mkShell {
-              packages = tools;
-              bash.extra = "hello";
-              commands =
-                mkCommands "tools" tools
-                ++ mkRunCommands "ide" { "codium ." = packages.codium; inherit (packages) writeSettings; }
-                ++ mkRunCommandsDir "." "infra" { inherit (packages) updateLocks pushToCachix saveFlakes writeWorkflows format; };
-            };
-          in
-          {
-            inherit packages devShells;
-          });
-    in
-    outputs;
+        devShells.default = mkShell {
+          packages = tools;
+          bash.extra = "hello";
+          commands =
+            mkCommands "tools" tools
+            ++ mkRunCommands "ide" { "codium ." = packages.codium; inherit (packages) writeSettings; }
+            ++ mkRunCommandsDir "." "infra" { inherit (packages) updateLocks pushToCachix saveFlakes writeWorkflows format; };
+        };
+      in
+      {
+        inherit packages devShells;
+      };
+  };
 
   nixConfig = {
     extra-trusted-substituters = [
