@@ -1,7 +1,7 @@
 {
   inputs.flakes.url = "github:deemp/flakes";
   outputs = inputs: inputs.flakes.makeFlake {
-    inputs = { inherit (inputs.flakes.outputs.inputs) flake-utils nixpkgs; };
+    inputs = { inherit (inputs.flakes.all) flake-utils nixpkgs; };
     perSystem = { inputs, system }:
       let
         pkgs = inputs.nixpkgs.legacyPackages.${system};
