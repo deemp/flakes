@@ -1,192 +1,169 @@
 {
   inputs = { };
-  outputs = inputs@{ self, ... }:
-    let
-      inputs_ = {
-        inherit (import ./source-flake) nixpkgs flake-utils formatter;
-        drv-tools = import ./drv-tools;
-        flakes-tools = import ./flakes-tools;
+  outputs = { self }:
+    let makeFlake = import ./makeFlake.nix; in
+    makeFlake {
+      inputs = (import ./source-flake) // {
         codium = import ./codium;
         devshell = import ./devshell;
+        drv-tools = import ./drv-tools;
+        env2json = import ./env2json;
+        flakes-tools = import ./flakes-tools;
+        haskell-tools = import ./language-tools/haskell;
+        json2md = import ./json2md;
+        purescript-tools = import ./language-tools/purescript;
+        python-tools = import ./language-tools/python;
         workflows = import ./workflows;
       };
+      perSystem = { inputs, system }:
+        let
+          pkgs = inputs.nixpkgs.legacyPackages.${system};
+          inherit (inputs.codium.lib.${system}) mkCodium writeSettingsJSON extensionsCommon settingsCommonNix;
+          inherit (inputs.drv-tools.lib.${system}) subDirectories withAttrs mkShellApps getExe;
+          inherit (inputs.flakes-tools.lib.${system}) mkFlakesTools;
+          inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkShell;
+          inherit (inputs.workflows.lib.${system}) writeWorkflow nixCI expr steps names run stepsIf os;
 
-      outputs = outputs_ { } // {
-        inputs = inputs_;
-        outputs = outputs_;
-        flakes = {
-          codium = import ./codium;
-          devshell = import ./devshell;
-          drv-tools = import ./drv-tools;
-          env2json = import ./env2json;
-          flakes-tools = import ./flakes-tools;
-          json2md = import ./json2md;
-          language-tools = {
-            haskell = import ./language-tools/haskell;
-            purescript = import ./language-tools/purescript;
-            python = import ./language-tools/python;
+          flakesTools = (mkFlakesTools {
+            root = self.outPath;
+            dirs = [
+              "codium"
+              "devshell"
+              "drv-tools"
+              "env2json"
+              "flakes-tools"
+              "json2md"
+              "templates/haskell-minimal"
+              "workflows"
+              "source-flake"
+              "."
+            ];
+            subDirs = [
+              "language-tools"
+              "templates/codium"
+            ];
+          });
+
+          packages =
+            let
+              packages1 = mkShellApps {
+                genDocs = {
+                  text = ''
+                    mkdir -p docs/src
+                    cp README/*.md docs/src
+                    ${getExe pkgs.mdbook} build docs
+                  '';
+                  description = "Generate docs";
+                };
+              };
+
+              packages2 = {
+                inherit (mkFlakesTools { root = ./.; dirs = [ "source-flake" "codium" ]; }) pushToCachix;
+                inherit (flakesTools) saveFlakes format updateLocks;
+                writeSettings = writeSettingsJSON settingsCommonNix;
+                codium = mkCodium ({ extensions = extensionsCommon; });
+                writeWorkflows = writeWorkflow "ci" (withAttrs
+                  (nixCI {
+                    jobArgs = {
+                      cacheNixArgs = {
+                        linuxGCEnabled = true;
+                        linuxMaxStoreSize = 5000000000;
+                        macosGCEnabled = true;
+                        macosMaxStoreSize = 5000000000;
+                      };
+                      doFormat = true;
+                      doPushToCachix = true;
+                      doCommit = false;
+                      steps = dirs:
+                        stepsIf ("${names.matrix.os} == '${os.ubuntu-22}'") [
+                          (
+                            let
+                              nameWriteWorkflows = "Write workflows";
+                              nameUpdateDocs = "Update docs";
+                            in
+                            [
+                              {
+                                name = nameWriteWorkflows;
+                                run = pkgs.lib.strings.concatMapStringsSep "\n\n"
+                                  (dir: "${run.nixScript { inherit dir; inDir = true; name = "writeWorkflows"; }}")
+                                  [ "templates/codium/haskell" "templates/codium/haskell-simple" "workflows" ]
+                                ;
+                              }
+                              {
+                                name = nameUpdateDocs;
+                                run = run.nixScript { name = packages1.genDocs.pname; };
+                              }
+                              (steps.commit {
+                                messages = [
+                                  (steps.updateLocks { }).name
+                                  (steps.format { }).name
+                                  nameWriteWorkflows
+                                  nameUpdateDocs
+                                ];
+                              })
+                            ]
+                          )
+                          {
+                            name = "Copy docs";
+                            run = "cp -r docs/book docs/dist";
+                          }
+                          {
+                            name = "Publish docs on GitHub Pages";
+                            uses = "peaceiris/actions-gh-pages@v3.9.3";
+                            "with" = {
+                              github_token = expr names.secrets.GITHUB_TOKEN;
+                              publish_dir = "docs/dist";
+                              force_orphan = true;
+                            };
+                          }
+                        ];
+                    };
+                  })
+                  { on.schedule = [{ cron = "0 0 * * 0"; }]; });
+              };
+            in
+            packages1 // packages2;
+
+          tools = [ ];
+          devShells.default = mkShell {
+            packages = tools;
+            commands =
+              mkCommands "tools" tools
+              ++ mkRunCommands "ide" { inherit (packages) writeSettings; "codium ." = packages.codium; }
+              ++ mkRunCommands "infra" { inherit (packages) writeWorkflows; }
+              ++ mkRunCommands "docs" { inherit (packages) genDocs; };
           };
-          source-flake = import ./source-flake;
-          workflows = import ./workflows;
+        in
+        {
+          inherit packages devShells;
+          formatter = inputs.formatter.${system};
+        };
+      raw = inputs: {
+        inherit makeFlake;
+        templates = rec {
+          codium-generic = {
+            path = ./templates/codium/generic;
+            description = "`VSCodium` with extensions and executables";
+          };
+          codium-haskell = {
+            path = ./templates/codium/haskell;
+            description = "${codium-generic.description} for `Haskell`. Shows 5 ways to run a `Haskell` app.";
+          };
+          codium-haskell-simple = {
+            path = ./templates/codium/haskell-simple;
+            description = "${codium-generic.description} for `Haskell`.";
+          };
+          haskell-minimal = {
+            path = ./templates/haskell-minimal;
+            description = "Minimal flake for a `Haskell` package development.";
+          };
+          codium-python = {
+            path = ./templates/codium/python;
+            description = "${codium-generic.description} for `Python`.";
+          };
         };
       };
-
-      outputs_ =
-        inputs__:
-        let inputs = inputs_ // inputs__; in
-        inputs.flake-utils.lib.eachDefaultSystem
-          (system:
-          let
-            pkgs = inputs.nixpkgs.legacyPackages.${system};
-            inherit (inputs.codium.lib.${system}) mkCodium writeSettingsJSON extensionsCommon settingsCommonNix;
-            inherit (inputs.drv-tools.lib.${system}) subDirectories withAttrs mkShellApps getExe;
-            inherit (inputs.flakes-tools.lib.${system}) mkFlakesTools;
-            inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkShell;
-            workflows = (inputs.workflows.lib.${system});
-
-            flakesTools = (mkFlakesTools {
-              root = self.outPath;
-              dirs =
-                [
-                  "codium"
-                  "devshell"
-                  "drv-tools"
-                  "env2json"
-                  "flakes-tools"
-                  "json2md"
-                  "templates/haskell-minimal"
-                  "workflows"
-                  "source-flake"
-                  "."
-                ];
-              subDirs = [
-                "language-tools"
-                "templates/codium"
-              ];
-            });
-
-            packages =
-              let
-                packages1 = mkShellApps {
-                  genDocs = {
-                    text = ''
-                      mkdir -p docs/src
-                      cp README/*.md docs/src
-                      ${getExe pkgs.mdbook} build docs
-                    '';
-                    description = "Generate docs";
-                  };
-                };
-
-                inherit (workflows) writeWorkflow nixCI expr steps names run stepsIf os;
-
-                packages2 = {
-                  inherit (mkFlakesTools { root = ./.; dirs = [ "source-flake" "codium" ]; }) pushToCachix;
-                  inherit (flakesTools) saveFlakes format updateLocks;
-                  writeSettings = writeSettingsJSON settingsCommonNix;
-                  codium = mkCodium ({ extensions = extensionsCommon; });
-                  writeWorkflows = writeWorkflow "ci" (withAttrs
-                    (nixCI {
-                      jobArgs = {
-                        cacheNixArgs = {
-                          linuxGCEnabled = true;
-                          linuxMaxStoreSize = 5000000000;
-                          macosGCEnabled = true;
-                          macosMaxStoreSize = 5000000000;
-                        };
-                        doFormat = true;
-                        doPushToCachix = true;
-                        doCommit = false;
-                        steps = dirs:
-                          stepsIf ("${names.matrix.os} == '${os.ubuntu-22}'") [
-                            (
-                              let
-                                nameWriteWorkflows = "Write workflows";
-                                nameUpdateDocs = "Update docs";
-                              in
-                              [
-                                {
-                                  name = nameWriteWorkflows;
-                                  run = pkgs.lib.strings.concatMapStringsSep "\n\n"
-                                    (dir: "${run.nixScript { inherit dir; inDir = true; name = "writeWorkflows"; }}")
-                                    [ "templates/codium/haskell" "templates/codium/haskell-simple" "workflows" ]
-                                  ;
-                                }
-                                {
-                                  name = nameUpdateDocs;
-                                  run = run.nixScript { name = packages1.genDocs.pname; };
-                                }
-                                (steps.commit {
-                                  messages = [
-                                    (steps.updateLocks { }).name
-                                    (steps.format { }).name
-                                    nameWriteWorkflows
-                                    nameUpdateDocs
-                                  ];
-                                })
-                              ]
-                            )
-                            {
-                              name = "Copy docs";
-                              run = "cp -r docs/book docs/dist";
-                            }
-                            {
-                              name = "Publish docs to GitHub Pages";
-                              uses = "peaceiris/actions-gh-pages@v3.9.3";
-                              "with" = {
-                                github_token = expr names.secrets.GITHUB_TOKEN;
-                                publish_dir = "docs/dist";
-                                force_orphan = true;
-                              };
-                            }
-                          ];
-                      };
-                    })
-                    { on.schedule = [{ cron = "0 0 * * 0"; }]; });
-                };
-              in
-              packages1 // packages2;
-
-            tools = [ pkgs.nixd ];
-            devShells.default = mkShell {
-              packages = tools;
-              commands =
-                mkCommands "tools" tools
-                ++ mkRunCommands "ide" { inherit (packages) writeSettings; "codium ." = packages.codium; }
-                ++ mkRunCommands "infra" { inherit (packages) writeWorkflows; }
-                ++ mkRunCommands "docs" { inherit (packages) genDocs; };
-            };
-          in
-          {
-            inherit packages devShells;
-            formatter = inputs.formatter.${system};
-          })
-        // {
-          templates = rec {
-            codium-generic = {
-              path = ./templates/codium/generic;
-              description = "`VSCodium` with extensions and executables";
-            };
-            codium-haskell = {
-              path = ./templates/codium/haskell;
-              description = "${codium-generic.description} for `Haskell`. Shows 5 ways to run a `Haskell` app.";
-            };
-            codium-haskell-simple = {
-              path = ./templates/codium/haskell-simple;
-              description = "${codium-generic.description} for `Haskell`.";
-            };
-            haskell-minimal = {
-              path = ./templates/haskell-minimal;
-              description = "Minimal flake for a `Haskell` package development.";
-            };
-            codium-python = {
-              path = ./templates/codium/python;
-              description = "${codium-generic.description} for `Python`.";
-            };
-          };
-        };
-    in
-    outputs;
+    };
 
   nixConfig = {
     extra-trusted-substituters = [
