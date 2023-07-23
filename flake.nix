@@ -1,6 +1,6 @@
 {
   inputs = { };
-  outputs = { self }:
+  outputs = inputs:
     let makeFlake = import ./makeFlake.nix; in
     makeFlake {
       inputs = {
@@ -21,7 +21,7 @@
           inherit (inputs.workflows.lib.${system}) writeWorkflow nixCI expr steps names run stepsIf os;
 
           flakesTools = (mkFlakesTools {
-            root = self.outPath;
+            root = ./.;
             dirs = [
               "codium"
               "devshell"

@@ -1,6 +1,6 @@
 {
   inputs.flakes.url = "github:deemp/flakes";
-  outputs = inputs@{ self, ... }: inputs.flakes.makeFlake {
+  outputs = inputs: inputs.flakes.makeFlake {
     inputs = {
       inherit (inputs.flakes.all)
         haskell-tools codium drv-tools devshell
@@ -154,7 +154,7 @@
           # --- Flakes ---
 
           # Scripts that can be used in CI
-          inherit (mkFlakesTools { dirs = [ "." ]; root = self.outPath; }) updateLocks pushToCachix saveFlakes format;
+          inherit (mkFlakesTools { dirs = [ "." ]; root = ./.; }) updateLocks pushToCachix saveFlakes format;
 
           # --- GH Actions
 

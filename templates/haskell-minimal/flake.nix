@@ -1,6 +1,6 @@
 {
   inputs.flakes.url = "github:deemp/flakes";
-  outputs = inputs@{ self, ... }: inputs.flakes.makeFlake {
+  outputs = inputs: inputs.flakes.makeFlake {
     inputs = { inherit (inputs.flakes.all) nixpkgs devshell; };
     perSystem = { inputs, system }:
       let
