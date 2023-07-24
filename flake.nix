@@ -69,42 +69,34 @@
                       doFormat = true;
                       doPushToCachix = true;
                       doCommit = false;
-                      steps = dirs:
+                      steps = { dir, stepsAttrs }:
                         stepsIf ("${names.matrix.os} == '${os.ubuntu-22}'") [
-                          (
-                            let
-                              nameWriteWorkflows = "Write workflows";
-                              nameUpdateDocs = "Update docs";
-                            in
-                            [
-                              {
-                                name = nameWriteWorkflows;
-                                run = pkgs.lib.strings.concatMapStringsSep "\n\n"
-                                  (dir: "${run.nixScript { inherit dir; inDir = true; name = "writeWorkflows"; }}")
-                                  [ "templates/codium/haskell" "templates/codium/haskell-simple" "workflows" ]
-                                ;
-                              }
-                              {
-                                name = nameUpdateDocs;
-                                run = run.nixScript { name = packages1.genDocs.pname; };
-                              }
-                              (steps.commit {
-                                messages = [
-                                  (steps.updateLocks { }).name
-                                  (steps.format { }).name
-                                  nameWriteWorkflows
-                                  nameUpdateDocs
-                                ];
-                              })
-                            ]
-                          )
+                          {
+                            name = "Write workflows";
+                            run = pkgs.lib.strings.concatMapStringsSep "\n\n"
+                              (dir_: "${run.nixScript { dir = dir_; inDir = true; name = "writeWorkflows"; }}")
+                              [ "templates/codium/haskell" "templates/codium/haskell-simple" "workflows" ]
+                            ;
+                          }
+                          {
+                            name = "Update docs";
+                            run = run.nixScript { name = packages1.genDocs.pname; };
+                          }
+                          (steps.commit {
+                            messages = [
+                              (steps.updateLocks { }).name
+                              (steps.format { }).name
+                              stepsAttrs."Write workflows".name
+                              stepsAttrs."Update docs".name
+                            ];
+                          })
                           {
                             name = "Copy docs";
                             run = "cp -r docs/book docs/dist";
                           }
                           {
                             name = "Publish docs on GitHub Pages";
-                            uses = "peiris/actions-gh-pages@v3.9.3";
+                            uses = "peaceiris/actions-gh-pages@v3.9.3";
                             "with" = {
                               github_token = expr names.secrets.GITHUB_TOKEN;
                               publish_dir = "docs/dist";
