@@ -1,5 +1,4 @@
 {
-  inputs = { };
   outputs = inputs:
     let makeFlake = import ./makeFlake.nix; in
     makeFlake {
