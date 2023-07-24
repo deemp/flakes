@@ -5,7 +5,7 @@
     perSystem = { inputs, system }:
       let
         pkgs = inputs.nixpkgs.legacyPackages.${system};
-        inherit (inputs.drv-tools.lib.${system}) writeYAML genAttrsId mkAccessors mkAccessors_ singletonIf;
+        inherit (inputs.drv-tools.lib.${system}) writeYAML genAttrsId mkAccessors mkAccessors_ singletonIf mapGenAttrs;
         inherit (builtins) concatMap filter map;
         testFlakesTools = (inputs.flakes-tools.testFlakesTools.${system});
         inherit (inputs.flakes-tools.lib.${system}) CACHE_DIRECTORY;
@@ -313,7 +313,7 @@
         job_ =
           let steps_ = steps; in
           { dir ? "."
-          , steps ? (_: [ ])
+          , steps ? ({ dir, stepsAttrs }: [ ])
           , defaultOS ? os.ubuntu-22
           , name ? "Nix CI"
           , permissions ? { }
@@ -342,12 +342,7 @@
           }:
           let
             runsOn_ = (if doMatrixOS then expr else (x: x)) runsOn;
-          in
-          {
-            inherit name;
-            runs-on = runsOn_;
-            permissions = { contents = "write"; actions = "write"; } // permissions;
-            steps = flatten [
+            stepsList = flatten [
               steps_.checkout
               (installNix installNixArgs)
               (singletonIf doCacheNix (steps_.cacheNix ({ keyOS = runsOn_; } // cacheNixArgs)))
@@ -365,11 +360,18 @@
                   } // commitArgs)))
                 ]
               )
-              (steps dir)
+              (steps { inherit dir stepsAttrs; })
               (singletonIf doSaveFlakes (steps_.saveFlakes ({ inherit dir doInstall; } // saveFlakesArgs)))
               (singletonIf doPushToCachix (steps_.pushToCachix ({ inherit dir doInstall; } // pushToCachixArgs)))
               (singletonIf doPurgeCache (steps_.purgeCache purgeCacheArgs))
             ];
+            stepsAttrs = mapGenAttrs (x: { ${x.name} = x; }) stepsList;
+          in
+          {
+            inherit name;
+            runs-on = runsOn_;
+            permissions = { contents = "write"; actions = "write"; } // permissions;
+            steps = stepsList;
           } // (if strategy != { } then { inherit strategy; } else { });
 
         job = args: job_ (
@@ -426,6 +428,9 @@
                 macosGCEnabled = true;
                 macosMaxStoreSize = 6442450944;
               };
+              steps = { dir, stepsAttrs }: [
+                (steps.commit { messages = [ stepsAttrs."Update flake locks".name stepsAttrs."Format Nix files".name ]; })
+              ];
             };
           });
         };

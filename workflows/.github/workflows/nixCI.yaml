@@ -57,6 +57,19 @@ jobs:
             || echo "commit failed!"
 
           git push
+      - name: Commit & Push
+        run: |-
+          git pull --rebase --autostash
+
+          git add .
+
+          git commit \
+            -m "action" \
+            -m "Update flake locks" \
+            -m "Format Nix files" \
+            || echo "commit failed!"
+
+          git push
       - name: Save flakes
         run: |-
           nix profile install nix-dev/#saveFlakes
