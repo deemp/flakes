@@ -123,7 +123,6 @@
     "python.formatting.provider" = "black";
     "python.linting.mypyCategorySeverity.error" = "Error";
     "python.linting.mypyEnabled" = true;
-    "python.defaultInterpreterPath" = "\${workspaceFolder}/.venv/bin/python";
   };
 
   rescript-vscode = {
