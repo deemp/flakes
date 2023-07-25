@@ -86,7 +86,13 @@
         # arg should be a set of sets of inputs
         mkShellApps =
           appsInputs@{ ... }:
-          mapAttrs (name: value: mkShellApp (value // { inherit name; })) appsInputs
+          mapAttrs
+            (name: value:
+            if pkgs.lib.attrsets.isDerivation value then
+              withMeta (value // { pname = name; })
+                (x: { mainProgram = baseNameOf (getExe value); })
+            else mkShellApp (value // { inherit name; }))
+            appsInputs
           // { __functor = self: f: mkShellApps (f self); };
 
         runFishScript =
@@ -493,6 +499,7 @@
             }
             (x: {
               helloX2.text = "${getExe x.hello}; ${getExe x.hello}";
+              helloRenamed = pkgs.hello;
             });
           mg = mapGenAttrs (x: { "a${toString x}" = { "b${toString x}" = x; }; }) [ 1 2 ];
           msg = mapStrGenAttrs (x: { "a${x}" = { "b${x}" = x; }; }) [ 1 2 ];
