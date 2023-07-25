@@ -6,7 +6,7 @@
       let
         pkgs = inputs.nixpkgs.outputs.legacyPackages.${system};
         inherit (inputs.drv-tools.outputs.lib.${system})
-          withMan mkShellApp wrapShellApp
+          withMan mkShellApp mkShellApps
           getExe framedBrackets singletonIf
           runInEachDir genAttrsId subDirectories
           concatStringsNewline
@@ -195,20 +195,17 @@
               sources = flakesGetSources (import root);
             };
           in
-          (__mapAttrs (name: app: wrapShellApp { inherit name app; })
-            {
-              updateLocks = flakesUpdate saveArgs.dirs;
-              pushToCachix = flakesSave (saveArgs // { doPushToCachix = true; });
-              saveFlakes = flakesSave saveArgs;
-              format = flakesFormat saveArgs.dirs;
-              inherit logInToCachix;
-            }
-          )
+          mkShellApps {
+            updateLocks = flakesUpdate saveArgs.dirs;
+            pushToCachix = flakesSave (saveArgs // { doPushToCachix = true; });
+            saveFlakes = flakesSave saveArgs;
+            format = flakesFormat saveArgs.dirs;
+          }
         ;
 
         testFlakesTools = mkFlakesTools { dirs = [ "." ]; root = ./.; };
         devShells.default = pkgs.mkShell {
-          buildInputs = __attrValues testFlakesTools;
+          buildInputs = builtins.filter (pkgs.lib.attrsets.isDerivation) (__attrValues testFlakesTools);
         };
       in
       {
