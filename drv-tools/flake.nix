@@ -84,7 +84,10 @@
 
         # make shell apps
         # arg should be a set of sets of inputs
-        mkShellApps = appsInputs@{ ... }: mapAttrs (name: value: mkShellApp (value // { inherit name; })) appsInputs;
+        mkShellApps =
+          appsInputs@{ ... }:
+          mapAttrs (name: value: mkShellApp (value // { inherit name; })) appsInputs
+          // { __functor = self: f: mkShellApps (f self); };
 
         runFishScript =
           { name
@@ -484,6 +487,13 @@
               { a = 3; }
               { b = 4; }
             ];
+          shellApps = mkShellApps
+            {
+              hello.text = "${getExe pkgs.hello}";
+            }
+            (x: {
+              helloX2.text = "${getExe x.hello}; ${getExe x.hello}";
+            });
           mg = mapGenAttrs (x: { "a${toString x}" = { "b${toString x}" = x; }; }) [ 1 2 ];
           msg = mapStrGenAttrs (x: { "a${x}" = { "b${x}" = x; }; }) [ 1 2 ];
         };
