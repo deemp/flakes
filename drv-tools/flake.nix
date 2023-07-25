@@ -93,7 +93,7 @@
                 (x: { mainProgram = baseNameOf (getExe value); })
             else mkShellApp (value // { inherit name; }))
             appsInputs
-          // { __functor = self: f: mkShellApps (f self); };
+          // { __functor = self: f: self // mkShellApps (f self); };
 
         runFishScript =
           { name
