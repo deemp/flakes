@@ -39,7 +39,7 @@
 
         CACHE_DIRECTORY = "/nix/var/nix/profiles/cache";
 
-        saveFlakes = { doPushToCachix ? false }:
+        saveFlakes_ = { doPushToCachix ? false, doInstall ? false }:
           withMan
             (mkShellApp {
               name = "save-all";
@@ -88,6 +88,8 @@
               ''
             );
 
+        saveFlakes = args: saveFlakes_ ({ doInstall = true; } // args);
+
         flakesUpdate = dirs:
           runInEachDir
             {
@@ -122,13 +124,13 @@
             ''
           );
 
-        flakesSave = { dirs ? [ ], doPushToCachix ? false, sources ? [ ] }:
+        flakesSave = { dirs ? [ ], doPushToCachix ? false, sources ? [ ], saveFlakesArgs ? { } }:
           let
             description = "Save and conditionally push to `Cachix` inputs and outputs of flakes in specified directories relative to `CWD`.";
             saveInEachDir = runInEachDir {
               inherit dirs;
               name = "flakes-save";
-              command = getExe (saveFlakes { inherit doPushToCachix; });
+              command = getExe (saveFlakes ({ inherit doPushToCachix; } // saveFlakesArgs));
               inherit description;
               longDescription =
                 concatStringsNewline [
@@ -188,18 +190,18 @@
 
         # all flake tools together
         mkFlakesTools =
-          { dirs ? [ ], subDirs ? [ ], root }:
+          { dirs ? [ ], subDirs ? [ ], root, flakesSaveArgs ? { } }:
           let
-            saveArgs = {
+            args = {
               dirs = flatten (dirs ++ builtins.map (subDirectories root) subDirs);
               sources = flakesGetSources (import root);
             };
           in
           mkShellApps {
-            updateLocks = flakesUpdate saveArgs.dirs;
-            pushToCachix = flakesSave (saveArgs // { doPushToCachix = true; });
-            saveFlakes = flakesSave saveArgs;
-            format = flakesFormat saveArgs.dirs;
+            updateLocks = flakesUpdate args.dirs;
+            pushToCachix = flakesSave (args // flakesSaveArgs // { doPushToCachix = true; });
+            saveFlakes = flakesSave (args // flakesSaveArgs);
+            format = flakesFormat args.dirs;
           }
         ;
 
@@ -211,13 +213,15 @@
       {
         lib = {
           inherit
-            flakesGetSources
-            flakesUpdate
-            flakesSave
-            mkFlakesTools
-            flakesFormat
-            logInToCachix
             CACHE_DIRECTORY
+            flakesFormat
+            flakesGetSources
+            flakesSave
+            flakesUpdate
+            logInToCachix
+            mkFlakesTools
+            saveFlakes
+            saveFlakes_
             ;
         };
         inherit testFlakesTools;
