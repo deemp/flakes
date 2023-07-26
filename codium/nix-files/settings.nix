@@ -137,6 +137,7 @@
       "*.res" = "\${capture}.mjs, \${capture}.js, \${capture}.cmi, \${capture}.cmt, \${capture}.cmj";
       "*.resi" = "\${capture}.res";
     };
+    "explorer.openEditors.visible" = 0;
   };
 
   terminal = {
