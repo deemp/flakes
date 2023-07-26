@@ -329,11 +329,11 @@
     },
     "flakes": {
       "locked": {
-        "lastModified": 1690190523,
-        "narHash": "sha256-5x360IfqIwxOK4oIAfE5old2wxmOniaW45qvJblJqlM=",
+        "lastModified": 1690287339,
+        "narHash": "sha256-qqkSq4yTZw6zwCAgCmNIFiXKcXp0SD/B/LML/CvMJso=",
         "owner": "deemp",
         "repo": "flakes",
-        "rev": "11e0ab649d184b72068caa05c548bbf6add2536e",
+        "rev": "2858784034ef2b70e96e6d2b0330beef22e4726e",
         "type": "github"
       },
       "original": {
@@ -344,11 +344,11 @@
     },
     "flakes_2": {
       "locked": {
-        "lastModified": 1690190523,
-        "narHash": "sha256-5x360IfqIwxOK4oIAfE5old2wxmOniaW45qvJblJqlM=",
+        "lastModified": 1690287339,
+        "narHash": "sha256-qqkSq4yTZw6zwCAgCmNIFiXKcXp0SD/B/LML/CvMJso=",
         "owner": "deemp",
         "repo": "flakes",
-        "rev": "11e0ab649d184b72068caa05c548bbf6add2536e",
+        "rev": "2858784034ef2b70e96e6d2b0330beef22e4726e",
         "type": "github"
       },
       "original": {
@@ -401,11 +401,11 @@
         "flakes": "flakes"
       },
       "locked": {
-        "lastModified": 1690246431,
-        "narHash": "sha256-S9v6hxSL+r8k6LwM1t5Sd/BMmyAxq+RFiocTpld/37U=",
+        "lastModified": 1690332476,
+        "narHash": "sha256-Rqy7J9h//jan6tW/FD37LPGQCyGoo3wX8E3IJheYLo8=",
         "owner": "deemp",
         "repo": "lima",
-        "rev": "660029670dfc473f6cd2367cec6520fce49ed311",
+        "rev": "ec651d4b6c5aaa9a0762e409fc0193ff953b8a08",
         "type": "github"
       },
       "original": {
@@ -483,11 +483,11 @@
         "nixpkgs": "nixpkgs_5"
       },
       "locked": {
-        "lastModified": 1690249792,
-        "narHash": "sha256-y8rbgRWIPbIlfRUkeEsy+eb+Ranvn5qgWS+UIov/aJA=",
+        "lastModified": 1690335391,
+        "narHash": "sha256-rmu8pNuexeitVps7CYfMDKn4VzL9s5rjEKoVNsj9jc0=",
         "owner": "nix-community",
         "repo": "nix-vscode-extensions",
-        "rev": "afd8af80deb9363ed52c0b3fe69d12285a6bb7e7",
+        "rev": "67b14bf8f5b36d634eb7453dad75f78e48cf52d5",
         "type": "github"
       },
       "original": {
@@ -818,11 +818,11 @@
         "flakes": "flakes_2"
       },
       "locked": {
-        "lastModified": 1690245730,
-        "narHash": "sha256-HBjGNC86cr5g0NF8jd/jZTgPQwdtxT0neVXurwQBxGs=",
+        "lastModified": 1690331915,
+        "narHash": "sha256-WtA3UoClvJQ/k24tJTuJK+XDgtbKKffpRmICusLIAXs=",
         "owner": "deemp",
         "repo": "terrafix",
-        "rev": "c9683b2bc326cf81b7b20822656edb2bcc9ec940",
+        "rev": "5b819b607d6b75b229abca5bb3e8edf41c65bcc4",
         "type": "github"
       },
       "original": {
