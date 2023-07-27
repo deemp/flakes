@@ -66,11 +66,7 @@
     "haskell.plugin.fourmolu.config.external" = true;
   };
 
-  # set your path instead of `front`
   ide-purescript = {
-    "purescript.outputDirectory" = "./output";
-    "purescript.packagePath" = "./";
-    "purescript.sourcePath" = "./src";
     "purescript.formatter" = "purs-tidy";
   };
 
