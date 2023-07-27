@@ -15,7 +15,10 @@
             mkShell = configuration: devshell_.mkShell (
               configuration // {
                 # bashInteractive - for VSCodium
-                packages = pkgs.lib.lists.flatten ((configuration.packages or [ ]) ++ [ pkgs.bashInteractive ]);
+                packages =
+                  pkgs.lib.lists.imap0
+                    pkgs.lib.setPrio
+                    (pkgs.lib.lists.flatten ((configuration.packages or [ ]) ++ [ pkgs.bashInteractive ]));
                 commands = (
                   builtins.map
                     (c:
@@ -91,7 +94,7 @@
         };
 
         devShells.default = mkShell {
-          packages = [ pkgs.gawk pkgs.hello ];
+          packages = [ pkgs.gawk pkgs.hello pkgs.nodejs_18 pkgs.nodejs_20 ];
           bash = {
             extra = ''
               printf "Hello, World!\n"
