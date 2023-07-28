@@ -39,77 +39,70 @@
             ];
           });
 
-          packages =
-            let
-              packages1 = mkShellApps {
-                genDocs = {
-                  text = ''
-                    mkdir -p docs/src
-                    cp README/*.md docs/src
-                    ${getExe pkgs.mdbook} build docs
-                  '';
-                  description = "Generate docs";
-                };
-              };
-
-              packages2 = {
-                inherit (mkFlakesTools { root = ./.; dirs = [ "source-flake" "codium" ]; }) pushToCachix;
-                inherit (flakesTools) saveFlakes format updateLocks;
-                writeSettings = writeSettingsJSON settingsCommonNix;
-                codium = mkCodium ({ extensions = extensionsCommon; });
-                writeWorkflows = writeWorkflow "ci" (withAttrs
-                  (nixCI {
-                    jobArgs = {
-                      cacheNixArgs = {
-                        linuxGCEnabled = true;
-                        linuxMaxStoreSize = 5000000000;
-                        macosGCEnabled = true;
-                        macosMaxStoreSize = 5000000000;
-                      };
-                      doFormat = true;
-                      doPushToCachix = true;
-                      doCommit = false;
-                      steps = { dir, stepsAttrs }:
-                        stepsIf ("${names.matrix.os} == '${os.ubuntu-22}'") [
-                          {
-                            name = "Write workflows";
-                            run = pkgs.lib.strings.concatMapStringsSep "\n\n"
-                              (dir_: "${run.nixScript { dir = dir_; inDir = true; name = "writeWorkflows"; }}")
-                              [ "templates/codium/haskell" "templates/codium/haskell-simple" "workflows" ]
-                            ;
-                          }
-                          {
-                            name = "Update docs";
-                            run = run.nixScript { name = packages1.genDocs.pname; };
-                          }
-                          (steps.commit {
-                            messages = [
-                              (steps.updateLocks { }).name
-                              (steps.format { }).name
-                              stepsAttrs."Write workflows".name
-                              stepsAttrs."Update docs".name
-                            ];
-                          })
-                          {
-                            name = "Copy docs";
-                            run = "cp -r docs/book docs/dist";
-                          }
-                          {
-                            name = "Publish docs on GitHub Pages";
-                            uses = "peaceiris/actions-gh-pages@v3.9.3";
-                            "with" = {
-                              github_token = expr names.secrets.GITHUB_TOKEN;
-                              publish_dir = "docs/dist";
-                              force_orphan = true;
-                            };
-                          }
+          packages = mkShellApps {
+            genDocs = {
+              text = ''
+                mkdir -p docs/src
+                cp README/*.md docs/src
+                ${getExe pkgs.mdbook} build docs
+              '';
+              description = "Generate docs";
+            };
+            inherit (mkFlakesTools { root = ./.; dirs = [ "source-flake" "codium" ]; }) pushToCachix;
+            inherit (flakesTools) saveFlakes format updateLocks;
+            writeSettings = writeSettingsJSON settingsCommonNix;
+            codium = mkCodium ({ extensions = extensionsCommon; });
+            writeWorkflows = writeWorkflow "ci" (withAttrs
+              (nixCI {
+                jobArgs = {
+                  cacheNixArgs = {
+                    linuxGCEnabled = true;
+                    linuxMaxStoreSize = 5000000000;
+                    macosGCEnabled = true;
+                    macosMaxStoreSize = 5000000000;
+                  };
+                  doFormat = true;
+                  doPushToCachix = true;
+                  doCommit = false;
+                  steps = { dir, stepsAttrs }:
+                    stepsIf ("${names.matrix.os} == '${os.ubuntu-22}'") [
+                      {
+                        name = "Write workflows";
+                        run = pkgs.lib.strings.concatMapStringsSep "\n\n"
+                          (dir_: "${run.nixScript { dir = dir_; inDir = true; name = "writeWorkflows"; }}")
+                          [ "templates/codium/haskell" "templates/codium/haskell-simple" "workflows" ]
+                        ;
+                      }
+                      {
+                        name = "Update docs";
+                        run = run.nixScript { name = packages.genDocs.pname; };
+                      }
+                      (steps.commit {
+                        messages = [
+                          (steps.updateLocks { }).name
+                          (steps.format { }).name
+                          stepsAttrs."Write workflows".name
+                          stepsAttrs."Update docs".name
                         ];
-                    };
-                  })
-                  { on.schedule = [{ cron = "0 0 * * 0"; }]; });
-              };
-            in
-            packages1 // packages2;
+                      })
+                      {
+                        name = "Copy docs";
+                        run = "cp -r docs/book docs/dist";
+                      }
+                      {
+                        name = "Publish docs on GitHub Pages";
+                        uses = "peaceiris/actions-gh-pages@v3.9.3";
+                        "with" = {
+                          github_token = expr names.secrets.GITHUB_TOKEN;
+                          publish_dir = "docs/dist";
+                          force_orphan = true;
+                        };
+                      }
+                    ];
+                };
+              })
+              { on.schedule = [{ cron = "0 0 * * 0"; }]; });
+          };
 
           tools = [ ];
           devShells.default = mkShell {
