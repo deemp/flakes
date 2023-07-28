@@ -139,6 +139,7 @@
           workflows = import ./workflows;
         };
         inherit makeFlake;
+        makeDefault = import ./makeDefault.nix;
         templates = rec {
           codium-generic = {
             path = ./templates/codium/generic;
