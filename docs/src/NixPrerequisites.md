@@ -186,6 +186,15 @@ cp flake-2/file{2,3} flake-3
    - Use them in your projects with `follows` - [example](https://github.com/deemp/flakes/blob/2395f79740fdc5f14f91db10b1acd2892cdee28c/codium/flake.nix#L5)
    - Now, all your projects have the same dependencies since they come from the same source
 
+1. How to bring any files into a flake?
+   1. Hack git
+      1. List expected files.
+      1. Commit corresponding blank files.
+      1. Run `git update-index --assume-unchanged <file>` for each `<file>`.
+      1. Now, it's possible to import them into flake.
+   1. Use Fixed-output derivations (FOD)
+      - [Nix: what are fixed-output derivations and why use them?](https://bmcgee.ie/posts/2023/02/nix-what-are-fixed-output-derivations-and-why-use-them/)
+
 1. How to enable a specific version of `nix` on my system? Approximately so:
 
    ```console
@@ -229,7 +238,7 @@ cp flake-2/file{2,3} flake-3
 
 - [cachix](https://www.cachix.org/)
 - [Attic](https://github.com/zhaofengli/attic)
-- [cache-nix-too](https://github.com/deemp/cache-nix-too) - cache between `GitHub Actions` runs
+- [cache-nix-action](https://github.com/nix-community/cache-nix-action) - save and restore cache in `GitHub Actions`
 - [nix-serve](https://github.com/edolstra/nix-serve) - serve nix store as a binary cache
   - to check if a package is in store, use [curl](https://nixos.wiki/wiki/Binary_Cache#4._Testing)
 
@@ -240,6 +249,10 @@ cp flake-2/file{2,3} flake-3
    ```sh
    nix run nixpkgs#nixpkgs-fmt -- hello-flake/flake.nix
    ```
+
+### Fixed-output derivation
+
+- [example](https://github.com/denoland/deno/issues/19961#issuecomment-1654480105)
 
 ### Making derivations and executables
 

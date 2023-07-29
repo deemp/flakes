@@ -31,6 +31,7 @@ This template provides a sample configuration for this tool in the `.ghcid` file
 - [Nixpkgs support for incremental Haskell builds](https://www.haskellforall.com/2022/12/nixpkgs-support-for-incremental-haskell.html)
 - Hackage packages in [nixpkgs](https://github.com/NixOS/nixpkgs/blob/ea692c2ad1afd6384e171eabef4f0887d2b882d3/pkgs/development/haskell-modules/hackage-packages.nix) - Haskell packages
 - [Fixing broken Haskell packages in Nixpkgs](https://gutier.io/post/development-fixing-broken-haskell-packages-nixpkgs/)
+- [Horizon Haskell](https://horizon-haskell.net/)
 
 ### haskell.nix
 
