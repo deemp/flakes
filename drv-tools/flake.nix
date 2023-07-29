@@ -481,13 +481,15 @@
               { b = 4; }
             ];
           shellApps =
-            let apps = mkShellApps {
-              helloScript.text = "${getExe pkgs.hello}";
-              helloX2.text = "${getExe apps.hello}; ${getExe apps.hello}";
-              helloRenamed = pkgs.hello;
-              hello.nested = pkgs.hello;
-            };
-            in apps;
+            let
+              apps = mkShellApps {
+                helloScript.text = "${getExe pkgs.hello}";
+                helloX2.text = "${getExe apps.hello}; ${getExe apps.hello}";
+                helloRenamed = pkgs.hello;
+                hello.nested = pkgs.hello;
+              };
+            in
+            apps;
           mg = mapGenAttrs (x: { "a${toString x}" = { "b${toString x}" = x; }; }) [ 1 2 ];
           msg = mapStrGenAttrs (x: { "a${x}" = { "b${x}" = x; }; }) [ 1 2 ];
         };
