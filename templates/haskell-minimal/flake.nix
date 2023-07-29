@@ -38,6 +38,7 @@
         };
 
         devShells.default = mkShell {
+          packages = [ pkgs.cabal-install ];
           bash.extra = ''
             cabal run package2
           '';
