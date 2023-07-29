@@ -133,6 +133,7 @@
         };
         inherit makeFlake;
         makeDefault = import ./makeDefault.nix;
+        makeShell = src: (import (import ./source-flake).outputs.flake-compat { inherit src; }).shellNix;
         templates = rec {
           codium-generic = {
             path = ./templates/codium/generic;
