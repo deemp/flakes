@@ -7,7 +7,8 @@
         pkgs = inputs.nixpkgs.legacyPackages.${system};
         inherit (pkgs.lib.lists) flatten;
         inherit (pkgs.lib.attrsets)
-          recursiveUpdate filterAttrs genAttrs mapAttrsToList;
+          recursiveUpdate filterAttrs genAttrs mapAttrsToList
+          mapAttrsRecursiveCond isDerivation;
         inherit (builtins)
           foldl' attrValues mapAttrs attrNames readDir map toString
           isString isAttrs dirOf baseNameOf toJSON hasAttr listToAttrs;
@@ -15,6 +16,7 @@
           concatStringsSep concatMapStringsSep
           removePrefix removeSuffix;
         inherit (pkgs.lib) escapeShellArg id;
+        inherit (pkgs.lib.trivial) throwIfNot;
 
         # if a set's attribute values are all sets, merge these values recursively
         # Note that the precedence order is undefined, so it's better to 
@@ -85,15 +87,27 @@
         # make shell apps
         # arg should be a set of sets of inputs
         mkShellApps =
-          appsInputs@{ ... }:
+          attrs@{ ... }:
           mapAttrs
-            (name: value:
-            if pkgs.lib.attrsets.isDerivation value then
-              withMeta (value // { pname = name; })
-                (x: { mainProgram = baseNameOf (getExe value); })
-            else mkShellApp (value // { inherit name; }))
-            appsInputs
-          // { __functor = self: f: self // mkShellApps (f self); };
+            (
+              name: value:
+              if isDerivation value
+              then withMeta (value // { pname = name; }) (x: { mainProgram = baseNameOf (getExe value); })
+              else
+                throwIfNot (isAttrs value) "Expected an attrset or a derivation" (
+                  let cond = value_: hasAttr "text" value_ && isString value_.text; in
+                  if cond value then mkShellApp (value // { inherit name; })
+                  else
+                    mapAttrsRecursiveCond (value_: cond value || isDerivation value)
+                      (
+                        path: value_:
+                        let name_ = concatStringsSep "." ([ name ] ++ path); in
+                        (mkShellApps { "${name_}" = value_; }).${name_}
+                      )
+                      value
+                )
+            )
+            attrs;
 
         runFishScript =
           { name
@@ -293,7 +307,7 @@
           withMan
             (mkShellApp {
               name = "json2nix";
-              runtimeInputs = [ pkgs.nixpkgs-fmt ];
+              runtimeInputs = [ pkgs.nixpkgs-fmt pkgs.nix ];
               text = ''
                 json_path=$1
                 nix_path=$2
@@ -466,14 +480,14 @@
               { a = 3; }
               { b = 4; }
             ];
-          shellApps = mkShellApps
-            {
-              hello.text = "${getExe pkgs.hello}";
-            }
-            (x: {
-              helloX2.text = "${getExe x.hello}; ${getExe x.hello}";
+          shellApps =
+            let apps = mkShellApps {
+              helloScript.text = "${getExe pkgs.hello}";
+              helloX2.text = "${getExe apps.hello}; ${getExe apps.hello}";
               helloRenamed = pkgs.hello;
-            });
+              hello.nested = pkgs.hello;
+            };
+            in apps;
           mg = mapGenAttrs (x: { "a${toString x}" = { "b${toString x}" = x; }; }) [ 1 2 ];
           msg = mapStrGenAttrs (x: { "a${x}" = { "b${x}" = x; }; }) [ 1 2 ];
         };
