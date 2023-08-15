@@ -11,7 +11,10 @@
           runInEachDir genAttrsId subDirectories
           concatStringsNewline
           ;
-        inherit (pkgs.lib.lists) flatten unique;
+        inherit (pkgs.lib.lists) flatten unique concatMap;
+        inherit (pkgs.lib.attrsets) mapAttrsToList hasAttrByPath attrByPath;
+        inherit (pkgs.lib.strings) concatMapStringsSep;
+        inherit (builtins) hasAttr;
 
         cachix = pkgs.cachix;
 
@@ -124,37 +127,99 @@
             ''
           );
 
+        # should be flake dirs
         flakesSave = { dirs ? [ ], doPushToCachix ? false, sources ? [ ], saveFlakesArgs ? { } }:
           let
             description = "Save and conditionally push to `Cachix` inputs and outputs of flakes in specified directories relative to `CWD`.";
-            saveInEachDir = runInEachDir {
-              inherit dirs;
-              name = "flakes-save";
-              command = getExe (saveFlakes ({ inherit doPushToCachix; } // saveFlakesArgs));
-              inherit description;
-              longDescription =
-                concatStringsNewline [
-                  man.ENV
-                  (singletonIf doPushToCachix [
-                    man.CACHIX_CACHE
-                    man.CACHIX_AUTH_TOKEN
-                  ])
-                  man.NIX_CACHE_PROFILE
-                ];
-            };
-            writeSources = pkgs.symlinkJoin { name = "appa"; paths = sources; };
+            # attrs = map
+            #   (x:
+            #     let
+            #       flake = import x;
+            #       collect = attr: __attrValues (attrByPath [ attr system ] { } flake);
+            #     in
+            #     collect "packages" ++ collect "devShells"
+            #   )
+            #   dirs;
+            save = pkgs.writeText "txt" (
+              concatMapStringsSep "\n" (x: x) (__attrValues (import (__head dirs)).devShells.${system})
+            )
+              # pkgs.hello.overrideAttrs (x: {
+              #   buildInputs = __attrValues (import (__head dirs)).devShells.${system};
+              # })
+              # concatMap
+              #   (x:
+              #     let
+              #       flake = import x;
+              #       collect = attr: __attrValues (attrByPath [ attr system ] { } flake);
+              #     in
+              #       # [flake]
+              #     concatMap collect [ 
+              #       "packages" 
+              #       "devShells" 
+              #     ]
+              #   )
+              #   dirs
+            ;
+            # pkgs.hello.overrideAttrs (x: {
+            #   buildInputs = [
+            #     pkgs.hello
+            #   ];
+            # });
+            # pkgs.stdenv.mkDerivation {
+            #   name = "save";
+            #   src = ./.;
+            #   buildInputs =
+            #     concatMap
+            #       (x:
+            #         let
+            #           flake = import x;
+            #           collect = attr: __attrValues (attrByPath [ attr system ] { } flake);
+            #         in
+            #         concatMap collect [ "packages" "devShells" ]
+            #       )
+            #       dirs;
+            # };
+            # pkgs.writeText "test" (concatStringsNewline (
+            #   concatMap
+            #     (x:
+            #       let
+            #         flake = import x;
+            #         collect = attr: __attrValues (attrByPath [ attr system ] { } flake);
+            #       in
+            #       concatMap collect [ "packages" "devShells" ]
+            #     )
+            #     dirs
+            # ));
+
+            # saveInEachDir = runInEachDir {
+            #   inherit dirs;
+            #   name = "flakes-save";
+            #   command = getExe (saveFlakes ({ inherit doPushToCachix; } // saveFlakesArgs));
+            #   inherit description;
+            #   longDescription =
+            #     concatStringsNewline [
+            #       man.ENV
+            #       (singletonIf doPushToCachix [
+            #         man.CACHIX_CACHE
+            #         man.CACHIX_AUTH_TOKEN
+            #       ])
+            #       man.NIX_CACHE_PROFILE
+            #     ];
+            # };
+            # writeSources = pkgs.symlinkJoin { name = "inputs"; paths = sources; };
           in
-          mkShellApp {
-            name = "flakes-${if doPushToCachix then "push-to-cachix" else "save"}";
-            text =
-              concatStringsNewline [
-                (singletonIf doPushToCachix (getExe logInToCachix))
-                (getExe saveInEachDir)
-              ];
-            inherit (saveInEachDir.meta) description longDescription;
-            # TODO can't symlink inputs - error No such file or directory
-            # runtimeInputs = [ writeSources ];
-          };
+          save;
+        # mkShellApp {
+        #   name = "flakes-${if doPushToCachix then "push-to-cachix" else "save"}";
+        #   text =
+        #     concatStringsNewline [
+        #       (singletonIf doPushToCachix (getExe logInToCachix))
+        #       # (getExe saveInEachDir)
+        #     ];
+        #   # inherit (saveInEachDir.meta) description longDescription;
+        #   # TODO can't symlink inputs - error No such file or directory
+        #   runtimeInputs = [ save ];
+        # };
 
         # format all .nix files with the formatter specified in the flake in the CWD
         flakesFormat = dirs:
@@ -176,8 +241,6 @@
           else
             let
               getOutPath = s: if builtins.hasAttr "outPath" s then builtins.match "(/nix/store/[^/]+).*" "${s.outPath}" else [ ];
-              inherit (builtins) hasAttr;
-              inherit (pkgs.lib.attrsets) hasAttrByPath mapAttrsToList;
               sources =
                 getOutPath s ++
                 (if hasAttrByPath [ "outputs" "inputs" ] s
@@ -193,7 +256,7 @@
           { dirs ? [ ], subDirs ? [ ], root, flakesSaveArgs ? { } }:
           let
             args = {
-              dirs = flatten (dirs ++ builtins.map (subDirectories root) subDirs);
+              dirs = map (x: "${root}/${x}") (flatten (dirs ++ builtins.map (subDirectories root) subDirs));
               sources = flakesGetSources (import root);
             };
           in
@@ -207,7 +270,9 @@
 
         testFlakesTools = mkFlakesTools { dirs = [ "." ]; root = ./.; };
         devShells.default = pkgs.mkShell {
-          buildInputs = builtins.filter (pkgs.lib.attrsets.isDerivation) (__attrValues testFlakesTools);
+          buildInputs = builtins.filter (pkgs.lib.attrsets.isDerivation) (with testFlakesTools; [
+            updateLocks pushToCachix format
+          ]);
         };
       in
       {
@@ -224,7 +289,7 @@
             saveFlakes_
             ;
         };
-        inherit testFlakesTools;
+        packages = testFlakesTools;
         inherit devShells;
       };
   };
