@@ -44,7 +44,7 @@
 
         inherit (devshell) mkShell;
 
-        # Case: list commands to run packages in a given directory
+        # list commands to run packages in a given directory
         mkRunCommandsDir = dir: category: drvs@{ ... }:
           mapAttrsToList
             (
@@ -58,13 +58,14 @@
             )
             drvs;
 
-        # Case: list commands to run packages in the current directory
+        # list commands to run packages in the current directory
         mkRunCommands = mkRunCommandsDir ".";
 
-        # Case: provide packages in the same category
+        # provide packages in a category
         mkCommands = category: drvs: map (x: { package = x; inherit category; }) (setPrios drvs);
 
-        mkDefaultCommands = commands: map (x: { command = " "; } // x) commands;
+        # list commands in a category
+        mkDefaultCommands = category: commands: map (x: { command = " "; inherit category; } // x) commands;
 
         packages = {
           awk = pkgs.gawk;
@@ -81,7 +82,7 @@
           commands =
             mkCommands "pkgs" [ pkgs.gawk pkgs.hello pkgs.nodejs_18 pkgs.nodejs_20 ]
             ++ mkRunCommands "run" { inherit (packages) awk testHello; }
-            ++ mkDefaultCommands
+            ++ mkDefaultCommands "scripts"
               [
                 {
                   name = "hello";
