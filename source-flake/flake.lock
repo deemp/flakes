@@ -9,11 +9,11 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1691619434,
-        "narHash": "sha256-BvdXPJ0VqABiDPMHdYqu/YGbBUttU4iYg3M2uomi8jQ=",
+        "lastModified": 1692618703,
+        "narHash": "sha256-V/AOyLTGnZA0805ZCb2HRmiA+giqa4pFsVwjGD4ziQM=",
         "owner": "cachix",
         "repo": "cachix",
-        "rev": "e480599155a69602e185be8f13d81c427ac7c3f0",
+        "rev": "3a12ac2a45353ea91776cd3715ec5f02c93f0054",
         "type": "github"
       },
       "original": {
@@ -71,11 +71,11 @@
         "systems": "systems_2"
       },
       "locked": {
-        "lastModified": 1688380630,
-        "narHash": "sha256-8ilApWVb1mAi4439zS3iFeIT0ODlbrifm/fegWwgHjA=",
+        "lastModified": 1692523566,
+        "narHash": "sha256-VDJDihK6jNebVw9y3qKCVD6+6QaC/x8kxZzL4MaIPPY=",
         "owner": "numtide",
         "repo": "devshell",
-        "rev": "f9238ec3d75cefbb2b42a44948c4e8fb1ae9a205",
+        "rev": "d208c58e2f7afef838add5f18a9936b12a71d695",
         "type": "github"
       },
       "original": {
@@ -299,11 +299,11 @@
     },
     "flakes": {
       "locked": {
-        "lastModified": 1691888015,
-        "narHash": "sha256-SrQ8WdHtzT5rihmZKytjUEIyN/flg8f4oNvBmZdcV+Y=",
+        "lastModified": 1692104886,
+        "narHash": "sha256-txkZtlHmLZNJamyDlKllLyuHfr7u5xwwcRIXNY5/P90=",
         "owner": "deemp",
         "repo": "flakes",
-        "rev": "380ac782bae220fa355f082b0c927670d526bccb",
+        "rev": "37c11022b40a1b69436b5851f1ce91f30bffb978",
         "type": "github"
       },
       "original": {
@@ -314,11 +314,11 @@
     },
     "flakes_2": {
       "locked": {
-        "lastModified": 1691888015,
-        "narHash": "sha256-SrQ8WdHtzT5rihmZKytjUEIyN/flg8f4oNvBmZdcV+Y=",
+        "lastModified": 1692104886,
+        "narHash": "sha256-txkZtlHmLZNJamyDlKllLyuHfr7u5xwwcRIXNY5/P90=",
         "owner": "deemp",
         "repo": "flakes",
-        "rev": "380ac782bae220fa355f082b0c927670d526bccb",
+        "rev": "37c11022b40a1b69436b5851f1ce91f30bffb978",
         "type": "github"
       },
       "original": {
@@ -371,11 +371,11 @@
         "flakes": "flakes"
       },
       "locked": {
-        "lastModified": 1691973511,
-        "narHash": "sha256-w5B4YX+FSm6pEdzwKE9x/X0/aXXTLkAmjMKkiFcGIqI=",
+        "lastModified": 1692146263,
+        "narHash": "sha256-32w/W1NjpagefOzK+kHrMCxhffFHltqKyKmHp3E9OAI=",
         "owner": "deemp",
         "repo": "lima",
-        "rev": "af1e61467ba92796808f695e2d08a98348ee404b",
+        "rev": "5bd0db056e7fc845cccf2aa02354917c620a8980",
         "type": "github"
       },
       "original": {
@@ -453,11 +453,11 @@
         "nixpkgs": "nixpkgs_5"
       },
       "locked": {
-        "lastModified": 1692062340,
-        "narHash": "sha256-Z51XVR8Se/cmN4JQqOHt8zUUEWHe99HlveGGaBwljVY=",
+        "lastModified": 1692643648,
+        "narHash": "sha256-SVukO780usWhdTRgR3TefZybn3gum+r9syOMFEgejNc=",
         "owner": "nix-community",
         "repo": "nix-vscode-extensions",
-        "rev": "eceec3df4f0593cca7222b0217ed129ee32519e3",
+        "rev": "4d255735615cf5a7cb85e1bcf8947ea451f88a6c",
         "type": "github"
       },
       "original": {
@@ -618,11 +618,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1692048894,
-        "narHash": "sha256-cDw03rso2V4CDc3Mll0cHN+ztzysAvdI8pJ7ybbz714=",
+        "lastModified": 1692369730,
+        "narHash": "sha256-VcCb/XxybOv0Py1Gnhmih9mfwyCUVDds/gID2VcscAo=",
         "owner": "nix-community",
         "repo": "poetry2nix",
-        "rev": "b059ad4c3051f45d6c912e17747aae37a9ec1544",
+        "rev": "e4cd574cac251dd44bdbc77c1e98d790fe27b781",
         "type": "github"
       },
       "original": {
@@ -788,11 +788,11 @@
         "flakes": "flakes_2"
       },
       "locked": {
-        "lastModified": 1691973072,
-        "narHash": "sha256-3Pzjcf5nfCh+Xz1sOOI+WISQxaIYnx3mIIHxri4xTWQ=",
+        "lastModified": 1692145795,
+        "narHash": "sha256-kV6+9EAljgNqJcOsFP+Yzww+MAutmGfPf3TZgyU+IKI=",
         "owner": "deemp",
         "repo": "terrafix",
-        "rev": "efa7d747b574c0eac5b34fd54f16c93f23817660",
+        "rev": "8926f2de495c81d91c964b4b8853c5c6d4703669",
         "type": "github"
       },
       "original": {

@@ -17,7 +17,7 @@ jobs:
             trusted-public-keys = cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY= nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs= hydra.iohk.io:f/Ea+s+dFdN+3Y/G+FDgSq+a5NEWhJGzdjvKNGv0/EQ= deemp.cachix.org-1:9shDxyR2ANqEPQEEYDL/xIOnoPwxHot21L5fiZnFL18=
             keep-outputs = true
       - name: Restore and cache Nix store
-        uses: nix-community/cache-nix-action@v1
+        uses: nix-community/cache-nix-action@v2
         with:
           key: nix-${{ matrix.os }}-job-${{ hashfiles('**/flake.nix', '**/flake.lock') }}
           restore-keys: |
@@ -64,13 +64,6 @@ jobs:
         run: |-
           nix profile install .#pushToCachix
           nix run .#pushToCachix
-      - name: Purge cache
-        uses: deemp/purge-cache@v1
-        with:
-          accessed: false
-          created: true
-          debug: true
-          max-age: 172800
     strategy:
       matrix:
         os:
