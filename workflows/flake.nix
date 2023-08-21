@@ -181,10 +181,15 @@
           , keyJob ? "job"
           , keyOS ? expr names.runner.os
           , path ? ""
-          , linuxGCEnabled ? false
-          , linuxMaxStoreSize ? 0
-          , macosGCEnabled ? false
-          , macosMaxStoreSize ? 0
+          , debug ? false
+          , gcEnabledLinux ? false
+          , gcMaxStoreSizeLinux ? 0
+          , gcEnabledMacos ? false
+          , gcMaxStoreSizeMacos ? 0
+          , purgeEnabled ? false
+          , purgeByCreatedTime ? false
+          , purgeByAccessedTime ? false
+          , purgeMaxAge ? 0
           }:
           let
             hashfilesArgs = concatMapStringsSep ", " (x: "'${x}'") files;
@@ -192,7 +197,7 @@
           in
           {
             name = "Restore and cache Nix store";
-            uses = "nix-community/cache-nix-action@v1";
+            uses = "nix-community/cache-nix-action@v2";
             "with" = {
               key = "nix-${keyOS}-${keyJob}-${hashfiles}";
               restore-keys = ''
@@ -200,8 +205,23 @@
               '';
             }
             // (if path != "" then { inherit path; } else { })
-            // (if linuxGCEnabled then { linux-gc-enabled = true; linux-max-store-size = linuxMaxStoreSize; } else { })
-            // (if macosGCEnabled then { macos-gc-enabled = true; macos-max-store-size = macosMaxStoreSize; } else { });
+            // (if gcEnabledLinux then {
+              gc-enabled-linux = true;
+              gc-max-store-size-linux = gcMaxStoreSizeLinux;
+            } else { })
+            // (if gcEnabledMacos then {
+              gc-enabled-macos = true;
+              gc-max-store-size-macos = gcMaxStoreSizeMacos;
+            } else { })
+            // (if purgeEnabled then {
+              purge-enabled = purgeEnabled;
+              purge-by-created-time = purgeByCreatedTime;
+              purge-by-accessed-time = purgeByAccessedTime;
+              purge-max-age = purgeMaxAge;
+            } else { })
+            // (if debug then {
+              inherit debug;
+            } else { });
           };
 
         # don't enable GC to not disable for macos
@@ -323,10 +343,8 @@
           , doConfigGitAsGHActions ? doUpdateLocks || doFormat || doCommit
           , installNixArgs ? { }
           , doCacheNix ? false
-          , doPurgeCache ? false
-          , purgeCacheArgs ? { }
-          , doRemoveCacheProfiles ? false
           , cacheNixArgs ? { }
+          , doRemoveCacheProfiles ? false
           , cacheDirectory ? CACHE_DIRECTORY
           , doInstall ? false
           , doFormat ? false
@@ -363,7 +381,6 @@
               (steps { inherit dir stepsAttrs; })
               (singletonIf doSaveFlakes (steps_.saveFlakes ({ inherit dir doInstall; } // saveFlakesArgs)))
               (singletonIf doPushToCachix (steps_.pushToCachix ({ inherit dir doInstall; } // pushToCachixArgs)))
-              (singletonIf doPurgeCache (steps_.purgeCache purgeCacheArgs))
             ];
             stepsAttrs = mapGenAttrs (x: { ${x.name} = x; }) stepsList;
           in
@@ -379,7 +396,6 @@
             doCacheNix = true;
             doRemoveCacheProfiles = true;
             doInstall = true;
-            doPurgeCache = true;
           }
           //
           args
@@ -423,10 +439,17 @@
               dir = "nix-dev/";
               doPushToCachix = true;
               cacheNixArgs = {
-                linuxGCEnabled = true;
-                linuxMaxStoreSize = 6442450944;
-                macosGCEnabled = true;
-                macosMaxStoreSize = 6442450944;
+                gcEnabledLinux = true;
+                gcMaxStoreSizeLinux = 7000000000;
+                gcEnabledMacos = true;
+                gcMaxStoreSizeMacos = 7000000000;
+
+                purgeEnabled = true;
+                purgeByCreatedTime = true;
+                purgeByAccessedTime = true;
+                purgeMaxAge = 172800;
+
+                debug = true;
               };
               steps = { dir, stepsAttrs }: [
                 (steps.commit { messages = [ stepsAttrs."Update flake locks".name stepsAttrs."Format Nix files".name ]; })
