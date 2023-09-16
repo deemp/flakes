@@ -18,6 +18,10 @@
     # TODO use purescript from nixpkgs
     nixpkgs-purescript.url = "github:deemp/nixpkgs/purescript";
     terrafix.url = "github:deemp/terrafix";
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = inputs: (inputs // (inputs.flake-utils.lib.eachDefaultSystem (system:
