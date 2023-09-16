@@ -5,12 +5,11 @@
 
 ## Prerequisites
 
-- NixOS wiki - [Haskell](https://nixos.wiki/wiki/Haskell)
-
 <details>
 
   <summary>Spoiler</summary>
 
+- NixOS wiki - [Haskell](https://nixos.wiki/wiki/Haskell)
 - [flake.nix](./flake.nix) - code in this flake is extensively commented.
 - [codium-haskell](https://github.com/deemp/flakes/tree/main/templates/codium/haskell#readme) - template for this flake.
 - [Haskell](https://github.com/deemp/flakes/blob/main/README/Haskell.md) - general info about `Haskell` tools.
