@@ -122,6 +122,9 @@ __foldl' pkgs.lib.attrsets.recursiveUpdate { }
           rescript = {
             chenglou92 = "rescript-vscode";
           };
+          rust = {
+            rust-lang = "rust-analyzer";
+          };
           scala = {
             scalameta = "metals";
             scala-lang = "scala";
