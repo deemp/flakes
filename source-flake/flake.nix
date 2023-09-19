@@ -22,6 +22,7 @@
       url = "github:oxalica/rust-overlay";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-filter.url = "github:numtide/nix-filter";
   };
 
   outputs = inputs: (inputs // (inputs.flake-utils.lib.eachDefaultSystem (system:
