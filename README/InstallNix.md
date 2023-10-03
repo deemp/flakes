@@ -1,24 +1,13 @@
 # Install Nix
 
-1. Edit [nix.conf](https://nixos.org/manual/nix/unstable/command-ref/conf-file.html#description)
-    1. Create that file if missing
-    1. [Enable](https://nixos.wiki/wiki/Flakes#Permanent) flakes in it
-    1. Set `show-trace = true` ([doc](https://nixos.org/manual/nix/unstable/command-ref/conf-file.html#conf-show-trace))
-    1. In short:
-
-        ```console
-        cat <<EOF >> ~/.config/nix/nix.conf
-        experimental-features = nix-command flakes
-        show-trace = true
-        EOF
-        ```
-
 1. Install [Nix](https://nixos.org/download.html) (Single-user installation)
 
     ```console
     sh <(curl -L https://nixos.org/nix/install) --no-daemon
     ```
-
+    
+1. [Enable](https://nixos.wiki/wiki/Flakes#Permanent) flakes
+1. Set `show-trace = true` ([doc](https://nixos.org/manual/nix/unstable/command-ref/conf-file.html#conf-show-trace))
 1. Reboot
 
 ## Community
