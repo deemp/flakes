@@ -5,10 +5,9 @@
     ```console
     sh <(curl -L https://nixos.org/nix/install) --no-daemon
     ```
-    
+
 1. [Enable](https://nixos.wiki/wiki/Flakes#Permanent) flakes
-1. Set `show-trace = true` ([doc](https://nixos.org/manual/nix/unstable/command-ref/conf-file.html#conf-show-trace))
-1. Reboot
+1. Set `show-trace = true` ([doc](https://nixos.org/manual/nix/unstable/command-ref/conf-file.html#conf-show-trace)) to see more complete error messages.
 
 ## Community
 
