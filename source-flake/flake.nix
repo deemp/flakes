@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/cba95e29d2d0ef0e314f3fac7fcd9f3cfa5c2cd3";
+    nixpkgs.url = "github:NixOS/nixpkgs/2bbf67d3c76927b5c3148f32c0e93c14e5dbc2d9";
     cachix.url = "github:cachix/cachix";
     devshell-source.url = "github:numtide/devshell";
     flake-compat = {
