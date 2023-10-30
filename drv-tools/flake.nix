@@ -172,11 +172,11 @@
 
         # man headings
         man = {
-          NAME = "# NAME";
-          SYNOPSYS = "# SYNOPSYS";
-          DESCRIPTION = "# DESCRIPTION";
-          EXAMPLES = "# EXAMPLES";
-          NOTES = "# NOTES";
+          NAME = "## NAME";
+          SYNOPSYS = "## SYNOPSYS";
+          DESCRIPTION = "## DESCRIPTION";
+          EXAMPLES = "## EXAMPLES";
+          NOTES = "## NOTES";
         };
 
         # ignore shellcheck when writing a shell application
@@ -228,25 +228,23 @@
           let
             longDescription = fLongDescription drv;
             man = ''
-              ---
-              title: ${executableName}
-              section: 1
-              header: User Manual
-              ---
+              ${executableName}(1) -- ${drv.meta.description}
+              ============
+
               ${longDescription}
             '';
-            md = "$out/${executableName}.1.md";
+            md = "$out/${executableName}.1.ronn";
             manPath = "$out/share/man/man1";
             drv_ =
               withAttrs
-                (pkgs.runCommand executableName { nativeBuildInputs = [ pkgs.pandoc ]; }
+                (pkgs.runCommand executableName { buildInputs = [ pkgs.ronn ]; }
                   ''
                     mkdir $out
                     cp -rs --no-preserve=mode,ownership ${drv}/* $out/
                     rm -rf ${manPath}
                     mkdir -p ${manPath}
                     printf '%s' ${escapeShellArg man} > ${md}
-                    pandoc ${md} -st man -o ${manPath}/${executableName}.1
+                    ronn ${md} --roff -o ${manPath}
                     rm ${md}
                   ''
                 )
@@ -319,9 +317,6 @@
               description = "Convert `.json` to `.nix`";
             })
             (x: ''
-              ${man.DESCRIPTION}
-              ${x.meta.description}
-            
               ${man.EXAMPLES}
               `json2nix .vscode/settings.json nix-files/settings.nix`
               :   Convert exising `settings.json` into a nix file
@@ -456,6 +451,10 @@
             writeJSON
             writeYAML
             ;
+        };
+
+        packages = {
+          inherit json2nix;
         };
 
         # tests 
