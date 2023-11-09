@@ -23,10 +23,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-filter.url = "github:numtide/nix-filter";
-    
+
     slimlock.url = "github:thomashoneyman/slimlock";
     slimlock.inputs.nixpkgs.follows = "nixpkgs";
-    
+
     nix2container.url = "github:nlewo/nix2container";
   };
 
