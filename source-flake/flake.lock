@@ -432,11 +432,11 @@
         "nixpkgs": "nixpkgs_6"
       },
       "locked": {
-        "lastModified": 1699570287,
-        "narHash": "sha256-eP/Mys0iqd845Xwt/A/vfODJSSVGXBKmiDq5RyLgkKc=",
+        "lastModified": 1699572637,
+        "narHash": "sha256-ZMpkv2m68yn/RIw5dV3P7Y7OH90+hWwhnsTXHUTAxhE=",
         "owner": "deemp",
         "repo": "nix2container",
-        "rev": "cc1504293335c1450360289c65fd60ed66015d06",
+        "rev": "79e6874a8ba066203e0352498a57b10396c65c8f",
         "type": "github"
       },
       "original": {
