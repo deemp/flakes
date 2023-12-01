@@ -8,11 +8,11 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1700834947,
-        "narHash": "sha256-2bIRCQXp6FcG9xWbXTtIPh9/un0pGAUGszyTCdFtRGQ=",
+        "lastModified": 1701353772,
+        "narHash": "sha256-hkarfx28vsRUR62gnrSE/H2Grxfy+yt/1RgcLmGz5G0=",
         "owner": "cachix",
         "repo": "cachix",
-        "rev": "609def3ff7bd610cc3d32871a11fb0a1b4da2cce",
+        "rev": "d6c66e2393e25627acc0dc5f97c1b7c92693c7aa",
         "type": "github"
       },
       "original": {
@@ -473,11 +473,11 @@
         "nixpkgs": "nixpkgs_5"
       },
       "locked": {
-        "lastModified": 1700874994,
-        "narHash": "sha256-/+d5YQm52S1K3FCkiRMTo6PBNWL7YRCpjh41I+/oqxM=",
+        "lastModified": 1701394021,
+        "narHash": "sha256-5ZEIX2Di/x0GAu9xAP+7tcy7hPu39lhLADwt/YR8Wk0=",
         "owner": "nix-community",
         "repo": "nix-vscode-extensions",
-        "rev": "659798efd139c3cdd630f727d0d1223a9beac525",
+        "rev": "d1f015cf54328b5c96a6f9d68f615f18ddac9264",
         "type": "github"
       },
       "original": {
@@ -699,11 +699,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1700890240,
-        "narHash": "sha256-AKbWnuDzDuXaYSXHXSj0Sa1DSmUm1KaFNJhf2MEhoS0=",
+        "lastModified": 1701399357,
+        "narHash": "sha256-QSGP2J73HQ4gF5yh+MnClv2KUKzcpTmikdmV8ULfq2E=",
         "owner": "nix-community",
         "repo": "poetry2nix",
-        "rev": "674fc0ef18bb62f3aea7684e09f20046a3cdfedf",
+        "rev": "7acb78166a659d6afe9b043bb6fe5cb5e86bb75e",
         "type": "github"
       },
       "original": {
@@ -802,11 +802,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1700878361,
-        "narHash": "sha256-O30hSOliHJhSdhZw5T8JFtxlL309mNLI+agYffuccIo=",
+        "lastModified": 1701397143,
+        "narHash": "sha256-nYUJxZXwCWWVBYZXPgRxGDuQcZRhKTtD/Jp5Jl+9EWU=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "0309d58c91c57e8d519de68312430074de3ef5f8",
+        "rev": "bb71557c93cad40f5921b2342d7fd69f9e6497ab",
         "type": "github"
       },
       "original": {
@@ -844,15 +844,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1688756706,
-        "narHash": "sha256-xzkkMv3neJJJ89zo3o2ojp7nFeaZc2G0fYwNXNJRFlo=",
-        "owner": "thomashoneyman",
+        "lastModified": 1701469842,
+        "narHash": "sha256-pf9xNX2mj+FVrTxRtliX7xMxQMezLxObtc6DI4ZtcW0=",
+        "owner": "deemp",
         "repo": "slimlock",
-        "rev": "cf72723f59e2340d24881fd7bf61cb113b4c407c",
+        "rev": "012ef0420280d99575b0911df739bf431f0a529f",
         "type": "github"
       },
       "original": {
-        "owner": "thomashoneyman",
+        "owner": "deemp",
         "repo": "slimlock",
         "type": "github"
       }
