@@ -24,7 +24,7 @@
     };
     nix-filter.url = "github:numtide/nix-filter";
 
-    slimlock.url = "github:deemp/slimlock";
+    slimlock.url = "github:thomashoneyman/slimlock";
     slimlock.inputs.nixpkgs.follows = "nixpkgs";
 
     # TODO use the official repo when https://github.com/nlewo/nix2container/pull/99 is merged
