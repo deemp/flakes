@@ -164,6 +164,8 @@
         framedBrackets = framedBrackets_ "\n\n" "\n\n";
         framedBrackets_ = pref: suff: framed_ "${pref}[ " " ]${suff}";
 
+        mkBashHref = text: url: ''\e]8;;${url}\a${text}\e]8;;\a'';
+
         # concat strings and separate them by a newline character
         concatStringsNewline = list: concatStringsSep "\n" (flatten list);
 
@@ -427,6 +429,7 @@
             mergeValues
             mkAccessors
             mkAccessors_
+            mkBashHref
             mkBin
             mkBinName
             mkShellApp
@@ -465,6 +468,9 @@
           name = "default";
           buildInputs = [ pkgs.tree json2nix pkgs.fish ];
           LC_ALL = "C.utf8";
+        };
+        devShells.href = pkgs.mkShell {
+          shellHook = ''printf '${mkBashHref "github link" "https://github.com"}\n' '';
         };
 
         tests = {
