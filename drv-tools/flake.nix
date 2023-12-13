@@ -15,7 +15,7 @@
         inherit (pkgs.lib.strings)
           concatStringsSep concatMapStringsSep
           removePrefix removeSuffix;
-        inherit (pkgs.lib) escapeShellArg id;
+        inherit (pkgs.lib) escapeShellArg id getExe getExe';
         inherit (pkgs.lib.trivial) throwIfNot;
 
         # if a set's attribute values are all sets, merge these values recursively
@@ -92,7 +92,7 @@
             (
               name: value:
               if isDerivation value
-              then withMeta (value // { pname = name; }) (x: { mainProgram = baseNameOf (getExe value); })
+              then withMeta value (x: { label = name; })
               else
                 throwIfNot (isAttrs value) "Expected an attrset or a derivation" (
                   let cond = value_: hasAttr "text" value_ && isString value_.text; in
@@ -144,17 +144,8 @@
         readSymlinks = dir: readXs dir "symlink";
 
         # get a list of immediate subdirectories
-        # root should be an absolute path like ./.      
+        # root should be an absolute path like ./.
         subDirectories = root: dir: builtins.map (x: "${dir}/${x}") (readDirectories "${root}/${dir}");
-
-        # assuming that a `pname` of a program coincides with its main executable's name
-        # unsafe to use with packages whose pname may change!
-        mkBin = drv@{ pname, ... }: "${drv}/bin/${pname}";
-
-        # same as `mkBin`, but need to provide the necessary executable name
-        mkBinName = drv@{ ... }: name_: "${drv}/bin/${name_}";
-
-        inherit (pkgs.lib) getExe;
 
         # frame a text with newlines
         framedNewlines = framed_ "\n\n" "\n\n";
@@ -181,29 +172,61 @@
           NOTES = "## NOTES";
         };
 
-        # ignore shellcheck when writing a shell application
         mkShellApp =
           { name
           , text
           , runtimeInputs ? [ ]
           , description ? "no description provided :("
-          , longDescription ? ''
-              ${description}
-            ''
+          , longDescription ? description
+          , excludeShellChecks ? [ ]
           }:
           withMan
-            (withMeta
-              (
-                withAttrs
-                  (
-                    pkgs.writeShellApplication ({ inherit name text; } // {
-                      runtimeInputs = flatten runtimeInputs;
-                      checkPhase = "";
-                    })
-                  )
-                  { pname = name; }
-              )
-              (_: { inherit longDescription description; })
+            (
+              (pkgs.writeShellApplication {
+                inherit name text excludeShellChecks;
+                runtimeInputs = flatten runtimeInputs;
+              }).overrideAttrs
+                (prev: {
+                  pname = name;
+                  buildCommand = null;
+                  passAsFile = [ ];
+                  doCheck = true;
+                  phases = [ "configurePhase" "buildPhase" "checkPhase" "installPhase" ];
+                  configurePhase = ''
+                    runHook preConfigure
+                    
+                    target=$out${pkgs.lib.escapeShellArg "/bin/${prev.name}"}
+
+                    runHook postConfigure
+                  '';
+                  buildPhase = ''
+                    runHook preBuild
+
+                    mkdir -p "$(dirname "$target")"
+
+                    if [ -e "$textPath" ]; then
+                      mv "$textPath" "$target"
+                    else
+                      echo -n "$text" > "$target"
+                    fi
+
+                    if [ -n "$executable" ]; then
+                      chmod +x "$target"
+                    fi
+
+                    runHook postBuild
+                  '';
+                  installPhase = ''
+                    runHook preInstall
+
+                    runHook postInstall
+                  '';
+                  meta = prev.meta // {
+                    inherit longDescription description;
+                    mainProgram = name;
+                    label = name;
+                  };
+                })
             )
             (_: ''
               ${man.DESCRIPTION}
@@ -235,26 +258,24 @@
 
               ${longDescription}
             '';
-            md = "$out/${executableName}.1.ronn";
+            ronn = "${executableName}.1.ronn";
             manPath = "$out/share/man/man1";
-            drv_ =
-              withAttrs
-                (pkgs.runCommand executableName { buildInputs = [ pkgs.ronn ]; }
-                  ''
-                    mkdir $out
-                    cp -rs --no-preserve=mode,ownership ${drv}/* $out/
-                    rm -rf ${manPath}
-                    mkdir -p ${manPath}
-                    printf '%s' ${escapeShellArg man} > ${md}
-                    ronn ${md} --roff -o ${manPath}
-                    rm ${md}
-                  ''
-                )
-                { pname = drv.pname; };
+            drv_ = drv.overrideAttrs (prev: {
+              buildInputs = (prev.buildInputs or [ ]) ++ [ pkgs.ronn ];
+              postInstall = (prev.postInstall or "") + ''
+                printf "Creating a man page.\n"
+                rm -rf ${manPath} 2> /dev/null    
+                mkdir -p ${manPath}
+                chmod +w .
+                printf '%s' ${escapeShellArg man} > ${ronn}
+                ronn ${ronn} --roff -o ${manPath}
+                rm ${ronn}
+              '';
+            });
           in
-          withLongDescription (withMeta drv_ (_: drv.meta)) (_: longDescription);
+          withMeta drv_ (_: drv.meta // { inherit longDescription; });
 
-        withMan = drv: withMan_ drv.pname drv;
+        withMan = drv: withMan_ (builtins.baseNameOf (getExe drv)) drv;
 
         # String -> String -> Any -> IO ()
         # make a script to write a nix expr to a file path
@@ -294,7 +315,7 @@
             runtimeInputs = [ pkgs.yq-go ];
             text = ''
               mkdir -p ${dir}
-              ${mkBin writeJSON_} &>/dev/null
+              ${getExe writeJSON_} &>/dev/null
               cat ${tmpJSON} | yq e -MP - > ${path}
               rm ${tmpJSON}
               printf "${framedBrackets "ok %s"}" "${name_}"
@@ -309,12 +330,12 @@
               name = "json2nix";
               runtimeInputs = [ pkgs.nixpkgs-fmt pkgs.nix ];
               text = ''
-                json_path=$1
-                nix_path=$2
-                mkdir -p $(dirname "''${2}")
-                nix eval --impure --expr "with builtins; fromJSON (readFile ./$json_path)" > $nix_path
-                sed -i -E "s/(\[|\{)/\1\n/g" $nix_path
-                nixpkgs-fmt $nix_path
+                json_path="$1"
+                nix_path="$2"
+                mkdir -p "$(dirname "''${2}")"
+                nix eval --impure --expr "with builtins; fromJSON (readFile ./$json_path)" > "$nix_path"
+                sed -i -E "s/(\[|\{)/\1\n/g" "$nix_path"
+                nixpkgs-fmt "$nix_path"
               '';
               description = "Convert `.json` to `.nix`";
             })
@@ -322,7 +343,8 @@
               ${man.EXAMPLES}
               `json2nix .vscode/settings.json nix-files/settings.nix`
               :   Convert exising `settings.json` into a nix file
-            '');
+            '')
+        ;
 
         runInEachDir =
           { dirs
@@ -417,6 +439,7 @@
             framedNewlines
             genAttrsId
             getExe
+            getExe'
             indentStrings_
             indentStrings4
             indentStrings8
@@ -430,8 +453,6 @@
             mkAccessors
             mkAccessors_
             mkBashHref
-            mkBin
-            mkBinName
             mkShellApp
             mkShellApps
             ord
@@ -463,7 +484,7 @@
         # tests 
         devShells.default = pkgs.mkShell {
           shellHook = ''
-            printf 'Run `man ${json2nix.pname}`\n'
+            printf 'Run `man ${builtins.baseNameOf (getExe json2nix)}`\n'
           '';
           name = "default";
           buildInputs = [ pkgs.tree json2nix pkgs.fish ];
@@ -489,7 +510,7 @@
             let
               apps = mkShellApps {
                 helloScript.text = "${getExe pkgs.hello}";
-                helloX2.text = "${getExe apps.hello}; ${getExe apps.hello}";
+                helloX2.text = "${getExe pkgs.hello}; ${getExe pkgs.hello}";
                 helloRenamed = pkgs.hello;
                 hello.nested = pkgs.hello;
               };
