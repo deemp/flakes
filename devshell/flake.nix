@@ -8,7 +8,7 @@
     perSystem = { inputs, system }:
       let
         pkgs = inputs.nixpkgs.legacyPackages.${system};
-        inherit (inputs.drv-tools.lib.${system}) framedNewlines framed_;
+        inherit (inputs.drv-tools.lib.${system}) framedNewlines framed_ mkShellApps;
         inherit (pkgs.lib.lists) flatten imap0;
         inherit (pkgs.lib) setPrio;
         inherit (pkgs.lib.attrsets) mapAttrsToList;
@@ -50,7 +50,7 @@
             (
               name: drv:
                 {
-                  name = "nix run ${dir}#${name}";
+                  name = "nix run ${dir}#${drv.pname or drv.name or drv.meta.mainProgram or "dummy name"}";
                   command = " ";
                   inherit category;
                   help = drv.meta.description or "dummy description";
@@ -67,10 +67,10 @@
         # list commands in a category
         mkDefaultCommands = category: commands: map (x: { command = " "; inherit category; } // x) commands;
 
-        packages = {
-          awk = pkgs.gawk;
+        packages = mkShellApps {
           myScript = pkgs.writeScript ''printf "hi from my script!"'';
           testHello = pkgs.hello;
+          nested.awk = pkgs.gawk;
         };
 
         devShells.default = mkShell {
@@ -81,7 +81,7 @@
           };
           commands =
             mkCommands "pkgs" [ pkgs.gawk pkgs.hello pkgs.nodejs_18 pkgs.nodejs_20 ]
-            ++ mkRunCommands "run" { inherit (packages) awk testHello; }
+            ++ mkRunCommands "run" { inherit (packages) testHello; inherit (packages.nested) awk; }
             ++ mkDefaultCommands "scripts"
               [
                 {
