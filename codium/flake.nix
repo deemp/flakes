@@ -7,7 +7,7 @@
         pkgs = inputs.nixpkgs.legacyPackages.${system};
         inherit (inputs.drv-tools.lib.${system})
           withMan writeJSON toList mergeValues
-          mkBin indentStrings4 withDescription
+          indentStrings4 withDescription
           withAttrs man;
 
         # A set of VSCodium extensions
@@ -65,10 +65,11 @@
                 ''
               )
               {
-                inherit (vscodium) version;
-                pname = exeName;
-                name = "${exeName}-${vscodium.version}";
-                meta = codium.meta // { description = "`VSCodium` with extensions and binaries on `PATH`"; };
+                inherit (vscodium) version pname name;
+                meta = codium.meta // {
+                  description = "`VSCodium` with extensions and binaries on `PATH`";
+                  mainProgram = exeName;
+                };
               })
             (x: ''
               ${man.DESCRIPTION}

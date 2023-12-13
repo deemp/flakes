@@ -149,6 +149,9 @@ __foldl' pkgs.lib.attrsets.recursiveUpdate { }
           yaml = {
             redhat = "vscode-yaml";
           };
+          postgresql = {
+            cweijan = "vscode-postgresql-client2";
+          };
         }
     )
     (mkExtensions vscode-marketplace-release {
@@ -156,11 +159,4 @@ __foldl' pkgs.lib.attrsets.recursiveUpdate { }
         eamodio = "gitlens";
       };
     })
-    (mkExtensions open-vsx
-      {
-        postgresql = {
-          cweijan = "vscode-postgresql-client2";
-        };
-      })
-
   ]
