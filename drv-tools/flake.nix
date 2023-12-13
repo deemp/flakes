@@ -92,7 +92,7 @@
             (
               name: value:
               if isDerivation value
-              then withMeta value (x: { label = name; })
+              then value // { pname = name; }
               else
                 throwIfNot (isAttrs value) "Expected an attrset or a derivation" (
                   let cond = value_: hasAttr "text" value_ && isString value_.text; in
@@ -224,7 +224,6 @@
                   meta = prev.meta // {
                     inherit longDescription description;
                     mainProgram = name;
-                    label = name;
                   };
                 })
             )
