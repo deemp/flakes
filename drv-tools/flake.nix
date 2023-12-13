@@ -285,7 +285,7 @@
             dataJSON = toJSON dataNix;
             name_ = "write-${name}-json";
             dir = dirOf path;
-            description = "Write a `Nix` expression for `${name}` as `JSON` into `${path}`";
+            description = "Write a `Nix` expression for `${name}` as `JSON` to `${path}`";
           in
           mkShellApp {
             name = name_;
@@ -320,7 +320,7 @@
               rm ${tmpJSON}
               printf "${framedBrackets "ok %s"}" "${name_}"
             '';
-            description = "Write a `Nix` expression for `${name}` as `YAML` into `${path}`";
+            description = "Write a `Nix` expression for `${name}` as `YAML` to `${path}`";
           };
 
         # Convert JSON to Nix
