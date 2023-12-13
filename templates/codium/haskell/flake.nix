@@ -16,7 +16,7 @@
         pkgs = inputs.nixpkgs.legacyPackages.${system};
         inherit (inputs.codium.lib.${system}) extensions extensionsCommon settingsNix settingsCommonNix writeSettingsJSON mkCodium;
         inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkShell;
-        inherit (inputs.drv-tools.lib.${system}) mkBin withAttrs withMan withDescription mkShellApp man;
+        inherit (inputs.drv-tools.lib.${system}) withAttrs withMan withDescription mkShellApp man;
         inherit (inputs.flakes-tools.lib.${system}) mkFlakesTools;
         inherit (inputs.haskell-tools.lib.${system}) toolsGHC;
         inherit (inputs.workflows.lib.${system}) writeWorkflow nixCI;
@@ -25,7 +25,7 @@
         # --- Parameters ---
 
         # The desired GHC version
-        ghcVersion = "928";
+        ghcVersion = "948";
 
         # The name of a package
         packageName = "nix-managed";
@@ -314,15 +314,8 @@
               mkCommands "tools" tools
               ++ mkRunCommands "packages" { inherit (packages) default; }
               ++ mkRunCommands "ide" { "codium ." = packages.codium; inherit (packages) writeSettings; }
-              ++ mkRunCommands "infra" { inherit (packages) writeWorkflows updateLocks pushToCachix saveFlakes; }
-              ++
-              [
-                {
-                  name = "cabal v1-run";
-                  category = "scripts";
-                  help = "Run app via cabal";
-                }
-              ];
+              ++ mkRunCommands "infra" { inherit (packages) writeWorkflows updateLocks pushToCachix saveFlakes format; }
+            ;
           };
         };
       in
