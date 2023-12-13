@@ -297,6 +297,7 @@
               } | python -m json.tool > ${path}
               printf "${framedBrackets "ok %s"}" "${name_}"
             '';
+            excludeShellChecks = [ "SC2016" ];
             inherit description;
           };
 
@@ -426,6 +427,11 @@
             )
             attrs
           ) // (common path);
+
+        packages = {
+          inherit json2nix;
+          test.json = writeJSON "test" "tmp/test.json" { a = "$b"; };
+        };
       in
       {
         lib = {
@@ -477,9 +483,7 @@
             ;
         };
 
-        packages = {
-          inherit json2nix;
-        };
+        inherit packages;
 
         # tests 
         devShells.default = pkgs.mkShell {
