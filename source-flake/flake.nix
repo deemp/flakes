@@ -13,7 +13,7 @@
     flake-utils.url = "github:numtide/flake-utils";
     lima.url = "github:deemp/lima";
     nix-vscode-extensions = {
-      url = "github:nix-community/nix-vscode-extensions";
+      url = "github:nix-community/nix-vscode-extensions/7cac6db467006533f4c151f0473498470f2e0bfd";
       inputs.nixpkgs.follows = "nixpkgs";
       inputs.flake-utils.follows = "flake-utils";
     };
