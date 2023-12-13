@@ -5,7 +5,7 @@
     perSystem = { inputs, system }:
       let
         pkgs = inputs.nixpkgs.legacyPackages.${system};
-        inherit (pkgs.lib.lists) flatten;
+        inherit (pkgs.lib.lists) flatten last;
         inherit (pkgs.lib.attrsets)
           recursiveUpdate filterAttrs genAttrs mapAttrsToList
           mapAttrsRecursiveCond isDerivation;
@@ -14,7 +14,7 @@
           isString isAttrs dirOf baseNameOf toJSON hasAttr listToAttrs;
         inherit (pkgs.lib.strings)
           concatStringsSep concatMapStringsSep
-          removePrefix removeSuffix;
+          removePrefix removeSuffix splitString;
         inherit (pkgs.lib) escapeShellArg id getExe getExe';
         inherit (pkgs.lib.trivial) throwIfNot;
 
@@ -96,7 +96,9 @@
               else
                 throwIfNot (isAttrs value) "Expected an attrset or a derivation" (
                   let cond = value_: hasAttr "text" value_ && isString value_.text; in
-                  if cond value then mkShellApp (value // { inherit name; })
+                  if cond value then
+                    withMeta (mkShellApp (value // { inherit name; }))
+                      (_: { mainProgram = last (splitString "." name); })
                   else
                     mapAttrsRecursiveCond (value_: cond value || isDerivation value)
                       (
@@ -536,6 +538,7 @@
                 helloX2.text = "${getExe pkgs.hello}; ${getExe pkgs.hello}";
                 helloRenamed = pkgs.hello;
                 hello.nested = pkgs.hello;
+                hello.script.nested.text = "${getExe pkgs.hello}";
               };
             in
             apps;
