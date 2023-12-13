@@ -9,11 +9,11 @@
           withMan mkShellApp mkShellApps
           getExe framedBrackets singletonIf
           runInEachDir genAttrsId subDirectories
-          concatStringsNewline
+          concatStringsNewline withMeta
           ;
         inherit (pkgs.lib.lists) flatten unique;
 
-        cachix = pkgs.cachix;
+        cachix = withMeta (pkgs.cachix) (_: { mainProgram = "cachix"; });
 
         env = genAttrsId [ "CACHIX_AUTH_TOKEN" "CACHIX_CACHE" "NIX_CACHE_PROFILE" "CACHE_DIRECTORY" ];
 
@@ -50,10 +50,10 @@
                     ''
                       if [ -z ''${${env.CACHIX_CACHE}+x} ];
                       then 
-                        printf "${framedBrackets "The environment variable ${env.CACHIX_CACHE} is not set. Can't find a Cachix cache."}"
+                        printf "%s" "${framedBrackets "The environment variable ${env.CACHIX_CACHE} is not set. Can't find a Cachix cache."}"
                         exit 1
                       else
-                        printf "${framedBrackets "Using the Cachix cache from ${env.CACHIX_CACHE} environment variable."}"
+                        printf "%s" "${framedBrackets "Using the Cachix cache from ${env.CACHIX_CACHE} environment variable."}"
                       fi
                     ''
                   else ""
@@ -61,13 +61,14 @@
                 + ''
                   if [ -z ''${${env.CACHE_DIRECTORY}+x} ]; then
                     export ${env.CACHE_DIRECTORY}="${CACHE_DIRECTORY}"
-                    printf "${framedBrackets "The environment variable ${env.CACHE_DIRECTORY} is not set. Using the \$${env.CACHE_DIRECTORY} directory for profiles."}"
+                    printf "%s" "${framedBrackets "The environment variable ${env.CACHE_DIRECTORY} is not set. Using the \$${env.CACHE_DIRECTORY} directory for profiles."}"
                   else
-                    printf "${framedBrackets "Using the \$${env.CACHE_DIRECTORY} directory for profiles."}"
+                    printf "%s" "${framedBrackets "Using the \$${env.CACHE_DIRECTORY} directory for profiles."}"
                   fi
                   source ${./scripts.sh}
                   saveFlakes ${if doPushToCachix then "true" else "false"}
                 '';
+              excludeShellChecks = [ "SC1091" ];
               description = "Push inputs and outputs (`packages` and `devShells`) of a flake to `cachix`";
               runtimeInputs =
                 (if doPushToCachix then [ cachix ] else [ ]) ++
