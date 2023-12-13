@@ -29,26 +29,31 @@
             ] ++ runtimeDependencies;
             flags_ = concatMapStringsNewline (x: x + " \\") flags;
           in
-          withAttrs
-            (
-              pkgs.runCommand name
-                { buildInputs = [ pkgs.makeBinaryWrapper ]; }
-                ''
-                  mkdir $out
-                  cp -rs --no-preserve=mode,ownership ${drv}/* $out
-                  rm -rf $out/bin
-                  mkdir $out/bin
+          pkgs.stdenv.mkDerivation {
+            pname = drv.pname or null;
+            name = drv.name or null;
+            version = drv.version or null;
 
-                  makeWrapper ${drv}/bin/${name} $out/bin/${name} \
-                    --add-flags "\
-                      ${flags_}
-                    " ${addBinDeps runtimeDependencies_}
-                ''
-            )
-            {
-              pname = name;
-              inherit (drv) meta;
-            };
+            phases = [ "installPhase" ];
+            buildInputs = [ pkgs.makeBinaryWrapper ];
+            installPhase = ''
+              runHook preInstall
+
+              mkdir $out
+              cp -rs --no-preserve=mode,ownership ${drv}/* $out
+              rm -rf $out/bin
+              mkdir $out/bin
+
+              makeWrapper ${drv}/bin/${name} $out/bin/${name} \
+                --add-flags "\
+                     ${flags_}
+                   " ${addBinDeps runtimeDependencies_}
+
+              runHook postInstall
+            '';
+
+            meta = drv.meta // { mainProgram = name; };
+          };
 
         # get deps for a Haskell package
         getHaskellPackageDeps = drv: concatLists (attrValues drv.getCabalDeps);
@@ -95,25 +100,28 @@
             description ? "no description provided :("
           }:
           let exe = pkgs.haskell.lib.justStaticExecutables package; in
-          withAttrs
-            (pkgs.runCommand binaryName
-              { buildInputs = [ pkgs.makeBinaryWrapper ]; }
-              ''
-                mkdir $out
+          pkgs.stdenv.mkDerivation {
+            pname = package.pname or null;
+            name = package.name or null;
+            version = package.version or null;
+
+            phases = [ "installPhase" ];
+            buildInputs = [ pkgs.makeBinaryWrapper ];
+            installPhase = ''
+              runHook preInstall
+
+              mkdir $out
                 cp -rs --no-preserve=mode,ownership ${exe}/* $out/
                 rm -rf $out/bin
                 mkdir $out/bin
-                makeWrapper ${exe}/bin/${executableName} \
-                  $out/bin/${binaryName} \
+                makeWrapper ${exe}/bin/${executableName} $out/bin/${binaryName} \
                   ${addBinDeps runtimeDependencies}
-              ''
-            )
-            {
-              pname = binaryName;
-              name = "${binaryName}-${package.version}";
-              meta = { inherit description; };
-            }
-        ;
+
+              runHook postInstall
+            '';
+
+            meta = package.meta // { mainProgram = binaryName; inherit description; };
+          };
 
         # Tools for a specific `GHC` version and overriden haskell packages for this `GHC`
         toolsGHC =

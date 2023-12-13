@@ -252,28 +252,39 @@
           let
             longDescription = fLongDescription drv;
             man = ''
-              ${executableName}(1) -- ${drv.meta.description}
+              ${executableName}(1) -- ${drv.meta.description or "no description provided :("}
               ============
 
               ${longDescription}
             '';
             ronn = "${executableName}.1.ronn";
             manPath = "$out/share/man/man1";
-            drv_ = drv.overrideAttrs (prev: {
-              buildInputs = (prev.buildInputs or [ ]) ++ [ pkgs.ronn ];
-              postInstall = (prev.postInstall or "") + ''
-                printf "Creating a man page.\n"
-                rm -rf ${manPath} 2> /dev/null    
-                mkdir -p ${manPath}
-                chmod +w .
-                printf '%s' ${escapeShellArg man} > ${ronn}
-                ronn ${ronn} --roff -o ${manPath}
-                rm ${ronn}
-              '';
-            });
           in
-          withMeta drv_ (_: drv.meta // { inherit longDescription; });
+          pkgs.stdenv.mkDerivation {
+            pname = drv.pname or null;
+            name = drv.name or null;
+            version = drv.version or null;
 
+            phases = [ "installPhase" ];
+            buildInputs = [ pkgs.ronn ];
+            installPhase = ''
+              runHook preInstall
+
+              mkdir -p $out
+              cp -rs --no-preserve=mode,ownership ${drv}/* $out
+              
+              printf "Creating a man page.\n"
+              rm -rf ${manPath} 2> /dev/null    
+              mkdir -p ${manPath}
+              chmod +w .
+              printf '%s' ${escapeShellArg man} > ${ronn}
+              ronn ${ronn} --roff -o ${manPath}
+              rm ${ronn}
+
+              runHook postInstall
+            '';
+            meta = drv.meta // { inherit longDescription; };
+          };
         withMan = drv: withMan_ (builtins.baseNameOf (getExe drv)) drv;
 
         # String -> String -> Any -> IO ()
