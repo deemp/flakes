@@ -233,6 +233,8 @@
             '')
         ;
 
+        # TODO fix order of args
+        # TODO withAttrs should take a function, not just another attrset
         withAttrs = attrSet1@{ ... }: attrSet2@{ ... }: recursiveUpdate attrSet1 attrSet2;
         withMeta = drv@{ ... }: fMeta: withAttrs drv { meta = fMeta drv; };
         withDescription = drv@{ ... }: fDescription: assert builtins.isFunction fDescription; withAttrs drv { meta.description = fDescription drv; };
@@ -365,7 +367,7 @@
           , message ? ""
           , postMessage ? ""
           , runtimeInputs ? [ ]
-          , description
+          , description ? "run `${name}` in each given directory"
           , longDescription ? ""
           }:
           let
@@ -379,7 +381,7 @@
               let INITIAL_CWD = "INITIAL_CWD";
               in
               ''
-                ${INITIAL_CWD}=$PWD
+                ${INITIAL_CWD}="$PWD"
                 printf "%s" '${preMessage}'
               '' +
               concatStringsSep "\n"
@@ -387,7 +389,7 @@
                   (dir: ''
                     printf "${framedBrackets "${if message == "" then name else message} : %s"}" "''$${INITIAL_CWD}/${dir}"
 
-                    cd ''$${INITIAL_CWD}/${dir}
+                    cd "''$${INITIAL_CWD}/${dir}"
             
                     ${command}
                   '')
@@ -395,7 +397,7 @@
               ''
                 printf "%s" '${postMessage}'
               '';
-            description = "run `${name}` in each given directory";
+            inherit description;
             longDescription = ''
               ${man.NAME}
               `${name_}` - ${description}
@@ -441,8 +443,13 @@
         packages = {
           inherit json2nix;
           test = {
-            json = writeJSON "test" "tmp/test.json" { a = "$b"; };
-            yaml = writeYAML "hey" "tmp/test-yaml" { a = 3; };
+            json = writeJSON "test-json" "tmp/test.json" { a = "$b"; };
+            yaml = writeYAML "test-yaml" "tmp/test-yaml" { a = 3; };
+            runInEachDir = runInEachDir {
+              name = "test-yaml";
+              command = getExe packages.test.yaml;
+              dirs = [ "tmp" ];
+            };
           };
         };
       in
