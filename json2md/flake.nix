@@ -6,22 +6,24 @@
       let
         pkgs = inputs.nixpkgs.legacyPackages.${system};
         inherit (inputs.drv-tools.lib.${system})
-          mkBin mkBinName writeJSON withMan mkShellApp
-          framedBrackets mkShellApps man;
+          getExe getExe' writeJSON withMan mkShellApp
+          framedBrackets mkShellApps man withMeta;
         inherit (builtins) isString baseNameOf dirOf;
 
-        json2md = pkgs.buildNpmPackage rec {
-          buildInputs = [
-            pkgs.nodejs_18
-          ];
+        json2md = withMeta
+          (pkgs.buildNpmPackage rec {
+            buildInputs = [
+              pkgs.nodejs_18
+            ];
 
-          pname = "json2md";
-          version = "2.0.0";
+            pname = "json2md";
+            version = "2.0.0";
 
-          src = ./.;
+            src = ./.;
 
-          npmDepsHash = "sha256-WjGhOEqL6Zg5tbBHgStr10ROcedJnkWCf5qiDwHOOp8=";
-        };
+            npmDepsHash = "sha256-WjGhOEqL6Zg5tbBHgStr10ROcedJnkWCf5qiDwHOOp8=";
+          })
+          (_: { mainProgram = "json2md"; });
 
         nix2mdSilent = outPath: dataNix:
           assert builtins.isString outPath;
@@ -44,10 +46,10 @@
               mdlint
             ];
             text = ''
-              ${mkBin writeTmpJSON}
+              ${getExe writeTmpJSON}
               mkdir -p ${outDir}
-              ${mkBinName json2md "json2md"} ${tmpJSON} > ${outPath}
-              ${mkBinName mdlint "markdownlint-cli2-fix"} ${outPath} || echo ""
+              ${getExe json2md} ${tmpJSON} > ${outPath}
+              ${getExe' mdlint "markdownlint-cli2-fix"} ${outPath} || echo ""
               rm ${tmpJSON}
             '';
           };
@@ -62,7 +64,7 @@
           mkShellApp {
             name = name;
             text = ''
-              ${mkBin nix2md_}
+              ${getExe nix2md_}
               printf "${framedBrackets "%s"}" "ok ${name}"
             '';
             description = "Convert a Nix expression to ${outPath}";
@@ -71,7 +73,7 @@
 
         test = mkShellApps {
           testNix2md = {
-            text = "${mkBin (nix2md "tmp/some.md" [{ h1 = "Some text"; }])}";
+            text = "${getExe (nix2md "tmp/some.md" [{ h1 = "Some text"; }])}";
           };
         };
       in
