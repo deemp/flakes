@@ -1,7 +1,7 @@
 {
   inputs.flakes.url = "github:deemp/flakes";
   outputs = inputs: inputs.flakes.makeFlake {
-    inputs = { inherit (inputs.flakes.all) nixpkgs; };
+    inputs = { inherit (inputs.flakes.all) nixpkgs drv-tools; };
     perSystem = { inputs, system }:
       let
         pkgs = inputs.nixpkgs.legacyPackages.${system};
@@ -9,15 +9,15 @@
         inherit (pkgs.lib.lists) genAttrs;
         inherit (pkgs.lib.strings) concatMapStringsSep;
         inherit (pkgs.lib.attrsets) recursiveUpdate;
-        concatMapStringsNewline = concatMapStringsSep "\n";
-        genAttrsId = list: genAttrs list (x: x);
-        withAttrs = recursiveUpdate;
+        inherit (inputs.drv-tools.lib.${system}) withMeta concatMapStringsNewline genAttrsId withAttrs getExe;
 
         # `GHC` of a specific version
         # With haskell packages that are dependencies of the given packages
         ghcGHC = ghcVersion: override: packages:
-          ((haskellPackagesGHCOverride ghcVersion override).ghcWithPackages
-            (ps: getHaskellPackagesDeps (packages ps))) // { pname = "ghc"; };
+          withMeta
+            ((haskellPackagesGHCOverride ghcVersion override).ghcWithPackages
+              (ps: getHaskellPackagesDeps (packages ps)) // { pname = "ghc"; })
+            (_: { mainProgram = "ghc"; });
 
         # build tool with `GHC` of a specific version available on PATH
         buildToolWithFlagsGHC = { name, drv, flags, ghcVersion, override, packages, runtimeDependencies }:
@@ -85,7 +85,7 @@
             # package that contains an executable
             package
           , # name of the executable
-            executableName ? package.pname
+            executableName ? builtins.baseNameOf (getExe package)
           , # new name of the executable
             binaryName ? executableName
           , # runtime dependencies of the executable
@@ -145,7 +145,7 @@
 
             inherit (haskellPackagesGHC version) callCabal2nix;
             implicit-hie = pkgs.haskellPackages.implicit-hie_0_1_4_0;
-            fourmolu = pkgs.haskellPackages.fourmolu_0_13_0_0;
+            fourmolu = pkgs.haskellPackages.fourmolu;
             inherit (pkgs) ghcid hpack;
 
             haskellPackages = haskellPackagesGHCOverride version override;
@@ -187,7 +187,7 @@
             runtimeDependencies = [ pkgs.hello ];
           };
 
-          ghcVersion_ = "945";
+          ghcVersion_ = "948";
           executableName = "hello-world";
           binaryName = "hello";
           test =
@@ -201,7 +201,7 @@
               };
             in
             {
-              inherit (tools) cabal stack hls ghc implicit-hie ghcid hpack haskellPackages;
+              inherit (tools) cabal stack hls ghc implicit-hie ghcid hpack haskellPackages fourmolu;
               inherit hello-world;
               deps = "${packageName}".getCabalDeps;
             };
@@ -222,7 +222,7 @@
                 ${test.${packageName}}/bin/${binaryName}
               '';
               buildInputs = __attrValues {
-                inherit (test) cabal stack hls ghc implicit-hie ghcid hpack;
+                inherit (test) cabal stack hls ghc implicit-hie ghcid hpack fourmolu;
               };
             };
           };
