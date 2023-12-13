@@ -14,7 +14,7 @@
         let
           pkgs = inputs.nixpkgs.legacyPackages.${system};
           inherit (inputs.codium.lib.${system}) mkCodium writeSettingsJSON extensionsCommon settingsCommonNix;
-          inherit (inputs.drv-tools.lib.${system}) subDirectories withAttrs mkShellApps getExe;
+          inherit (inputs.drv-tools.lib.${system}) subDirectories withAttrs mkShellApps getExe getExe';
           inherit (inputs.flakes-tools.lib.${system}) mkFlakesTools;
           inherit (inputs.devshell.lib.${system}) mkCommands mkRunCommands mkShell;
           inherit (inputs.workflows.lib.${system}) writeWorkflow nixCI expr steps names run stepsIf os;
@@ -44,7 +44,7 @@
               text = ''
                 mkdir -p docs/src
                 cp README/*.md docs/src
-                ${getExe pkgs.mdbook} build docs
+                ${getExe' pkgs.mdbook "mdbook"} build docs
               '';
               description = "Generate docs";
             };
@@ -75,7 +75,7 @@
                       }
                       {
                         name = "Update docs";
-                        run = run.nixScript { name = packages.genDocs.pname; };
+                        run = run.nixScript { name = getExe packages.genDocs; };
                       }
                       (steps.commit {
                         messages = [
@@ -110,7 +110,7 @@
             commands =
               mkCommands "tools" tools
               ++ mkRunCommands "ide" { inherit (packages) writeSettings; "codium ." = packages.codium; }
-              ++ mkRunCommands "infra" { inherit (packages) writeWorkflows; }
+              ++ mkRunCommands "infra" { inherit (packages) writeWorkflows saveFlakes format updateLocks; }
               ++ mkRunCommands "docs" { inherit (packages) genDocs; };
           };
         in
