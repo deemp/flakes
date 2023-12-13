@@ -317,7 +317,7 @@
             text = ''
               mkdir -p ${dir}
               ${getExe writeJSON_} &>/dev/null
-              cat ${tmpJSON} | yq e -MP - > ${path}
+              yq e -MP ${tmpJSON} > ${path}
               rm ${tmpJSON}
               printf "${framedBrackets "ok %s"}" "${name_}"
             '';
@@ -430,7 +430,10 @@
 
         packages = {
           inherit json2nix;
-          test.json = writeJSON "test" "tmp/test.json" { a = "$b"; };
+          test = {
+            json = writeJSON "test" "tmp/test.json" { a = "$b"; };
+            yaml = writeYAML "hey" "tmp/test-yaml" { a = 3; };
+          };
         };
       in
       {
@@ -504,7 +507,6 @@
           accessors = mkAccessors_ "pref" {
             a.b.c = "";
           };
-          writeYAML = writeYAML "hey" "tmp/test-yaml" { a = 3; };
           mkAttrs =
             ord_ [
               { a = 3; }
