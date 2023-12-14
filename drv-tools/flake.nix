@@ -157,7 +157,7 @@
         framedBrackets = framedBrackets_ "\n\n" "\n\n";
         framedBrackets_ = pref: suff: framed_ "${pref}[ " " ]${suff}";
 
-        mkBashHref = text: url: ''\e]8;;${url}\a${text}\e]8;;\a'';
+        mkBashHref = text: url: '']8;;${url}\${text}]8;;\'';
 
         # concat strings and separate them by a newline character
         concatStringsNewline = list: concatStringsSep "\n" (flatten list);
@@ -442,6 +442,8 @@
             attrs
           ) // (common path);
 
+        bashHref = mkBashHref "github link" "https://github.com";
+
         packages = {
           inherit json2nix;
           test = {
@@ -451,6 +453,12 @@
               name = "test-yaml";
               command = getExe packages.test.yaml;
               dirs = [ "tmp" ];
+            };
+            href = pkgs.writeShellApplication {
+              name = "href";
+              text = ''echo -e '${bashHref}' '';
+              meta.description = "${bashHref}";
+              excludeShellChecks = [ "SC1003" ];
             };
           };
         };
@@ -515,9 +523,6 @@
           name = "default";
           buildInputs = [ pkgs.tree json2nix pkgs.fish ];
           LC_ALL = "C.utf8";
-        };
-        devShells.href = pkgs.mkShell {
-          shellHook = ''printf '${mkBashHref "github link" "https://github.com"}\n' '';
         };
 
         tests = {
