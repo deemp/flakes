@@ -12,22 +12,22 @@
 ## Community
 
 - Join `NixOS` [community](https://nixos.org/community/)
-  - [Telegram](https://t.me/ru_nixos/19843)
+  - [Telegram](https://t.me/ru_nixos)
 - [Discourse](https://discourse.nixos.org/)
 
 ## Nix messages
 
 Sometimes, when you enter a devshell (e.g., `nix develop`) or run a default package of a flake, you may see:
 
-- warnings - not a problem, just read them and google if interested
-- errors - the same story
-- prompts - answer `y` (the simplest way)
+- warnings - not a problem, just read them and google if you're interested;
+- errors - the same story;
+- prompts - answer `y` (the simplest way).
 
 ## direnv
 
-This is a tool for running scripts in `.envrc` files when you enter a directory containing such file.
-One of its usages with flakes is to automatically build, cache, and enter a devshell when you enter that flake's directory in a terminal.
-See [Direnv integration](https://nixos.wiki/wiki/Flakes#Direnv_integration)
+This is a tool for running scripts when you `cd` to a directory containing a `.envrc` file.
+`direnv` automatically builds, caches, and starts a devshell when you enter a flake directory containing the `.envrc` file (e.g., the root directory of this repository).
+See [Direnv integration](https://nixos.wiki/wiki/Flakes#Direnv_integration).
 
 1. Install `direnv` - [src](https://direnv.net/docs/installation.html#installation)
     1. Install the binary
@@ -38,8 +38,14 @@ See [Direnv integration](https://nixos.wiki/wiki/Flakes#Direnv_integration)
 
     1. [Hook](https://direnv.net/docs/hook.html) into your devshell
 
-When you see `direnv` errors, run the suggested commands
+1. Allow `direnv` to work in a directory.
+
+    ```console
+    direnv allow
+    ```
+
+    When you see `direnv` errors, run the suggested commands.
 
 ## Further reading
 
-See [Nix prerequisites](./NixPrerequisites.md)
+See [Nix prerequisites](./NixPrerequisites.md).
