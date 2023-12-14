@@ -97,8 +97,10 @@
                 throwIfNot (isAttrs value) "Expected an attrset or a derivation" (
                   let cond = value_: hasAttr "text" value_ && isString value_.text; in
                   if cond value then
-                    withMeta (mkShellApp (value // { inherit name; }))
-                      (_: { mainProgram = last (splitString "." name); })
+                    let name_ = last (splitString "." name); in
+                    withMeta
+                      ((mkShellApp (value // { name = name_; })) // { pname = name; })
+                      (_: { mainProgram = name_; })
                   else
                     mapAttrsRecursiveCond (value_: cond value || isDerivation value)
                       (
