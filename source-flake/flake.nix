@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/e97b3e4186bcadf0ef1b6be22b8558eab1cdeb5d";
+    nixpkgs.url = "github:NixOS/nixpkgs/d2d95997aa3059b512105976e378490aaea2ea75";
     devshell-source = {
       url = "github:numtide/devshell";
       inputs.nixpkgs.follows = "nixpkgs";
