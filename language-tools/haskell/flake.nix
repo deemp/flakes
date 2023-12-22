@@ -154,7 +154,10 @@
             inherit (haskellPackagesGHC version) callCabal2nix;
             implicit-hie = pkgs.haskellPackages.implicit-hie_0_1_4_0;
             fourmolu = pkgs.haskellPackages.fourmolu;
-            inherit (pkgs) ghcid hpack;
+            hpack = pkgs.haskell.lib.overrideCabal (pkgs.haskellPackages.hpack_0_36_0) (x: {
+              libraryHaskellDepends = [ pkgs.haskellPackages.http-client-tls_0_3_6_3 ] ++ (x.libraryHaskellDepends or [ ]);
+            });
+            inherit (pkgs) ghcid;
 
             haskellPackages = haskellPackagesGHCOverride version override;
             inherit justStaticExecutable getHaskellPackageDeps getHaskellPackagesDeps;
