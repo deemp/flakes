@@ -230,17 +230,17 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1702272962,
-        "narHash": "sha256-D+zHwkwPc6oYQ4G3A1HuadopqRwUY/JkMwHz1YF7j4Q=",
+        "lastModified": 1703112174,
+        "narHash": "sha256-YUgWFRQe09TqZkGaz7q9bPK2gSoz7XLSXx9fX1wWflA=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "e97b3e4186bcadf0ef1b6be22b8558eab1cdeb5d",
+        "rev": "d2d95997aa3059b512105976e378490aaea2ea75",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "e97b3e4186bcadf0ef1b6be22b8558eab1cdeb5d",
+        "rev": "d2d95997aa3059b512105976e378490aaea2ea75",
         "type": "github"
       }
     },
@@ -276,11 +276,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1702591455,
-        "narHash": "sha256-vK54IZysaxuUOe+abJO0wD40bxqwfZ2aBOhUWS/O/oA=",
+        "lastModified": 1703216642,
+        "narHash": "sha256-9ZxL8UGFLBUepcoujK6CtkGgQhxWkHnDl0r9+h+0uik=",
         "owner": "nix-community",
         "repo": "poetry2nix",
-        "rev": "9d9d434528404a22fb0c8283fea1ea3a7410ff80",
+        "rev": "1c75a009920f66138877318358f8a07a8bca443e",
         "type": "github"
       },
       "original": {
@@ -356,11 +356,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1702692877,
-        "narHash": "sha256-apUL3DgWZGzWQNo13o7Cv4BfwpvXyD00rGWlp7wJyhw=",
+        "lastModified": 1703211258,
+        "narHash": "sha256-ye9HcJ9WH/QCq6R4GC3FvLnIDpa2Kje4nXya9j/mhA4=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "2a186e207c9ef8e3eef114259044fc2f92043d59",
+        "rev": "b8c487832712f4e3e6f9e81b70e6654eb907abfc",
         "type": "github"
       },
       "original": {
@@ -398,11 +398,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1702064950,
-        "narHash": "sha256-6qvmnrzDOK/o2G2xaHkp8XjsGmG1mY57je7WuEgTjIQ=",
+        "lastModified": 1702828829,
+        "narHash": "sha256-tL/ThLAk5JgYdKXy3MIZYnDavemjpemF17dVgbfbYM8=",
         "owner": "thomashoneyman",
         "repo": "slimlock",
-        "rev": "eebd4046168ad38558cd6869dcd58d747673ab97",
+        "rev": "a7ce81f35d236a5e58bce30e34825013e19ffade",
         "type": "github"
       },
       "original": {
