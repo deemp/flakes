@@ -1,0 +1,44 @@
+{
+  "nodes": {
+    "flakes": {
+      "locked": {
+        "lastModified": 1696514961,
+        "narHash": "sha256-6V9skmHuk6AajrFPIBolCPIM5JBmnwquYT415BTtbSg=",
+        "owner": "deemp",
+        "repo": "flakes",
+        "rev": "004f8374a77dcefe6a4c4a42eb136fc4e9b26827",
+        "type": "github"
+      },
+      "original": {
+        "owner": "deemp",
+        "repo": "flakes",
+        "type": "github"
+      }
+    },
+    "lima": {
+      "inputs": {
+        "flakes": "flakes"
+      },
+      "locked": {
+        "lastModified": 1696552781,
+        "narHash": "sha256-9unhE2yQZ8Loq4HhG480VfGlZXnWySQ+/3jtwo5yP00=",
+        "owner": "deemp",
+        "repo": "lima",
+        "rev": "b75bce703a2c1ea4f70dd0ae6e0b47d984a905b6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "deemp",
+        "repo": "lima",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "lima": "lima"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

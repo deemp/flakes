@@ -1,0 +1,44 @@
+{
+  "nodes": {
+    "flakes": {
+      "locked": {
+        "lastModified": 1696514961,
+        "narHash": "sha256-6V9skmHuk6AajrFPIBolCPIM5JBmnwquYT415BTtbSg=",
+        "owner": "deemp",
+        "repo": "flakes",
+        "rev": "004f8374a77dcefe6a4c4a42eb136fc4e9b26827",
+        "type": "github"
+      },
+      "original": {
+        "owner": "deemp",
+        "repo": "flakes",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "terrafix": "terrafix"
+      }
+    },
+    "terrafix": {
+      "inputs": {
+        "flakes": "flakes"
+      },
+      "locked": {
+        "lastModified": 1703334368,
+        "narHash": "sha256-nKYy3evVgHJW1sLPhQdkoA3UcIq6z1W6T9XDcKc2nSw=",
+        "owner": "deemp",
+        "repo": "terrafix",
+        "rev": "49512d4e899809ff87e7feaac64882861ca7af1a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "deemp",
+        "repo": "terrafix",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
