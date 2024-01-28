@@ -1,0 +1,918 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>flakes</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('light')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="InstallNix.html"><strong aria-hidden="true">1.</strong> Install Nix</a></li><li class="chapter-item expanded "><a href="NixPrerequisites.html"><strong aria-hidden="true">2.</strong> Nix Prerequisites</a></li><li class="chapter-item expanded "><a href="Conventions.html"><strong aria-hidden="true">3.</strong> Conventions</a></li><li class="chapter-item expanded "><a href="Troubleshooting.html"><strong aria-hidden="true">4.</strong> Troubleshooting</a></li><li class="chapter-item expanded "><a href="Haskell.html"><strong aria-hidden="true">5.</strong> Haskell</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">flakes</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="install-nix"><a class="header" href="#install-nix">Install Nix</a></h1>
+<ol>
+<li>
+<p>Install <a href="https://nixos.org/download.html">Nix</a> (Single-user installation)</p>
+<pre><code class="language-console">sh &lt;(curl -L https://nixos.org/nix/install) --no-daemon
+</code></pre>
+</li>
+<li>
+<p><a href="https://nixos.wiki/wiki/Flakes#Permanent">Enable</a> flakes</p>
+</li>
+<li>
+<p>Set <code>show-trace = true</code> (<a href="https://nixos.org/manual/nix/unstable/command-ref/conf-file.html#conf-show-trace">doc</a>) to see more complete error messages.</p>
+</li>
+</ol>
+<h2 id="community"><a class="header" href="#community">Community</a></h2>
+<ul>
+<li>Join <code>NixOS</code> <a href="https://nixos.org/community/">community</a>
+<ul>
+<li><a href="https://t.me/ru_nixos">Telegram</a></li>
+</ul>
+</li>
+<li><a href="https://discourse.nixos.org/">Discourse</a></li>
+</ul>
+<h2 id="nix-messages"><a class="header" href="#nix-messages">Nix messages</a></h2>
+<p>Sometimes, when you enter a devshell (e.g., <code>nix develop</code>) or run a default package of a flake, you may see:</p>
+<ul>
+<li>warnings - not a problem, just read them and google if you're interested;</li>
+<li>errors - the same story;</li>
+<li>prompts - answer <code>y</code> (the simplest way).</li>
+</ul>
+<h2 id="direnv"><a class="header" href="#direnv">direnv</a></h2>
+<p>This is a tool for running scripts when you <code>cd</code> to a directory containing a <code>.envrc</code> file.
+<code>direnv</code> automatically builds, caches, and starts a devshell when you enter a flake directory containing the <code>.envrc</code> file (e.g., the root directory of this repository).
+See <a href="https://nixos.wiki/wiki/Flakes#Direnv_integration">Direnv integration</a>.</p>
+<ol>
+<li>
+<p>Install <code>direnv</code> - <a href="https://direnv.net/docs/installation.html#installation">src</a></p>
+<ol>
+<li>
+<p>Install the binary</p>
+<pre><code class="language-console">nix profile install nixpkgs#direnv
+</code></pre>
+</li>
+<li>
+<p><a href="https://direnv.net/docs/hook.html">Hook</a> into your devshell</p>
+</li>
+</ol>
+</li>
+<li>
+<p>Allow <code>direnv</code> to work in a directory.</p>
+<pre><code class="language-console">direnv allow
+</code></pre>
+<p>When you see <code>direnv</code> errors, run the suggested commands.</p>
+</li>
+</ol>
+<h2 id="further-reading"><a class="header" href="#further-reading">Further reading</a></h2>
+<p>See <a href="./NixPrerequisites.html">Nix prerequisites</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="nix-prerequisites"><a class="header" href="#nix-prerequisites">Nix Prerequisites</a></h1>
+<h2 id="install-nix-1"><a class="header" href="#install-nix-1">Install Nix</a></h2>
+<ul>
+<li>Complete all steps from <a href="InstallNix.html">here</a></li>
+</ul>
+<h3 id="community-1"><a class="header" href="#community-1">Community</a></h3>
+<ul>
+<li><a href="https://nixos.org/community/">NixOS/Community</a></li>
+<li><a href="https://t.me/ru_nixos/19843">Telegram</a></li>
+<li><a href="https://nix-community.org/">Nix Community</a></li>
+</ul>
+<h2 id="resources"><a class="header" href="#resources">Resources</a></h2>
+<ul>
+<li>Study the <code>Nix</code> language
+<ul>
+<li><a href="https://nixos.org/manual/nix/unstable/language/index.html">here</a></li>
+<li>and <a href="https://nixos.wiki/wiki/Overview_of_the_Nix_Language">here</a></li>
+</ul>
+</li>
+<li>Learn about <a href="NixPrerequisites.html#flakes">flakes</a></li>
+<li>Read:
+<ul>
+<li><a href="https://nixos.org/manual/nix/unstable/command-ref/nix-store.html">Nix manual</a></li>
+<li><a href="https://nixos.org/manual/nix/unstable/glossary.html">Nix glossary</a></li>
+<li><a href="https://nixos.org/manual/nixpkgs/unstable">nixpkgs manual</a></li>
+<li><a href="https://nix.dev/">nix.dev</a> - Good tutorials. No flakes so far</li>
+<li><a href="https://nixos.org/learn.html">NixOS/Learn</a></li>
+</ul>
+</li>
+<li>Watch
+<ul>
+<li><a href="https://www.youtube.com/watch?v=GMQPzv3Sx58">Nix: Under the hood by Gabriel Gonzalez</a></li>
+</ul>
+</li>
+</ul>
+<h3 id="references"><a class="header" href="#references">References</a></h3>
+<p>I added bookmarks for search engines in my browser, like described <a href="https://superuser.com/a/7336">here</a>.</p>
+<ul>
+<li><a href="https://teu5us.github.io/nix-lib.html">nix-lib</a> - Nix (builtins) &amp; Nixpkgs (lib) Functions</li>
+<li><a href="https://nixos.org/manual/nixpkgs/stable/#nixpkgs-manual">Nixpkgs manual</a></li>
+<li><a href="https://devdocs.io/">devdocs</a> - search functions
+<ul>
+<li><a href="./devdocs-config.json">config</a></li>
+</ul>
+</li>
+<li><a href="https://search.nix.gsc.io/?q=wrapProgram&amp;i=nope&amp;files=&amp;excludeFiles=&amp;repos=">grep nixpkgs</a></li>
+<li><a href="https://github.com/search?q=repo%3ANixOS%2Fnixpkgs+writePython3Bin&amp;type=code">grep nixpkgs on GitHub</a></li>
+</ul>
+<h2 id="docs"><a class="header" href="#docs">Docs</a></h2>
+<h3 id="nix-repl"><a class="header" href="#nix-repl">Nix repl</a></h3>
+<p>Docs are usually left as comments in <code>Nix</code> code. You can find an attribute in <a href="https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-repl.html">nix-repl</a> and look up its comments in a file at a given position.</p>
+<pre><code class="language-console">nix repl
+nix-repl&gt; :lf nixpkgs
+nix-repl&gt; legacyPackages.x86_64-linux.lib.lists.singleton
+«lambda @ /nix/store/24akvz6idhp4lxxvhbfxxq84py30v6bw-source/lib/lists.nix:23:15»
+</code></pre>
+<p>Sometimes, you may evaluate a <code>description</code> or a <code>longDescription</code> of a derivation:</p>
+<pre><code class="language-console">nix-repl&gt; legacyPackages.x86_64-linux.coreutils.meta.longDescription
+&quot;The GNU Core Utilities are the basic file, shell and text manipulation\nutilities of the GNU operating system. These are the core utilities which\nare expected to exist on every operating system.\n&quot;
+</code></pre>
+<h3 id="nix-commands"><a class="header" href="#nix-commands">nix commands</a></h3>
+<p>Learn about a command:</p>
+<pre><code class="language-console">nix help command
+</code></pre>
+<p>Search for a package description:</p>
+<pre><code class="language-console">nix edit nixpkgs#coreutils
+</code></pre>
+<h2 id="flake-templates"><a class="header" href="#flake-templates">Flake templates</a></h2>
+<h3 id="list-templates"><a class="header" href="#list-templates">List templates</a></h3>
+<p>If a <code>flake.nix</code> contains a valid output <code>templates</code>, these templates can be listed.
+List flake outputs and search for <code>templates</code> in this (<code>flakes</code>) repository:</p>
+<pre><code class="language-console">nix flake show | grep template
+└───templates
+evaluating ''    ├───codium-generic: template: `VSCodium` with extensions and executables
+    ├───codium-haskell: template: `VSCodium` with extensions and executables for `Haskell`. Shows 5 ways to run a `Haskell` app.
+evaluating ''    ├───codium-haskell-simple: template: `VSCodium` with extensions and executables for `Haskell`.
+evaluating ''    ├───codium-python: template: `VSCodium` with extensions and executables for `Python`.
+    └───haskell-minimal: template: Minimal flake for a `Haskell` package development.
+</code></pre>
+<h3 id="use-a-template"><a class="header" href="#use-a-template">Use a template</a></h3>
+<p>Two ways of copying from templates:</p>
+<ul>
+<li><a href="https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake-init.html">nix flake init</a></li>
+<li><a href="https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake-new.html">nix flake new</a></li>
+</ul>
+<h3 id="update-a-cached-template"><a class="header" href="#update-a-cached-template">Update a cached template</a></h3>
+<p>If you notice that <code>nix flake init</code>, <code>nix flake new</code>, etc. give you an old version of a template, run <code>nix flake lock</code> on that template. This action will force <code>nix</code> to update the cached version of the template somewhere in <code>~/.cache/nix</code>. - <a href="https://t.me/ru_nixos/140144">src</a></p>
+<h3 id="explore-a-template"><a class="header" href="#explore-a-template">Explore a template</a></h3>
+<p>Templates can be accessed in Nix store via <code>nix repl</code>:</p>
+<pre><code class="language-console">nix repl
+nix-repl&gt; :lf .
+nix-repl&gt; templates.&lt;TAB&gt;
+nix-repl&gt; templates.codium-generic.path
+/nix/store/j3kx4dk567y483pvszr2w8ghnkxich3d-source/templates/codium/generic
+</code></pre>
+<h3 id="assemble"><a class="header" href="#assemble">Assemble</a></h3>
+<p>Templates may contain arbitrary files. This feature enables the following assembly:</p>
+<pre><code class="language-sh">nix flake new flake-1 -t flake1
+nix flake new flake-2 -t flake2
+nix flake new flake-3 -t flake3
+cp flake-1/file1 flake-3
+cp flake-2/file{2,3} flake-3
+</code></pre>
+<h3 id="template-repositories"><a class="header" href="#template-repositories">Template repositories</a></h3>
+<ul>
+<li>Templates for many programming languages - <a href="https://github.com/the-nix-way/dev-templates">src</a></li>
+<li>Some more - <a href="https://github.com/NixOS/templates">src</a></li>
+<li>Some templates are in <a href="https://github.com/deemp/flakes">this repo</a></li>
+</ul>
+<h2 id="flakes"><a class="header" href="#flakes">Flakes</a></h2>
+<ol>
+<li>
+<p>What are flakes? How to enable flakes? - <a href="https://nixos.wiki/wiki/Flakes">wiki</a></p>
+</li>
+<li>
+<p><a href="https://nixos.org/manual/nix/unstable/">Nix manual</a> answers the following questions:</p>
+<ul>
+<li><a href="https://nixos.org/manual/nix/unstable/glossary.html#glossary">Glossary</a>
+<ul>
+<li>What does this term mean?</li>
+</ul>
+</li>
+<li><a href="https://nixos.org/manual/nix/unstable/language/derivations.html#derivations">Derivations</a>
+<ul>
+<li>What are derivations?
+<ul>
+<li>Something that describes how to create a particular <code>Nix</code> store path</li>
+<li>A <code>derivation</code> can become an executable, and that executable can be used in build scripts of other derivations</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-flake.html#description">Description</a>
+<ul>
+<li>What are flakes?
+<ul>
+<li>A flake is a function from inputs into outputs. To take this function at a point, a <code>flake.lock</code> is used</li>
+<li>Don't confuse 'inputs' and 'outputs' with the terms <code>inputs</code> and <code>outputs</code>.</li>
+<li>I use 'inputs' and 'outputs' to describe the high-level idea of what a flake is.</li>
+<li>On the other hand, <code>inputs</code> and <code>outputs</code> have specifications described in Nix manual.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-flake.html#flake-inputs">Flake inputs</a>:
+<ul>
+<li>How to use old-style packages as flake inputs?</li>
+<li>How to declare an input? == How to use a flake in another flake?</li>
+<li>How to follow an input?</li>
+<li>How to pin an input?</li>
+</ul>
+</li>
+<li><a href="https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-flake.html#flake-format">Flake format</a>
+<ul>
+<li>What can go into <code>outputs</code>?</li>
+<li>How to access the <code>outputs</code>? (described at the bottom)</li>
+<li>How can I override <a href="https://nixos.org/manual/nix/unstable/command-ref/conf-file.html">nix.conf</a>? - via <code>nixConfig</code></li>
+</ul>
+</li>
+<li><a href="https://nixos.org/manual/nix/unstable/command-ref/experimental-commands.html">Experimental commands</a>
+<ul>
+<li>How to explore a flake?
+<ul>
+<li><code>nix flake show</code></li>
+<li><code>nix flake metadata</code></li>
+<li><code>nix repl</code>
+<ul>
+<li><code>nix-repl&gt; :lf nixpkgs</code> - load flake <code>nixpkgs</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>How to see all <code>derivation</code>s used to build a specific <code>derivation</code>?
+<ul>
+<li><code>nix show-derivation</code></li>
+</ul>
+</li>
+<li>How can I temporarily make an executable available in my terminal?
+<ul>
+<li><code>nix shell</code></li>
+</ul>
+</li>
+<li>How can I install a Nix package on my OS?
+<ul>
+<li><code>nix profile</code></li>
+</ul>
+</li>
+<li>How can I pin my global <code>nixpkgs</code> to a specific commit SHA?
+<ul>
+<li><code>nix registry</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>And many more questions!</li>
+</ul>
+</li>
+<li>
+<p>How to add a flake to a project?</p>
+<ul>
+<li>Nix uses <code>git</code> to track flake files. So, adding a <code>flake.nix</code> to a project requires the following steps:
+<ol>
+<li><code>git init</code> - initialize a <code>git</code> repository</li>
+<li>Add <code>flake.nix</code> in some way (copy the existing <code>flake.nix</code>, <code>nix flake init</code>, etc.)</li>
+<li><code>git add flake.nix</code></li>
+<li>Add <code>flake.lock</code> in some way (copy the relevant existing <code>flake.lock</code>, generate a new one via <code>nix flake update</code>, etc.)</li>
+<li><code>git add flake.lock</code></li>
+<li><code>git commit</code> these files</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>
+<p>Flake tutorials: <a href="https://nix-tutorial.gitlabpages.inria.fr/nix-tutorial/flakes.html?highlight=flake">1</a>, <a href="https://yuanwang.ca/posts/getting-started-with-flakes.html">2</a>, <a href="https://ghedam.at/a-tour-of-nix-flakes">3</a>, <a href="https://xeiaso.net/blog/nix-flakes-2-2022-02-27">4</a>, <a href="https://myme.no/posts/2022-01-16-nixos-the-ultimate-dev-environment.html#launch-script">5</a></p>
+</li>
+<li>
+<p>How to use the same flake inputs in all projects?</p>
+<ul>
+<li>Store your flake inputs in a repo - <a href="https://github.com/deemp/flakes/blob/2395f79740fdc5f14f91db10b1acd2892cdee28c/source-flake">example</a></li>
+<li>Use them in your projects with <code>follows</code> - <a href="https://github.com/deemp/flakes/blob/2395f79740fdc5f14f91db10b1acd2892cdee28c/codium/flake.nix#L5">example</a></li>
+<li>Now, all your projects have the same dependencies since they come from the same source</li>
+</ul>
+</li>
+<li>
+<p>How to bring any files into a flake?</p>
+<ol>
+<li>Hack git
+<ol>
+<li>List expected files.</li>
+<li>Commit corresponding blank files.</li>
+<li>Run <code>git update-index --assume-unchanged &lt;file&gt;</code> for each <code>&lt;file&gt;</code>.</li>
+<li>Now, it's possible to import them into flake.</li>
+</ol>
+</li>
+<li>Use Fixed-output derivations (FOD)
+<ul>
+<li><a href="https://bmcgee.ie/posts/2023/02/nix-what-are-fixed-output-derivations-and-why-use-them/">Nix: what are fixed-output derivations and why use them?</a></li>
+</ul>
+</li>
+</ol>
+</li>
+<li>
+<p>How to enable a specific version of <code>nix</code> on my system? Approximately so:</p>
+<pre><code class="language-console">nix registry remove nix
+nix registry add nix github:NixOS/nix/4bf70b74a78bf10f3f19ed122ae7377963e14003
+nix profile install nix --priority 4
+</code></pre>
+</li>
+<li>
+<p>How to pin <code>nixpkgs</code>?</p>
+<ul>
+<li><a href="https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-registry-pin.html#examples">nix registry pin</a></li>
+</ul>
+</li>
+<li>
+<p>When should I use overlays over <code>nixpkgs</code>? - You <a href="https://zimbatm.com/notes/1000-instances-of-nixpkgs">shouldn't</a></p>
+</li>
+<li>
+<p>How to convert an exising project to flakes? - <a href="https://garnix.io/blog/converting-to-flakes">tutorial</a></p>
+</li>
+<li>
+<p>How to use a <code>.gitignore</code>d file inside a flake?</p>
+<ul>
+<li>
+<p>build with <code>--impure</code></p>
+<pre><code class="language-console">zxcTest = prev.writeText &quot;zxcTest&quot; (builtins.readFile /home/name_snrl/nixos-configuration/&lt;fileFromIgnore&gt;);
+</code></pre>
+</li>
+<li>
+<p>Provide it in inputs. Inputs accept arbitrary files. Make links follow the format of <a href="https://nixos.org/manual/nix/stable/command-ref/new-cli/nix3-flake.html#flake-inputs">flake inputs</a></p>
+</li>
+</ul>
+</li>
+<li>
+<p>How to disable querying remote binary caches?</p>
+<ul>
+<li><code>nix run &lt;installable&gt; --no-substitute</code></li>
+</ul>
+</li>
+</ol>
+<h2 id="devshells"><a class="header" href="#devshells">devShells</a></h2>
+<ol>
+<li>How to set up a development environment?
+2. <code>pkgs.mkShell</code>
+3. <a href="https://github.com/deemp/flakes/tree/main/devshell">devshell</a>
+4. Add environment variables if necessary. E.g., using Nix store paths <a href="https://discourse.nixos.org/t/provide-environmental-variables-from-nix/3453/3">post</a>
+5. Symlink a path from Nix store to make files available to <code>NodeJS</code> - <a href="https://myme.no/posts/2022-01-16-nixos-the-ultimate-dev-environment.html#launch-script">NixOS: The Ultimate Dev Environment?</a></li>
+</ol>
+<h2 id="nix"><a class="header" href="#nix">Nix</a></h2>
+<h2 id="nix-store-caching"><a class="header" href="#nix-store-caching">Nix store caching</a></h2>
+<ul>
+<li><a href="https://www.cachix.org/">cachix</a></li>
+<li><a href="https://github.com/zhaofengli/attic">Attic</a></li>
+<li><a href="https://github.com/nix-community/cache-nix-action">cache-nix-action</a> - save and restore cache in <code>GitHub Actions</code></li>
+<li><a href="https://github.com/edolstra/nix-serve">nix-serve</a> - serve nix store as a binary cache
+<ul>
+<li>to check if a package is in store, use <a href="https://nixos.wiki/wiki/Binary_Cache#4._Testing">curl</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="qa"><a class="header" href="#qa">Q&amp;A</a></h2>
+<ol>
+<li>
+<p>Run a binary from <code>nixpkgs</code>:</p>
+<pre><code class="language-sh">nix run nixpkgs#nixpkgs-fmt -- hello-flake/flake.nix
+</code></pre>
+</li>
+</ol>
+<h3 id="fixed-output-derivation"><a class="header" href="#fixed-output-derivation">Fixed-output derivation</a></h3>
+<ul>
+<li><a href="https://github.com/denoland/deno/issues/19961#issuecomment-1654480105">example</a></li>
+</ul>
+<h3 id="making-derivations-and-executables"><a class="header" href="#making-derivations-and-executables">Making derivations and executables</a></h3>
+<ol>
+<li>
+<p>What is <code>expression</code>, <code>closure</code>, <code>derivation</code>?</p>
+<ul>
+<li>Check the <a href="https://nixos.org/manual/nix/unstable/glossary.html">glossary</a></li>
+<li><a href="https://medium.com/scientific-breakthrough-of-the-afternoon/closure-vs-derivation-in-the-nix-package-manager-ec0eccc53407">expression, closure, derivation</a></li>
+</ul>
+</li>
+<li>
+<p>How to get a path of a derivation in store in a <code>.nix</code> file?: <code>${drv}</code></p>
+</li>
+<li>
+<p>There are <a href="https://nixos.org/manual/nixpkgs/unstable/#sec-stdenv-phases">phases</a></p>
+<ul>
+<li>They can be run via <code>nix develop</code> - <a href="https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-develop.html#examples">src</a></li>
+<li><a href="https://github.com/NixOS/nixpkgs/blob/d64780ea0e22b5f61cd6012a456869c702a72f20/pkgs/development/haskell-modules/generic-stack-builder.nix#L49">Example</a></li>
+</ul>
+</li>
+<li>
+<p>When derivations are built, they may produce executables. Locations of these executables are determined by bash scripts. If you make a derivation you can use <code>buildInputs</code> to specify the derivations you'd like to be accessible during in scripts during <code>phases</code> or in a <code>shellHook</code></p>
+</li>
+<li>
+<p>How to access a <code>$out</code> folder of a derivation <code>drv</code>?</p>
+<ul>
+<li>First of all, you should create such folder, e.g. via a <a href="https://nixos.wiki/wiki/Shell_Scripts#runCommand_.2B_builder.sh">builder</a>
+<ul>
+<li>Alternatively, it will be created during the <a href="https://nixos.org/manual/nixpkgs/stable/#ssec-install-phase">install phase</a></li>
+</ul>
+</li>
+<li>Next, you can use it in a script like <code>${drv.out}</code>;</li>
+</ul>
+</li>
+<li>
+<p>Programs can be specified in <code>buildInputs</code> or called by name <code>{pkgs.hello}/bin/hello</code></p>
+<ul>
+<li>This helped me when configuring tasks for VSCodium <a href="https://github.com/deemp/devops-labs/blob/b400993e18b0e1ebc515141450c51f2d6c8b3f67/.nix/commands.nix#L37">here</a></li>
+</ul>
+</li>
+<li>
+<p>How to wrap an executable to run it with flags?</p>
+<ul>
+<li>See the example with <code>pkgs.runCommand</code> in <a href="https://nixos.wiki/wiki/Nix_Cookbook#Wrapping_packages">Wrapping Packages</a></li>
+<li>Another example in <a href="https://github.com/deemp/flakes/blob/4ed230763b12a2805b0369cf4446fff1e490a582/language-tools/haskell/flake.nix#L36">language-tools/haskell</a></li>
+</ul>
+</li>
+<li>
+<p>How to rename an executable and supply runtime dependencies?</p>
+<ul>
+<li><a href="https://discourse.nixos.org/t/basic-flake-run-existing-python-bash-script/19886/11">symlinkJoin</a> + <code>wrapProgram</code> provided by <code>pkgs.makeBinaryWrapper</code> (<a href="https://nixos.org/manual/nixpkgs/stable/#fun-wrapProgram">docs</a>, <a href="https://github.com/NixOS/nixpkgs/blob/0e9e77750818f40303c72ad658b3dca299591e4f/pkgs/build-support/setup-hooks/make-wrapper.sh#L130">src</a>).</li>
+</ul>
+<pre><code class="language-nix">hello =
+pkgs.symlinkJoin {
+  name = &quot;hello&quot;;
+  paths = [ hello ];
+  buildInputs = [ pkgs.makeWrapper ];
+  postBuild = ''
+    wrapProgram $out/bin/hello \
+      --set PATH ${
+        pkgs.lib.makeBinPath [
+          pkgs.cowsay
+        ]
+      }
+  '';
+};
+</code></pre>
+</li>
+<li>
+<p>How to escape a shell/bash command?
+2. <code>pkgs.lib.escapeShellArg</code></p>
+</li>
+<li>
+<p>How to see binaries that a package provides?
+2. <code>find  $(nix build nixpkgs#hello --no-link --print-out-paths)/bin -mindepth 1</code></p>
+</li>
+<li>
+<p>It's possible to use <code>nix</code> commands inside scripts</p>
+<ul>
+<li>E.g. <code>nix-instantiate --eval --strict -E &quot;import ./settings.nix&quot;</code> - print contents of a nix file</li>
+<li>Moreover, one can use pinned <code>nixpkgs</code>: <code>nix run ${pkgs}#nixpkgs-fmt $nix_path</code></li>
+</ul>
+</li>
+<li>
+<p>How to package a script?
+2. <a href="https://nixos.org/manual/nixpkgs/unstable/#trivial-builder-writeText">pkgs.writeScriptBin</a></p>
+</li>
+<li>
+<p>How to remove build deps from runtime deps?</p>
+<ul>
+<li>see this <a href="https://nixos.org/guides/nix-pills/automatic-runtime-dependencies.html#idm140737320124560">pill</a></li>
+</ul>
+</li>
+<li>
+<p>How to use parallel builds? - <a href="https://nixos.org/manual/nix/stable/advanced-topics/cores-vs-jobs.html#tuning-cores-and-jobs">docs</a></p>
+</li>
+<li>
+<p><a href="https://serokell.io/blog/what-is-nix#nixpkgs">cross-compilation</a></p>
+</li>
+</ol>
+<h3 id="helper-function-libs"><a class="header" href="#helper-function-libs">Helper function libs</a></h3>
+<ol>
+<li>
+<p><a href="https://github.com/edolstra/flake-compat">flake-compat</a>.</p>
+<ol>
+<li>Whenever possible, add a flake into a repo, and then use <code>flake-compat</code> to create <code>default.nix</code> and <code>shell.nix</code></li>
+<li>Use it to access scripts from a flake in a child directory - <a href="https://github.com/deemp/projects/blob/ce7907b4f2a9c4f9f0bb30ca3b8c50284929405c/flake.nix#L35">example</a></li>
+</ol>
+</li>
+<li>
+<p><a href="https://github.com/numtide/flake-utils">flake-utils</a></p>
+</li>
+<li>
+<p><code>nixpkgs.lib</code></p>
+<pre><code class="language-sh">$ nix repl
+nix-repl&gt; :lf nixpkgs
+nix-repl&gt; lib.or true false
+</code></pre>
+</li>
+<li>
+<p>Symlinked things cannot be written or opened. They should first be removed - <a href="https://nixos.wiki/wiki/Nix_Cookbook#Wrapping_packages">src</a></p>
+<ul>
+<li><a href="https://github.com/deemp/flakes/blob/b57918dfa6cf694e81886cb0dd858731f4987b08/drv-tools/flake.nix#L132">add man page</a></li>
+</ul>
+</li>
+<li>
+<p><code>pkgs.dockerTools.buildLayeredImage</code> - build a docker image</p>
+<ol>
+<li>Pass static executables</li>
+<li>Set entrypoint: <code>config.Entrypoint = [ command ]</code>. No need for <code>bash</code></li>
+<li><code>docker inspect</code> the image</li>
+</ol>
+</li>
+</ol>
+<h2 id="package-code"><a class="header" href="#package-code">Package code</a></h2>
+<h3 id="haskell"><a class="header" href="#haskell">Haskell</a></h3>
+<p>See <a href="./Haskell.html">Haskell</a></p>
+<h3 id="python"><a class="header" href="#python">Python</a></h3>
+<ol>
+<li>
+<p><a href="https://github.com/nix-community/poetry2nix">poetry2nix</a></p>
+<ul>
+<li><a href="https://serokell.io/blog/practical-nix-flakes#python-(poetry)">example</a></li>
+<li>It might be necessary to
+<ul>
+<li>activate an environment for any app in a project - <a href="https://github.com/deemp/devops-labs/blob/b400993e18b0e1ebc515141450c51f2d6c8b3f67/app_python/flake.nix#L37">src</a></li>
+<li>create envs - <a href="https://github.com/deemp/devops-labs/blob/b400993e18b0e1ebc515141450c51f2d6c8b3f67/.nix/default.nix#L128">src</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><a href="https://github.com/NixOS/nixpkgs/search?q=writePython3Bin&amp;type=">pkgs.writers.writePython3Bin</a> - <a href="https://stackoverflow.com/a/67799667">SO</a></p>
+</li>
+</ol>
+<p><a href="https://github.com/nix-community/dream2nix">dream2nix</a></p>
+<h3 id="typescript"><a class="header" href="#typescript">TypeScript</a></h3>
+<ul>
+<li>I <a href="https://github.com/objectionary/try-phi/blob/beeae361822be7db7cb3bb4bb469c9c74a51cff6/front/flake.nix#L33">packaged</a> try-phi front end with it, following this <a href="https://johns.codes/blog/building-typescript-node-apps-with-nix#dream2nix">tutorial</a></li>
+</ul>
+<h3 id="purescript"><a class="header" href="#purescript">PureScript</a></h3>
+<ol>
+<li><a href="https://github.com/ngua/spago.nix">spago.nix</a>
+<ul>
+<li>TODO try</li>
+</ul>
+</li>
+</ol>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="conventions"><a class="header" href="#conventions">Conventions</a></h1>
+<h2 id="readmes"><a class="header" href="#readmes">READMEs</a></h2>
+<p>In this repo, each flake's <code>README.md</code> assumes that the directory of its <code>flake.nix</code> is your current working directory in a terminal.</p>
+<h2 id="prerequisites"><a class="header" href="#prerequisites">Prerequisites</a></h2>
+<p>To de-duplicate the docs, one of the top sections of each <code>README.md</code> here contains a <code>Prerequisites</code> section. This section provides the links to other sections that possibly contain the relevant docs. Sometimes, you'll need to traverse multiple <code>Prerequisites</code> before you achieve the relevant docs.</p>
+<h2 id="nixconfig"><a class="header" href="#nixconfig">nixConfig</a></h2>
+<p>I inserted a number of binary caches into <code>nixConfig</code> attribute of each <code>flake.nix</code>.
+These caches should accelerate builds.
+You can add an <a href="https://nixos.org/manual/nix/unstable/command-ref/conf-file.html#conf-accept-flake-config">accept-flake-config</a> to your <a href="https://nixos.org/manual/nix/stable/command-ref/conf-file.html#conf-trusted-substituters">nix.conf</a>.</p>
+<h2 id="dev-tools"><a class="header" href="#dev-tools">Dev tools</a></h2>
+<p>Sometimes, I put dev tools into a <code>nix-dev</code> directory.
+Then, I enter a devshell as follows.</p>
+<pre><code class="language-sh">nix develop nix-dev/
+</code></pre>
+<h2 id="pushing-to-a-remote-repo"><a class="header" href="#pushing-to-a-remote-repo">Pushing to a remote repo</a></h2>
+<p>All flakes in this repo access some other flakes from this repo via <code>GitHub</code> URLs.
+Let's consider two flakes from this repo, <code>A</code> and <code>B</code>, where <code>A</code> is in <code>inputs</code> of <code>B</code>.
+If I change the flake <code>A</code>, I:</p>
+<ul>
+<li>push <code>A</code> changes to GitHub.</li>
+<li>update <code>flake.lock</code> of <code>B</code>.</li>
+</ul>
+<p>Whenever there's a push to the remote <code>GitHub</code> repo, <code>B</code>'s <code>flake.lock</code> is updated by a <code>GitHub Action</code>.
+That's why, if that action works, there's no need to commit and push <code>flake.lock</code> changes.
+After an update is complete, it's necessary to rebase local changes onto remote changes.
+However, sometimes, there are local uncommitted changes already.
+These changes should be <code>git stash</code>ed before doing <code>git rebase</code>.
+After rebasing, they can be <code>git stash pop</code>ped to continue the work.</p>
+<p>Thus, the process is as follows:</p>
+<pre><code class="language-console"># can be omitted in case of automatic fetches
+git fetch
+git rebase --autostash
+git push
+</code></pre>
+<h2 id="docs-1"><a class="header" href="#docs-1">Docs</a></h2>
+<p>Each derivation that evaluates to an executable should have these attributes:</p>
+<ul>
+<li><code>meta.description</code>
+<ul>
+<li>string written in <code>CommonMark</code></li>
+<li>This description will be rendered in devshells</li>
+<li>It should be a single-line brief description of this executable</li>
+</ul>
+</li>
+<li><code>meta.longDescription</code>
+<ul>
+<li>string written in <code>CommonMark</code></li>
+<li>This description is used to generate <code>man</code> pages for executables</li>
+<li>The format of a <code>longDescription</code> should be recognizable by <code>pandoc</code>
+<ul>
+<li>Here's a sample <a href="https://pandoc.org/demo/pandoc.1.md">input</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h1>
+<h2 id="prerequisites-1"><a class="header" href="#prerequisites-1">Prerequisites</a></h2>
+<p>See <a href="NixPrerequisites.html">Nix Prerequisites</a></p>
+<h2 id="red-text-in-the-output"><a class="header" href="#red-text-in-the-output">Red text in the output</a></h2>
+<p>This is not a problem. Just read the text and answer. When asked like:</p>
+<pre><code class="language-console">do you want to allow configuration setting 'extra-trusted-substituters' to be set to 'https://haskell-language-server.cachix.org https://nix-community.cachix.org https://cache.iog.io https://deemp.cachix.org' (y/N)?
+</code></pre>
+<p>answer <code>y</code>.</p>
+<p>And then, when asked</p>
+<pre><code class="language-console">do you want to permanently mark this value as trusted (y/N)? 
+</code></pre>
+<p>answer <code>y</code> again. This is to let you use the binary caches listed by the flake.</p>
+<h2 id="vscodium-troubleshooting"><a class="header" href="#vscodium-troubleshooting">VSCodium troubleshooting</a></h2>
+<p>See <a href="https://github.com/deemp/flakes/blob/main/codium/README.md#troubleshooting">VSCodium troubleshooting</a></p>
+<h2 id="substituters-and-keys"><a class="header" href="#substituters-and-keys">Substituters and keys</a></h2>
+<p>To provide binary caches, <code>flake.nix</code> files specify <code>nixConfig.extra-trusted-substituters</code>. If you try, e.g., <code>nix develop</code>, and <code>Nix</code> unsuccessfully tries to download from a cache several times, this cache has probably failed. Comment out the lines containing its <code>URL</code> address in <code>extra-trusted-substituters</code>.</p>
+<h2 id="repair-a-derivation"><a class="header" href="#repair-a-derivation">Repair a derivation</a></h2>
+<p>Repair a derivation - <a href="https://nixos.org/manual/nix/unstable/command-ref/new-cli/nix3-store-repair.html">manual</a></p>
+<p>Alternative steps:</p>
+<ol>
+<li>Assumptions:
+<ul>
+<li>current working directory contains <code>flake.nix</code></li>
+<li>your corrupt derivation is available inside this <code>flake.nix</code> by . name <code>your-corrupt-derivation</code></li>
+</ul>
+</li>
+<li>Set <code>packages.default = your-corrupt-derivation</code> in this <code>flake.nix</code></li>
+<li>Run <code>nix store repair .#</code>
+<ul>
+<li><code>.#</code> denotes an <a href="https://nixos.org/manual/nix/stable/command-ref/new-cli/nix.html?highlight=installable#installables">installable</a></li>
+</ul>
+</li>
+</ol>
+<h2 id="locales"><a class="header" href="#locales">Locales</a></h2>
+<p>See <a href="https://nixos.wiki/wiki/Locales">Locales</a></p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="haskell-1"><a class="header" href="#haskell-1">Haskell</a></h1>
+<h2 id="templates"><a class="header" href="#templates">Templates</a></h2>
+<p>Templates provide extensive information about setting up development environment and packaging Haskell apps.</p>
+<ul>
+<li><a href="https://github.com/deemp/flakes/tree/main/templates/codium/haskell#readme">haskell</a></li>
+<li><a href="https://github.com/deemp/flakes/tree/main/templates/codium/haskell-simple#readme">haskell-simple</a></li>
+<li><a href="https://github.com/deemp/flakes/tree/main/templates/haskell-minimal#readme">haskell-minimal</a></li>
+</ul>
+<h2 id="tools"><a class="header" href="#tools">Tools</a></h2>
+<h3 id="ghcid"><a class="header" href="#ghcid">ghcid</a></h3>
+<p><a href="https://github.com/ndmitchell/ghcid">ghcid</a> is a <code>Very low feature GHCi based IDE</code>.
+It can be used to re-run a function in a given file on changes in a given directory.
+This template provides a sample configuration for this tool in the <code>.ghcid</code> file.</p>
+<h3 id="hpack"><a class="header" href="#hpack">hpack</a></h3>
+<p><a href="https://github.com/sol/hpack">hpack</a> translates <code>package.yaml</code> into <a href="https://cabal.readthedocs.io/en/3.8/cabal-package.html">.cabal</a>.</p>
+<h2 id="nix-1"><a class="header" href="#nix-1">Nix</a></h2>
+<h3 id="haskell4nix"><a class="header" href="#haskell4nix">haskell4nix</a></h3>
+<ul>
+<li><a href="https://haskell4nix.readthedocs.io/nixpkgs-users-guide.html">haskell4nix</a></li>
+<li><a href="https://nixos.org/manual/nixpkgs/stable/#haskell">nixpkgs manual</a></li>
+<li><a href="https://www.haskellforall.com/2022/08/incrementally-package-haskell-program.html">Incrementally package a Haskell program</a></li>
+<li><a href="https://github.com/Gabriella439/haskell-nix">haskell-nix</a> - examples of packaging haskell apps</li>
+<li><a href="https://www.haskellforall.com/2022/12/nixpkgs-support-for-incremental-haskell.html">Nixpkgs support for incremental Haskell builds</a></li>
+<li>Hackage packages in <a href="https://github.com/NixOS/nixpkgs/blob/ea692c2ad1afd6384e171eabef4f0887d2b882d3/pkgs/development/haskell-modules/hackage-packages.nix">nixpkgs</a> - Haskell packages</li>
+<li><a href="https://gutier.io/post/development-fixing-broken-haskell-packages-nixpkgs/">Fixing broken Haskell packages in Nixpkgs</a></li>
+<li><a href="https://horizon-haskell.net/">Horizon Haskell</a></li>
+</ul>
+<h3 id="haskellnix"><a class="header" href="#haskellnix">haskell.nix</a></h3>
+<ul>
+<li><a href="https://input-output-hk.github.io/haskell.nix/">haskell.nix</a></li>
+<li><a href="https://github.com/Gabriella439/haskell-nix">tutorial</a></li>
+<li>projects: <a href="https://github.com/deemp/discord-emoji-dl">discord-emoji-dl</a></li>
+</ul>
+<h3 id="stack"><a class="header" href="#stack">Stack</a></h3>
+<p>Uses <a href="Haskell.html#haskell4nix">haskell4nix</a>.</p>
+<p>Stack support <a href="https://docs.haskellstack.org/en/stable/nix_integration">Nix integration</a>.</p>
+<p>Stack uses <a href="https://nixos.org/manual/nix/unstable/command-ref/nix-shell.html">nix-shell</a>.</p>
+<ul>
+<li><a href="https://docs.haskellstack.org/en/stable/nix_integration/#nix-integration">docs</a>.</li>
+</ul>
+<p>The name of the file providing a Nix shell can be customized in <code>stack.yaml</code>.</p>
+<ul>
+<li><a href="https://docs.haskellstack.org/en/stable/nix_integration/?query=resolver#external-c-libraries-through-a-shellnix-file">docs</a></li>
+<li><a href="https://github.com/deemp/flakes/blob/ba6ba57a3c52b8b71263f6b2baf874aaf9e7b631/templates/codium/haskell/stack.yaml#L24">example</a></li>
+</ul>
+<p>Here's the format of that file - <a href="https://docs.haskellstack.org/en/stable/nix_integration#supporting-both-nix-and-non-nix-developers">docs</a>.</p>
+<p>The shell file can import the contents of <code>flake.nix</code> via <a href="https://github.com/edolstra/flake-compat">flake-compat</a>.</p>
+<p><code>flake.nix</code> provides an output <code>stack-shell.${system} = {version}: ...</code>.</p>
+<ul>
+<li><a href="https://github.com/deemp/flakes/blob/6b14dbcaaf9e2c310a6bddc5f2992bf328d3e868/templates/codium/haskell/flake.nix#L346">output</a></li>
+<li><a href="https://github.com/deemp/flakes/blob/6b14dbcaaf9e2c310a6bddc5f2992bf328d3e868/templates/codium/haskell/flake.nix#L239">definition</a></li>
+</ul>
+<p><code>stack.nix</code> imports <code>flake.nix</code> and provides a shell.</p>
+<ul>
+<li><a href="https://github.com/deemp/cachix/blob/17efcd60abe547d33bb2ccc63b561797a94e5b46/stack.nix">stack.nix</a></li>
+</ul>
+<h2 id="devshells-1"><a class="header" href="#devshells-1">devShells</a></h2>
+<h3 id="completions-for-cli-apps"><a class="header" href="#completions-for-cli-apps">Completions for CLI apps</a></h3>
+<pre><code class="language-nix">devShells.default = pkgs.mkShell {
+    buildInputs = [ packageExe ];
+    shellHook = ''
+      source ${packageExe}/share/bash-completion/completions/${packageExecutableName}
+    '';
+  };
+</code></pre>
+<h2 id="troubleshooting-1"><a class="header" href="#troubleshooting-1">Troubleshooting</a></h2>
+<h3 id="haskell-language-server"><a class="header" href="#haskell-language-server">Haskell Language Server</a></h3>
+<h4 id="clear-cache"><a class="header" href="#clear-cache">Clear cache</a></h4>
+<p>Sometimes, <code>HLS</code> finds errors in code despite <code>cabal build</code> running successfully.
+If you use <code>VS Code</code>, find <code>Outputs</code> of <code>Haskell Language Server</code> and determine the cache directory for a project.</p>
+<p>It should have approximately this form: <code>/home/&lt;user name&gt;/.cache/hie-bios/dist-&lt;project-name&gt;-&lt;something&gt;</code>.
+Remove it and restart <code>HLS</code>.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>
