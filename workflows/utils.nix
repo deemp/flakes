@@ -10,31 +10,32 @@ rec
         (
           let uses = builtins.head (builtins.attrValues x.uses); in
           {
-            uses = uses.name;
+            uses = uses.name or null;
             with' = (x.with' or { }) // (uses.with' or { });
           }
         )
-    )
-  ;
+    );
+
+  removeNulls = lib.filterAttrsRecursive (_: value: value != null);
 
   # builtins.removeAttrs x [ "actions" "path" ];
   cleanWorkflow = workflow:
-    let
-      cleanJobs =
+    (builtins.removeAttrs workflow [ "actions" "path" ])
+    //
+    {
+      jobs =
         lib.mapAttrs
           (
             _: value: value // {
               steps = lib.pipe value.steps [
-                (map (lib.filterAttrsRecursive (_: value: value != null)))
                 (map convertUses)
-                (map (x: if x.with' == { } then builtins.removeAttrs x [ "with'" ] else x))
+                (map removeNulls)
+                (map (x: if (x.with' or { }) == { } then builtins.removeAttrs x [ "with'" ] else x))
               ];
             }
           )
           workflow.jobs;
-      clean = (builtins.removeAttrs workflow [ "actions" "path" ]) // { jobs = cleanJobs; };
-    in
-    clean;
+    };
 
-  clean = lib.mapAttrs (_: cleanWorkflow);
+  cleanWorkflows = lib.mapAttrs (_: cleanWorkflow);
 }

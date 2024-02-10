@@ -23,6 +23,85 @@ let
       inherit (module) config options;
     };
 
+  configuration =
+    { workflows, actions }:
+    {
+      actions = {
+        checkout = {
+          name = "actions/checkout@v4";
+          with' = {
+            repository = "abra";
+            filter = "filter";
+          };
+        };
+      };
+
+      workflows = {
+        workflow-1 = {
+          path = "action.yaml";
+          actions = { };
+          jobs = {
+            a = {
+              name = "Hello";
+              steps = [
+                {
+                  id = "1";
+                  uses.checkout = {
+                    with' = {
+                      filter = "filter-1";
+                    };
+                  };
+                }
+                {
+                  uses = "actions/cache";
+                }
+              ];
+            };
+
+            b = {
+              name = workflows.workflow-1.jobs.a.name;
+              steps = [
+                {
+                  name = "hello";
+                  uses.checkout = {
+                    with' = {
+                      repository = "abra";
+                      filter = null;
+                    };
+                  };
+                }
+                {
+                  uses = workflows.workflow-1.jobs.a.steps."2".uses;
+                }
+              ];
+            };
+          };
+        };
+
+        workflow-2 = {
+          path = "action-2.yaml";
+
+          jobs = {
+            a = {
+              name = workflows.workflow-1.jobs.b.name;
+              steps = [
+                {
+                  id = "1";
+                }
+              ];
+            };
+          };
+        };
+      };
+    };
+
+  gh-action = eval { inherit configuration; };
+in
+{
+  options = gh-action.options;
+  config = gh-action.config;
+}
+
   # cleanConfig = config:
   #   let
   #     clean = lib.filterAttrsRecursive (_: value: value != null) config;
@@ -105,82 +184,26 @@ let
   # TODO typecheck configuration, not constructed version
   # users should provide a valid configuration
 
-  configuration =
-    { workflows, actions }:
-    {
-      actions = {
-        checkout = {
-          name = "actions/checkout@v4";
-          with' = {
-            repository = "abra";
-            filter = "filter";
-          };
-        };
-      };
+  # TODO ask at nix-community/nix-gh-actions
 
-      workflows = {
-        workflow-1 = {
-          path = "action.yaml";
-          actions = { };
-          jobs = {
-            a = {
-              name = "Hello";
-              steps = [
-                {
-                  id = "1";
-                  uses.checkout = {
-                    with' = {
-                      filter = "filter-1";
-                    };
-                  };
-                }
-                {
-                  uses = "actions/cache";
-                }
-              ];
-            };
+  # TODO actionsOptions
+  # allow people to provide custom options?
 
-            b = {
-              name = workflows.workflow-1.jobs.a.name;
-              steps = [
-                {
-                  name = "hello";
-                  uses.checkout = {
-                    with' = {
-                      repository = "abra";
-                      filter = null;
-                    };
-                  };
-                }
-                {
-                  uses = workflows.workflow-1.jobs.a.steps."2".uses;
-                }
-              ];
-            };
-          };
-        };
+  # TODO enable later because it's sugar
+  # workflows = attrsOrFunc (configuration.workflows or { }) config.workflows;
+  # actions = attrsOrFunc (x.actions or { }) config.accessible.actions;
 
-        workflow-2 = {
-          path = "action-2.yaml";
+  # TODO
+  # internal
+  # 
+  # or, better, not expose config at all
 
-          jobs = {
-            a = {
-              # name = workflows.workflow-1.jobs.b.name;
-              name = "";
-              steps = [
-                {
-                  id = "1";
-                }
-              ];
-            };
-          };
-        };
-      };
-    };
+  # TODO
+  # initial
+  # make constructed from initial
+  # make accessible from constructed
 
-  gh-action = eval { inherit configuration; };
-
-  clean = (import ./utils.nix { inherit lib; }).clean gh-action.config.workflows;
+  # clean = (import ./utils.nix { inherit lib; }).cleanWorkflows gh-action.config.workflows;
 
   # can be a function
   # { config, ... }: {
@@ -285,12 +308,3 @@ let
   # mixing of typed (pre-defined workflow attrs and action-specific?) 
   # won't happen in case of {uses = "name";}
   # because the action keeps the step structure
-
-in
-{
-  options = gh-action.options;
-  config = gh-action.config;
-  inherit clean;
-  # foo = foo_;
-  # script = writeConfig "action" "tmp/action.yaml" configuration;
-}
