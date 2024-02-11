@@ -1,13 +1,14 @@
 { workflows
 , actions
 , qq
+, null_
 , ...
 }:
 {
   actions = {
     checkout = {
       name = "actions/checkout@v4";
-      with' = {
+      with_ = {
         repository = "abra";
         filter = "filter";
       };
@@ -25,8 +26,9 @@
             {
               id = "1";
               uses.checkout = {
-                with' = {
+                with_ = {
                   filter = "filter-1";
+                  a = null_;
                 };
               };
             }
@@ -42,9 +44,9 @@
             {
               name = "hello";
               uses.checkout = {
-                with' = {
+                with_ = {
                   repository = "abra";
-                  filter = null;
+                  filter = null_;
                 };
               };
             }

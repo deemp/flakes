@@ -25,10 +25,9 @@
   config = {
     accessible = {
       inherit (config) actions;
-
       workflows =
         utils.resolveWorkflows {
-          inherit config utils;
+          inherit config;
           stepsPipe = [
             (
               lib.foldl'

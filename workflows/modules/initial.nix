@@ -15,7 +15,7 @@
             inherit (common.options) id name;
             uses = lib.mkOption {
               type = lib.types.oneOf [
-                (lib.types.nullOr lib.types.str)
+                common.types.null_OrNullOrStr
                 (
                   (lib.types.attrsOf common.options.action) // {
                     check = x:
@@ -32,14 +32,7 @@
     };
   };
 
-  config =
-    let
-      configuration = args.configuration {
-        inherit (config.accessible) workflows actions;
-        qq = x: "\${{ ${lib.toString x} }}";
-      };
-    in
-    {
-      inherit (configuration) workflows actions;
-    };
+  config = {
+    inherit (configuration) workflows actions;
+  };
 }

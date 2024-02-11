@@ -1,6 +1,8 @@
 { lib }:
 rec
 {
+  qq = x: "\${{ ${builtins.toString x} }}";
+
   convertUses = x:
     x
     //
@@ -11,59 +13,79 @@ rec
           let uses = builtins.head (builtins.attrValues x.uses); in
           {
             uses = uses.name or null;
-            with' = (x.with' or { }) // (uses.with' or { });
+            with_ = (x.with_ or { }) // (uses.with_ or { });
           }
         )
     );
 
   removeNulls = lib.filterAttrsRecursive (_: value: value != null);
 
-  resolveWorkflows = { config, utils, stepsPipe ? [ ] }:
-    lib.mapAttrs
-      (_: workflow:
-        workflow
-        //
-        (
-          let actions = lib.recursiveUpdate config.actions (workflow.actions or { }); in
-          {
-            inherit actions;
-            jobs =
-              lib.mapAttrs
-                (_: job: job // {
-                  steps =
-                    lib.pipe job.steps (
-                      [
-                        (x:
-                          if x?uses && builtins.isAttrs x.uses then
-                            x
-                            //
-                            (
-                              let
-                                action = builtins.head (builtins.attrNames x.uses);
-                                actions' = lib.recursiveUpdate actions x.uses;
-                              in
-                              {
-                                uses = actions'.${action};
-                              }
-                            )
-                          else x
-                        )
-                        (map utils.convertUses)
-                      ]
-                      ++
-                      stepsPipe
-                    );
-                })
-                workflow.jobs;
-          }
-        )
-      )
-      config.workflows
-  ;
+  convertNull_s =
+    lib.mapAttrsRecursive
+      (_: value:
+        if value == lib.values.null_
+        then null
+        else if builtins.isList value
+        then map convertNull_s value
+        else value
+      );
 
-  # builtins.removeAttrs x [ "actions" "path" ];
-  cleanWorkflow = workflow:
-    (builtins.removeAttrs workflow [ "actions" "path" ])
+  resolveWorkflows = { config, stepsPipe ? [ ] }:
+    lib.pipe config.workflows [
+      (lib.mapAttrs
+        (_: workflow:
+          workflow
+          //
+          (
+            let actions = lib.recursiveUpdate config.actions (workflow.actions or { }); in
+            {
+              inherit actions;
+              jobs =
+                lib.mapAttrs
+                  (_: job:
+                    job
+                    //
+                    {
+                      steps =
+                        lib.pipe job.steps (
+                          [
+                            (map
+                              (x:
+                                lib.pipe x [
+                                  removeNulls
+                                  convertNull_s
+                                  (x:
+                                    if x?uses && builtins.isAttrs x.uses then
+                                      x
+                                      //
+                                      (
+                                        let
+                                          action = builtins.head (builtins.attrNames x.uses);
+                                          actions' = lib.recursiveUpdate actions x.uses;
+                                        in
+                                        {
+                                          uses.${action} = actions'.${action};
+                                        }
+                                      )
+                                    else x
+                                  )
+                                  convertUses
+                                ]
+                              )
+                            )
+                          ]
+                          ++
+                          stepsPipe
+                        );
+                    })
+                  workflow.jobs;
+            }
+          )
+        ))
+    ];
+
+  cleanJobs = workflow:
+    workflow
     //
     {
       jobs =
@@ -71,14 +93,21 @@ rec
           (
             _: value: value // {
               steps = lib.pipe value.steps [
+                (builtins.filter (x: x != { }))
                 (map convertUses)
                 (map removeNulls)
-                (map (x: if (x.with' or { }) == { } then builtins.removeAttrs x [ "with'" ] else x))
+                (map (x: if (x.with_ or { }) == { } then builtins.removeAttrs x [ "with_" ] else x))
               ];
             }
           )
           workflow.jobs;
     };
 
-  cleanWorkflows = lib.mapAttrs (_: cleanWorkflow);
+  cleanWorkflows =
+    lib.mapAttrs (_: workflow:
+      lib.pipe workflow [
+        (x: builtins.removeAttrs x [ "actions" "path" ])
+        cleanJobs
+      ]
+    );
 }

@@ -20,6 +20,44 @@ let
   # import other workflows and actions
   # resolve them in resolved.nix
 
+
+  # TODO
+  # custom options inside configuration
+  # so that a workflow can be shared and options can be typechecked
+
+  # TODO override a step?
+  # I think it should be handled by a user 
+  # f = { params }: { workflows, actions}: { ... # use params here }
+
+  # TODO
+  # optional steps?
+  # stepsIf
+  # flatten
+  # listOf
+
+  # TODO
+  # don't write if no path
+
+  # TODO
+  # resolve workflows in order
+  # import [A B] -> first A, then B, then importing (current)
+
+  # TODO
+  # use null_ to disable an option
+
+  # we should be able to differentiate between
+  # a missing value and an intentionally nulled value
+
+  # after typechecking, some values are set to null by default
+  # and the idea is to remove all nulls to get the original configuration
+  # we can't use the original configuration directly because it's not typechecked
+
+  # local actions inherit all attributes of global actions
+  # unless a user tells to not inherit an attribute
+  # by setting it to null_
+
+  # this way, we won't delete user-set null_ values when cleaning typechecked configuration
+
   eval = import ./nix { inherit lib; };
   workflows = eval { configuration = import ./example; };
 in
@@ -146,7 +184,7 @@ in
 # { a = mkOption { }; }
 
 # TODO
-# with_ or with'
+# with_ or with_
 # actions_ or actions'
 
 # TODO convert actions_ to options
