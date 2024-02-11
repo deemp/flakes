@@ -12,6 +12,8 @@ rec
     name = str;
 
     id = str;
+    
+    uses = str;
 
     with' = lib.mkOption {
       type = lib.types.attrsOf (lib.types.nullOr lib.types.str);
@@ -30,7 +32,7 @@ rec
     };
 
     step = {
-      inherit id name with';
+      inherit id name uses with';
     };
 
     job = {

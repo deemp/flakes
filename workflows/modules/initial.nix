@@ -1,25 +1,18 @@
-{ lib, common }:
-rec {
-  options = rec {
-    job = common.options.job // {
-      steps = lib.mkOption {
-        type = lib.types.attrsOf (lib.types.submodule { options = step; });
-        default = { };
-      };
-    };
-
-    step = common.options.step // {
-      uses = lib.mkOption {
-        type = lib.types.nullOr lib.types.str;
-        default = null;
-      };
-    };
+{ lib
+, common
+, config
+, configuration
+, ...
+}@args:
+{
+  options = {
+    inherit (common.options) actions;
 
     workflows = common.mkWorkflowsOption {
       type =
-        lib.types.attrsOf (lib.types.submodule {
+        lib.types.nonEmptyListOf (lib.types.submodule {
           options = {
-            inherit (common.options) id name with';
+            inherit (common.options) id name;
             uses = lib.mkOption {
               type = lib.types.oneOf [
                 (lib.types.nullOr lib.types.str)
@@ -35,7 +28,18 @@ rec {
             };
           };
         });
-      default = { };
+      default = [ ];
     };
   };
+
+  config =
+    let
+      configuration = args.configuration {
+        inherit (config.accessible) workflows actions;
+        qq = x: "\${{ ${lib.toString x} }}";
+      };
+    in
+    {
+      inherit (configuration) workflows actions;
+    };
 }
