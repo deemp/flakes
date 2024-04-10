@@ -18,7 +18,7 @@
             language-tools.haskell = import ./language-tools/haskell { inherit system pkgs drv-tools; };
             language-tools.purescript = import ./language-tools/purescript { inherit system pkgs drv-tools; };
             json2md = import ./language-tools/purescript { inherit system pkgs drv-tools; };
-            workflows = import ./workflows { inherit system pkgs drv-tools flakes-tools; };
+            workflows = import ./workflows { inherit system pkgs drv-tools; };
           };
 
           subdirs =
@@ -101,7 +101,8 @@
         lib.recursiveUpdate subdirs { inherit packages devShells formatter; };
 
       other = rec {
-        lib.makeFlake = import ./makeFlake.nix;
+        makeFlake = import ./makeFlake.nix;
+        makeDefault = import ./makeDefault.nix;
 
         # no overlay is provided because it's easy to override nixpkgs via flake inputs
 
