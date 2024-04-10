@@ -163,6 +163,7 @@ let
             buildCommand = null;
             passAsFile = [ ];
             doCheck = true;
+            phases = [ "configurePhase" "buildPhase" "installPhase" ];
             configurePhase = ''
               runHook preConfigure
                     
