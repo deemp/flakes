@@ -71,34 +71,15 @@ let
   # Get just the ordered set
   ord = list: (ord_ list).acc;
 
-  # make shell apps
-  # arg should be a set of sets of inputs
-  mkShellApps =
-    attrs@{ ... }:
-    lib.mapAttrs
-      (
-        name: value:
-        if lib.isDerivation value
-        then value // { pname = name; }
-        else
-          lib.throwIfNot (lib.isAttrs value) "Expected an attrset or a derivation" (
-            let cond = value_: lib.hasAttr "text" value_ && lib.isString value_.text; in
-            if cond value then
-              let name_ = lib.last (lib.splitString "." name); in
-              withMeta
-                ((mkShellApp (value // { name = name_; })) // { pname = name; })
-                (_: { mainProgram = name_; })
-            else
-              lib.mapAttrsRecursiveCond (value_: cond value || lib.isDerivation value)
-                (
-                  path: value_:
-                  let name_ = lib.concatStringsSep "." ([ name ] ++ path); in
-                  (mkShellApps { "${name_}" = value_; }).${name_}
-                )
-                value
-          )
-      )
-      attrs;
+  mapFunctionRecursiveCond = f: lib.mapAttrsRecursiveCond
+    (x: !(lib.isDerivation x || (builtins.intersectAttrs (lib.functionArgs f) x) != { }))
+    (path: value:
+      if lib.isDerivation value then value else
+      if lib.isAttrs value then f ({ name = lib.concatStringsSep "-" path; } // value)
+      else lib.throw "Expected an attrset or a derivation, but got ${lib.generators.toPretty value}"
+    );
+
+  mkShellApps = mapFunctionRecursiveCond mkShellApp;
 
   runFishScript =
     { name
